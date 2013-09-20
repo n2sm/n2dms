@@ -1,0 +1,181 @@
+/**
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+package com.openkm.servlet.admin;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.jackrabbit.extractor.TextExtractor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.openkm.api.OKMDocument;
+import com.openkm.api.OKMRepository;
+import com.openkm.bean.Repository;
+import com.openkm.core.AccessDeniedException;
+import com.openkm.core.DatabaseException;
+import com.openkm.core.MimeTypeConfig;
+import com.openkm.core.PathNotFoundException;
+import com.openkm.core.RepositoryException;
+import com.openkm.extractor.RegisteredExtractors;
+import com.openkm.util.PathUtils;
+
+/**
+ * Mime type management servlet
+ */
+public class CheckTextExtractionServlet extends BaseServlet {
+    private static final long serialVersionUID = 1L;
+
+    private static Logger log = LoggerFactory
+            .getLogger(CheckTextExtractionServlet.class);
+
+    @Override
+    public void doGet(final HttpServletRequest request,
+            final HttpServletResponse response) throws IOException,
+            ServletException {
+        log.debug("doGet({}, {})", request, response);
+        request.setCharacterEncoding("UTF-8");
+        updateSessionManager(request);
+
+        final ServletContext sc = getServletContext();
+        sc.setAttribute("repoPath", "/" + Repository.ROOT);
+        sc.setAttribute("docUuid", null);
+        sc.setAttribute("text", null);
+        sc.setAttribute("time", null);
+        sc.setAttribute("mimeType", null);
+        sc.setAttribute("extractor", null);
+        sc.getRequestDispatcher("/admin/check_text_extraction.jsp").forward(
+                request, response);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void doPost(final HttpServletRequest request,
+            final HttpServletResponse response) throws IOException,
+            ServletException {
+        log.debug("doPost({}, {})", request, response);
+        request.setCharacterEncoding("UTF-8");
+        updateSessionManager(request);
+        InputStream is = null;
+
+        try {
+            if (ServletFileUpload.isMultipartContent(request)) {
+                final FileItemFactory factory = new DiskFileItemFactory();
+                final ServletFileUpload upload = new ServletFileUpload(factory);
+                final List<FileItem> items = upload.parseRequest(request);
+                String docUuid = null;
+                String repoPath = null;
+                String text = null;
+                String mimeType = null;
+                String extractor = null;
+
+                for (final FileItem item : items) {
+                    if (item.isFormField()) {
+                        if (item.getFieldName().equals("docUuid")) {
+                            docUuid = item.getString("UTF-8");
+                        } else if (item.getFieldName().equals("repoPath")) {
+                            repoPath = item.getString("UTF-8");
+                        }
+                    } else {
+                        is = item.getInputStream();
+                        final String name = FilenameUtils.getName(item
+                                .getName());
+                        mimeType = MimeTypeConfig.mimeTypes.getContentType(name
+                                .toLowerCase());
+
+                        if (!name.isEmpty() && item.getSize() > 0) {
+                            docUuid = null;
+                            repoPath = null;
+                        } else if (docUuid.isEmpty() && repoPath.isEmpty()) {
+                            mimeType = null;
+                        }
+                    }
+                }
+
+                if (docUuid != null && !docUuid.isEmpty()) {
+                    repoPath = OKMRepository.getInstance().getNodePath(null,
+                            docUuid);
+                }
+
+                if (repoPath != null && !repoPath.isEmpty()) {
+                    final String name = PathUtils.getName(repoPath);
+                    mimeType = MimeTypeConfig.mimeTypes.getContentType(name
+                            .toLowerCase());
+                    is = OKMDocument.getInstance().getContent(null, repoPath,
+                            false);
+                }
+
+                final long begin = System.currentTimeMillis();
+
+                if (is != null) {
+                    if (!MimeTypeConfig.MIME_UNDEFINED.equals(mimeType)) {
+                        final TextExtractor extClass = RegisteredExtractors
+                                .getTextExtractor(mimeType);
+
+                        if (extClass != null) {
+                            extractor = extClass.getClass().getCanonicalName();
+                            text = RegisteredExtractors.getText(mimeType, null,
+                                    is);
+                        } else {
+                            extractor = "Undefined text extractor";
+                        }
+                    }
+                }
+
+                final ServletContext sc = getServletContext();
+                sc.setAttribute("docUuid", docUuid);
+                sc.setAttribute("repoPath", repoPath);
+                sc.setAttribute("text", text);
+                sc.setAttribute("time", System.currentTimeMillis() - begin);
+                sc.setAttribute("mimeType", mimeType);
+                sc.setAttribute("extractor", extractor);
+                sc.getRequestDispatcher("/admin/check_text_extraction.jsp")
+                        .forward(request, response);
+            }
+        } catch (final DatabaseException e) {
+            sendErrorRedirect(request, response, e);
+        } catch (final FileUploadException e) {
+            sendErrorRedirect(request, response, e);
+        } catch (final PathNotFoundException e) {
+            sendErrorRedirect(request, response, e);
+        } catch (final AccessDeniedException e) {
+            sendErrorRedirect(request, response, e);
+        } catch (final RepositoryException e) {
+            sendErrorRedirect(request, response, e);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+    }
+}

@@ -1,0 +1,162 @@
+/**
+ *  OpenKM, Open Document Management System (http://www.openkm.com)
+ *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *
+ *  No bytes were intentionally harmed during the development of this application.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program; if not, write to the Free Software Foundation, Inc.,
+ *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+package com.openkm.frontend.client.widget.dashboard;
+
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasAllMouseHandlers;
+import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Image;
+
+/**
+ * Image hovering on mouse over
+ * 
+ * @author jllort
+ *
+ */
+public class ImageHover extends Image implements HasClickHandlers,
+        HasAllMouseHandlers {
+    private String url = "";
+
+    private String urlHover = "";
+
+    public ImageHover(final String url, final String urlHover) {
+        super(url);
+        sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
+        this.url = url;
+        this.urlHover = urlHover;
+
+        addMouseOverHandler(new MouseOverHandler() {
+            @Override
+            public void onMouseOver(final MouseOverEvent event) {
+                setUrl(urlHover);
+            }
+        });
+
+        addMouseOutHandler(new MouseOutHandler() {
+            @Override
+            public void onMouseOut(final MouseOutEvent event) {
+                setUrl(url);
+            }
+        });
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasClickHandlers#addClickHandler(com.google.gwt.event.dom.client.ClickHandler)
+     */
+    @Override
+    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        return addHandler(handler, ClickEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseDownHandlers#addMouseDownHandler(com.google.gwt.event.dom.client.MouseDownHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseDownHandler(
+            final MouseDownHandler handler) {
+        return addDomHandler(handler, MouseDownEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseMoveHandlers#addMouseMoveHandler(com.google.gwt.event.dom.client.MouseMoveHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseMoveHandler(
+            final MouseMoveHandler handler) {
+        return addDomHandler(handler, MouseMoveEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseOutHandlers#addMouseOutHandler(com.google.gwt.event.dom.client.MouseOutHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseOutHandler(final MouseOutHandler handler) {
+        return addDomHandler(handler, MouseOutEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseOverHandlers#addMouseOverHandler(com.google.gwt.event.dom.client.MouseOverHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseOverHandler(
+            final MouseOverHandler handler) {
+        return addDomHandler(handler, MouseOverEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseUpHandlers#addMouseUpHandler(com.google.gwt.event.dom.client.MouseUpHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseUpHandler(final MouseUpHandler handler) {
+        return addDomHandler(handler, MouseUpEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.event.dom.client.HasMouseWheelHandlers#addMouseWheelHandler(com.google.gwt.event.dom.client.MouseWheelHandler)
+     */
+    @Override
+    public HandlerRegistration addMouseWheelHandler(
+            final MouseWheelHandler handler) {
+        return addDomHandler(handler, MouseWheelEvent.getType());
+    }
+
+    /* (non-Javadoc)
+     * @see com.google.gwt.user.client.ui.Widget#onBrowserEvent(com.google.gwt.user.client.Event)
+     */
+    @Override
+    public void onBrowserEvent(final Event event) {
+        switch (DOM.eventGetType(event)) {
+        case Event.ONMOUSEDOWN:
+        case Event.ONMOUSEUP:
+        case Event.ONMOUSEMOVE:
+        case Event.ONMOUSEOVER:
+            if (!super.getUrl().equals(urlHover)) {
+                super.setUrl(urlHover);
+            }
+            break;
+        case Event.ONMOUSEOUT: {
+            if (!super.getUrl().equals(url)) {
+                super.setUrl(url);
+            }
+            break;
+        }
+
+        }
+        super.onBrowserEvent(event);
+    }
+}
