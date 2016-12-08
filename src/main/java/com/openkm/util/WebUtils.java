@@ -358,7 +358,7 @@ public class WebUtils {
         // Set MIME type
         response.setContentType(mimeType);
 
-        if (null != agent && -1 != agent.indexOf("MSIE")) {
+        if (null != agent && (-1 != agent.indexOf("MSIE") || -1 != agent.indexOf("Trident"))) {
             log.debug("Agent: Explorer ({})", request.getServerPort());
             fileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+",
                     " ");
