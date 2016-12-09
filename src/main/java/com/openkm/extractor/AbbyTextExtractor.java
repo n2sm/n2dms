@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,14 +34,12 @@ public class AbbyTextExtractor extends CuneiformTextExtractor {
      * Logger instance.
      */
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory
-            .getLogger(AbbyTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(AbbyTextExtractor.class);
 
     /**
      * Creates a new <code>TextExtractor</code> instance.
      */
     public AbbyTextExtractor() {
-        super(new String[] { "application/pdf", "image/bmp", "image/pcx",
-                "image/jpeg", "image/tiff", "image/png" });
+        super(new String[] { "application/pdf", "image/bmp", "image/pcx", "image/jpeg", "image/tiff", "image/png" });
     }
 }

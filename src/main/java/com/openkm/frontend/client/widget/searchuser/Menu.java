@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,9 +38,7 @@ import com.openkm.frontend.client.widget.ConfirmPopup;
 public class Menu extends Composite {
 
     private MenuBar searchSavedMenu;
-
     private MenuItem run;
-
     private MenuItem delete;
 
     /**
@@ -51,12 +49,10 @@ public class Menu extends Composite {
 
         // First initialize language values
         searchSavedMenu = new MenuBar(true);
-        run = new MenuItem(Util.menuHTML("img/icon/actions/run.gif",
-                Main.i18n("search.saved.run")), true, runSearch);
+        run = new MenuItem(Util.menuHTML("img/icon/actions/run.gif", Main.i18n("search.saved.run")), true, runSearch);
         run.addStyleName("okm-MenuItem");
         searchSavedMenu.addItem(run);
-        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("search.saved.delete")), true, deleteSearch);
+        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("search.saved.delete")), true, deleteSearch);
         delete.addStyleName("okm-MenuItem");
         searchSavedMenu.addItem(delete);
         searchSavedMenu.addStyleName("okm-MenuBar");
@@ -65,7 +61,6 @@ public class Menu extends Composite {
 
     // Command menu to save file
     Command runSearch = new Command() {
-        @Override
         public void execute() {
             Main.get().mainPanel.search.historySearch.userNews.getSearch();
             hide();
@@ -74,10 +69,8 @@ public class Menu extends Composite {
 
     // Command menu to go directory file
     Command deleteSearch = new Command() {
-        @Override
         public void execute() {
-            Main.get().confirmPopup
-                    .setConfirm(ConfirmPopup.CONFIRM_DELETE_USER_NEWS);
+            Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_USER_NEWS);
             Main.get().confirmPopup.show();
             hide();
         }
@@ -87,10 +80,8 @@ public class Menu extends Composite {
      *  Refresh language values
      */
     public void langRefresh() {
-        run.setHTML(Util.menuHTML("img/icon/actions/run.gif",
-                Main.i18n("search.saved.run")));
-        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("search.saved.delete")));
+        run.setHTML(Util.menuHTML("img/icon/actions/run.gif", Main.i18n("search.saved.run")));
+        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("search.saved.delete")));
     }
 
     /**
@@ -101,11 +92,17 @@ public class Menu extends Composite {
     }
 
     /**
+     * evaluateMenuOptions
+     */
+    public void evaluateMenuOptions() {
+    }
+
+    /**
      * Enables menu item
      * 
      * @param menuItem The menu item
      */
-    public void enable(final MenuItem menuItem) {
+    public void enable(MenuItem menuItem) {
         menuItem.addStyleName("okm-MenuItem");
         menuItem.removeStyleName("okm-MenuItem-strike");
     }
@@ -115,7 +112,7 @@ public class Menu extends Composite {
      * 
      * @param menuItem The menu item
      */
-    public void disable(final MenuItem menuItem) {
+    public void disable(MenuItem menuItem) {
         menuItem.removeStyleName("okm-MenuItem");
         menuItem.addStyleName("okm-MenuItem-strike");
     }

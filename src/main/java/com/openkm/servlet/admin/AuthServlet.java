@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -22,8 +22,11 @@
 package com.openkm.servlet.admin;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,16 +45,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.jcsv.CSVStrategy;
+import com.googlecode.jcsv.writer.CSVWriter;
+import com.googlecode.jcsv.writer.internal.CSVWriterBuilder;
+import com.googlecode.jcsv.writer.internal.DefaultCSVEntryConverter;
+import com.ibm.icu.util.Calendar;
 import com.openkm.api.OKMAuth;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
+import com.openkm.core.MimeTypeConfig;
 import com.openkm.dao.AuthDAO;
 import com.openkm.dao.ProfileDAO;
 import com.openkm.dao.bean.Profile;
 import com.openkm.dao.bean.Role;
 import com.openkm.dao.bean.User;
 import com.openkm.frontend.client.OKMException;
+import com.openkm.module.common.CommonAuthModule;
 import com.openkm.principal.DatabasePrincipalAdapter;
 import com.openkm.principal.PrincipalAdapterException;
 import com.openkm.servlet.frontend.ChatServlet;
@@ -64,23 +74,17 @@ import com.openkm.util.WebUtils;
  */
 public class AuthServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(AuthServlet.class);
+    private static boolean db = Config.PRINCIPAL_ADAPTER.equals(DatabasePrincipalAdapter.class.getCanonicalName());
 
-    private static boolean db = Config.PRINCIPAL_ADAPTER
-            .equals(DatabasePrincipalAdapter.class.getCanonicalName());
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
-        if (request.isUserInRole(Config.DEFAULT_ADMIN_ROLE)) {
+        if (isMultipleInstancesAdmin(request) || request.isUserInRole(Config.DEFAULT_ADMIN_ROLE)) {
             try {
                 if (action.equals("userCreate")) {
                     userCreate(userId, request, response);
@@ -106,37 +110,56 @@ public class AuthServlet extends BaseServlet {
                     validateRole(request, response);
                 }
 
-                if (action.equals("") || action.equals("userActive")
-                        || action.equals("userChatDisconnect")
-                        || action.startsWith("user")
-                        && WebUtils.getBoolean(request, "persist")) {
+                if (action.equals("") || action.equals("userActive") || action.equals("userChatDisconnect")
+                        || (action.startsWith("user") && WebUtils.getBoolean(request, "persist"))) {
                     userList(userId, request, response);
-                } else if (action.equals("roleList")
-                        || action.equals("roleActive")
-                        || action.startsWith("role")
-                        && WebUtils.getBoolean(request, "persist")) {
+                } else if (action.equals("roleList") || action.equals("roleActive")
+                        || (action.startsWith("role") && WebUtils.getBoolean(request, "persist"))) {
                     roleList(userId, request, response);
+                } else if (action.endsWith("Export")) {
+                    String fileName = "";
+                    List<String[]> csvValues = new ArrayList<String[]>();
+
+                    if (action.equals("userListExport")) {
+                        fileName = userListExport(csvValues);
+                    } else if (action.equals("roleListExport")) {
+                        fileName = roleListExport(csvValues);
+                    }
+
+                    // Prepare file headers
+                    WebUtils.prepareSendFile(request, response, fileName, MimeTypeConfig.MIME_CSV, false);
+
+                    // CSVWriter
+                    CSVStrategy strategyFormat =
+                            new CSVStrategy(Config.CSV_FORMAT_DELIMITER.toCharArray()[0],
+                                    Config.CSV_FORMAT_QUOTE_CHARACTER.toCharArray()[0],
+                                    Config.CSV_FORMAT_COMMENT_INDICATOR.toCharArray()[0], Config.CSV_FORMAT_SKIP_HEADER,
+                                    Config.CSV_FORMAT_IGNORE_EMPTY_LINES);
+                    Writer out = new OutputStreamWriter(response.getOutputStream());
+                    CSVWriter<String[]> csvWriter =
+                            new CSVWriterBuilder<String[]>(out).strategy(strategyFormat).entryConverter(new DefaultCSVEntryConverter())
+                                    .build();
+                    csvWriter.writeAll(csvValues);
+                    csvWriter.flush();
                 }
-            } catch (final DatabaseException e) {
+            } catch (DatabaseException e) {
                 log.error(e.getMessage(), e);
                 sendErrorRedirect(request, response, e);
-            } catch (final NoSuchAlgorithmException e) {
+            } catch (NoSuchAlgorithmException e) {
                 log.error(e.getMessage(), e);
                 sendErrorRedirect(request, response, e);
-            } catch (final PrincipalAdapterException e) {
+            } catch (PrincipalAdapterException e) {
                 log.error(e.getMessage(), e);
                 sendErrorRedirect(request, response, e);
-            } catch (final AccessDeniedException e) {
+            } catch (AccessDeniedException e) {
                 log.error(e.getMessage(), e);
                 sendErrorRedirect(request, response, e);
             }
         } else {
             // Activity log
-            UserActivity.log(userId, "ADMIN_ACCESS_DENIED",
-                    request.getRequestURI(), null, request.getQueryString());
+            UserActivity.log(userId, "ADMIN_ACCESS_DENIED", request.getRequestURI(), null, request.getQueryString());
 
-            final AccessDeniedException ade = new AccessDeniedException(
-                    "You should not access this resource");
+            AccessDeniedException ade = new AccessDeniedException("You should not access this resource");
             sendErrorRedirect(request, response, ade);
         }
     }
@@ -144,17 +167,20 @@ public class AuthServlet extends BaseServlet {
     /**
      * Validate user name
      */
-    private void validateUser(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        final String value = WebUtils.getString(request, "value");
-        final PrintWriter out = response.getWriter();
+    private void validateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        String value = WebUtils.getString(request, "value");
+        PrintWriter out = response.getWriter();
         response.setContentType("text/json");
 
         if (AuthDAO.findUserByPk(value) == null) {
-            out.print("{ \"success\": true }");
+            if (value.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
+                out.print("{ \"success\": true }");
+            } else {
+                out.print("{ \"success\": false, \"message\": \"Invalid identifier.\" }");
+            }
         } else {
-            out.print("{ \"success\": false, \"message\": \"Name is already taken.\" }");
+            out.print("{ \"success\": false, \"message\": \"Id already taken.\" }");
         }
 
         out.flush();
@@ -164,17 +190,20 @@ public class AuthServlet extends BaseServlet {
     /**
      * Validate role name
      */
-    private void validateRole(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        final String value = WebUtils.getString(request, "value");
-        final PrintWriter out = response.getWriter();
+    private void validateRole(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        String value = WebUtils.getString(request, "value");
+        PrintWriter out = response.getWriter();
         response.setContentType("text/json");
 
         if (AuthDAO.findRoleByPk(value) == null) {
-            out.print("{ \"success\": true }");
+            if (value.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
+                out.print("{ \"success\": true }");
+            } else {
+                out.print("{ \"success\": false, \"message\": \"Invalid identifier.\" }");
+            }
         } else {
-            out.print("{ \"success\": false, \"message\": \"Name is already taken.\" }");
+            out.print("{ \"success\": false, \"message\": \"Id already taken.\" }");
         }
 
         out.flush();
@@ -184,74 +213,57 @@ public class AuthServlet extends BaseServlet {
     /**
      * New user
      */
-    private void userCreate(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            AccessDeniedException, NoSuchAlgorithmException {
-        log.debug("userCreate({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void userCreate(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("userCreate({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            String reqCsrft = WebUtils.getString(request, "csrft");
+            String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
             if (reqCsrft.equals(sesCsrft)) {
-                final String usrId = WebUtils.getString(request, "usr_id");
+                String usrId = WebUtils.getString(request, "usr_id");
 
                 if (AuthDAO.findUserByPk(usrId) == null) {
-                    if (!usrId.matches("^[a-zA-Z0-9._]+$")) {
-                        throw new DatabaseException("User name is not correct");
-                    } else if (Config.VALIDATOR_ID_MIN_LENGTH > 0
-                            && usrId.length() < Config.VALIDATOR_ID_MIN_LENGTH) {
-                        throw new DatabaseException(
-                                Config.VALIDATOR_ID_ERROR_MIN_LENGTH);
-                    } else if (Config.VALIDATOR_ID_MAX_LENGTH > 0
-                            && usrId.length() > Config.VALIDATOR_ID_MAX_LENGTH) {
-                        throw new DatabaseException(
-                                Config.VALIDATOR_ID_ERROR_MAX_LENGTH);
+                    if (usrId.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
+                        User usr = new User();
+                        usr.setId(usrId);
+                        usr.setName(WebUtils.getString(request, "usr_name"));
+                        usr.setPassword(WebUtils.getString(request, "usr_password"));
+                        usr.setEmail(WebUtils.getString(request, "usr_email"));
+                        usr.setActive(WebUtils.getBoolean(request, "usr_active"));
+                        List<String> usrRoles = WebUtils.getStringList(request, "usr_roles");
+
+                        for (String rolId : usrRoles) {
+                            usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
+                        }
+
+                        AuthDAO.createUser(usr);
+
+                        // Activity log
+                        UserActivity.log(userId, "ADMIN_USER_CREATE", usr.getId(), null, usr.toString());
+                    } else {
+                        throw new DatabaseException("Invalid identifier");
                     }
-                    final User usr = new User();
-                    usr.setId(usrId);
-                    usr.setName(WebUtils.getString(request, "usr_name"));
-                    usr.setPassword(WebUtils.getString(request, "usr_password"));
-                    usr.setEmail(WebUtils.getString(request, "usr_email"));
-                    usr.setActive(WebUtils.getBoolean(request, "usr_active"));
-                    final List<String> usrRoles = WebUtils.getStringList(
-                            request, "usr_roles");
-
-                    for (final String rolId : usrRoles) {
-                        usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
-                    }
-
-                    AuthDAO.createUser(usr);
-
-                    // Activity log
-                    UserActivity.log(userId, "ADMIN_USER_CREATE", usr.getId(),
-                            null, usr.toString());
                 } else {
                     throw new DatabaseException("User name already taken");
                 }
             } else {
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
 
                 throw new AccessDeniedException("Security risk detected");
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("roles", AuthDAO.findAllRoles());
             sc.setAttribute("usr", null);
-            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request, response);
         }
 
         log.debug("userCreate: void");
@@ -260,63 +272,54 @@ public class AuthServlet extends BaseServlet {
     /**
      * Edit user
      */
-    private void userEdit(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException, AccessDeniedException {
-        log.debug("userEdit({}, {}, {})", new Object[] { userId, request,
-                response });
-        final String usrId = WebUtils.getString(request, "usr_id");
+    private void userEdit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("userEdit({}, {}, {})", new Object[] { userId, request, response });
+        String usrId = WebUtils.getString(request, "usr_id");
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            if (isMultipleInstancesAdmin(request) || !usrId.equals(Config.ADMIN_USER)) {
+                String reqCsrft = WebUtils.getString(request, "csrft");
+                String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
-            if (reqCsrft.equals(sesCsrft)) {
-                final String password = WebUtils.getString(request,
-                        "usr_password");
-                final User usr = new User();
-                usr.setId(usrId);
-                usr.setName(WebUtils.getString(request, "usr_name"));
-                usr.setEmail(WebUtils.getString(request, "usr_email"));
-                usr.setActive(WebUtils.getBoolean(request, "usr_active"));
-                final List<String> usrRoles = WebUtils.getStringList(request,
-                        "usr_roles");
+                if (reqCsrft.equals(sesCsrft)) {
+                    String password = WebUtils.getString(request, "usr_password");
+                    User usr = new User();
+                    usr.setId(usrId);
+                    usr.setName(WebUtils.getString(request, "usr_name"));
+                    usr.setEmail(WebUtils.getString(request, "usr_email"));
+                    usr.setActive(WebUtils.getBoolean(request, "usr_active"));
+                    List<String> usrRoles = WebUtils.getStringList(request, "usr_roles");
 
-                for (final String rolId : usrRoles) {
-                    usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
+                    for (String rolId : usrRoles) {
+                        usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
+                    }
+
+                    AuthDAO.updateUser(usr);
+
+                    if (!password.equals("")) {
+                        AuthDAO.updateUserPassword(usr.getId(), password);
+                    }
+
+                    // Activity log
+                    UserActivity.log(userId, "ADMIN_USER_EDIT", usr.getId(), null, usr.toString());
+                } else {
+                    // Activity log
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
+
+                    throw new AccessDeniedException("Security risk detected");
                 }
-
-                AuthDAO.updateUser(usr);
-
-                if (!password.equals("")) {
-                    AuthDAO.updateUserPassword(usr.getId(), password);
-                }
-
-                // Activity log
-                UserActivity.log(userId, "ADMIN_USER_EDIT", usr.getId(), null,
-                        usr.toString());
-            } else {
-                // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
-
-                throw new AccessDeniedException("Security risk detected");
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("roles", AuthDAO.findAllRoles());
             sc.setAttribute("usr", AuthDAO.findUserByPk(usrId));
-            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request, response);
         }
 
         log.debug("userEdit: void");
@@ -325,45 +328,38 @@ public class AuthServlet extends BaseServlet {
     /**
      * Update user
      */
-    private void userDelete(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException, AccessDeniedException {
-        log.debug("userDelete({}, {}, {})", new Object[] { userId, request,
-                response });
-        final String usrId = WebUtils.getString(request, "usr_id");
+    private void userDelete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("userDelete({}, {}, {})", new Object[] { userId, request, response });
+        String usrId = WebUtils.getString(request, "usr_id");
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            if (isMultipleInstancesAdmin(request) || !usrId.equals(Config.ADMIN_USER)) {
+                String reqCsrft = WebUtils.getString(request, "csrft");
+                String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
-            if (reqCsrft.equals(sesCsrft)) {
-                AuthDAO.deleteUser(usrId);
+                if (reqCsrft.equals(sesCsrft)) {
+                    AuthDAO.deleteUser(usrId);
 
-                // Activity log
-                UserActivity
-                        .log(userId, "ADMIN_USER_DELETE", usrId, null, null);
-            } else {
-                // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
+                    // Activity log
+                    UserActivity.log(userId, "ADMIN_USER_DELETE", usrId, null, null);
+                } else {
+                    // Activity log
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
 
-                throw new AccessDeniedException("Security risk detected");
+                    throw new AccessDeniedException("Security risk detected");
+                }
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("roles", AuthDAO.findAllRoles());
             sc.setAttribute("usr", AuthDAO.findUserByPk(usrId));
-            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/user_edit.jsp").forward(request, response);
         }
 
         log.debug("userDelete: void");
@@ -372,19 +368,18 @@ public class AuthServlet extends BaseServlet {
     /**
      * Active user
      */
-    private void userActive(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException {
-        log.debug("userActive({}, {}, {})", new Object[] { userId, request,
-                response });
-        final boolean active = WebUtils.getBoolean(request, "usr_active");
-        final String usrId = WebUtils.getString(request, "usr_id");
-        AuthDAO.activeUser(usrId, active);
+    private void userActive(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException {
+        log.debug("userActive({}, {}, {})", new Object[] { userId, request, response });
+        boolean active = WebUtils.getBoolean(request, "usr_active");
+        String usrId = WebUtils.getString(request, "usr_id");
 
-        // Activity log
-        UserActivity.log(userId, "ADMIN_USER_ACTIVE", usrId, null,
-                Boolean.toString(active));
+        if (isMultipleInstancesAdmin(request) || !usrId.equals(Config.ADMIN_USER)) {
+            AuthDAO.activeUser(usrId, active);
+
+            // Activity log
+            UserActivity.log(userId, "ADMIN_USER_ACTIVE", usrId, null, Boolean.toString(active));
+        }
 
         log.debug("userActive: void");
     }
@@ -392,101 +387,108 @@ public class AuthServlet extends BaseServlet {
     /**
      * List users
      */
-    private void userList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PrincipalAdapterException {
-        log.debug("userList({}, {}, {})", new Object[] { userId, request,
-                response });
-        final String roleFilter = WebUtils.getString(request, "roleFilter");
-        final ServletContext sc = getServletContext();
+    private void userList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, PrincipalAdapterException {
+        log.debug("userList({}, {}, {})", new Object[] { userId, request, response });
+        String roleFilter = WebUtils.getString(request, "roleFilter");
+        ServletContext sc = getServletContext();
         sc.setAttribute("roleFilter", roleFilter);
-        sc.setAttribute("chatUsers", ChatServlet.getChatManager()
-                .getLoggedUsers());
+        sc.setAttribute("chatUsers", ChatServlet.getChatManager().getLoggedUsers());
 
         if (roleFilter.equals("")) {
             if (db) {
-                final List<User> users = sortUserRoles(AuthDAO
-                        .findAllUsers(false));
+                List<User> users = sortUserRoles(AuthDAO.findAllUsers(false));
                 sc.setAttribute("users", toMapSetProfile(users));
                 sc.setAttribute("roles", AuthDAO.findAllRoles());
             } else {
-                final List<User> users = str2user(OKMAuth.getInstance()
-                        .getUsers(null));
+                List<User> users = str2user(OKMAuth.getInstance().getUsers(null));
                 sc.setAttribute("users", toMapSetProfile(users));
-                sc.setAttribute("roles", str2role(OKMAuth.getInstance()
-                        .getRoles(null)));
+                sc.setAttribute("roles", str2role(OKMAuth.getInstance().getRoles(null)));
             }
         } else {
             if (db) {
-                final List<User> users = sortUserRoles(AuthDAO.findUsersByRole(
-                        roleFilter, false));
+                List<User> users = sortUserRoles(AuthDAO.findUsersByRole(roleFilter, false));
                 sc.setAttribute("users", toMapSetProfile(users));
                 sc.setAttribute("roles", AuthDAO.findAllRoles());
             } else {
-                final List<User> users = str2user(OKMAuth.getInstance()
-                        .getUsersByRole(null, roleFilter));
+                List<User> users = str2user(OKMAuth.getInstance().getUsersByRole(null, roleFilter));
                 sc.setAttribute("users", toMapSetProfile(users));
-                sc.setAttribute("roles", str2role(OKMAuth.getInstance()
-                        .getRoles(null)));
+                sc.setAttribute("roles", str2role(OKMAuth.getInstance().getRoles(null)));
             }
         }
 
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
         sc.setAttribute("db", db);
-        sc.getRequestDispatcher("/admin/user_list.jsp").forward(request,
-                response);
+        sc.setAttribute("date", date);
+        sc.setAttribute("multInstAdmin", isMultipleInstancesAdmin(request));
+        sc.getRequestDispatcher("/admin/user_list.jsp").forward(request, response);
         log.debug("userList: void");
+    }
+
+    /**
+     * User list export
+     */
+    private String userListExport(List<String[]> csvValues) throws PrincipalAdapterException, DatabaseException {
+        String[] columns = new String[] { "Id", "Name", "Mail", "Roles", "Active" };
+        csvValues.add(columns);
+
+        for (User usr : str2user(CommonAuthModule.getUsers())) {
+            StringBuilder roles = new StringBuilder();
+
+            for (Role rol : usr.getRoles()) {
+                roles.append(rol.getId()).append(" ");
+            }
+
+            csvValues.add(new String[] { usr.getId(), usr.getName(), usr.getEmail(), roles.toString(), String.valueOf(usr.isActive()) });
+        }
+
+        return "users-export.csv";
     }
 
     /**
      * New role
      */
-    private void roleCreate(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            AccessDeniedException, NoSuchAlgorithmException {
-        log.debug("roleCreate({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void roleCreate(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("roleCreate({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            String reqCsrft = WebUtils.getString(request, "csrft");
+            String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
             if (reqCsrft.equals(sesCsrft)) {
-                final String rolId = WebUtils.getString(request, "rol_id");
+                String rolId = WebUtils.getString(request, "rol_id");
 
                 if (AuthDAO.findRoleByPk(rolId) == null) {
-                    final Role rol = new Role();
-                    rol.setId(rolId);
-                    rol.setActive(WebUtils.getBoolean(request, "rol_active"));
-                    AuthDAO.createRole(rol);
+                    if (rolId.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
+                        Role rol = new Role();
+                        rol.setId(rolId);
+                        rol.setActive(WebUtils.getBoolean(request, "rol_active"));
+                        AuthDAO.createRole(rol);
 
-                    // Activity log
-                    UserActivity.log(userId, "ADMIN_ROLE_CREATE", rol.getId(),
-                            null, rol.toString());
+                        // Activity log
+                        UserActivity.log(userId, "ADMIN_ROLE_CREATE", rol.getId(), null, rol.toString());
+                    } else {
+                        throw new DatabaseException("Invalid identifier");
+                    }
                 } else {
                     throw new DatabaseException("Role name already taken");
                 }
             } else {
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
 
                 throw new AccessDeniedException("Security risk detected");
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("rol", null);
-            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request, response);
         }
 
         log.debug("roleCreate: void");
@@ -495,47 +497,38 @@ public class AuthServlet extends BaseServlet {
     /**
      * Edit role
      */
-    private void roleEdit(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException, AccessDeniedException {
-        log.debug("roleEdit({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void roleEdit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("roleEdit({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            String reqCsrft = WebUtils.getString(request, "csrft");
+            String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
             if (reqCsrft.equals(sesCsrft)) {
-                final Role rol = new Role();
+                Role rol = new Role();
                 rol.setId(WebUtils.getString(request, "rol_id"));
                 rol.setActive(WebUtils.getBoolean(request, "rol_active"));
                 AuthDAO.updateRole(rol);
 
                 // Activity log
-                UserActivity.log(userId, "ADMIN_ROLE_EDIT", rol.getId(), null,
-                        rol.toString());
+                UserActivity.log(userId, "ADMIN_ROLE_EDIT", rol.getId(), null, rol.toString());
             } else {
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
 
                 throw new AccessDeniedException("Security risk detected");
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
-            final String rolId = WebUtils.getString(request, "rol_id");
+            ServletContext sc = getServletContext();
+            String rolId = WebUtils.getString(request, "rol_id");
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("rol", AuthDAO.findRoleByPk(rolId));
-            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request, response);
         }
 
         log.debug("roleEdit: void");
@@ -544,45 +537,36 @@ public class AuthServlet extends BaseServlet {
     /**
      * Delete role
      */
-    private void roleDelete(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException, AccessDeniedException {
-        log.debug("roleDelete({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void roleDelete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException, AccessDeniedException {
+        log.debug("roleDelete({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final String reqCsrft = WebUtils.getString(request, "csrft");
-            final String sesCsrft = (String) request.getSession().getAttribute(
-                    "csrft");
+            String reqCsrft = WebUtils.getString(request, "csrft");
+            String sesCsrft = (String) request.getSession().getAttribute("csrft");
 
             if (reqCsrft.equals(sesCsrft)) {
-                final String rolId = WebUtils.getString(request, "rol_id");
+                String rolId = WebUtils.getString(request, "rol_id");
                 AuthDAO.deleteRole(rolId);
 
                 // Activity log
-                UserActivity
-                        .log(userId, "ADMIN_ROLE_DELETE", rolId, null, null);
+                UserActivity.log(userId, "ADMIN_ROLE_DELETE", rolId, null, null);
             } else {
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_SECURITY_RISK", request.getRemoteHost(), null,
-                        null);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_SECURITY_RISK", request.getRemoteHost(), null, null);
 
                 throw new AccessDeniedException("Security risk detected");
             }
         } else {
-            final String genCsrft = SecureStore.md5Encode(UUID.randomUUID()
-                    .toString().getBytes());
+            String genCsrft = SecureStore.md5Encode(UUID.randomUUID().toString().getBytes());
             request.getSession().setAttribute("csrft", genCsrft);
-            final ServletContext sc = getServletContext();
-            final String rolId = WebUtils.getString(request, "rol_id");
+            ServletContext sc = getServletContext();
+            String rolId = WebUtils.getString(request, "rol_id");
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("csrft", genCsrft);
             sc.setAttribute("rol", AuthDAO.findRoleByPk(rolId));
-            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/role_edit.jsp").forward(request, response);
         }
 
         log.debug("roleDelete: void");
@@ -591,34 +575,28 @@ public class AuthServlet extends BaseServlet {
     /**
      * Active role
      */
-    private void roleActive(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            NoSuchAlgorithmException {
-        log.debug("roleActive({}, {}, {})", new Object[] { userId, request,
-                response });
-        final String rolId = WebUtils.getString(request, "rol_id");
-        final boolean active = WebUtils.getBoolean(request, "rol_active");
+    private void roleActive(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException {
+        log.debug("roleActive({}, {}, {})", new Object[] { userId, request, response });
+        String rolId = WebUtils.getString(request, "rol_id");
+        boolean active = WebUtils.getBoolean(request, "rol_active");
         AuthDAO.activeRole(rolId, active);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_ROLE_ACTIVE", rolId, null,
-                Boolean.toString(active));
+        UserActivity.log(userId, "ADMIN_ROLE_ACTIVE", rolId, null, Boolean.toString(active));
         log.debug("roleActive: void");
     }
 
     /**
      * Diconnect user chat
      */
-    private void userChatDisconnect(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException, NoSuchAlgorithmException {
-        log.debug("userChatDisconnect({}, {})", new Object[] { request,
-                response });
+    private void userChatDisconnect(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, NoSuchAlgorithmException {
+        log.debug("userChatDisconnect({}, {})", new Object[] { request, response });
         try {
-            final String userId = WebUtils.getString(request, "usr_id");
+            String userId = WebUtils.getString(request, "usr_id");
             ChatServlet.getChatManager().logout(userId);
-        } catch (final OKMException e) {
+        } catch (OKMException e) {
             throw new ServletException(e.getMessage());
         }
         log.debug("userChatDisconnect: void");
@@ -627,48 +605,55 @@ public class AuthServlet extends BaseServlet {
     /**
      * List roles
      */
-    private void roleList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PrincipalAdapterException {
-        log.debug("roleList({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
+    private void roleList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, PrincipalAdapterException {
+        log.debug("roleList({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
 
         if (db) {
             sc.setAttribute("roles", AuthDAO.findAllRoles());
         } else {
-            sc.setAttribute("roles",
-                    str2role(OKMAuth.getInstance().getRoles(null)));
+            sc.setAttribute("roles", str2role(OKMAuth.getInstance().getRoles(null)));
         }
 
         sc.setAttribute("db", db);
-        sc.getRequestDispatcher("/admin/role_list.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/role_list.jsp").forward(request, response);
         log.debug("roleList: void");
+    }
+
+    /**
+     * Export role list
+     */
+    private String roleListExport(List<String[]> csvValues) throws PrincipalAdapterException, DatabaseException {
+        String[] columns = new String[] { "Id", "Active" };
+        csvValues.add(columns);
+
+        for (Role rol : str2role(CommonAuthModule.getRoles())) {
+            csvValues.add(new String[] { rol.getId(), String.valueOf(rol.isActive()) });
+        }
+
+        return "roles-export.csv";
     }
 
     /**
      * Convenient conversion method
      */
-    private List<User> str2user(final List<String> strList)
-            throws PrincipalAdapterException {
-        final List<User> usrList = new ArrayList<User>();
+    private List<User> str2user(List<String> strList) throws PrincipalAdapterException {
+        List<User> usrList = new ArrayList<User>();
 
-        for (final String usrId : strList) {
-            final List<String> roleList = OKMAuth.getInstance().getRolesByUser(
-                    null, usrId);
-            final User usr = new User();
+        for (String usrId : strList) {
+            List<String> roleList = OKMAuth.getInstance().getRolesByUser(null, usrId);
+            User usr = new User();
             usr.setId(usrId);
             usr.setActive(true);
             usr.setName(OKMAuth.getInstance().getName(null, usrId));
             usr.setEmail(OKMAuth.getInstance().getMail(null, usrId));
 
             if (!roleList.isEmpty()) {
-                final Set<Role> roles = new TreeSet<Role>(new RoleComparator());
+                Set<Role> roles = new TreeSet<Role>(new RoleComparator());
 
-                for (final String rolId : roleList) {
-                    final Role rol = new Role();
+                for (String rolId : roleList) {
+                    Role rol = new Role();
                     rol.setId(rolId);
                     rol.setActive(true);
                     roles.add(rol);
@@ -687,11 +672,11 @@ public class AuthServlet extends BaseServlet {
     /**
      * Convenient conversion method
      */
-    private List<Role> str2role(final List<String> strList) {
-        final List<Role> roleList = new ArrayList<Role>();
+    private List<Role> str2role(List<String> strList) {
+        List<Role> roleList = new ArrayList<Role>();
 
-        for (final String id : strList) {
-            final Role rol = new Role();
+        for (String id : strList) {
+            Role rol = new Role();
             rol.setId(id);
             rol.setActive(true);
             roleList.add(rol);
@@ -706,7 +691,7 @@ public class AuthServlet extends BaseServlet {
      */
     private class UserComparator implements Comparator<User> {
         @Override
-        public int compare(final User arg0, final User arg1) {
+        public int compare(User arg0, User arg1) {
             if (arg0 != null && arg1 != null) {
                 return arg0.getId().compareTo(arg1.getId());
             } else {
@@ -720,7 +705,7 @@ public class AuthServlet extends BaseServlet {
      */
     private class RoleComparator implements Comparator<Role> {
         @Override
-        public int compare(final Role arg0, final Role arg1) {
+        public int compare(Role arg0, Role arg1) {
             if (arg0 != null && arg1 != null) {
                 return arg0.getId().compareTo(arg1.getId());
             } else {
@@ -732,12 +717,11 @@ public class AuthServlet extends BaseServlet {
     /**
      * Sort roles from user
      */
-    private List<User> sortUserRoles(final List<User> users) {
-        final List<User> ret = new ArrayList<User>();
+    private List<User> sortUserRoles(List<User> users) {
+        List<User> ret = new ArrayList<User>();
 
-        for (final User user : users) {
-            final Set<Role> sortedRoles = new TreeSet<Role>(
-                    new RoleComparator());
+        for (User user : users) {
+            Set<Role> sortedRoles = new TreeSet<Role>(new RoleComparator());
             sortedRoles.addAll(user.getRoles());
             user.setRoles(sortedRoles);
             ret.add(user);
@@ -749,13 +733,12 @@ public class AuthServlet extends BaseServlet {
     /**
      * Convert to Map and set Profile
      */
-    private List<Map<String, Object>> toMapSetProfile(final List<User> users)
-            throws DatabaseException {
-        final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+    private List<Map<String, Object>> toMapSetProfile(List<User> users) throws DatabaseException {
+        List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
 
-        for (final User user : users) {
-            final Map<String, Object> usrMap = new HashMap<String, Object>();
-            final Profile prf = ProfileDAO.findByUser(user.getId());
+        for (User user : users) {
+            Map<String, Object> usrMap = new HashMap<String, Object>();
+            Profile prf = ProfileDAO.findByUser(user.getId());
 
             if (prf != null) {
                 usrMap.put("profile", prf.getName());

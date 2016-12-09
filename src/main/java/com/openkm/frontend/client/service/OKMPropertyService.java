@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,15 +31,11 @@ import com.openkm.frontend.client.OKMException;
  */
 @RemoteServiceRelativePath("Property")
 public interface OKMPropertyService extends RemoteService {
-    public void addCategory(String nodePath, String category)
-            throws OKMException;
+    public void addCategory(String nodePath, String category) throws OKMException;
 
-    public void removeCategory(String nodePath, String category)
-            throws OKMException;
+    public void removeCategory(String nodePath, String category) throws OKMException;
 
-    public String addKeyword(String nodePath, String keyword)
-            throws OKMException;
+    public String addKeyword(String nodePath, String keyword) throws OKMException;
 
-    public void removeKeyword(String nodePath, String keyword)
-            throws OKMException;
+    public void removeKeyword(String nodePath, String keyword) throws OKMException;
 }

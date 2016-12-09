@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,17 +26,17 @@ import java.io.File;
 public class TextInfoDecorator implements InfoDecorator {
     private int cut;
 
-    public TextInfoDecorator(final File tmp) {
-        cut = tmp.getPath().length() + 1;
+    public TextInfoDecorator(File tmp) {
+        this.cut = tmp.getPath().length() + 1;
     }
 
-    public TextInfoDecorator(final String path) {
-        cut = path.length() + 1;
+    public TextInfoDecorator(String path) {
+        this.cut = path.length() + 1;
     }
 
     @Override
-    public String print(final String path, final long size, final String error) {
-        final StringBuffer sb = new StringBuffer();
+    public String print(String path, long size, String error) {
+        StringBuffer sb = new StringBuffer();
 
         if (error != null) {
             sb.append(path.substring(cut));

@@ -1,11 +1,10 @@
 package com.openkm.dao.bean.cache;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "OKM_USER_ITEMS")
@@ -32,7 +31,7 @@ public class UserItems implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -40,7 +39,7 @@ public class UserItems implements Serializable {
         return folders;
     }
 
-    public void setFolders(final long folders) {
+    public void setFolders(long folders) {
         this.folders = folders;
     }
 
@@ -48,15 +47,15 @@ public class UserItems implements Serializable {
         return documents;
     }
 
-    public void setDocuments(final long document) {
-        documents = document;
+    public void setDocuments(long document) {
+        this.documents = document;
     }
 
     public long getMails() {
         return mails;
     }
 
-    public void setMails(final long mails) {
+    public void setMails(long mails) {
         this.mails = mails;
     }
 
@@ -64,13 +63,12 @@ public class UserItems implements Serializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("{");
         sb.append("user=");
         sb.append(user);

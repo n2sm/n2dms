@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,8 +33,7 @@ import com.openkm.frontend.client.bean.GWTMail;
  */
 public interface HasPermissionsExtension {
 
-    public abstract void checkPermissions(GWTFolder folder,
-            GWTFolder folderParent, int originPanel);
+    public abstract void checkPermissions(GWTFolder folder, GWTFolder folderParent, int originPanel);
 
     public abstract void checkPermissions(GWTDocument doc, GWTFolder folder);
 

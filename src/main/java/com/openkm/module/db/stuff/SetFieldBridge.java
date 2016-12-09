@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,13 +36,12 @@ public class SetFieldBridge implements FieldBridge {
     private static Logger log = LoggerFactory.getLogger(SetFieldBridge.class);
 
     @Override
-    public void set(String name, final Object value, final Document document,
-            final LuceneOptions luceneOptions) {
+    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value instanceof Set<?>) {
             @SuppressWarnings("unchecked")
-            final Set<String> set = (Set<String>) value;
+            Set<String> set = (Set<String>) value;
 
-            for (final String elto : set) {
+            for (String elto : set) {
                 if ("keywords".equals(name)) {
                     name = "keyword";
                 } else if ("categories".equals(name)) {

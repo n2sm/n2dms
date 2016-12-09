@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,36 +26,22 @@ import java.util.Calendar;
 
 public class CronTab implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    public static final String BSH = "application/x-bsh";
-
-    public static final String JAR = "application/x-java-archive";
-
     private long id;
-
     private String name;
-
     private String expression;
-
     private String fileContent;
-
     private String fileName;
-
     private String fileMime;
-
     private String mail;
-
     private Calendar lastBegin;
-
     private Calendar lastEnd;
-
     private boolean active;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -63,7 +49,7 @@ public class CronTab implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -71,7 +57,7 @@ public class CronTab implements Serializable {
         return expression;
     }
 
-    public void setExpression(final String expression) {
+    public void setExpression(String expression) {
         this.expression = expression;
     }
 
@@ -79,7 +65,7 @@ public class CronTab implements Serializable {
         return fileContent;
     }
 
-    public void setFileContent(final String fileContent) {
+    public void setFileContent(String fileContent) {
         this.fileContent = fileContent;
     }
 
@@ -87,7 +73,7 @@ public class CronTab implements Serializable {
         return fileName;
     }
 
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
@@ -95,7 +81,7 @@ public class CronTab implements Serializable {
         return fileMime;
     }
 
-    public void setFileMime(final String fileMime) {
+    public void setFileMime(String fileMime) {
         this.fileMime = fileMime;
     }
 
@@ -103,7 +89,7 @@ public class CronTab implements Serializable {
         return mail;
     }
 
-    public void setMail(final String mail) {
+    public void setMail(String mail) {
         this.mail = mail;
     }
 
@@ -111,7 +97,7 @@ public class CronTab implements Serializable {
         return lastBegin;
     }
 
-    public void setLastBegin(final Calendar lastBegin) {
+    public void setLastBegin(Calendar lastBegin) {
         this.lastBegin = lastBegin;
     }
 
@@ -119,7 +105,7 @@ public class CronTab implements Serializable {
         return lastEnd;
     }
 
-    public void setLastEnd(final Calendar lastEnd) {
+    public void setLastEnd(Calendar lastEnd) {
         this.lastEnd = lastEnd;
     }
 
@@ -127,13 +113,12 @@ public class CronTab implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

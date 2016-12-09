@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,16 +34,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public abstract class DatabaseMetadataCommon implements IsSerializable {
     private Double realId;
-
     private String realTable;
 
     /**
      * loadFromMap
      */
-    public void loadFromMap(final Map<String, String> map) {
+    public void loadFromMap(Map<String, String> map) {
         if (map.containsKey(DatabaseMetadataMap.MV_NAME_ID)) {
-            setRealId(DatabaseMetadataMap.getDoubleValue(map
-                    .get(DatabaseMetadataMap.MV_NAME_ID)));
+            setRealId(DatabaseMetadataMap.getDoubleValue(map.get(DatabaseMetadataMap.MV_NAME_ID)));
         }
 
         if (map.containsKey(DatabaseMetadataMap.MV_NAME_TABLE)) {
@@ -55,11 +53,10 @@ public abstract class DatabaseMetadataCommon implements IsSerializable {
      * restoreToMap
      */
     public Map<String, String> restoreToMap() {
-        final Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<String, String>();
 
         if (realId != null) {
-            map.put(DatabaseMetadataMap.MV_NAME_ID,
-                    DatabaseMetadataMap.mapDoubleValue(getRealId()));
+            map.put(DatabaseMetadataMap.MV_NAME_ID, DatabaseMetadataMap.mapDoubleValue(getRealId()));
         }
 
         if (realTable != null) {
@@ -73,7 +70,7 @@ public abstract class DatabaseMetadataCommon implements IsSerializable {
         return realId;
     }
 
-    public void setRealId(final Double realId) {
+    public void setRealId(Double realId) {
         this.realId = realId;
     }
 
@@ -81,7 +78,7 @@ public abstract class DatabaseMetadataCommon implements IsSerializable {
         return realTable;
     }
 
-    public void setRealTable(final String realTable) {
+    public void setRealTable(String realTable) {
         this.realTable = realTable;
     }
 }

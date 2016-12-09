@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -51,19 +51,13 @@ import com.openkm.util.WebUtils;
  * Only for enjoy
  */
 public class TextToSpeechServlet extends HttpServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(TextToSpeechServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(TextToSpeechServlet.class);
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String cmd = "espeak -v mb-es1 -f input.txt | mbrola -e /usr/share/mbrola/voices/es1 - -.wav "
-                + "| oggenc -Q - -o output.ogg";
-        final String text = WebUtils.getString(request, "text");
-        final String docPath = WebUtils.getString(request, "docPath");
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String cmd = "espeak -v mb-es1 -f input.txt | mbrola -e /usr/share/mbrola/voices/es1 - -.wav " + "| oggenc -Q - -o output.ogg";
+        String text = WebUtils.getString(request, "text");
+        String docPath = WebUtils.getString(request, "docPath");
         response.setContentType("audio/ogg");
         FileInputStream fis = null;
         OutputStream os = null;
@@ -72,19 +66,16 @@ public class TextToSpeechServlet extends HttpServlet {
             if (!text.equals("")) {
                 FileUtils.writeStringToFile(new File("input.txt"), text);
             } else if (!docPath.equals("")) {
-                final InputStream is = OKMDocument.getInstance().getContent(
-                        null, docPath, false);
-                final Document doc = OKMDocument.getInstance().getProperties(
-                        null, docPath);
-                DocConverter.getInstance().doc2txt(is, doc.getMimeType(),
-                        new File("input.txt"));
+                InputStream is = OKMDocument.getInstance().getContent(null, docPath, false);
+                Document doc = OKMDocument.getInstance().getProperties(null, docPath);
+                DocConverter.getInstance().doc2txt(is, doc.getMimeType(), new File("input.txt"));
             }
 
             // Convert to voice
-            final ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", cmd);
-            final Process process = pb.start();
+            ProcessBuilder pb = new ProcessBuilder("/bin/sh", "-c", cmd);
+            Process process = pb.start();
             process.waitFor();
-            final String info = IOUtils.toString(process.getInputStream());
+            String info = IOUtils.toString(process.getInputStream());
             process.destroy();
 
             if (process.exitValue() == 1) {
@@ -96,19 +87,19 @@ public class TextToSpeechServlet extends HttpServlet {
             fis = new FileInputStream("output.ogg");
             IOUtils.copy(fis, os);
             os.flush();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             log.warn(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.warn(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.warn(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.warn(e.getMessage(), e);
-        } catch (final ConversionException e) {
+        } catch (ConversionException e) {
             log.warn(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(fis);

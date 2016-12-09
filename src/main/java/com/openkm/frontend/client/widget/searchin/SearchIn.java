@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.frontend.client.widget.searchin;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
@@ -48,47 +49,28 @@ import com.openkm.frontend.client.widget.searchsaved.Status;
  * 
  * @author jllort
  */
-public class SearchIn extends Composite implements HasSearch {
+public class SearchIn extends Composite implements HasPropertyHandler {
     private static final int TAB_HEIGHT = 20;
-
     private static final int CONTROLER_WIDTH = 380;
-
     private static final int MINIMUM_TAB_WIDTH = 400;
 
     private HorizontalPanel hPanel;
-
     public TabLayoutPanel tabPanel;
-
     public SearchSimple searchSimple;
-
     public SearchNormal searchNormal;
-
     public SearchAdvanced searchAdvanced;
-
     public SearchMetadata searchMetadata;
-
     public SearchControl searchControl;
-
     public FuturamaWalking futuramaWalking;
-
     public Status status;
-
     public int posTaxonomy = 0;
-
     private int posTemplates = 0;
-
     private int posPersonal = 0;
-
     private int posMail = 0;
-
     private int posTrash = 0;
-
     private int searchMode = SearchControl.SEARCH_MODE_SIMPLE;
-
     private int height = 0;
-
     private int tabWidth = 0;
-
     private int controlWidth = 0;
 
     /**
@@ -119,20 +101,18 @@ public class SearchIn extends Composite implements HasSearch {
         tabPanel.add(searchSimple, Main.i18n("search.simple"));
         tabPanel.selectTab(0);
 
-        final Image verticalLine = new Image("img/transparent_pixel.gif");
+        Image verticalLine = new Image("img/transparent_pixel.gif");
         verticalLine.setStyleName("okm-Vertical-Line-Border");
-        verticalLine.setSize("2", "100%");
+        verticalLine.setSize("2px", "100%");
         hPanel.add(tabPanel);
         hPanel.add(verticalLine);
         hPanel.add(searchControl);
 
-        hPanel.setCellWidth(verticalLine, "2");
+        hPanel.setCellWidth(verticalLine, "2px");
         hPanel.setCellHeight(verticalLine, "100%");
-        hPanel.setCellWidth(searchControl, "" + CONTROLER_WIDTH);
-        hPanel.setCellVerticalAlignment(tabPanel,
-                HasVerticalAlignment.ALIGN_TOP);
-        hPanel.setCellVerticalAlignment(searchControl,
-                HasVerticalAlignment.ALIGN_TOP);
+        hPanel.setCellWidth(searchControl, "" + CONTROLER_WIDTH + "px");
+        hPanel.setCellVerticalAlignment(tabPanel, HasAlignment.ALIGN_TOP);
+        hPanel.setCellVerticalAlignment(searchControl, HasAlignment.ALIGN_TOP);
 
         // Gets all users
         searchNormal.getAllUsers();
@@ -143,8 +123,7 @@ public class SearchIn extends Composite implements HasSearch {
     /**
      * setPixelSize
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         super.setPixelSize(width, height);
         this.height = height;
         tabWidth = MINIMUM_TAB_WIDTH;
@@ -160,12 +139,12 @@ public class SearchIn extends Composite implements HasSearch {
                 tabWidth = 10;
                 controlWidth = 10;
             }
-        } else if (width - CONTROLER_WIDTH > tabWidth) {
+        } else if ((width - CONTROLER_WIDTH) > tabWidth) {
             tabWidth = width - CONTROLER_WIDTH; // Always trying expand tab panel
         }
 
-        tabPanel.setWidth("" + (tabWidth - 2));
-        tabPanel.setHeight("" + (height - 2));
+        tabPanel.setWidth("" + (tabWidth - 2) + "px");
+        tabPanel.setHeight("" + (height - 2) + "px");
         searchSimple.setPixelSize(tabWidth - 2, height - 22); // Substract tab height
         searchNormal.setPixelSize(tabWidth - 2, height - 22); // Substract tab height
         searchAdvanced.setPixelSize(tabWidth - 2, height - 22); // Substract tab height
@@ -181,7 +160,7 @@ public class SearchIn extends Composite implements HasSearch {
         searchAdvanced.langRefresh();
         searchMetadata.langRefresh();
         searchControl.langRefresh();
-        final int selectedTab = tabPanel.getSelectedIndex();
+        int selectedTab = tabPanel.getSelectedIndex();
         switchSearchMode(searchMode);
         tabPanel.selectTab(selectedTab);
     }
@@ -201,9 +180,8 @@ public class SearchIn extends Composite implements HasSearch {
      * @return The actual form elements values
      */
     public Collection<String> getFormElementsKeys() {
-        final List<String> keyList = new ArrayList<String>();
-        for (final GWTFormElement formElement : searchMetadata
-                .getFormElements()) {
+        List<String> keyList = new ArrayList<String>();
+        for (GWTFormElement formElement : searchMetadata.getFormElements()) {
             keyList.add(formElement.getName());
         }
         return keyList;
@@ -223,7 +201,7 @@ public class SearchIn extends Composite implements HasSearch {
     /**
      * @param gWTParams
      */
-    public void setQuickSearch(final String query) {
+    public void setQuickSearch(String query) {
         searchControl.switchSearchMode(SearchControl.SEARCH_MODE_SIMPLE);
         searchSimple.fullText.setText(query);
         searchControl.evaluateSearchButtonVisible();
@@ -236,22 +214,17 @@ public class SearchIn extends Composite implements HasSearch {
      * 
      * @param gWTParams The params
      */
-    public void setSavedSearch(final GWTQueryParams gWTParams) {
+    public void setSavedSearch(GWTQueryParams gWTParams) {
         searchControl.switchSearchMode(SearchControl.SEARCH_MODE_ADVANCED);
-        if (gWTParams.getPath().startsWith(
-                Main.get().repositoryContext.getContextTaxonomy())) {
+        if (gWTParams.getPath().startsWith(Main.get().repositoryContext.getContextTaxonomy())) {
             searchNormal.context.setSelectedIndex(posTaxonomy);
-        } else if (gWTParams.getPath().startsWith(
-                Main.get().repositoryContext.getContextPersonal())) {
+        } else if (gWTParams.getPath().startsWith(Main.get().repositoryContext.getContextPersonal())) {
             searchNormal.context.setSelectedIndex(posTemplates);
-        } else if (gWTParams.getPath().startsWith(
-                Main.get().repositoryContext.getContextTemplates())) {
+        } else if (gWTParams.getPath().startsWith(Main.get().repositoryContext.getContextTemplates())) {
             searchNormal.context.setSelectedIndex(posPersonal);
-        } else if (gWTParams.getPath().startsWith(
-                Main.get().repositoryContext.getContextMail())) {
+        } else if (gWTParams.getPath().startsWith(Main.get().repositoryContext.getContextMail())) {
             searchNormal.context.setSelectedIndex(posMail);
-        } else if (gWTParams.getPath().startsWith(
-                Main.get().repositoryContext.getContextTrash())) {
+        } else if (gWTParams.getPath().startsWith(Main.get().repositoryContext.getContextTrash())) {
             searchNormal.context.setSelectedIndex(posTrash);
         } else {
             searchNormal.context.setSelectedIndex(posTaxonomy);
@@ -263,16 +236,11 @@ public class SearchIn extends Composite implements HasSearch {
         }
 
         // Detecting if user has setting some folder path filter or there's only a context one
-        if (!gWTParams.getPath().equals(
-                Main.get().repositoryContext.getContextTaxonomy())
-                && !gWTParams.getPath().equals(
-                        Main.get().repositoryContext.getContextPersonal())
-                && !gWTParams.getPath().equals(
-                        Main.get().repositoryContext.getContextTemplates())
-                && !gWTParams.getPath().equals(
-                        Main.get().repositoryContext.getContextMail())
-                && !gWTParams.getPath().equals(
-                        Main.get().repositoryContext.getContextTrash())) {
+        if (!gWTParams.getPath().equals(Main.get().repositoryContext.getContextTaxonomy())
+                && !gWTParams.getPath().equals(Main.get().repositoryContext.getContextPersonal())
+                && !gWTParams.getPath().equals(Main.get().repositoryContext.getContextTemplates())
+                && !gWTParams.getPath().equals(Main.get().repositoryContext.getContextMail())
+                && !gWTParams.getPath().equals(Main.get().repositoryContext.getContextTrash())) {
             searchAdvanced.path.setText(gWTParams.getPath());
         } else {
             searchAdvanced.path.setText("");
@@ -319,11 +287,9 @@ public class SearchIn extends Composite implements HasSearch {
         searchAdvanced.mimeTypes.setSelectedIndex(0);
 
         // TODO: on api mime must not return null, this must be revised
-        if (gWTParams.getMimeType() != null
-                && !gWTParams.getMimeType().equals("")) {
+        if (gWTParams.getMimeType() != null && !gWTParams.getMimeType().equals("")) {
             for (int i = 0; i < searchAdvanced.mimeTypes.getItemCount(); i++) {
-                if (searchAdvanced.mimeTypes.getValue(i).equals(
-                        gWTParams.getMimeType())) {
+                if (searchAdvanced.mimeTypes.getValue(i).equals(gWTParams.getMimeType())) {
                     searchAdvanced.mimeTypes.setSelectedIndex(i);
                 }
             }
@@ -334,8 +300,7 @@ public class SearchIn extends Composite implements HasSearch {
 
         if (gWTParams.getAuthor() != null && !gWTParams.getAuthor().equals("")) {
             for (int i = 0; i < searchNormal.userListBox.getItemCount(); i++) {
-                if (searchNormal.userListBox.getValue(i).equals(
-                        gWTParams.getAuthor())) {
+                if (searchNormal.userListBox.getValue(i).equals(gWTParams.getAuthor())) {
                     searchNormal.userListBox.setSelectedIndex(i);
                 }
             }
@@ -343,10 +308,8 @@ public class SearchIn extends Composite implements HasSearch {
 
         if (gWTParams.getLastModifiedFrom() != null) {
             searchNormal.modifyDateFrom = gWTParams.getLastModifiedFrom();
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.day.pattern"));
-            searchNormal.startDate.setText(dtf
-                    .format(searchNormal.modifyDateFrom));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.day.pattern"));
+            searchNormal.startDate.setText(dtf.format(searchNormal.modifyDateFrom));
         } else {
             searchNormal.modifyDateFrom = null;
             searchNormal.startDate.setText("");
@@ -354,8 +317,7 @@ public class SearchIn extends Composite implements HasSearch {
 
         if (gWTParams.getLastModifiedTo() != null) {
             searchNormal.modifyDateTo = gWTParams.getLastModifiedTo();
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.day.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.day.pattern"));
             searchNormal.endDate.setText(dtf.format(searchNormal.modifyDateTo));
         } else {
             searchNormal.modifyDateTo = null;
@@ -381,10 +343,9 @@ public class SearchIn extends Composite implements HasSearch {
      * 
      * @param hproperties The table properties map
      */
-    private void addPropertyParams(
-            final Map<String, GWTPropertyParams> hproperties) {
-        for (final String string : hproperties.keySet()) {
-            searchMetadata.addProperty(hproperties.get(string));
+    private void addPropertyParams(Map<String, GWTPropertyParams> hproperties) {
+        for (Iterator<String> it = hproperties.keySet().iterator(); it.hasNext();) {
+            searchMetadata.addProperty((GWTPropertyParams) hproperties.get(it.next()));
         }
     }
 
@@ -394,7 +355,7 @@ public class SearchIn extends Composite implements HasSearch {
      * @param contextValue The context value
      * @param stackView The stack view
      */
-    public void setContextValue(final String contextValue, final int stackView) {
+    public void setContextValue(String contextValue, int stackView) {
         searchNormal.setContextValue(contextValue, stackView);
     }
 
@@ -432,7 +393,7 @@ public class SearchIn extends Composite implements HasSearch {
      * @return
      */
     public int getSelectedView() {
-        final int index = searchNormal.context.getSelectedIndex();
+        int index = searchNormal.context.getSelectedIndex();
         if (index == posTaxonomy) {
             return UIDesktopConstants.NAVIGATOR_TAXONOMY;
         } else if (index == posTemplates) {
@@ -451,8 +412,8 @@ public class SearchIn extends Composite implements HasSearch {
      * 
      * @param mode
      */
-    public void switchSearchMode(final int mode) {
-        searchMode = mode;
+    public void switchSearchMode(int mode) {
+        this.searchMode = mode;
         switch (searchMode) {
         case SearchControl.SEARCH_MODE_SIMPLE:
             while (tabPanel.getWidgetCount() > 0) {
@@ -476,19 +437,17 @@ public class SearchIn extends Composite implements HasSearch {
         }
         // TODO:Solves minor bug with IE ( now shows contents )
         if (Util.getUserAgent().startsWith("ie")) {
-            tabPanel.setWidth("" + (tabWidth - 20));
-            tabPanel.setHeight("" + (height - 20));
+            tabPanel.setWidth("" + (tabWidth - 20) + "px");
+            tabPanel.setHeight("" + (height - 20) + "px");
             searchSimple.setPixelSize(tabWidth - 20, height - 42); // Substract tab height
             searchNormal.setPixelSize(tabWidth - 20, height - 42); // Substract tab height
             searchAdvanced.setPixelSize(tabWidth - 20, height - 42); // Substract tab height
             searchMetadata.setPixelSize(tabWidth - 20, height - 42); // Substract tab height
-            Main.get().mainPanel.search.searchBrowser
-                    .refreshSpliterAfterAdded();
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
-                    tabPanel.setWidth("" + (tabWidth - 2));
-                    tabPanel.setHeight("" + (height - 2));
+                    tabPanel.setWidth("" + (tabWidth - 2) + "px");
+                    tabPanel.setHeight("" + (height - 2) + "px");
                     searchSimple.setPixelSize(tabWidth - 2, height - 22); // Substract tab height
                     searchNormal.setPixelSize(tabWidth - 2, height - 22); // Substract tab height
                     searchAdvanced.setPixelSize(tabWidth - 2, height - 22); // Substract tab height

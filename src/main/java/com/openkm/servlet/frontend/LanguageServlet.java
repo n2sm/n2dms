@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,15 +39,12 @@ import com.openkm.util.LanguageUtils;
  * @author jllort
  *
  */
-public class LanguageServlet extends OKMRemoteServiceServlet implements
-        OKMLanguageService {
+public class LanguageServlet extends OKMRemoteServiceServlet implements OKMLanguageService {
     private static Logger log = LoggerFactory.getLogger(LanguageServlet.class);
-
     private static final long serialVersionUID = -879908904295685769L;
 
     @Override
-    public Map<String, String> getFrontEndTranslations(final String lang)
-            throws OKMException {
+    public Map<String, String> getFrontEndTranslations(String lang) throws OKMException {
         log.debug("getTranslations({})", lang);
         updateSessionManager();
 
@@ -55,15 +52,10 @@ public class LanguageServlet extends OKMRemoteServiceServlet implements
         setLanguage(lang);
 
         try {
-            return LanguageUtils
-                    .getTranslations(lang, new String[] {
-                            Translation.MODULE_FRONTEND,
-                            Translation.MODULE_EXTENSION });
-        } catch (final DatabaseException e) {
+            return LanguageUtils.getTranslations(lang, new String[] { Translation.MODULE_FRONTEND, Translation.MODULE_EXTENSION });
+        } catch (DatabaseException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMGeneralService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMGeneralService, ErrorCode.CAUSE_Database), e.getMessage());
         }
     }
 }

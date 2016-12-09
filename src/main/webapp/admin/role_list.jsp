@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -27,7 +27,10 @@
           <a href="Auth?action=roleList">Role list</a>
         </li>
         <li class="action">
-          <a href="Auth">User list</a>
+          <a href="Auth">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            User list
+          </a>
         </li>
       </ul>
       <br/>
@@ -39,9 +42,14 @@
               <c:url value="Auth" var="urlCreate">
                 <c:param name="action" value="roleCreate"/>
               </c:url>
+              <c:url value="Auth" var="urlExport">
+                <c:param name="action" value="roleListExport"/>
+              </c:url>
               <c:if test="${db}">
                 <a href="${urlCreate}"><img src="img/action/new.png" alt="New role" title="New role"/></a>
+                &nbsp;
               </c:if>
+              <a href="${urlExport}"><img src="img/action/export_csv.png" alt="CSV export" title="CSV export"/></a>
             </th>
           </tr>
         </thead>

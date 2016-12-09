@@ -85,6 +85,45 @@
       </td>
     </tr>
     <tr>
+      <td>Notify external users</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMisc.notifyExternalUsers}">
+            <input name="prf_misc_notify_external_users" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_misc_notify_external_users" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
+      <td>Acrobat plugin preview</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMisc.acrobatPluginPreview}">
+            <input name="prf_misc_acrobat_plugin_preview" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_misc_acrobat_plugin_preview" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
+      <td>Increase version</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMisc.increaseVersion}">
+            <input name="prf_misc_increase_version" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_misc_increase_version" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
       <td>Extensions</td>
       <td>
         <select multiple="multiple" name="prf_misc_extensions" size="4">

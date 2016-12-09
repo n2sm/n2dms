@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,26 +25,28 @@ import java.io.Serializable;
 
 public class ProfileTab implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    private String defaultTab;
     private boolean desktopVisible;
-
     private boolean searchVisible;
-
     private boolean dashboardVisible;
-
     private boolean administrationVisible;
-
     private ProfileTabFolder prfFolder = new ProfileTabFolder();
-
     private ProfileTabDocument prfDocument = new ProfileTabDocument();
-
     private ProfileTabMail prfMail = new ProfileTabMail();
+
+    public String getDefaultTab() {
+        return defaultTab;
+    }
+
+    public void setDefaultTab(String defaultTab) {
+        this.defaultTab = defaultTab;
+    }
 
     public boolean isDesktopVisible() {
         return desktopVisible;
     }
 
-    public void setDesktopVisible(final boolean desktopVisible) {
+    public void setDesktopVisible(boolean desktopVisible) {
         this.desktopVisible = desktopVisible;
     }
 
@@ -52,7 +54,7 @@ public class ProfileTab implements Serializable {
         return searchVisible;
     }
 
-    public void setSearchVisible(final boolean searchVisible) {
+    public void setSearchVisible(boolean searchVisible) {
         this.searchVisible = searchVisible;
     }
 
@@ -60,7 +62,7 @@ public class ProfileTab implements Serializable {
         return dashboardVisible;
     }
 
-    public void setDashboardVisible(final boolean dashboardVisible) {
+    public void setDashboardVisible(boolean dashboardVisible) {
         this.dashboardVisible = dashboardVisible;
     }
 
@@ -68,7 +70,7 @@ public class ProfileTab implements Serializable {
         return administrationVisible;
     }
 
-    public void setAdministrationVisible(final boolean administrationVisible) {
+    public void setAdministrationVisible(boolean administrationVisible) {
         this.administrationVisible = administrationVisible;
     }
 
@@ -76,7 +78,7 @@ public class ProfileTab implements Serializable {
         return prfFolder;
     }
 
-    public void setPrfFolder(final ProfileTabFolder prfFolder) {
+    public void setPrfFolder(ProfileTabFolder prfFolder) {
         this.prfFolder = prfFolder;
     }
 
@@ -84,7 +86,7 @@ public class ProfileTab implements Serializable {
         return prfDocument;
     }
 
-    public void setPrfDocument(final ProfileTabDocument prfDocument) {
+    public void setPrfDocument(ProfileTabDocument prfDocument) {
         this.prfDocument = prfDocument;
     }
 
@@ -92,13 +94,12 @@ public class ProfileTab implements Serializable {
         return prfMail;
     }
 
-    public void setPrfMail(final ProfileTabMail prfMail) {
+    public void setPrfMail(ProfileTabMail prfMail) {
         this.prfMail = prfMail;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("desktopVisible=");
         sb.append(desktopVisible);

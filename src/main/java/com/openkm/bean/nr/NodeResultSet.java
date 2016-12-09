@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,16 +27,14 @@ import java.util.List;
 
 public class NodeResultSet implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long total;
-
     private List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
 
     public long getTotal() {
         return total;
     }
 
-    public void setTotal(final long total) {
+    public void setTotal(long total) {
         this.total = total;
     }
 
@@ -44,13 +42,12 @@ public class NodeResultSet implements Serializable {
         return results;
     }
 
-    public void setResults(final List<NodeQueryResult> results) {
+    public void setResults(List<NodeQueryResult> results) {
         this.results = results;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("total=");
         sb.append(total);

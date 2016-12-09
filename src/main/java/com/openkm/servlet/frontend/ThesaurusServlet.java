@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,42 +36,38 @@ import com.openkm.kea.RDFREpository;
 /**
  * Servlet Class
  */
-public class ThesaurusServlet extends OKMRemoteServiceServlet implements
-        OKMThesaurusService {
+public class ThesaurusServlet extends OKMRemoteServiceServlet implements OKMThesaurusService {
     private static Logger log = LoggerFactory.getLogger(ThesaurusServlet.class);
-
     private static final long serialVersionUID = -4436438730167948558L;
 
     @Override
     public List<String> getKeywords(final String filter) throws OKMException {
         log.debug("getKeywords({})", filter);
-        final List<String> keywordList = new ArrayList<String>();
-        final List<String> keywords = RDFREpository.getInstance().getKeywords();
+        List<String> keywordList = new ArrayList<String>();
+        List<String> keywords = RDFREpository.getInstance().getKeywords();
         int index = -1;
-        final int size = keywords.size();
+        int size = keywords.size();
         updateSessionManager();
 
         // Keywords list is an ordered list
-        final String value = (String) CollectionUtils.find(keywords,
-                new Predicate() {
-                    @Override
-                    public boolean evaluate(final Object arg0) {
-                        final String key = (String) arg0;
-                        if (key.toLowerCase().startsWith(filter)) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
+        String value = (String) CollectionUtils.find(keywords, new Predicate() {
+            @Override
+            public boolean evaluate(Object arg0) {
+                String key = (String) arg0;
+                if (key.toLowerCase().startsWith(filter)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
 
         if (value != null) {
             index = keywords.indexOf(value);
         }
 
         if (index >= 0) {
-            while (size > index
-                    && keywords.get(index).toLowerCase().startsWith(filter)) {
+            while (size > index && keywords.get(index).toLowerCase().startsWith(filter)) {
                 keywordList.add(keywords.get(index));
                 index++;
             }

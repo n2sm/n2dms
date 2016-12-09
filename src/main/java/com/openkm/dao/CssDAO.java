@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -41,7 +41,6 @@ import com.openkm.dao.bean.Css;
  */
 public class CssDAO extends GenericDAO<Css, Long> {
     private static Logger log = LoggerFactory.getLogger(CssDAO.class);
-
     private static CssDAO single = new CssDAO();
 
     private CssDAO() {
@@ -55,27 +54,24 @@ public class CssDAO extends GenericDAO<Css, Long> {
      * Find all styles
      */
     @SuppressWarnings("unchecked")
-    public List<Css> findAll(final boolean filterByActive)
-            throws DatabaseException {
+    public List<Css> findAll(boolean filterByActive) throws DatabaseException {
         log.debug("findAll({})", filterByActive);
-        final String qs = "from Css c "
-                + (filterByActive ? "where c.active=:active" : "")
-                + " order by c.context, c.name asc";
+        String qs = "from Css c " + (filterByActive ? "where c.active=:active" : "") + " order by c.context, c.name asc";
         Session session = null;
-        final Transaction tx = null;
+        Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
 
             if (filterByActive) {
                 q.setBoolean("active", true);
             }
 
-            final List<Css> ret = q.list();
+            List<Css> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -86,22 +82,21 @@ public class CssDAO extends GenericDAO<Css, Long> {
     /**
      * Find by content and name
      */
-    public Css findByContextAndName(final String context, final String name)
-            throws DatabaseException {
+    public Css findByContextAndName(String context, String name) throws DatabaseException {
         log.debug("findByContextAndName({},{})", context, name);
-        final String qs = "from Css c where c.context=:context and c.name=:name and c.active=:active";
+        String qs = "from Css c where c.context=:context and c.name=:name and c.active=:active";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("context", context);
             q.setString("name", name);
             q.setBoolean("active", true);
-            final Css ret = (Css) q.setMaxResults(1).uniqueResult();
+            Css ret = (Css) q.setMaxResults(1).uniqueResult();
             log.debug("findByContextAndName: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,13 +36,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class FuturamaWalking extends PopupPanel {
     private VerticalPanel vPanel;
-
     private Image logo;
-
     private Timer move;
-
     private static int left = 0;
-
     private static int top = 0;
 
     /**
@@ -55,8 +51,8 @@ public class FuturamaWalking extends PopupPanel {
         top = Window.getClientHeight() - 80 - 21;
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("186");
-        vPanel.setHeight("80");
+        vPanel.setWidth("186px");
+        vPanel.setHeight("80px");
 
         logo = new Image("img/eastereggs/futurama_walking.gif");
         vPanel.add(logo);
@@ -70,7 +66,7 @@ public class FuturamaWalking extends PopupPanel {
     /**
      * Evaluate
      */
-    public void evaluate(final String name) {
+    public void evaluate(String name) {
         if (name.equals("futurama")) {
             left = -180;
             top = Window.getClientHeight() - 80 - 21;
@@ -78,7 +74,6 @@ public class FuturamaWalking extends PopupPanel {
             setPopupPosition(left, top);
 
             move = new Timer() {
-                @Override
                 public void run() {
                     left += 2;
                     setPopupPosition(left, top);
@@ -99,10 +94,9 @@ public class FuturamaWalking extends PopupPanel {
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.PopupPanel#setPopupPosition(int, int)
      */
-    @Override
-    public void setPopupPosition(final int left, final int top) {
+    public void setPopupPosition(int left, int top) {
         // Removed popup not can has negative position
-        final Element elem = getElement();
+        Element elem = getElement();
         DOM.setStyleAttribute(elem, "left", left + "px");
         DOM.setStyleAttribute(elem, "top", top + "px");
     }

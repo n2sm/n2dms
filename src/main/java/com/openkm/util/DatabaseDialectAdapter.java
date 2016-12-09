@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,15 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DatabaseDialectAdapter {
-    private static Logger log = LoggerFactory
-            .getLogger(DatabaseDialectAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(DatabaseDialectAdapter.class);
 
     /**
      * Adapt "default.sql" to every supported database
      */
-    public static String dialectAdapter(final InputStream is,
-            final String dialect) {
-        final StringBuilder sb = new StringBuilder();
+    public static String dialectAdapter(InputStream is, String dialect) {
+        StringBuilder sb = new StringBuilder();
         BufferedReader br = null;
         String line;
 
@@ -54,8 +52,7 @@ public class DatabaseDialectAdapter {
                 while ((line = br.readLine()) != null) {
                     sb.append(oracleAdapter(line)).append("\n");
                 }
-            } else if (SQLServerDialect.class.getCanonicalName()
-                    .equals(dialect)) {
+            } else if (SQLServerDialect.class.getCanonicalName().equals(dialect)) {
                 log.info("Generation SQL for SQLServerDialect...");
 
                 while ((line = br.readLine()) != null) {
@@ -68,7 +65,7 @@ public class DatabaseDialectAdapter {
                     sb.append(line).append("\n");
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(br);
@@ -81,7 +78,7 @@ public class DatabaseDialectAdapter {
     /**
      * Oracle special stuff
      */
-    private static String oracleAdapter(final String line) {
+    private static String oracleAdapter(String line) {
         log.debug("oracleAdapter({})", line);
         String str;
 
@@ -100,9 +97,9 @@ public class DatabaseDialectAdapter {
     /**
      * SQL Server special stuff
      */
-    private static String sqlServerAdapter(final String line) {
+    private static String sqlServerAdapter(String line) {
         log.debug("sqlServerAdapter({})", line);
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         if (line.startsWith("INSERT INTO OKM_PROFILE")) {
             sb.append("SET IDENTITY_INSERT OKM_PROFILE ON;").append("\n");

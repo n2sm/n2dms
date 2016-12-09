@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,29 +31,28 @@ import com.openkm.frontend.client.bean.GWTDocument;
  */
 public class PathDocumentComparator extends CultureComparator<GWTDocument> {
 
-    protected PathDocumentComparator(final String locale) {
+    protected PathDocumentComparator(String locale) {
         super(locale);
     }
 
-    public static PathDocumentComparator getInstance(final String locale) {
+    public static PathDocumentComparator getInstance(String locale) {
         try {
-            final PathDocumentComparator comparator = (PathDocumentComparator) CultureComparator
-                    .getInstance(PathDocumentComparator.class, locale);
+            PathDocumentComparator comparator =
+                    (PathDocumentComparator) CultureComparator.getInstance(PathDocumentComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new PathDocumentComparator(locale);
         }
     }
 
     public static PathDocumentComparator getInstance() {
-        final PathDocumentComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        PathDocumentComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTDocument arg0, final GWTDocument arg1) {
-        final String[] paths1 = arg0.getPath().split("/");
-        final String[] paths2 = arg1.getPath().split("/");
+    public int compare(GWTDocument arg0, GWTDocument arg1) {
+        String[] paths1 = arg0.getPath().split("/");
+        String[] paths2 = arg1.getPath().split("/");
         for (int i = 0; i < paths1.length - 2; i++) { // Not compares document name here
             if (i != paths2.length - 2) {
                 break;
@@ -63,8 +62,7 @@ public class PathDocumentComparator extends CultureComparator<GWTDocument> {
             }
         }
         if (paths1.length == paths2.length) { // here is compared document name
-            return collator.compare(paths1[paths1.length - 1],
-                    paths2[paths2.length - 1]);
+            return collator.compare(paths1[paths1.length - 1], paths2[paths2.length - 1]);
         } else {
             return paths1.length - paths2.length; // otherside number of folders lenght
         }

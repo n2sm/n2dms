@@ -2,7 +2,6 @@
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ page import="com.openkm.frontend.client.bean.GWTUINotification" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -54,7 +53,7 @@
             <c:param name="me_id" value="${me.id}"/>
           </c:url>
           <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
-			<td><fmt:formatDate value="${me.date}" type="both"/></td>
+			<td><u:formatDate date="${me.date}"/></td>
 			<td>
 			  <c:choose>
                 <c:when test="${me.action == GWTUINotification.ACTION_LOGOUT}">

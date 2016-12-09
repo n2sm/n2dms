@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -21,120 +21,28 @@
 
 package com.openkm.util;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.openkm.api.OKMAuth;
 import com.openkm.api.OKMFolder;
 import com.openkm.api.OKMPropertyGroup;
 import com.openkm.api.OKMRepository;
-import com.openkm.bean.AppVersion;
-import com.openkm.bean.DashboardDocumentResult;
-import com.openkm.bean.DashboardFolderResult;
-import com.openkm.bean.DashboardMailResult;
-import com.openkm.bean.Document;
-import com.openkm.bean.Folder;
-import com.openkm.bean.LockInfo;
-import com.openkm.bean.Mail;
-import com.openkm.bean.Note;
-import com.openkm.bean.PropertyGroup;
-import com.openkm.bean.QueryResult;
-import com.openkm.bean.Version;
-import com.openkm.bean.form.Button;
-import com.openkm.bean.form.CheckBox;
-import com.openkm.bean.form.Download;
-import com.openkm.bean.form.FormElement;
-import com.openkm.bean.form.Input;
+import com.openkm.bean.*;
+import com.openkm.bean.form.*;
 import com.openkm.bean.form.Node;
-import com.openkm.bean.form.Option;
-import com.openkm.bean.form.Print;
-import com.openkm.bean.form.Select;
-import com.openkm.bean.form.Separator;
-import com.openkm.bean.form.SuggestBox;
-import com.openkm.bean.form.Text;
-import com.openkm.bean.form.TextArea;
-import com.openkm.bean.form.Upload;
-import com.openkm.bean.form.Validator;
-import com.openkm.bean.workflow.Comment;
-import com.openkm.bean.workflow.ProcessDefinition;
-import com.openkm.bean.workflow.ProcessInstance;
-import com.openkm.bean.workflow.TaskInstance;
-import com.openkm.bean.workflow.Token;
-import com.openkm.bean.workflow.Transition;
+import com.openkm.bean.workflow.*;
+import com.openkm.core.*;
 import com.openkm.core.Config;
-import com.openkm.core.DatabaseException;
-import com.openkm.core.NoSuchGroupException;
-import com.openkm.core.ParseException;
-import com.openkm.core.PathNotFoundException;
-import com.openkm.core.RepositoryException;
 import com.openkm.dao.KeyValueDAO;
-import com.openkm.dao.bean.Bookmark;
-import com.openkm.dao.bean.KeyValue;
-import com.openkm.dao.bean.Language;
-import com.openkm.dao.bean.Omr;
-import com.openkm.dao.bean.QueryParams;
-import com.openkm.dao.bean.Report;
-import com.openkm.dao.bean.UserConfig;
-import com.openkm.frontend.client.bean.GWTAppVersion;
-import com.openkm.frontend.client.bean.GWTBookmark;
-import com.openkm.frontend.client.bean.GWTComment;
-import com.openkm.frontend.client.bean.GWTDashboardDocumentResult;
-import com.openkm.frontend.client.bean.GWTDashboardFolderResult;
-import com.openkm.frontend.client.bean.GWTDashboardMailResult;
-import com.openkm.frontend.client.bean.GWTDocument;
-import com.openkm.frontend.client.bean.GWTFolder;
-import com.openkm.frontend.client.bean.GWTKeyValue;
-import com.openkm.frontend.client.bean.GWTLanguage;
-import com.openkm.frontend.client.bean.GWTLockInfo;
-import com.openkm.frontend.client.bean.GWTMail;
-import com.openkm.frontend.client.bean.GWTNote;
-import com.openkm.frontend.client.bean.GWTOmr;
-import com.openkm.frontend.client.bean.GWTProcessDefinition;
-import com.openkm.frontend.client.bean.GWTProcessInstance;
-import com.openkm.frontend.client.bean.GWTProcessInstanceLogEntry;
-import com.openkm.frontend.client.bean.GWTPropertyGroup;
-import com.openkm.frontend.client.bean.GWTPropertyParams;
-import com.openkm.frontend.client.bean.GWTQueryParams;
-import com.openkm.frontend.client.bean.GWTQueryResult;
-import com.openkm.frontend.client.bean.GWTReport;
-import com.openkm.frontend.client.bean.GWTTaskInstance;
-import com.openkm.frontend.client.bean.GWTToken;
-import com.openkm.frontend.client.bean.GWTTransition;
-import com.openkm.frontend.client.bean.GWTUser;
-import com.openkm.frontend.client.bean.GWTUserConfig;
-import com.openkm.frontend.client.bean.GWTVersion;
-import com.openkm.frontend.client.bean.GWTWorkflowComment;
-import com.openkm.frontend.client.bean.GWTWorkspace;
-import com.openkm.frontend.client.bean.form.GWTButton;
-import com.openkm.frontend.client.bean.form.GWTCheckBox;
-import com.openkm.frontend.client.bean.form.GWTDownload;
-import com.openkm.frontend.client.bean.form.GWTFormElement;
-import com.openkm.frontend.client.bean.form.GWTInput;
-import com.openkm.frontend.client.bean.form.GWTNode;
-import com.openkm.frontend.client.bean.form.GWTOption;
-import com.openkm.frontend.client.bean.form.GWTPrint;
-import com.openkm.frontend.client.bean.form.GWTSelect;
-import com.openkm.frontend.client.bean.form.GWTSeparator;
-import com.openkm.frontend.client.bean.form.GWTSuggestBox;
-import com.openkm.frontend.client.bean.form.GWTText;
-import com.openkm.frontend.client.bean.form.GWTTextArea;
-import com.openkm.frontend.client.bean.form.GWTUpload;
-import com.openkm.frontend.client.bean.form.GWTValidator;
+import com.openkm.dao.bean.*;
+import com.openkm.frontend.client.bean.*;
+import com.openkm.frontend.client.bean.form.*;
 import com.openkm.principal.PrincipalAdapterException;
 import com.openkm.util.WorkflowUtils.ProcessInstanceLogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
 
 public class GWTUtil {
     private static Logger log = LoggerFactory.getLogger(GWTUtil.class);
@@ -146,56 +54,50 @@ public class GWTUtil {
      * @param workspace
      * @return A GWTDocument object with the data from the original Document.
      */
-    public static GWTDocument copy(final Document doc,
-            final GWTWorkspace workspace) throws PrincipalAdapterException,
-            IOException, ParseException, NoSuchGroupException,
-            PathNotFoundException, RepositoryException, DatabaseException {
+    public static GWTDocument copy(Document doc, GWTWorkspace workspace) throws PrincipalAdapterException, IOException, ParseException,
+            NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("copy({})", doc);
-        final GWTDocument gwtDocument = MappingUtils.getMapper().map(doc,
-                GWTDocument.class);
+        GWTDocument gwtDocument = MappingUtils.getMapper().map(doc, GWTDocument.class);
         gwtDocument.setParentPath(GWTUtil.getParent(doc.getPath()));
         gwtDocument.setName(GWTUtil.getName(doc.getPath()));
 
         // User id & username
-        final GWTUser user = new GWTUser();
+        GWTUser user = new GWTUser();
         user.setId(doc.getAuthor());
         user.setUsername(OKMAuth.getInstance().getName(null, doc.getAuthor()));
         gwtDocument.setUser(user);
 
         // Version user id & usersame
         if (gwtDocument.getActualVersion() != null) {
-            final GWTUser userVersion = new GWTUser();
+            GWTUser userVersion = new GWTUser();
             userVersion.setId(gwtDocument.getActualVersion().getAuthor());
-            userVersion.setUsername(OKMAuth.getInstance().getName(null,
-                    gwtDocument.getActualVersion().getAuthor()));
+            userVersion.setUsername(OKMAuth.getInstance().getName(null, gwtDocument.getActualVersion().getAuthor()));
             gwtDocument.getActualVersion().setUser(userVersion);
         }
 
         // Lockinfo user id & username
         if (gwtDocument.getLockInfo() != null) {
-            final GWTUser userLock = new GWTUser();
+            GWTUser userLock = new GWTUser();
             userLock.setId(gwtDocument.getLockInfo().getOwner());
-            userLock.setUsername(OKMAuth.getInstance().getName(null,
-                    gwtDocument.getLockInfo().getOwner()));
+            userLock.setUsername(OKMAuth.getInstance().getName(null, gwtDocument.getLockInfo().getOwner()));
             gwtDocument.getLockInfo().setUser(userLock);
         }
 
         // Notes user id & username
         gwtDocument.getNotes().clear();
-        for (final Note note : doc.getNotes()) {
+        for (Note note : doc.getNotes()) {
             gwtDocument.getNotes().add(copy(note));
-            if (!note.getAuthor().equals(Config.SYSTEM_USER)) {
+            if (!note.getAuthor().equals(com.openkm.core.Config.SYSTEM_USER)) {
                 gwtDocument.setHasNotes(true);
             }
         }
 
         // Subscriptors
-        final Set<GWTUser> subscriptors = new HashSet<GWTUser>();
-        for (final String userId : doc.getSubscriptors()) {
-            final GWTUser subscriptor = new GWTUser();
+        Set<GWTUser> subscriptors = new HashSet<GWTUser>();
+        for (String userId : doc.getSubscriptors()) {
+            GWTUser subscriptor = new GWTUser();
             subscriptor.setId(userId);
-            subscriptor
-                    .setUsername(OKMAuth.getInstance().getName(null, userId));
+            subscriptor.setUsername(OKMAuth.getInstance().getName(null, userId));
             subscriptors.add(subscriptor);
         }
         gwtDocument.setSubscriptors(subscriptors);
@@ -210,11 +112,10 @@ public class GWTUtil {
      * @param gWTDoc The original GWTDocument object.
      * @return A Document object with the data form de original GWTDocument
      */
-    public static Document copy(final GWTDocument gWTDoc)
-            throws PrincipalAdapterException {
+    public static Document copy(GWTDocument gWTDoc) throws PrincipalAdapterException {
         log.debug("copy({})", gWTDoc);
-        final Document doc = new Document();
-        final Calendar cal = Calendar.getInstance();
+        Document doc = new Document();
+        Calendar cal = Calendar.getInstance();
 
         doc.setKeywords(gWTDoc.getKeywords());
         doc.setMimeType(gWTDoc.getMimeType());
@@ -229,15 +130,15 @@ public class GWTUtil {
         doc.setActualVersion(GWTUtil.copy(gWTDoc.getActualVersion()));
         doc.setPermissions(gWTDoc.getPermissions());
         doc.setSubscribed(gWTDoc.isSubscribed());
-        final Set<String> subscriptors = new HashSet<String>();
-        for (final GWTUser user : gWTDoc.getSubscriptors()) {
+        Set<String> subscriptors = new HashSet<String>();
+        for (GWTUser user : gWTDoc.getSubscriptors()) {
             subscriptors.add(user.getId());
         }
         doc.setSubscriptors(subscriptors);
-        final Set<Folder> categories = new HashSet<Folder>();
+        Set<Folder> categories = new HashSet<Folder>();
 
-        for (final GWTFolder gwtFolder : gWTDoc.getCategories()) {
-            categories.add(copy(gwtFolder));
+        for (Iterator<GWTFolder> it = gWTDoc.getCategories().iterator(); it.hasNext();) {
+            categories.add(copy(it.next()));
         }
 
         doc.setCategories(categories);
@@ -254,25 +155,22 @@ public class GWTUtil {
      * @param workspace
      * @return A GWTFolder object with the data from the original Document.
      */
-    public static GWTFolder copy(final Folder fld, final GWTWorkspace workspace)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public static GWTFolder copy(Folder fld, GWTWorkspace workspace) throws PrincipalAdapterException, IOException, ParseException,
+            NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("copy({})", fld);
-        final GWTFolder gwtFolder = MappingUtils.getMapper().map(fld,
-                GWTFolder.class);
+        GWTFolder gwtFolder = MappingUtils.getMapper().map(fld, GWTFolder.class);
         gwtFolder.setParentPath(GWTUtil.getParent(fld.getPath()));
         gwtFolder.setName(GWTUtil.getName(fld.getPath()));
 
         // User id & username
-        final GWTUser user = new GWTUser();
+        GWTUser user = new GWTUser();
         user.setId(fld.getAuthor());
         user.setUsername(OKMAuth.getInstance().getName(null, fld.getAuthor()));
         gwtFolder.setUser(user);
 
         // Notes user id & username
         gwtFolder.getNotes().clear();
-        for (final Note note : fld.getNotes()) {
+        for (Note note : fld.getNotes()) {
             gwtFolder.getNotes().add(copy(note));
             if (!note.getAuthor().equals(Config.SYSTEM_USER)) {
                 gwtFolder.setHasNotes(true);
@@ -280,12 +178,11 @@ public class GWTUtil {
         }
 
         // Subscriptors
-        final Set<GWTUser> subscriptors = new HashSet<GWTUser>();
-        for (final String userId : fld.getSubscriptors()) {
-            final GWTUser subscriptor = new GWTUser();
+        Set<GWTUser> subscriptors = new HashSet<GWTUser>();
+        for (String userId : fld.getSubscriptors()) {
+            GWTUser subscriptor = new GWTUser();
             subscriptor.setId(userId);
-            subscriptor
-                    .setUsername(OKMAuth.getInstance().getName(null, userId));
+            subscriptor.setUsername(OKMAuth.getInstance().getName(null, userId));
             subscriptors.add(subscriptor);
         }
         gwtFolder.setSubscriptors(subscriptors);
@@ -300,14 +197,14 @@ public class GWTUtil {
      * @param doc The original GWTFolder object.
      * @return A Folder object with the data from the original Document.
      */
-    public static Folder copy(final GWTFolder fld) {
+    public static Folder copy(GWTFolder fld) {
         log.debug("copy({})", fld);
-        final Folder folder = new Folder();
+        Folder folder = new Folder();
 
         folder.setUuid(fld.getUuid());
         folder.setPath(fld.getPath());
         folder.setHasChildren(fld.isHasChildren());
-        final Calendar created = Calendar.getInstance();
+        Calendar created = Calendar.getInstance();
         created.setTimeInMillis(fld.getCreated().getTime());
         folder.setCreated(created);
         folder.setPermissions(fld.getPermissions());
@@ -315,8 +212,8 @@ public class GWTUtil {
         folder.setSubscribed(fld.isSubscribed());
 
         // Subscriptors
-        final Set<String> subscriptors = new HashSet<String>();
-        for (final GWTUser user : fld.getSubscriptors()) {
+        Set<String> subscriptors = new HashSet<String>();
+        for (GWTUser user : fld.getSubscriptors()) {
             subscriptors.add(user.getId());
         }
         folder.setSubscriptors(subscriptors);
@@ -331,10 +228,9 @@ public class GWTUtil {
      * @param doc The original Version object.
      * @return A GWTVersion object with the data from the original Document.
      */
-    public static GWTVersion copy(final Version version)
-            throws PrincipalAdapterException {
+    public static GWTVersion copy(Version version) throws PrincipalAdapterException {
         log.debug("copy({})", version);
-        final GWTVersion gWTVersion = new GWTVersion();
+        GWTVersion gWTVersion = new GWTVersion();
 
         gWTVersion.setCreated(version.getCreated().getTime());
         gWTVersion.setName(version.getName());
@@ -343,10 +239,9 @@ public class GWTUtil {
         gWTVersion.setActual(version.isActual());
         gWTVersion.setComment(version.getComment());
 
-        final GWTUser user = new GWTUser();
+        GWTUser user = new GWTUser();
         user.setId(version.getAuthor());
-        user.setUsername(OKMAuth.getInstance().getName(null,
-                version.getAuthor()));
+        user.setUsername(OKMAuth.getInstance().getName(null, version.getAuthor()));
         gWTVersion.setUser(user);
 
         log.debug("copy: {}", gWTVersion);
@@ -359,10 +254,10 @@ public class GWTUtil {
      * @param gWTVersion The original GWTVersion
      * @return A Version object with the data from the original GWTVersion
      */
-    public static Version copy(final GWTVersion gWTVersion) {
+    public static Version copy(GWTVersion gWTVersion) {
         log.debug("copy({})", gWTVersion);
-        final Version version = new Version();
-        final Calendar cal = Calendar.getInstance();
+        Version version = new Version();
+        Calendar cal = Calendar.getInstance();
 
         version.setName(gWTVersion.getName());
         version.setSize(gWTVersion.getSize());
@@ -382,15 +277,12 @@ public class GWTUtil {
      * @param doc The original Version object.
      * @return A GWTLock object with the data from the original Lock.
      */
-    public static GWTLockInfo copy(final LockInfo lock)
-            throws PrincipalAdapterException {
+    public static GWTLockInfo copy(LockInfo lock) throws PrincipalAdapterException {
         log.debug("copy({})", lock);
-        final GWTLockInfo gwtLock = MappingUtils.getMapper().map(lock,
-                GWTLockInfo.class);
-        final GWTUser user = new GWTUser();
+        GWTLockInfo gwtLock = MappingUtils.getMapper().map(lock, GWTLockInfo.class);
+        GWTUser user = new GWTUser();
         user.setId(gwtLock.getOwner());
-        user.setUsername(OKMAuth.getInstance()
-                .getName(null, gwtLock.getOwner()));
+        user.setUsername(OKMAuth.getInstance().getName(null, gwtLock.getOwner()));
         log.debug("copy: {}", gwtLock);
         return gwtLock;
     }
@@ -401,10 +293,9 @@ public class GWTUtil {
      * @param bookmark The original Version object.
      * @return A GWTBookmark object with the data from the original Bookmark.
      */
-    public static GWTBookmark copy(final Bookmark bm, final String path) {
+    public static GWTBookmark copy(Bookmark bm, String path) {
         log.debug("copy({})", bm);
-        final GWTBookmark gwtBookmark = MappingUtils.getMapper().map(bm,
-                GWTBookmark.class);
+        GWTBookmark gwtBookmark = MappingUtils.getMapper().map(bm, GWTBookmark.class);
         gwtBookmark.setPath(path);
         log.debug("copy: {}", gwtBookmark);
         return gwtBookmark;
@@ -416,10 +307,10 @@ public class GWTUtil {
      * @param path The complete item path.
      * @return The parent item path.
      */
-    public static String getParent(final String path) {
+    public static String getParent(String path) {
         log.debug("getParent({})", path);
-        final int lastSlash = path.lastIndexOf('/');
-        final String ret = lastSlash > 0 ? path.substring(0, lastSlash) : "";
+        int lastSlash = path.lastIndexOf('/');
+        String ret = (lastSlash > 0) ? path.substring(0, lastSlash) : "";
         log.debug("getParent: {}", ret);
         return ret;
     }
@@ -430,9 +321,9 @@ public class GWTUtil {
      * @param path The complete item path.
      * @return The name of the item.
      */
-    public static String getName(final String path) {
+    public static String getName(String path) {
         log.debug("getName({})", path);
-        final String ret = path.substring(path.lastIndexOf('/') + 1);
+        String ret = path.substring(path.lastIndexOf('/') + 1);
         log.debug("getName: {}", ret);
         return ret;
     }
@@ -443,35 +334,36 @@ public class GWTUtil {
      * @param gWTParams The original GWTQueryParams
      * @return The QueryParams object with the data from de original GWTQueryParams
      */
-    public static QueryParams copy(final GWTQueryParams gWTParams) {
-        final QueryParams params = new QueryParams();
+    public static QueryParams copy(GWTQueryParams gWTParams) {
+        QueryParams params = new QueryParams();
 
         params.setId(new Long(gWTParams.getId()));
         params.setQueryName(gWTParams.getQueryName());
         params.setContent(gWTParams.getContent());
-        final String keywords = gWTParams.getKeywords().trim();
-        final Set<String> tmpKwd = new HashSet<String>();
+        String keywords = gWTParams.getKeywords().trim();
+        Set<String> tmpKwd = new HashSet<String>();
 
         if (!keywords.equals("")) {
-            final String kw[] = keywords.split(" ");
-            for (final String element : kw) {
-                tmpKwd.add(element);
+            String kw[] = keywords.split(" ");
+            for (int i = 0; i < kw.length; i++) {
+                tmpKwd.add(kw[i]);
             }
         }
 
         params.setKeywords(tmpKwd);
         params.setMimeType(gWTParams.getMimeType());
         params.setName(gWTParams.getName());
-        final Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> properties = new HashMap<String, String>();
 
-        for (final String key : gWTParams.getProperties().keySet()) {
+        for (Iterator<String> it = gWTParams.getProperties().keySet().iterator(); it.hasNext();) {
+            String key = it.next();
             properties.put(key, gWTParams.getProperties().get(key).getValue());
         }
 
         params.setProperties(properties);
         params.setPath(gWTParams.getPath());
-        final String categories = gWTParams.getCategoryUuid().trim();
-        final Set<String> tmpCat = new HashSet<String>();
+        String categories = gWTParams.getCategoryUuid().trim();
+        Set<String> tmpCat = new HashSet<String>();
 
         if (!categories.equals("")) {
             tmpCat.add(categories);
@@ -482,8 +374,7 @@ public class GWTUtil {
         Calendar lastModifiedFrom = Calendar.getInstance();
         Calendar lastModifiedTo = Calendar.getInstance();
 
-        if (gWTParams.getLastModifiedFrom() != null
-                && gWTParams.getLastModifiedTo() != null) {
+        if (gWTParams.getLastModifiedFrom() != null && gWTParams.getLastModifiedTo() != null) {
             lastModifiedFrom.setTime(gWTParams.getLastModifiedFrom());
             lastModifiedTo.setTime(gWTParams.getLastModifiedTo());
         } else {
@@ -508,29 +399,20 @@ public class GWTUtil {
      * 
      * @param queryResult The original QueryResult
      * @return The GWTQueryResult object with data values from de origina QueryResult
-     * @throws DatabaseException
-     * @throws RepositoryException
-     * @throws PathNotFoundException
-     * @throws NoSuchGroupException
-     * @throws ParseException
-     * @throws IOException
      */
-    public static GWTQueryResult copy(final QueryResult queryResult)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTQueryResult gwtQueryResult = new GWTQueryResult();
+    public static GWTQueryResult copy(QueryResult queryResult, GWTWorkspace workspace) throws PrincipalAdapterException, IOException,
+            ParseException, NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTQueryResult gwtQueryResult = new GWTQueryResult();
 
         if (queryResult.getDocument() != null) {
-            gwtQueryResult.setDocument(copy(queryResult.getDocument(), null));
+            gwtQueryResult.setDocument(copy(queryResult.getDocument(), workspace));
             gwtQueryResult.getDocument().setAttachment(false);
         } else if (queryResult.getFolder() != null) {
-            gwtQueryResult.setFolder(copy(queryResult.getFolder(), null));
+            gwtQueryResult.setFolder(copy(queryResult.getFolder(), workspace));
         } else if (queryResult.getMail() != null) {
-            gwtQueryResult.setMail(copy(queryResult.getMail(), null));
+            gwtQueryResult.setMail(copy(queryResult.getMail(), workspace));
         } else if (queryResult.getAttachment() != null) {
-            gwtQueryResult
-                    .setAttachment(copy(queryResult.getAttachment(), null));
+            gwtQueryResult.setAttachment(copy(queryResult.getAttachment(), workspace));
             gwtQueryResult.getAttachment().setAttachment(true);
         }
 
@@ -545,21 +427,18 @@ public class GWTUtil {
      * 
      * @param GWTQueryParams The original QueryParams
      * @return The GWTQueryParams object with the data from de original QueryParams
-     * @throws NoSuchGroupException
      */
-    public static GWTQueryParams copy(final QueryParams params)
-            throws RepositoryException, IOException, PathNotFoundException,
-            ParseException, DatabaseException, PrincipalAdapterException,
-            NoSuchGroupException {
-        final GWTQueryParams gWTParams = new GWTQueryParams();
+    public static GWTQueryParams copy(QueryParams params) throws RepositoryException, IOException, AccessDeniedException,
+            PathNotFoundException, ParseException, DatabaseException, PrincipalAdapterException, NoSuchGroupException {
+        GWTQueryParams gWTParams = new GWTQueryParams();
 
         gWTParams.setId(params.getId());
         gWTParams.setQueryName(params.getQueryName());
         gWTParams.setContent(params.getContent());
         String tmp = "";
 
-        for (final String string : params.getKeywords()) {
-            tmp += string + " ";
+        for (Iterator<String> itKwd = params.getKeywords().iterator(); itKwd.hasNext();) {
+            tmp += itKwd.next() + " ";
         }
 
         gWTParams.setKeywords(tmp);
@@ -582,45 +461,40 @@ public class GWTUtil {
         if (params.getCategories() != null && !params.getCategories().isEmpty()) {
             itCat = params.getCategories().iterator();
             if (itCat.hasNext()) {
-                gWTParams.setCategoryPath(OKMRepository.getInstance()
-                        .getNodePath(null, itCat.next()));
+                gWTParams.setCategoryPath(OKMRepository.getInstance().getNodePath(null, itCat.next()));
             }
         }
 
-        if (params.getLastModifiedFrom() != null
-                && params.getLastModifiedTo() != null) {
-            gWTParams.setLastModifiedFrom(params.getLastModifiedFrom()
-                    .getTime());
+        if (params.getLastModifiedFrom() != null && params.getLastModifiedTo() != null) {
+            gWTParams.setLastModifiedFrom(params.getLastModifiedFrom().getTime());
             gWTParams.setLastModifiedTo(params.getLastModifiedTo().getTime());
         }
 
         // Sets group name for each property param
-        final Map<String, GWTPropertyParams> finalProperties = new HashMap<String, GWTPropertyParams>();
-        final Map<String, String> properties = params.getProperties();
-        final Collection<String> colKeys = properties.keySet();
+        Map<String, GWTPropertyParams> finalProperties = new HashMap<String, GWTPropertyParams>();
+        Map<String, String> properties = params.getProperties();
+        Collection<String> colKeys = properties.keySet();
 
-        for (final String key : colKeys) {
+        for (Iterator<String> itKeys = colKeys.iterator(); itKeys.hasNext();) {
+            String key = itKeys.next();
             boolean found = false;
 
             // Obtain all group names
-            final Collection<PropertyGroup> colGroups = OKMPropertyGroup
-                    .getInstance().getAllGroups(null);
-            final Iterator<PropertyGroup> itGroup = colGroups.iterator();
+            Collection<PropertyGroup> colGroups = OKMPropertyGroup.getInstance().getAllGroups(null);
+            Iterator<PropertyGroup> itGroup = colGroups.iterator();
             while (itGroup.hasNext() && !found) {
-                final PropertyGroup group = itGroup.next();
+                PropertyGroup group = itGroup.next();
 
                 // Obtain all metadata values
-                final Collection<FormElement> metaData = OKMPropertyGroup
-                        .getInstance().getPropertyGroupForm(null,
-                                group.getName());
-                for (final FormElement formElement : metaData) {
+                Collection<FormElement> metaData = OKMPropertyGroup.getInstance().getPropertyGroupForm(null, group.getName());
+                for (Iterator<FormElement> it = metaData.iterator(); it.hasNext();) {
+                    FormElement formElement = it.next();
                     if (formElement.getName().equals(key)) {
                         found = true;
-                        final GWTPropertyParams gWTPropertyParams = new GWTPropertyParams();
+                        GWTPropertyParams gWTPropertyParams = new GWTPropertyParams();
                         gWTPropertyParams.setGrpName(group.getName());
                         gWTPropertyParams.setGrpLabel(group.getLabel());
-                        gWTPropertyParams.setFormElement(GWTUtil
-                                .copy(formElement));
+                        gWTPropertyParams.setFormElement(GWTUtil.copy(formElement));
                         gWTPropertyParams.setValue(properties.get(key));
                         finalProperties.put(key, gWTPropertyParams);
                         break;
@@ -640,18 +514,13 @@ public class GWTUtil {
      * @return The GWTDashboardDocumentResult object with data values from the original
      *         DashboardDocumentResult
      */
-    public static GWTDashboardDocumentResult copy(
-            final DashboardDocumentResult dsDocumentResult)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTDashboardDocumentResult gwtDashboardDocumentResult = new GWTDashboardDocumentResult();
+    public static GWTDashboardDocumentResult copy(DashboardDocumentResult dsDocumentResult) throws PrincipalAdapterException, IOException,
+            ParseException, NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTDashboardDocumentResult gwtDashboardDocumentResult = new GWTDashboardDocumentResult();
 
-        gwtDashboardDocumentResult.setDocument(copy(
-                dsDocumentResult.getDocument(), null));
+        gwtDashboardDocumentResult.setDocument(copy(dsDocumentResult.getDocument(), null));
         gwtDashboardDocumentResult.setVisited(dsDocumentResult.isVisited());
-        gwtDashboardDocumentResult
-                .setDate(dsDocumentResult.getDate().getTime());
+        gwtDashboardDocumentResult.setDate(dsDocumentResult.getDate().getTime());
 
         return gwtDashboardDocumentResult;
     }
@@ -663,15 +532,11 @@ public class GWTUtil {
      * @return The GWTDashboardFolderResult object with data values from the original
      *         DashboardFolderResult
      */
-    public static GWTDashboardFolderResult copy(
-            final DashboardFolderResult dsFolderResult)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTDashboardFolderResult gwtDashboardFolderResult = new GWTDashboardFolderResult();
+    public static GWTDashboardFolderResult copy(DashboardFolderResult dsFolderResult) throws PrincipalAdapterException, IOException,
+            ParseException, NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTDashboardFolderResult gwtDashboardFolderResult = new GWTDashboardFolderResult();
 
-        gwtDashboardFolderResult.setFolder(copy(dsFolderResult.getFolder(),
-                null));
+        gwtDashboardFolderResult.setFolder(copy(dsFolderResult.getFolder(), null));
         gwtDashboardFolderResult.setVisited(dsFolderResult.isVisited());
         gwtDashboardFolderResult.setDate(dsFolderResult.getDate().getTime());
 
@@ -685,12 +550,9 @@ public class GWTUtil {
      * @return The GWTDashboardMailResult object with data values from the original
      *         DashboardMailResult
      */
-    public static GWTDashboardMailResult copy(
-            final DashboardMailResult dsmailResult)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTDashboardMailResult gwtDashboardMailResult = new GWTDashboardMailResult();
+    public static GWTDashboardMailResult copy(DashboardMailResult dsmailResult) throws PrincipalAdapterException, IOException,
+            ParseException, NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTDashboardMailResult gwtDashboardMailResult = new GWTDashboardMailResult();
 
         gwtDashboardMailResult.setMail(copy(dsmailResult.getMail(), null));
         gwtDashboardMailResult.setVisited(dsmailResult.isVisited());
@@ -705,9 +567,8 @@ public class GWTUtil {
      * @param ProcessDefinition the original data
      * @return The GWTProcessDefinition object with data values from original ProcessDefinition
      */
-    public static GWTProcessDefinition copy(
-            final ProcessDefinition processDefinition) {
-        final GWTProcessDefinition gWTProcessDefinition = new GWTProcessDefinition();
+    public static GWTProcessDefinition copy(ProcessDefinition processDefinition) {
+        GWTProcessDefinition gWTProcessDefinition = new GWTProcessDefinition();
 
         gWTProcessDefinition.setId(processDefinition.getId());
         gWTProcessDefinition.setName(processDefinition.getName());
@@ -723,18 +584,15 @@ public class GWTUtil {
      * @param TaskInstance the original data
      * @return The GWTTaskInstance object with data values from original TaskInstance
      */
-    public static GWTTaskInstance copy(final TaskInstance taskInstance)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, PrincipalAdapterException, IOException,
-            ParseException, NoSuchGroupException {
-        final GWTTaskInstance gWTTaskInstance = new GWTTaskInstance();
+    public static GWTTaskInstance copy(TaskInstance taskInstance) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException, PrincipalAdapterException, IOException, ParseException, NoSuchGroupException {
+        GWTTaskInstance gWTTaskInstance = new GWTTaskInstance();
 
         gWTTaskInstance.setActorId(taskInstance.getActorId());
         gWTTaskInstance.setCreate(taskInstance.getCreate().getTime());
         gWTTaskInstance.setId(taskInstance.getId());
         gWTTaskInstance.setName(taskInstance.getName());
-        gWTTaskInstance.setProcessInstance(copy(taskInstance
-                .getProcessInstance()));
+        gWTTaskInstance.setProcessInstance(copy(taskInstance.getProcessInstance()));
         gWTTaskInstance.setDescription(taskInstance.getDescription());
 
         if (taskInstance.getDueDate() != null) {
@@ -755,26 +613,24 @@ public class GWTUtil {
      * @param ProcessInstance the original data
      * @return The GWTProcessInstance object with data values from original ProcessInstance
      */
-    public static GWTProcessInstance copy(final ProcessInstance processInstance)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, PrincipalAdapterException, IOException,
-            ParseException, NoSuchGroupException {
-        final GWTProcessInstance gWTProcessInstance = new GWTProcessInstance();
+    public static GWTProcessInstance copy(ProcessInstance processInstance) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException, PrincipalAdapterException, IOException, ParseException, NoSuchGroupException {
+        GWTProcessInstance gWTProcessInstance = new GWTProcessInstance();
 
         gWTProcessInstance.setEnded(processInstance.isEnded());
         gWTProcessInstance.setId(processInstance.getId());
-        gWTProcessInstance.setProcessDefinition(copy(processInstance
-                .getProcessDefinition()));
+        gWTProcessInstance.setProcessDefinition(copy(processInstance.getProcessDefinition()));
         gWTProcessInstance.setSuspended(processInstance.isSuspended());
-        final Map<String, Object> variables = new HashMap<String, Object>();
+        Map<String, Object> variables = new HashMap<String, Object>();
 
-        for (final String key : processInstance.getVariables().keySet()) {
-            final Object obj = processInstance.getVariables().get(key);
+        for (Iterator<String> it = processInstance.getVariables().keySet().iterator(); it.hasNext();) {
+            String key = it.next();
+            Object obj = processInstance.getVariables().get(key);
 
             if (obj instanceof FormElement) {
                 variables.put(key, copy((FormElement) obj));
             } else {
-                variables.put(key, obj);
+                variables.put(key, String.valueOf(obj));
             }
         }
 
@@ -800,22 +656,20 @@ public class GWTUtil {
      * @param Token the original data
      * @return The GWTToken object with data values from original Token
      */
-    public static GWTToken copy(final Token token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, PrincipalAdapterException, IOException,
-            ParseException, NoSuchGroupException {
-        final GWTToken gWTToken = new GWTToken();
-        final Collection<GWTTransition> availableTransitions = new ArrayList<GWTTransition>();
+    public static GWTToken copy(Token token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException,
+            PrincipalAdapterException, IOException, ParseException, NoSuchGroupException {
+        GWTToken gWTToken = new GWTToken();
+        Collection<GWTTransition> availableTransitions = new ArrayList<GWTTransition>();
 
-        for (final Transition transition : token.getAvailableTransitions()) {
-            availableTransitions.add(copy(transition));
+        for (Iterator<Transition> it = token.getAvailableTransitions().iterator(); it.hasNext();) {
+            availableTransitions.add(copy(it.next()));
         }
 
         gWTToken.setAvailableTransitions(availableTransitions);
-        final Collection<GWTWorkflowComment> comments = new ArrayList<GWTWorkflowComment>();
+        Collection<GWTWorkflowComment> comments = new ArrayList<GWTWorkflowComment>();
 
-        for (final Comment comment : token.getComments()) {
-            comments.add(copy(comment));
+        for (Iterator<Comment> it = token.getComments().iterator(); it.hasNext();) {
+            comments.add(copy(it.next()));
         }
 
         gWTToken.setComments(comments);
@@ -848,8 +702,8 @@ public class GWTUtil {
      * @param Transition the original data
      * @return The GWTTransition object with data values from original Transition
      */
-    public static GWTTransition copy(final Transition transition) {
-        final GWTTransition gWTTransition = new GWTTransition();
+    public static GWTTransition copy(Transition transition) {
+        GWTTransition gWTTransition = new GWTTransition();
         gWTTransition.setFrom(transition.getFrom());
         gWTTransition.setId(transition.getId());
         gWTTransition.setName(transition.getName());
@@ -864,8 +718,8 @@ public class GWTUtil {
      * @param Transition the original data
      * @return The GWTWorkFlowComment object with data values from original Comment
      */
-    public static GWTWorkflowComment copy(final Comment comment) {
-        final GWTWorkflowComment gWTComment = new GWTWorkflowComment();
+    public static GWTWorkflowComment copy(Comment comment) {
+        GWTWorkflowComment gWTComment = new GWTWorkflowComment();
         gWTComment.setActorId(comment.getActorId());
         gWTComment.setMessage(comment.getMessage());
         gWTComment.setTime(comment.getTime().getTime());
@@ -879,10 +733,9 @@ public class GWTUtil {
      * @param Validator the original data
      * @return The GWTValidator object with data values from original Validator
      */
-    public static List<GWTValidator> copyValidators(
-            final List<Validator> validators) {
-        final List<GWTValidator> gwtValidatorsList = new ArrayList<GWTValidator>();
-        for (final Validator validator : validators) {
+    public static List<GWTValidator> copyValidators(List<Validator> validators) {
+        List<GWTValidator> gwtValidatorsList = new ArrayList<GWTValidator>();
+        for (Validator validator : validators) {
             gwtValidatorsList.add(copy(validator));
         }
         return gwtValidatorsList;
@@ -891,9 +744,9 @@ public class GWTUtil {
     /**
      * copyNodes
      */
-    public static List<GWTNode> copyNodes(final List<Node> nodes) {
-        final List<GWTNode> gwtNodesList = new ArrayList<GWTNode>();
-        for (final Node node : nodes) {
+    public static List<GWTNode> copyNodes(List<Node> nodes) {
+        List<GWTNode> gwtNodesList = new ArrayList<GWTNode>();
+        for (Node node : nodes) {
             gwtNodesList.add(copy(node));
         }
         return gwtNodesList;
@@ -905,51 +758,48 @@ public class GWTUtil {
      * @param FormElement the original data
      * @return The GWTFormElement object with data values from original FormElement
      */
-    public static GWTFormElement copy(final FormElement formElement)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, PrincipalAdapterException, IOException,
-            ParseException, NoSuchGroupException {
+    public static GWTFormElement copy(FormElement formElement) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException, PrincipalAdapterException, IOException, ParseException, NoSuchGroupException {
         if (formElement instanceof Button) {
-            final GWTButton gWTButton = new GWTButton();
+            GWTButton gWTButton = new GWTButton();
             gWTButton.setName(formElement.getName());
             gWTButton.setLabel(formElement.getLabel());
             gWTButton.setWidth(formElement.getWidth());
             gWTButton.setHeight(formElement.getHeight());
-            final Button button = (Button) formElement;
+            Button button = (Button) formElement;
             gWTButton.setTransition(button.getTransition());
             gWTButton.setConfirmation(button.getConfirmation());
             gWTButton.setStyle(button.getStyle());
             gWTButton.setValidate(button.isValidate());
             return gWTButton;
         } else if (formElement instanceof Input) {
-            final GWTInput gWTInput = new GWTInput();
+            GWTInput gWTInput = new GWTInput();
             gWTInput.setName(formElement.getName());
             gWTInput.setLabel(formElement.getLabel());
             gWTInput.setWidth(formElement.getWidth());
             gWTInput.setHeight(formElement.getHeight());
-            final Input input = (Input) formElement;
+            Input input = (Input) formElement;
             gWTInput.setReadonly(input.isReadonly());
             gWTInput.setValue(input.getValue());
 
             if (input.getType().equals(Input.TYPE_DATE)) {
                 if (!input.getValue().equals("")) {
-                    final Calendar date = ISO8601.parseBasic(input.getValue());
+                    Calendar date = ISO8601.parseBasic(input.getValue());
 
                     if (date != null) {
                         gWTInput.setDate(date.getTime());
                     } else {
-                        log.warn(
-                                "Input '{}' value should be in ISO8601 format: {}",
-                                input.getName(), input.getValue());
+                        log.warn("Input '{}' value should be in ISO8601 format: {}", input.getName(), input.getValue());
                     }
                 }
             }
 
-            if (input.getType().equals(Input.TYPE_FOLDER)
-                    && !gWTInput.getValue().equals("")) {
-                gWTInput.setFolder(copy(
-                        OKMFolder.getInstance().getProperties(null,
-                                ((Input) formElement).getValue()), null));
+            if (input.getType().equals(Input.TYPE_FOLDER) && !gWTInput.getValue().equals("")) {
+                try {
+                    gWTInput.setFolder(copy(OKMFolder.getInstance().getProperties(null, ((Input) formElement).getValue()), null));
+                } catch (PathNotFoundException e) {
+                    log.warn("Folder not found: {}", e.getMessage(), e);
+                }
             }
 
             gWTInput.setType(((Input) formElement).getType());
@@ -957,15 +807,14 @@ public class GWTUtil {
             gWTInput.setData(input.getData());
             return gWTInput;
         } else if (formElement instanceof SuggestBox) {
-            final GWTSuggestBox gWTsuggestBox = new GWTSuggestBox();
+            GWTSuggestBox gWTsuggestBox = new GWTSuggestBox();
             gWTsuggestBox.setName(formElement.getName());
             gWTsuggestBox.setLabel(formElement.getLabel());
             gWTsuggestBox.setWidth(formElement.getWidth());
             gWTsuggestBox.setHeight(formElement.getHeight());
-            final SuggestBox suggestBox = (SuggestBox) formElement;
+            SuggestBox suggestBox = (SuggestBox) formElement;
             gWTsuggestBox.setReadonly(suggestBox.isReadonly());
-            gWTsuggestBox.setValidators(copyValidators(suggestBox
-                    .getValidators()));
+            gWTsuggestBox.setValidators(copyValidators(suggestBox.getValidators()));
             gWTsuggestBox.setValue(suggestBox.getValue());
             gWTsuggestBox.setDialogTitle(suggestBox.getDialogTitle());
             gWTsuggestBox.setTable(suggestBox.getTable());
@@ -975,11 +824,10 @@ public class GWTUtil {
             gWTsuggestBox.setData(suggestBox.getData());
 
             if (!suggestBox.getValue().equals("")) {
-                final String formatedQuery = MessageFormat.format(
-                        suggestBox.getValueQuery().replaceAll("'", "\\\""),
-                        suggestBox.getValue()).replaceAll("\"", "'");
-                final List<KeyValue> keyValues = KeyValueDAO.getKeyValues(
-                        Arrays.asList(suggestBox.getTable()), formatedQuery);
+                String formatedQuery =
+                        MessageFormat.format(suggestBox.getValueQuery().replaceAll("'", "\\\""), suggestBox.getValue()).replaceAll("\"",
+                                "'");
+                List<KeyValue> keyValues = KeyValueDAO.getKeyValues(Arrays.asList(suggestBox.getTable()), formatedQuery);
 
                 if (!keyValues.isEmpty()) {
                     gWTsuggestBox.setText(keyValues.get(0).getValue());
@@ -987,27 +835,27 @@ public class GWTUtil {
             }
             return gWTsuggestBox;
         } else if (formElement instanceof CheckBox) {
-            final GWTCheckBox gWTCheckbox = new GWTCheckBox();
+            GWTCheckBox gWTCheckbox = new GWTCheckBox();
             gWTCheckbox.setName(formElement.getName());
             gWTCheckbox.setLabel(formElement.getLabel());
-            final CheckBox checkbox = (CheckBox) formElement;
+            CheckBox checkbox = (CheckBox) formElement;
             gWTCheckbox.setValue(checkbox.getValue());
             gWTCheckbox.setReadonly(checkbox.isReadonly());
             gWTCheckbox.setValidators(copyValidators(checkbox.getValidators()));
             gWTCheckbox.setData(checkbox.getData());
             return gWTCheckbox;
         } else if (formElement instanceof Select) {
-            final GWTSelect gWTselect = new GWTSelect();
+            GWTSelect gWTselect = new GWTSelect();
             gWTselect.setName(formElement.getName());
             gWTselect.setLabel(formElement.getLabel());
             gWTselect.setWidth(formElement.getWidth());
             gWTselect.setHeight(formElement.getHeight());
-            final Select select = (Select) formElement;
+            Select select = (Select) formElement;
             gWTselect.setType(select.getType());
             gWTselect.setReadonly(select.isReadonly());
 
-            final List<GWTOption> options = new ArrayList<GWTOption>();
-            for (final Option option : select.getOptions()) {
+            List<GWTOption> options = new ArrayList<GWTOption>();
+            for (Option option : select.getOptions()) {
                 options.add(copy(option));
             }
 
@@ -1015,26 +863,28 @@ public class GWTUtil {
             gWTselect.setValidators(copyValidators(select.getValidators()));
             gWTselect.setData(select.getData());
             gWTselect.setOptionsData(select.getOptionsData());
+            gWTselect.setSuggestion(select.getSuggestion());
+            gWTselect.setClassName(select.getClassName());
             return gWTselect;
         } else if (formElement instanceof TextArea) {
-            final GWTTextArea gWTTextArea = new GWTTextArea();
+            GWTTextArea gWTTextArea = new GWTTextArea();
             gWTTextArea.setName(formElement.getName());
             gWTTextArea.setLabel(formElement.getLabel());
             gWTTextArea.setWidth(formElement.getWidth());
             gWTTextArea.setHeight(formElement.getHeight());
-            final TextArea textArea = (TextArea) formElement;
+            TextArea textArea = (TextArea) formElement;
             gWTTextArea.setValue(textArea.getValue());
             gWTTextArea.setReadonly(textArea.isReadonly());
             gWTTextArea.setValidators(copyValidators(textArea.getValidators()));
             gWTTextArea.setData(textArea.getData());
             return gWTTextArea;
         } else if (formElement instanceof Upload) {
-            final GWTUpload gWTUpload = new GWTUpload();
+            GWTUpload gWTUpload = new GWTUpload();
             gWTUpload.setName(formElement.getName());
             gWTUpload.setLabel(formElement.getLabel());
             gWTUpload.setWidth(formElement.getWidth());
             gWTUpload.setHeight(formElement.getHeight());
-            final Upload upload = (Upload) formElement;
+            Upload upload = (Upload) formElement;
             gWTUpload.setFolderPath(upload.getFolderPath());
             gWTUpload.setFolderUuid(upload.getFolderUuid());
             gWTUpload.setDocumentName(upload.getDocumentName());
@@ -1044,39 +894,39 @@ public class GWTUtil {
             gWTUpload.setValidators(copyValidators(upload.getValidators()));
             return gWTUpload;
         } else if (formElement instanceof Text) {
-            final GWTText gWTtext = new GWTText();
+            GWTText gWTtext = new GWTText();
             gWTtext.setName(formElement.getName());
             gWTtext.setLabel(formElement.getLabel());
             gWTtext.setHeight(formElement.getHeight());
             gWTtext.setWidth(formElement.getWidth());
-            final Text text = (Text) formElement;
+            Text text = (Text) formElement;
             gWTtext.setData(text.getData());
             return gWTtext;
         } else if (formElement instanceof Separator) {
-            final GWTSeparator separator = new GWTSeparator();
+            GWTSeparator separator = new GWTSeparator();
             separator.setName(formElement.getName());
             separator.setLabel(formElement.getLabel());
             separator.setHeight(formElement.getHeight());
             separator.setWidth(formElement.getWidth());
             return separator;
         } else if (formElement instanceof Download) {
-            final GWTDownload gWTdownload = new GWTDownload();
+            GWTDownload gWTdownload = new GWTDownload();
             gWTdownload.setName(formElement.getName());
             gWTdownload.setLabel(formElement.getLabel());
             gWTdownload.setHeight(formElement.getHeight());
             gWTdownload.setWidth(formElement.getWidth());
-            final Download download = (Download) formElement;
+            Download download = (Download) formElement;
             gWTdownload.setData(download.getData());
             gWTdownload.setValidators(copyValidators(download.getValidators()));
             gWTdownload.setNodes(copyNodes(download.getNodes()));
             return gWTdownload;
         } else if (formElement instanceof Print) {
-            final GWTPrint gWTprint = new GWTPrint();
+            GWTPrint gWTprint = new GWTPrint();
             gWTprint.setName(formElement.getName());
             gWTprint.setLabel(formElement.getLabel());
             gWTprint.setHeight(formElement.getHeight());
             gWTprint.setWidth(formElement.getWidth());
-            final Print download = (Print) formElement;
+            Print download = (Print) formElement;
             gWTprint.setData(download.getData());
             gWTprint.setValidators(copyValidators(download.getValidators()));
             gWTprint.setNodes(copyNodes(download.getNodes()));
@@ -1092,29 +942,28 @@ public class GWTUtil {
      * @param GWTFormElement the original data
      * @return The FormElement object with data values from original GWTFormElement
      */
-    public static FormElement copy(final GWTFormElement formElement) {
+    public static FormElement copy(GWTFormElement formElement) {
         if (formElement instanceof GWTButton) {
-            final Button button = new Button();
+            Button button = new Button();
             button.setName(formElement.getName());
-            final GWTButton gWTButton = (GWTButton) formElement;
+            GWTButton gWTButton = ((GWTButton) formElement);
             button.setTransition(gWTButton.getTransition());
             button.setConfirmation(gWTButton.getConfirmation());
             button.setStyle(gWTButton.getStyle());
             button.setValidate(gWTButton.isValidate());
             return button;
         } else if (formElement instanceof GWTInput) {
-            final Input input = new Input();
+            Input input = new Input();
             input.setName(formElement.getName());
-            final GWTInput gWTInput = (GWTInput) formElement;
+            GWTInput gWTInput = ((GWTInput) formElement);
             input.setReadonly(gWTInput.isReadonly());
 
-            if (gWTInput.getType().equals(GWTInput.TYPE_TEXT)
-                    || gWTInput.getType().equals(GWTInput.TYPE_LINK)
+            if (gWTInput.getType().equals(GWTInput.TYPE_TEXT) || gWTInput.getType().equals(GWTInput.TYPE_LINK)
                     || gWTInput.getType().equals(GWTInput.TYPE_FOLDER)) {
                 input.setValue(gWTInput.getValue());
             } else if (gWTInput.getType().equals(GWTInput.TYPE_DATE)) {
                 if (gWTInput.getDate() != null) {
-                    final Calendar cal = Calendar.getInstance();
+                    Calendar cal = Calendar.getInstance();
                     cal.setTime(((GWTInput) formElement).getDate());
                     input.setValue(ISO8601.formatBasic(cal));
                 }
@@ -1124,34 +973,35 @@ public class GWTUtil {
             input.setData(gWTInput.getData());
             return input;
         } else if (formElement instanceof GWTSuggestBox) {
-            final SuggestBox suggestBox = new SuggestBox();
+            SuggestBox suggestBox = new SuggestBox();
             suggestBox.setName(formElement.getName());
-            final GWTSuggestBox gWTSuggestBox = (GWTSuggestBox) formElement;
+            GWTSuggestBox gWTSuggestBox = ((GWTSuggestBox) formElement);
             suggestBox.setReadonly(gWTSuggestBox.isReadonly());
             suggestBox.setValue(gWTSuggestBox.getValue());
             suggestBox.setFilterQuery(gWTSuggestBox.getFilterQuery());
             suggestBox.setValueQuery(gWTSuggestBox.getValueQuery());
             suggestBox.setFilterMinLen(gWTSuggestBox.getFilterMinLen());
             suggestBox.setData(gWTSuggestBox.getData());
+            suggestBox.setTable(gWTSuggestBox.getTable());
             return suggestBox;
         } else if (formElement instanceof GWTCheckBox) {
-            final CheckBox checkbox = new CheckBox();
+            CheckBox checkbox = new CheckBox();
             checkbox.setLabel(formElement.getLabel());
             checkbox.setName(formElement.getName());
-            final GWTCheckBox gWTCheckBox = (GWTCheckBox) formElement;
+            GWTCheckBox gWTCheckBox = ((GWTCheckBox) formElement);
             checkbox.setValue(gWTCheckBox.getValue());
             checkbox.setReadonly(gWTCheckBox.isReadonly());
             checkbox.setData(gWTCheckBox.getData());
             return checkbox;
         } else if (formElement instanceof GWTSelect) {
-            final Select select = new Select();
+            Select select = new Select();
             select.setName(formElement.getName());
-            final GWTSelect gWTSelect = (GWTSelect) formElement;
+            GWTSelect gWTSelect = ((GWTSelect) formElement);
             select.setType(gWTSelect.getType());
             select.setReadonly(gWTSelect.isReadonly());
-            final List<Option> options = new ArrayList<Option>();
+            List<Option> options = new ArrayList<Option>();
 
-            for (final GWTOption option : gWTSelect.getOptions()) {
+            for (GWTOption option : gWTSelect.getOptions()) {
                 options.add(copy(option));
 
                 if (option.isSelected()) {
@@ -1161,8 +1011,7 @@ public class GWTUtil {
                         if ("".equals(select.getValue())) {
                             select.setValue(option.getValue());
                         } else {
-                            select.setValue(select.getValue().concat(",")
-                                    .concat(option.getValue()));
+                            select.setValue(select.getValue().concat(",").concat(option.getValue()));
                         }
                     }
                 }
@@ -1173,17 +1022,17 @@ public class GWTUtil {
             select.setOptionsData(gWTSelect.getOptionsData());
             return select;
         } else if (formElement instanceof GWTTextArea) {
-            final TextArea textArea = new TextArea();
+            TextArea textArea = new TextArea();
             textArea.setName(formElement.getName());
-            final GWTTextArea gWTTextArea = (GWTTextArea) formElement;
+            GWTTextArea gWTTextArea = ((GWTTextArea) formElement);
             textArea.setValue(gWTTextArea.getValue());
             textArea.setReadonly(gWTTextArea.isReadonly());
             textArea.setData(gWTTextArea.getData());
             return textArea;
         } else if (formElement instanceof GWTUpload) {
-            final Upload upload = new Upload();
+            Upload upload = new Upload();
             upload.setName(formElement.getName());
-            final GWTUpload gWTUpload = (GWTUpload) formElement;
+            GWTUpload gWTUpload = ((GWTUpload) formElement);
             upload.setDocumentName(gWTUpload.getDocumentName());
             upload.setDocumentUuid(gWTUpload.getDocumentUuid());
             upload.setFolderPath(gWTUpload.getFolderPath());
@@ -1192,8 +1041,8 @@ public class GWTUtil {
             upload.setData(gWTUpload.getData());
             return upload;
         } else if (formElement instanceof GWTText) {
-            final Text text = new Text();
-            final GWTText gWTText = (GWTText) formElement;
+            Text text = new Text();
+            GWTText gWTText = (GWTText) formElement;
             text.setName(gWTText.getName());
             text.setLabel(gWTText.getLabel());
             text.setHeight(gWTText.getHeight());
@@ -1201,39 +1050,39 @@ public class GWTUtil {
             text.setData(gWTText.getData());
             return text;
         } else if (formElement instanceof GWTSeparator) {
-            final Separator separator = new Separator();
-            final GWTSeparator gWTSeparator = (GWTSeparator) formElement;
+            Separator separator = new Separator();
+            GWTSeparator gWTSeparator = (GWTSeparator) formElement;
             separator.setName(gWTSeparator.getName());
             separator.setLabel(gWTSeparator.getLabel());
             separator.setHeight(gWTSeparator.getHeight());
             separator.setWidth(gWTSeparator.getWidth());
             return separator;
         } else if (formElement instanceof GWTDownload) {
-            final Download download = new Download();
-            final GWTDownload gWTDownload = (GWTDownload) formElement;
+            Download download = new Download();
+            GWTDownload gWTDownload = (GWTDownload) formElement;
             download.setName(gWTDownload.getName());
             download.setLabel(gWTDownload.getLabel());
             download.setHeight(gWTDownload.getHeight());
             download.setWidth(gWTDownload.getWidth());
             download.setData(gWTDownload.getData());
-            final List<Node> nodes = new ArrayList<Node>();
+            List<Node> nodes = new ArrayList<Node>();
 
-            for (final GWTNode gWTNode : gWTDownload.getNodes()) {
+            for (GWTNode gWTNode : gWTDownload.getNodes()) {
                 nodes.add(copy(gWTNode));
             }
 
             return download;
         } else if (formElement instanceof GWTPrint) {
-            final Print print = new Print();
-            final GWTPrint gWTprint = (GWTPrint) formElement;
+            Print print = new Print();
+            GWTPrint gWTprint = (GWTPrint) formElement;
             print.setName(gWTprint.getName());
             print.setLabel(gWTprint.getLabel());
             print.setHeight(gWTprint.getHeight());
             print.setWidth(gWTprint.getWidth());
             print.setData(gWTprint.getData());
-            final List<Node> nodes = new ArrayList<Node>();
+            List<Node> nodes = new ArrayList<Node>();
 
-            for (final GWTNode gWTNode : gWTprint.getNodes()) {
+            for (GWTNode gWTNode : gWTprint.getNodes()) {
                 nodes.add(copy(gWTNode));
             }
 
@@ -1246,12 +1095,11 @@ public class GWTUtil {
     /**
      * getFormElementValue
      */
-    public static Object getFormElementValue(final GWTFormElement formElement)
-            throws DatabaseException {
+    public static Object getFormElementValue(GWTFormElement formElement) throws DatabaseException {
         if (formElement instanceof GWTButton) {
             return ((GWTButton) formElement).getLabel();
         } else if (formElement instanceof GWTInput) {
-            final GWTInput input = (GWTInput) formElement;
+            GWTInput input = (GWTInput) formElement;
 
             if (GWTInput.TYPE_DATE.equals(input.getType())) {
                 return input.getDate();
@@ -1259,15 +1107,13 @@ public class GWTUtil {
                 return input.getValue();
             }
         } else if (formElement instanceof GWTSuggestBox) {
-            final GWTSuggestBox suggestBox = (GWTSuggestBox) formElement;
+            GWTSuggestBox suggestBox = (GWTSuggestBox) formElement;
 
             // The ' character must be replaced to \" to be correctly parsed
             // and after it must change all " characters to '
-            final String formatedQuery = MessageFormat.format(
-                    suggestBox.getValueQuery().replaceAll("'", "\\\""),
-                    suggestBox.getValue()).replaceAll("\"", "'");
-            final List<KeyValue> keyValues = KeyValueDAO.getKeyValues(
-                    Arrays.asList(suggestBox.getTable()), formatedQuery);
+            String formatedQuery =
+                    MessageFormat.format(suggestBox.getValueQuery().replaceAll("'", "\\\""), suggestBox.getValue()).replaceAll("\"", "'");
+            List<KeyValue> keyValues = KeyValueDAO.getKeyValues(Arrays.asList(suggestBox.getTable()), formatedQuery);
 
             if (!keyValues.isEmpty()) {
                 return keyValues.get(0).getValue();
@@ -1279,8 +1125,9 @@ public class GWTUtil {
         } else if (formElement instanceof GWTSelect) {
             String value = "";
 
-            for (final GWTOption option : ((GWTSelect) formElement)
-                    .getOptions()) {
+            for (Iterator<GWTOption> it = ((GWTSelect) formElement).getOptions().iterator(); it.hasNext();) {
+                GWTOption option = it.next();
+
                 if (option.isSelected()) {
                     value += option.getLabel() + " ";
                 }
@@ -1296,10 +1143,10 @@ public class GWTUtil {
         } else if (formElement instanceof GWTSeparator) {
             return ((GWTSeparator) formElement).getLabel();
         } else if (formElement instanceof GWTDownload) {
-            final GWTDownload download = (GWTDownload) formElement;
+            GWTDownload download = ((GWTDownload) formElement);
             String value = "";
 
-            for (final GWTNode node : download.getNodes()) {
+            for (GWTNode node : download.getNodes()) {
                 if (!value.equals("")) {
                     value += ",";
                 }
@@ -1313,10 +1160,10 @@ public class GWTUtil {
 
             return value;
         } else if (formElement instanceof GWTPrint) {
-            final GWTPrint print = (GWTPrint) formElement;
+            GWTPrint print = ((GWTPrint) formElement);
             String value = "";
 
-            for (final GWTNode node : print.getNodes()) {
+            for (GWTNode node : print.getNodes()) {
                 if (!value.equals("")) {
                     value += ",";
                 }
@@ -1340,8 +1187,8 @@ public class GWTUtil {
      * @param Validator the original data
      * @return The GWTValidator object with data values from original Validator
      */
-    public static GWTValidator copy(final Validator validator) {
-        final GWTValidator gWTValidator = new GWTValidator();
+    public static GWTValidator copy(Validator validator) {
+        GWTValidator gWTValidator = new GWTValidator();
         gWTValidator.setParameter(validator.getParameter());
         gWTValidator.setType(validator.getType());
         return gWTValidator;
@@ -1353,8 +1200,8 @@ public class GWTUtil {
      * @param Node the original data
      * @return The GWTNode object with data values from original Node
      */
-    public static GWTNode copy(final Node node) {
-        final GWTNode gWTNode = new GWTNode();
+    public static GWTNode copy(Node node) {
+        GWTNode gWTNode = new GWTNode();
         gWTNode.setLabel(node.getLabel());
         gWTNode.setPath(node.getPath());
         gWTNode.setUuid(node.getUuid());
@@ -1367,8 +1214,8 @@ public class GWTUtil {
      * @param GWTNode the original data
      * @return The Node object with data values from original GWTNode
      */
-    public static Node copy(final GWTNode gWTNode) {
-        final Node node = new Node();
+    public static Node copy(GWTNode gWTNode) {
+        Node node = new Node();
         node.setLabel(gWTNode.getLabel());
         node.setPath(gWTNode.getPath());
         node.setUuid(gWTNode.getUuid());
@@ -1381,8 +1228,8 @@ public class GWTUtil {
      * @param GWTOption the original data
      * @return The Option object with data values from original GWTOption
      */
-    public static Option copy(final GWTOption gWTOption) {
-        final Option option = new Option();
+    public static Option copy(GWTOption gWTOption) {
+        Option option = new Option();
         option.setLabel(gWTOption.getLabel());
         option.setValue(gWTOption.getValue());
         option.setSelected(gWTOption.isSelected());
@@ -1395,8 +1242,8 @@ public class GWTUtil {
      * @param Option the original data
      * @return The GWTOption object with data values from original Option
      */
-    public static GWTOption copy(final Option option) {
-        final GWTOption gWTOption = new GWTOption();
+    public static GWTOption copy(Option option) {
+        GWTOption gWTOption = new GWTOption();
         gWTOption.setLabel(option.getLabel());
         gWTOption.setValue(option.getValue());
         gWTOption.setSelected(option.isSelected());
@@ -1409,11 +1256,12 @@ public class GWTUtil {
      * @param Comment the original data
      * @return The GWTTaskInstanceComment object with data values from original TaskInstanceComment
      */
-    public static List<GWTComment> copyComments(final List<Comment> list) {
-        final List<GWTComment> al = new ArrayList<GWTComment>();
+    public static List<GWTComment> copyComments(List<Comment> list) {
+        List<GWTComment> al = new ArrayList<GWTComment>();
         GWTComment gWTComment;
 
-        for (final Comment comment : list) {
+        for (Iterator<Comment> it = list.iterator(); it.hasNext();) {
+            Comment comment = it.next();
             gWTComment = new GWTComment();
 
             gWTComment.setActorId(comment.getActorId());
@@ -1431,12 +1279,11 @@ public class GWTUtil {
      * @param Note the original data
      * @return The GWTNote object with data values from original Note
      */
-    public static List<GWTNote> copy(final List<Note> commentList)
-            throws PrincipalAdapterException {
-        final List<GWTNote> gWTCommentList = new ArrayList<GWTNote>();
+    public static List<GWTNote> copy(List<Note> commentList) throws PrincipalAdapterException {
+        List<GWTNote> gWTCommentList = new ArrayList<GWTNote>();
 
-        for (final Note note : commentList) {
-            gWTCommentList.add(copy(note));
+        for (Iterator<Note> it = commentList.iterator(); it.hasNext();) {
+            gWTCommentList.add(copy(it.next()));
         }
 
         return gWTCommentList;
@@ -1448,13 +1295,12 @@ public class GWTUtil {
      * @param Note the original data
      * @return The GWTNote object with data values from original Note
      */
-    public static GWTNote copy(final Note note)
-            throws PrincipalAdapterException {
-        final GWTNote gWTNote = new GWTNote();
+    public static GWTNote copy(Note note) throws PrincipalAdapterException {
+        GWTNote gWTNote = new GWTNote();
         gWTNote.setDate(note.getDate().getTime());
         gWTNote.setText(note.getText());
         gWTNote.setAuthor(note.getAuthor());
-        final GWTUser user = new GWTUser();
+        GWTUser user = new GWTUser();
         user.setId(note.getAuthor());
         user.setUsername(OKMAuth.getInstance().getName(null, note.getAuthor()));
         gWTNote.setUser(user);
@@ -1469,16 +1315,13 @@ public class GWTUtil {
      * @param workspace
      * @return A GWTMail object with the data from the original Mail.
      */
-    public static GWTMail copy(final Mail mail, final GWTWorkspace workspace)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public static GWTMail copy(Mail mail, GWTWorkspace workspace) throws PrincipalAdapterException, IOException, ParseException,
+            NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("copy({})", mail);
-        final GWTMail gwtMail = MappingUtils.getMapper().map(mail,
-                GWTMail.class);
+        GWTMail gwtMail = MappingUtils.getMapper().map(mail, GWTMail.class);
         gwtMail.setParentPath(GWTUtil.getParent(mail.getPath()));
 
-        for (final GWTDocument doc : gwtMail.getAttachments()) {
+        for (GWTDocument doc : gwtMail.getAttachments()) {
             doc.setParentPath(GWTUtil.getParent(doc.getPath()));
             doc.setName(GWTUtil.getName(doc.getPath()));
         }
@@ -1486,7 +1329,7 @@ public class GWTUtil {
         // Notes user id & username
         gwtMail.getNotes().clear();
 
-        for (final Note note : mail.getNotes()) {
+        for (Note note : mail.getNotes()) {
             gwtMail.getNotes().add(copy(note));
 
             if (!note.getAuthor().equals(Config.SYSTEM_USER)) {
@@ -1504,8 +1347,8 @@ public class GWTUtil {
      * @param doc The original PropertyGroup object.
      * @return A GWTPropertyGroup object with the data from the original PropertyGroup.
      */
-    public static GWTPropertyGroup copy(final PropertyGroup property) {
-        final GWTPropertyGroup gWTPropertyGroup = new GWTPropertyGroup();
+    public static GWTPropertyGroup copy(PropertyGroup property) {
+        GWTPropertyGroup gWTPropertyGroup = new GWTPropertyGroup();
 
         gWTPropertyGroup.setLabel(property.getLabel());
         gWTPropertyGroup.setName(property.getName());
@@ -1521,17 +1364,16 @@ public class GWTUtil {
      * @param doc The original UserConfig object.
      * @return A GWTUserConfig object with the data from the original UserConfig.
      */
-    public static GWTUserConfig copy(final UserConfig userConfig) {
-        final GWTUserConfig gwtUserConfig = MappingUtils.getMapper().map(
-                userConfig, GWTUserConfig.class);
+    public static GWTUserConfig copy(UserConfig userConfig) {
+        GWTUserConfig gwtUserConfig = MappingUtils.getMapper().map(userConfig, GWTUserConfig.class);
         return gwtUserConfig;
     }
 
     /**
      * Copy Language to GWTLanguage
      */
-    public static GWTLanguage copy(final Language language) {
-        final GWTLanguage gWTlang = new GWTLanguage();
+    public static GWTLanguage copy(Language language) {
+        GWTLanguage gWTlang = new GWTLanguage();
         gWTlang.setId(language.getId());
         gWTlang.setName(language.getName());
         return gWTlang;
@@ -1540,29 +1382,26 @@ public class GWTUtil {
     /**
      * Copy KeyValue to GWTKeyValue
      */
-    public static GWTKeyValue copy(final KeyValue keyValue) {
-        final GWTKeyValue gwtKeyValue = MappingUtils.getMapper().map(keyValue,
-                GWTKeyValue.class);
+    public static GWTKeyValue copy(KeyValue keyValue) {
+        GWTKeyValue gwtKeyValue = MappingUtils.getMapper().map(keyValue, GWTKeyValue.class);
         return gwtKeyValue;
     }
 
     /**
      * Copy Report to GWTReport
      */
-    public static GWTReport copy(final Report report,
-            final List<FormElement> formElements) throws PathNotFoundException,
-            RepositoryException, DatabaseException, PrincipalAdapterException,
-            IOException, ParseException, NoSuchGroupException {
-        final GWTReport gWTReport = new GWTReport();
+    public static GWTReport copy(Report report, List<FormElement> formElements) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException, PrincipalAdapterException, IOException, ParseException, NoSuchGroupException {
+        GWTReport gWTReport = new GWTReport();
         gWTReport.setActive(report.isActive());
         gWTReport.setFileContent(report.getFileContent());
         gWTReport.setFileMime(report.getFileMime());
         gWTReport.setFileName(report.getFileName());
         gWTReport.setId(report.getId());
         gWTReport.setName(report.getName());
-        final List<GWTFormElement> gWTFormElemets = new ArrayList<GWTFormElement>();
+        List<GWTFormElement> gWTFormElemets = new ArrayList<GWTFormElement>();
 
-        for (final FormElement formElement : formElements) {
+        for (FormElement formElement : formElements) {
             gWTFormElemets.add(copy(formElement));
         }
 
@@ -1573,8 +1412,8 @@ public class GWTUtil {
     /**
      * Copy Omr to GWTOmr
      */
-    public static GWTOmr copy(final Omr omr) {
-        final GWTOmr gWTOmr = new GWTOmr();
+    public static GWTOmr copy(Omr omr) {
+        GWTOmr gWTOmr = new GWTOmr();
         gWTOmr.setId(omr.getId());
         gWTOmr.setName(omr.getName());
         return gWTOmr;
@@ -1583,14 +1422,12 @@ public class GWTUtil {
     /**
      * GWTProcessInstanceLogEntry
      */
-    public static GWTProcessInstanceLogEntry copy(
-            final ProcessInstanceLogEntry logEntry) {
-        final GWTProcessInstanceLogEntry gWTLogEntry = new GWTProcessInstanceLogEntry();
+    public static GWTProcessInstanceLogEntry copy(ProcessInstanceLogEntry logEntry) {
+        GWTProcessInstanceLogEntry gWTLogEntry = new GWTProcessInstanceLogEntry();
         gWTLogEntry.setDate(logEntry.getDate());
         gWTLogEntry.setInfo(logEntry.getInfo());
         gWTLogEntry.setProcessDefinitionId(logEntry.getProcessDefinitionId());
-        gWTLogEntry.setProcessDefinitionName(logEntry
-                .getProcessDefinitionName());
+        gWTLogEntry.setProcessDefinitionName(logEntry.getProcessDefinitionName());
         gWTLogEntry.setProcessInstanceId(logEntry.getProcessInstanceId());
         gWTLogEntry.setToken(gWTLogEntry.getToken());
         gWTLogEntry.setType(logEntry.getType());
@@ -1600,9 +1437,41 @@ public class GWTUtil {
     /**
      * GWTAppVersion
      */
-    public static GWTAppVersion copy(final AppVersion appVersion) {
-        final GWTAppVersion gwtAppVersion = MappingUtils.getMapper().map(
-                appVersion, GWTAppVersion.class);
+    public static GWTAppVersion copy(AppVersion appVersion) {
+        GWTAppVersion gwtAppVersion = MappingUtils.getMapper().map(appVersion, GWTAppVersion.class);
         return gwtAppVersion;
+    }
+
+    /**
+     * Copy GWTExtendedAttributes to ExtendedAttributes
+     */
+    public static ExtendedAttributes copy(GWTExtendedAttributes attributes) {
+        ExtendedAttributes extendedAttributes = new ExtendedAttributes();
+        extendedAttributes.setCategories(attributes.isCategories());
+        extendedAttributes.setKeywords(attributes.isKeywords());
+        extendedAttributes.setNotes(attributes.isNotes());
+        extendedAttributes.setPropertyGroups(attributes.isPropertyGroups());
+        return extendedAttributes;
+    }
+
+    /**
+     * Copy MimeType to GWTMimeType
+     */
+    public static GWTMimeType copy(MimeType mt) {
+        GWTMimeType gWTmt = new GWTMimeType();
+        gWTmt.setName(mt.getName());
+        gWTmt.setDescription(mt.getDescription());
+        return gWTmt;
+    }
+
+    /**
+     * Copy Config to GWTConfig
+     */
+    public static GWTConfig copy(com.openkm.dao.bean.Config config) {
+        GWTConfig gWTConfig = new GWTConfig();
+        gWTConfig.setKey(config.getKey());
+        gWTConfig.setType(config.getType());
+        gWTConfig.setValue(config.getValue());
+        return gWTConfig;
     }
 }

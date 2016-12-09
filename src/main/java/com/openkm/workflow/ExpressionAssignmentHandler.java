@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,8 +33,7 @@ import org.jbpm.identity.assignment.ExpressionSession;
 import org.jbpm.identity.assignment.TermTokenizer;
 import org.jbpm.taskmgmt.exe.Assignable;
 
-public class ExpressionAssignmentHandler extends
-        org.jbpm.identity.assignment.ExpressionAssignmentHandler {
+public class ExpressionAssignmentHandler extends org.jbpm.identity.assignment.ExpressionAssignmentHandler {
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -44,30 +43,26 @@ public class ExpressionAssignmentHandler extends
 
     @Override
     @SuppressWarnings("unchecked")
-    public void assign(final Assignable assignable,
-            final ExecutionContext executionContext) {
+    public void assign(Assignable assignable, ExecutionContext executionContext) {
         try {
             expressionSession = getExpressionSession();
 
             if (expressionSession == null) {
-                throw new NullPointerException(
-                        "getIdentitySession returned null");
+                throw new NullPointerException("getIdentitySession returned null");
             }
 
-            tokenizer = new TermTokenizer(expression);
+            this.tokenizer = new TermTokenizer(expression);
             this.executionContext = executionContext;
             entity = resolveFirstTerm(tokenizer.nextTerm());
 
-            while (tokenizer.hasMoreTerms() && entity != null) {
+            while (tokenizer.hasMoreTerms() && (entity != null)) {
                 entity = resolveNextTerm(tokenizer.nextTerm());
             }
 
             // if the expression did not resolve to an actor
             if (entity == null) {
                 // throw an exception
-                throw new RuntimeException(
-                        "couldn't resolve assignment expression '" + expression
-                                + "'");
+                throw new RuntimeException("couldn't resolve assignment expression '" + expression + "'");
 
                 // else if the expression evaluated to a user
             } else if (entity instanceof User) {
@@ -77,20 +72,17 @@ public class ExpressionAssignmentHandler extends
                 // else if the expression evaluated to a group
             } else if (entity instanceof Group) {
                 // put the group in the pool
-                final Group group = (Group) entity;
-                final List<String> pooledActors = new ArrayList<String>();
+                Group group = (Group) entity;
+                List<String> pooledActors = new ArrayList<String>();
 
-                for (final User user : (Set<User>) group.getUsers()) {
+                for (User user : (Set<User>) group.getUsers()) {
                     pooledActors.add(user.getName());
                 }
 
-                assignable.setPooledActors(pooledActors
-                        .toArray(new String[pooledActors.size()]));
+                assignable.setPooledActors(pooledActors.toArray(new String[pooledActors.size()]));
             }
-        } catch (final RuntimeException e) {
-            throw new ExpressionAssignmentException(
-                    "couldn't resolve assignment expression '" + expression
-                            + "'", e);
+        } catch (RuntimeException e) {
+            throw new ExpressionAssignmentException("couldn't resolve assignment expression '" + expression + "'", e);
         }
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -31,14 +31,13 @@ import com.openkm.frontend.client.bean.GWTFolder;
  */
 public class GWTDropboxStatusListener implements IsSerializable {
     private GWTDocument document;
-
     private GWTFolder folder;
 
     public GWTDocument getDocument() {
         return document;
     }
 
-    public void setDocument(final GWTDocument document) {
+    public void setDocument(GWTDocument document) {
         this.document = document;
     }
 
@@ -46,7 +45,7 @@ public class GWTDropboxStatusListener implements IsSerializable {
         return folder;
     }
 
-    public void setFolder(final GWTFolder folder) {
+    public void setFolder(GWTFolder folder) {
         this.folder = folder;
     }
 }

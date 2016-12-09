@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,7 +32,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
@@ -45,9 +44,8 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasText;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -74,27 +72,18 @@ import com.openkm.frontend.client.widget.notify.NotifyPanel;
  * 
  * @author jllort
  */
-public class FancyFileUpload extends Composite implements HasText,
-        HasChangeHandlers {
-    private final OKMGeneralServiceAsync generalService = (OKMGeneralServiceAsync) GWT
-            .create(OKMGeneralService.class);
-
-    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
+public class FancyFileUpload extends Composite implements HasText, HasChangeHandlers {
+    private final OKMGeneralServiceAsync generalService = (OKMGeneralServiceAsync) GWT.create(OKMGeneralService.class);
+    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
 
     /**
      * State definitions
      */
     public static final int EMPTY_STATE = 1;
-
     public static final int PENDING_STATE = 2;
-
     public static final int UPLOADING_STATE = 3;
-
     public static final int UPLOADED_STATE = 4;
-
     public static final int FAILED_STATE = 5;
-
     public static final int MAX_FILENAME_LENGHT = 60;
 
     /**
@@ -106,7 +95,6 @@ public class FancyFileUpload extends Composite implements HasText,
      * Default delay for pending state, when delay over the form is submitted.
      */
     private static final int PENDING_UPDATE_DELAY = 1000;
-
     private static final int REFRESH_STATUS_DELAY = 250;
 
     /**
@@ -115,63 +103,38 @@ public class FancyFileUpload extends Composite implements HasText,
     private int widgetState = EMPTY_STATE;
 
     private VerticalPanel mainPanel = new VerticalPanel();
-
     public CheckBox notifyToUser = new CheckBox();
-
+    private HorizontalPanel hIncreaseVersionPanel = new HorizontalPanel();
+    private CheckBox increaseMajorVersion = new CheckBox();
+    private CheckBox increaseMinorVersion = new CheckBox();
     private CheckBox importZip = new CheckBox();
-
     private HTML versionCommentText = new HTML();
-
     private HorizontalPanel hNotifyPanel = new HorizontalPanel();
-
     private HorizontalPanel hUnzipPanel = new HorizontalPanel();
-
     public NotifyPanel notifyPanel = new NotifyPanel();
-
     private HTML versionHTMLBR;
-
     private TextArea versionComment;
-
     private ScrollPanel versionCommentScrollPanel;
-
+    public TextBox mails;
     public TextBox users;
-
     public TextBox roles;
-
     private TextArea message;
-
     private VerticalPanel vNotifyPanel = new VerticalPanel();
-
     private VerticalPanel vVersionCommentPanel = new VerticalPanel();
-
     private HTML commentTXT;
-
     private ScrollPanel messageScroll;
-
     public HTML errorNotify;
-
     private ProgressBar progressBar;
-
     private TextFormatter progressiveFormater;
-
     private TextFormatter finalFormater;
-
     private boolean wizard = false;
-
     private int action = UIFileUploadConstants.ACTION_NONE;
-
     private FileUploadForm uploadForm;
-
     private List<FileToUpload> filesToUpload = new ArrayList<FileToUpload>();
-
     private List<FileToUpload> pendingFileToUpload = new ArrayList<FileToUpload>();
-
     private FileToUpload actualFileToUpload;
-
     private List<FileToUpload> uploadedWorkflowFiles = new ArrayList<FileToUpload>();
-
     private DisclosurePanel diclousureFilesPanel;
-
     private VerticalPanel pendingFilePanel;
 
     /**
@@ -193,7 +156,6 @@ public class FancyFileUpload extends Composite implements HasText,
      * Uploading status
      */
     private GWTFileUploadingStatus fileUploadingStatus = new GWTFileUploadingStatus();
-
     private boolean fileUplodingStartedFlag = false;
 
     /**
@@ -210,7 +172,6 @@ public class FancyFileUpload extends Composite implements HasText,
          * Label to display if some error on unzip uplaoded file
          */
         HTML statusZipNotify;
-
         ScrollPanel statusZipNotifyScroll;
 
         /**
@@ -229,11 +190,11 @@ public class FancyFileUpload extends Composite implements HasText,
          * Constructor
          */
         public UploadDisplay() {
-            hFileUpload.setWidth("350");
+            hFileUpload.setWidth("350px");
 
             status.setWidth("100%");
             status.setWordWrap(true);
-            status.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+            status.setHorizontalAlignment(HasAlignment.ALIGN_CENTER);
 
             // Adds error panel when zip file is uploaded
             statusZipNotify = new HTML();
@@ -242,14 +203,13 @@ public class FancyFileUpload extends Composite implements HasText,
             statusZipNotifyScroll = new ScrollPanel(statusZipNotify);
             statusZipNotifyScroll.setAlwaysShowScrollBars(false);
             statusZipNotifyScroll.setVisible(false);
-            statusZipNotifyScroll.setSize("375", "100");
+            statusZipNotifyScroll.setSize("375px", "100px");
             statusZipNotifyScroll.setStyleName("okm-Bookmark-Panel");
             statusZipNotifyScroll.addStyleName("okm-Input");
 
             progressiveFormater = new TextFormatter() {
                 @Override
-                protected String getText(final ProgressBar bar,
-                        final double curProgress) {
+                protected String getText(ProgressBar bar, double curProgress) {
                     String text = "";
                     text += Util.formatSize(curProgress);
                     text += " " + Main.i18n("fileupload.status.of") + " ";
@@ -261,10 +221,8 @@ public class FancyFileUpload extends Composite implements HasText,
 
             finalFormater = new TextFormatter() {
                 @Override
-                protected String getText(final ProgressBar bar,
-                        final double curProgress) {
-                    final String text = " "
-                            + (int) (100 * progressBar.getPercent()) + "% ";
+                protected String getText(ProgressBar bar, double curProgress) {
+                    String text = " " + (int) (100 * progressBar.getPercent()) + "% ";
                     return text;
                 }
             };
@@ -272,26 +230,22 @@ public class FancyFileUpload extends Composite implements HasText,
             progressBar = new ProgressBar();
             progressBar.setTextFormatter(progressiveFormater);
 
-            final HorizontalPanel hPBPanel = new HorizontalPanel();
+            HorizontalPanel hPBPanel = new HorizontalPanel();
             hPBPanel.add(progressBar);
-            hPBPanel.setCellVerticalAlignment(progressBar,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
+            hPBPanel.setCellVerticalAlignment(progressBar, HasAlignment.ALIGN_MIDDLE);
 
             // Corrects some problem with centering progress status
-            hPBPanel.setCellHorizontalAlignment(progressBar,
-                    HasHorizontalAlignment.ALIGN_LEFT);
-            progressBar.setSize("360", "20");
+            hPBPanel.setCellHorizontalAlignment(progressBar, HasAlignment.ALIGN_LEFT);
+            progressBar.setSize("360px", "20px");
 
-            pendingPanel.setWidth("375");
+            pendingPanel.setWidth("375px");
             pendingPanel.setVisible(true);
             pendingPanel.add(status);
             pendingPanel.add(hPBPanel);
 
-            pendingPanel.setCellHorizontalAlignment(hPBPanel,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            pendingPanel.setCellHorizontalAlignment(hPBPanel, HasAlignment.ALIGN_CENTER);
 
-            diclousureFilesPanel = new DisclosurePanel(
-                    Main.i18n("fileupload.upload.pending"));
+            diclousureFilesPanel = new DisclosurePanel(Main.i18n("fileupload.label.pending.queue"));
             pendingFilePanel = new VerticalPanel();
             diclousureFilesPanel.add(pendingFilePanel);
             diclousureFilesPanel.setVisible(false);
@@ -310,13 +264,10 @@ public class FancyFileUpload extends Composite implements HasText,
          * widget and finally set the state to Pending.
          */
         private void setPending() {
-            if (fileName.length() > MAX_FILENAME_LENGHT - 20) {
-                status.setHTML(Main.i18n("fileupload.status.sending") + " "
-                        + fileName.substring(0, MAX_FILENAME_LENGHT - 20)
-                        + " ...");
+            if (fileName.length() > (MAX_FILENAME_LENGHT - 20)) {
+                status.setHTML(Main.i18n("fileupload.status.sending") + " " + fileName.substring(0, (MAX_FILENAME_LENGHT - 20)) + " ...");
             } else {
-                status.setHTML(Main.i18n("fileupload.status.sending") + " "
-                        + fileName);
+                status.setHTML(Main.i18n("fileupload.status.sending") + " " + fileName);
             }
 
             pendingPanel.setStyleName("fancyfileupload-pending");
@@ -367,12 +318,9 @@ public class FancyFileUpload extends Composite implements HasText,
             }
 
             fireChange();
-            Main.get().mainPanel.dashboard.userDashboard
-                    .getUserLastModifiedDocuments();
-            Main.get().mainPanel.dashboard.userDashboard
-                    .getUserCheckedOutDocuments();
-            Main.get().mainPanel.dashboard.userDashboard
-                    .getUserLastUploadedDocuments();
+            Main.get().mainPanel.dashboard.userDashboard.getUserLastModifiedDocuments();
+            Main.get().mainPanel.dashboard.userDashboard.getUserCheckedOutDocuments();
+            Main.get().mainPanel.dashboard.userDashboard.getUserLastUploadedDocuments();
             Main.get().workspaceUserProperties.getUserDocumentsSize();
             uploadNewPendingFile();
         }
@@ -381,7 +329,7 @@ public class FancyFileUpload extends Composite implements HasText,
          * Set the widget to Failed mode by changing the style name and updating the widget State to Failed.
          * Additionally, hide the pending panel and display the FileUpload widget.
          */
-        private void setFailed(final String msg) {
+        private void setFailed(String msg) {
             // Sometimes if upload is fast, has no time to getting file uploading status
             // information on this cases must be setting it directly ( simulating )
             if (fileUploadingStatus.getContentLength() == 0) {
@@ -396,21 +344,11 @@ public class FancyFileUpload extends Composite implements HasText,
                 statusZipNotify.setHTML(msg.replaceAll("\n", "<br/>"));
                 statusZipNotifyScroll.setVisible(true);
                 pendingPanel.setVisible(true);
-                Main.get().showError(
-                        fileName,
-                        new Throwable(Main
-                                .i18n("fileupload.label.error.importing.zip")));
+                Main.get().showError(fileName, new Throwable(Main.i18n("fileupload.label.error.importing.zip")));
             } else if (msg.contains(returnErrorMessage)) {
-                Main.get().showError(
-                        fileName,
-                        new Throwable(Main.i18n(msg.substring(
-                                msg.indexOf("OKM"), msg.indexOf("OKM") + 10))));
+                Main.get().showError(fileName, new Throwable(Main.i18n(msg.substring(msg.indexOf("OKM"), msg.indexOf("OKM") + 10))));
             } else {
-                Main.get().showError(
-                        fileName,
-                        new Throwable(Main
-                                .i18n("fileupload.label.error.importing.zip")
-                                + " (" + msg + ")"));
+                Main.get().showError(fileName, new Throwable(Main.i18n("fileupload.label.error.importing.zip") + " (" + msg + ")"));
             }
 
             pendingPanel.setStyleName("fancyfileupload-failed");
@@ -424,18 +362,22 @@ public class FancyFileUpload extends Composite implements HasText,
         /**
          * Reset the display
          */
-        private void reset(final boolean enableImport,
-                final boolean enableNotifyButton) {
+        private void reset(boolean enableImport, boolean enableNotifyButton) {
             widgetState = EMPTY_STATE;
             fireChange();
 
             // Reseting values
+            increaseMajorVersion.setValue(false);
+            increaseMinorVersion.setValue(false);
+            increaseMajorVersion.setHTML(Main.i18n("fileupload.increment.major.version"));
+            increaseMinorVersion.setHTML(Main.i18n("fileupload.increment.minor.version"));
             fileName = "";
             status.setText("");
             statusZipNotify.setText("");
             statusZipNotifyScroll.setVisible(false);
             message.setText("");
             versionComment.setText("");
+            mails.setText("");
             users.setText("");
             roles.setText("");
             notifyPanel.reset();
@@ -455,6 +397,7 @@ public class FancyFileUpload extends Composite implements HasText,
             hFileUpload.setVisible(true);
             pendingPanel.setVisible(false);
             hUnzipPanel.setVisible(enableImport);
+            hIncreaseVersionPanel.setVisible(action == UIFileUploadConstants.ACTION_UPDATE);
 
             resetProgressBar();
         }
@@ -462,9 +405,10 @@ public class FancyFileUpload extends Composite implements HasText,
         /**
          * resetWhileUploading
          */
-        public void resetWhileUploading(final boolean enableImport,
-                final boolean enableNotifyButton) {
+        public void resetWhileUploading(boolean enableImport, boolean enableNotifyButton) {
             // Reseting values
+            increaseMajorVersion.setValue(false);
+            increaseMinorVersion.setValue(false);
             statusZipNotify.setText("");
             statusZipNotifyScroll.setVisible(false);
             message.setText("");
@@ -486,6 +430,7 @@ public class FancyFileUpload extends Composite implements HasText,
             importZip.setValue(false);
             hFileUpload.setVisible(true);
             hUnzipPanel.setVisible(enableImport);
+            hIncreaseVersionPanel.setVisible(action == UIFileUploadConstants.ACTION_UPDATE);
         }
 
         /**
@@ -503,8 +448,7 @@ public class FancyFileUpload extends Composite implements HasText,
         if (importZip.getValue()) {
             Main.get().activeFolderTree.refresh(true);
         } else {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .refresh(Main.get().activeFolderTree.getActualPath());
+            Main.get().mainPanel.desktop.browser.fileBrowser.refresh(Main.get().activeFolderTree.getActualPath());
         }
     }
 
@@ -512,24 +456,33 @@ public class FancyFileUpload extends Composite implements HasText,
      * Perform the uploading of a file by changing state of display widget and then calling form.submit() method.
      */
     private void uploadFiles() {
-        final FileUploadForm uploadForm = pendingFileToUpload.get(0)
-                .getUploadForm();
+        FileUploadForm uploadForm = pendingFileToUpload.get(0).getUploadForm();
 
         // Store some values to uploadForm
         uploadForm.setNotifyToUser(notifyToUser.getValue());
         uploadForm.setImportZip(importZip.getValue());
         uploadForm.setVersionCommnent(versionComment.getText());
+        uploadForm.setMails(mails.getText());
         uploadForm.setUsers(users.getText());
         uploadForm.setRoles(roles.getText());
         uploadForm.setMessage(message.getText());
+
+        if (increaseMajorVersion.getValue()) {
+            uploadForm.setIncreaseVersion(1);
+        } else if (increaseMinorVersion.getValue()) {
+            uploadForm.setIncreaseVersion(2);
+        } else {
+            uploadForm.setIncreaseVersion(0);
+        }
+
         uploadForm.setVisible(false);
-        enqueueFileToUpload(new ArrayList<FileToUpload>(
-                Arrays.asList(pendingFileToUpload.remove(0))));
+        enqueueFileToUpload(new ArrayList<FileToUpload>(Arrays.asList(pendingFileToUpload.remove(0))));
 
         // Ensure comment is hidden ( we're comming from updating file )
         versionComment.setVisible(false);
         versionCommentText.setVisible(false);
         versionHTMLBR.setVisible(false);
+        hIncreaseVersionPanel.setVisible(false);
     }
 
     /**
@@ -552,7 +505,7 @@ public class FancyFileUpload extends Composite implements HasText,
 
         // Adds error panel, whem user select notify but not select any user
         errorNotify = new HTML(Main.i18n("fileupload.label.must.select.users"));
-        errorNotify.setWidth("370");
+        errorNotify.setWidth("370px");
         errorNotify.setVisible(false);
         errorNotify.setStyleName("fancyfileupload-failed");
         mainPanel.add(errorNotify);
@@ -561,8 +514,8 @@ public class FancyFileUpload extends Composite implements HasText,
         versionHTMLBR = new HTML("<br/>");
         mainPanel.add(versionHTMLBR);
         versionComment = new TextArea();
-        versionComment.setWidth("375");
-        versionComment.setHeight("50");
+        versionComment.setWidth("375px");
+        versionComment.setHeight("50px");
         versionComment.setName("comment");
         versionComment.setStyleName("okm-TextArea");
         versionCommentText = new HTML(Main.i18n("fileupload.label.comment"));
@@ -577,11 +530,30 @@ public class FancyFileUpload extends Composite implements HasText,
         vVersionCommentPanel.add(versionCommentScrollPanel);
         mainPanel.add(vVersionCommentPanel);
 
-        // Adds unzip file
+        // Increase version
+        increaseMajorVersion.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                increaseMinorVersion.setValue(false);
+            }
+        });
+        increaseMinorVersion.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                increaseMajorVersion.setValue(false);
+            }
+        });
+        hIncreaseVersionPanel = new HorizontalPanel();
+        hIncreaseVersionPanel.add(increaseMajorVersion);
+        hIncreaseVersionPanel.add(Util.hSpace("5px"));
+        hIncreaseVersionPanel.add(increaseMinorVersion);
+        mainPanel.add(hIncreaseVersionPanel);
+
+        // Ads unzip file
         importZip = new CheckBox(Main.i18n("fileupload.label.importZip"));
         importZip.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (importZip.getValue()) {
                     notifyToUser.setValue(false);
                     vNotifyPanel.setVisible(false);
@@ -596,6 +568,9 @@ public class FancyFileUpload extends Composite implements HasText,
         mainPanel.add(hUnzipPanel);
 
         // Adds the notify checkbox
+        mails = new TextBox();
+        mails.setName("mails");
+        mails.setVisible(false);
         users = new TextBox();
         users.setName("users");
         users.setVisible(false);
@@ -605,15 +580,15 @@ public class FancyFileUpload extends Composite implements HasText,
         notifyToUser = new CheckBox(Main.i18n("fileupload.label.users.notify"));
         notifyToUser.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (notifyToUser.getValue()) {
                     vNotifyPanel.setVisible(true);
                     importZip.setValue(false);
 
                     // TODO:Solves minor bug with IE
                     if (Util.getUserAgent().startsWith("ie")) {
-                        notifyPanel.tabPanel.setWidth("374");
-                        notifyPanel.tabPanel.setWidth("375");
+                        notifyPanel.tabPanel.setWidth("374px");
+                        notifyPanel.tabPanel.setWidth("375px");
                         notifyPanel.correcIEBug();
                     }
                 } else {
@@ -633,7 +608,7 @@ public class FancyFileUpload extends Composite implements HasText,
         message = new TextArea();
         commentTXT = new HTML(Main.i18n("fileupload.label.notify.comment"));
         message.setName("message");
-        message.setSize("375", "60");
+        message.setSize("375px", "60px");
         message.setStyleName("okm-TextArea");
 
         vNotifyPanel = new VerticalPanel();
@@ -649,19 +624,16 @@ public class FancyFileUpload extends Composite implements HasText,
         vNotifyPanel.add(notifyPanel);
         vNotifyPanel.add(new HTML("<br/>"));
 
+        mainPanel.add(mails);
         mainPanel.add(users);
         mainPanel.add(roles);
         mainPanel.add(vNotifyPanel);
 
         // Set align to panels
-        mainPanel.setCellHorizontalAlignment(hNotifyPanel,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        mainPanel.setCellHorizontalAlignment(hUnzipPanel,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        mainPanel.setCellHorizontalAlignment(vNotifyPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        mainPanel.setCellHorizontalAlignment(vVersionCommentPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        mainPanel.setCellHorizontalAlignment(hNotifyPanel, HorizontalPanel.ALIGN_LEFT);
+        mainPanel.setCellHorizontalAlignment(hUnzipPanel, HorizontalPanel.ALIGN_LEFT);
+        mainPanel.setCellHorizontalAlignment(vNotifyPanel, HorizontalPanel.ALIGN_CENTER);
+        mainPanel.setCellHorizontalAlignment(vVersionCommentPanel, HorizontalPanel.ALIGN_CENTER);
 
         // Initialize users
         getAllUsers();
@@ -673,8 +645,7 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * Reset he upload
      */
-    public void reset(final boolean enableImport,
-            final boolean enableNotifyButton) {
+    public void reset(boolean enableImport, boolean enableNotifyButton) {
         uploadItem.reset(enableImport, enableNotifyButton);
     }
 
@@ -689,7 +660,6 @@ public class FancyFileUpload extends Composite implements HasText,
      * Get the text from the widget - which in reality will be retrieving any value set in the Label element of the
      * display widget.
      */
-    @Override
     public String getText() {
         return uploadItem.status.getText();
     }
@@ -697,8 +667,7 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * Cannot set the text of a File Upload Widget, so raise an exception.
      */
-    @Override
-    public void setText(final String text) {
+    public void setText(String text) {
         throw new RuntimeException("Cannot set text of a FileUpload Widget");
     }
 
@@ -722,8 +691,8 @@ public class FancyFileUpload extends Composite implements HasText,
      * fire a change event
      */
     private void fireChange() {
-        final NativeEvent nativeEvent = Document.get().createChangeEvent();
-        DomEvent.fireNativeEvent(nativeEvent, this);
+        NativeEvent nativeEvent = Document.get().createChangeEvent();
+        ChangeEvent.fireNativeEvent(nativeEvent, this);
     }
 
     /*
@@ -732,7 +701,7 @@ public class FancyFileUpload extends Composite implements HasText,
      * .google.gwt.event.dom.client.ChangeHandler)
      */
     @Override
-    public HandlerRegistration addChangeHandler(final ChangeHandler handler) {
+    public HandlerRegistration addChangeHandler(ChangeHandler handler) {
         return addDomHandler(handler, ChangeEvent.getType());
     }
 
@@ -746,19 +715,21 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * setAction
      */
-    public void setAction(final int action) {
+    public void setAction(int action) {
         this.action = action;
         switch (action) {
         case UIFileUploadConstants.ACTION_INSERT:
             versionComment.setVisible(false);
             versionCommentText.setVisible(false);
             versionHTMLBR.setVisible(false);
+            hIncreaseVersionPanel.setVisible(false);
             break;
 
         case UIFileUploadConstants.ACTION_UPDATE:
             versionComment.setVisible(true);
             versionCommentText.setVisible(true);
             versionHTMLBR.setVisible(true);
+            hIncreaseVersionPanel.setVisible(true);
             break;
         }
     }
@@ -768,9 +739,12 @@ public class FancyFileUpload extends Composite implements HasText,
      */
     public void langRefresh() {
         notifyToUser.setText(Main.i18n("fileupload.label.users.notify"));
+        increaseMajorVersion.setHTML(Main.i18n("fileupload.increment.major.version"));
+        increaseMinorVersion.setHTML(Main.i18n("fileupload.increment.minor.version"));
         importZip.setText(Main.i18n("fileupload.label.importZip"));
         versionCommentText.setHTML(Main.i18n("fileupload.label.comment"));
         commentTXT.setHTML(Main.i18n("fileupload.label.notify.comment"));
+        diclousureFilesPanel.getHeaderTextAccessor().setText(Main.i18n("fileupload.label.pending.queue"));
         notifyPanel.langRefresh();
     }
 
@@ -778,15 +752,12 @@ public class FancyFileUpload extends Composite implements HasText,
      * Call back get file upload status
      */
     final AsyncCallback<GWTFileUploadingStatus> callbackGetFileUploadStatus = new AsyncCallback<GWTFileUploadingStatus>() {
-        @Override
-        public void onSuccess(final GWTFileUploadingStatus result) {
+        public void onSuccess(GWTFileUploadingStatus result) {
             fileUploadingStatus = result;
 
             if (fileUplodingStartedFlag) {
                 if (result.isStarted()) {
-                    if (result.getContentLength() != 0
-                            && result.getContentLength() == result
-                                    .getBytesRead()) {
+                    if (result.getContentLength() != 0 && result.getContentLength() == result.getBytesRead()) {
                         result.setUploadFinish(true);
                         uploadItem.setProcessing();
                     }
@@ -795,12 +766,9 @@ public class FancyFileUpload extends Composite implements HasText,
                         progressBar.setTextFormatter(finalFormater);
                     }
 
-                    progressBar.setMaxProgress(fileUploadingStatus
-                            .getContentLength());
+                    progressBar.setMaxProgress(fileUploadingStatus.getContentLength());
                     progressBar.setProgress(fileUploadingStatus.getBytesRead());
-                    Main.get().mainPanel.topPanel
-                            .setPercentageUploading((int) (100 * progressBar
-                                    .getPercent()));
+                    Main.get().mainPanel.topPanel.setPercentageUploading((int) (100 * progressBar.getPercent()));
                 }
 
                 if (!result.isUploadFinish()) {
@@ -809,8 +777,7 @@ public class FancyFileUpload extends Composite implements HasText,
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             // Main.get().showError("getFileUploadStatus", caught);
             // Silent error ( if bandwidth is full used by uploading treat could cause RPC error while updating, that's
             // more visible when uploading file is bigger ).
@@ -822,7 +789,7 @@ public class FancyFileUpload extends Composite implements HasText,
      * 
      */
     private void refreshStatus() {
-        final Timer refreshStatus = new Timer() {
+        Timer refreshStatus = new Timer() {
             @Override
             public void run() {
                 getFileUploadStatus();
@@ -870,6 +837,24 @@ public class FancyFileUpload extends Composite implements HasText,
     }
 
     /**
+     * enableNotifyExternalUsers
+     */
+    public void enableNotifyExternalUsers() {
+        notifyPanel.enableNotifyExternalUsers();
+    }
+
+    /**
+     * setIncrementalVersion
+     */
+    public void setIncreaseVersion(int incrementVersion) {
+        if (incrementVersion == 0) {
+            mainPanel.remove(hIncreaseVersionPanel);
+        } else if (incrementVersion == 1) {
+            hIncreaseVersionPanel.remove(increaseMinorVersion);
+        }
+    }
+
+    /**
      * getFileName
      */
     public String getFilename() {
@@ -890,16 +875,14 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * @param filesToUpload
      */
-    public void enqueueFileToUpload(final Collection<FileToUpload> filesToUpload) {
+    public void enqueueFileToUpload(Collection<FileToUpload> filesToUpload) {
         this.filesToUpload.addAll(filesToUpload);
 
-        for (final FileToUpload fileToUpload : filesToUpload) {
+        for (FileToUpload fileToUpload : filesToUpload) {
             if (fileToUpload.getUploadForm() != null) {
-                addFileNameToPendingPanel(fileToUpload.getUploadForm()
-                        .getFileName());
+                addFileNameToPendingPanel(fileToUpload.getUploadForm().getFileName());
             } else {
-                addFileNameToPendingPanel(fileToUpload.getFileUpload()
-                        .getFilename());
+                addFileNameToPendingPanel(fileToUpload.getFileUpload().getFilename());
             }
         }
 
@@ -913,8 +896,7 @@ public class FancyFileUpload extends Composite implements HasText,
                 uploadItem.pendingPanel.setVisible(true);
             }
 
-            Main.get().mainPanel.topPanel
-                    .setPendingFilesToUpload(calculatePendingFilesToUpload());
+            Main.get().mainPanel.topPanel.setPendingFilesToUpload(calculatePendingFilesToUpload());
             diclousureFilesPanel.setVisible(filesToUpload.size() > 0);
         }
     }
@@ -922,10 +904,15 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * addFileNameToPendingPanel
      */
-    private void addFileNameToPendingPanel(final String fileName) {
+    private void addFileNameToPendingPanel(String fileName) {
+        // Get name from linux or windows path
+        if (fileName.contains("/")) {
+            fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+        } else if (fileName.contains("\\")) {
+            fileName = fileName.substring(fileName.lastIndexOf('\\') + 1);
+        }
         if (fileName.length() > MAX_FILENAME_LENGHT) {
-            pendingFilePanel.add(new HTML(fileName.substring(0,
-                    MAX_FILENAME_LENGHT) + " ..."));
+            pendingFilePanel.add(new HTML(fileName.substring(0, MAX_FILENAME_LENGHT) + " ..."));
         } else {
             pendingFilePanel.add(new HTML(fileName));
         }
@@ -945,34 +932,28 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * addPendingFileToUpload
      */
-    public void addPendingFileToUpload(final FileToUpload pendingFileToUpload) {
+    public void addPendingFileToUpload(FileToUpload pendingFileToUpload) {
         this.pendingFileToUpload.clear(); // There's only one element in list ( because we don't want to not
                                           // implementing clone in FileToUpload )
         this.pendingFileToUpload.add(pendingFileToUpload);
         // pendingFileToUpload.getFileUpload().getElement().setPropertyBoolean("multiple", true); // Test to select
         // several documents at same time
-        pendingFileToUpload
-                .setUploadForm(new FileUploadForm(pendingFileToUpload
-                        .getFileUpload(), FileToUpload.DEFAULT_SIZE));
+        pendingFileToUpload.setUploadForm(new FileUploadForm(pendingFileToUpload.getFileUpload(), FileToUpload.DEFAULT_SIZE));
         uploadItem.hFileUpload.add(pendingFileToUpload.getUploadForm());
         setAction(pendingFileToUpload.getAction()); // Action show / hides some panels
 
         if (actualFileToUpload == null && filesToUpload.size() == 0) {
-            Main.get().fileUpload.showPopup(
-                    pendingFileToUpload.isEnableAddButton(),
-                    pendingFileToUpload.isEnableImport(), true);
+            Main.get().fileUpload.showPopup(pendingFileToUpload.isEnableAddButton(), pendingFileToUpload.isEnableImport(), true);
             Main.get().fileUpload.setModal(true);
         } else {
-            uploadItem.resetWhileUploading(
-                    pendingFileToUpload.isEnableAddButton(),
-                    pendingFileToUpload.isEnableImport());
+            uploadItem.resetWhileUploading(pendingFileToUpload.isEnableAddButton(), pendingFileToUpload.isEnableImport());
             Main.get().fileUpload.center();
             Main.get().fileUpload.setModal(true);
 
             // TODO:Solves minor bug with IE
             if (Util.getUserAgent().startsWith("ie")) {
-                notifyPanel.tabPanel.setWidth("374");
-                notifyPanel.tabPanel.setWidth("375");
+                notifyPanel.tabPanel.setWidth("374px");
+                notifyPanel.tabPanel.setWidth("375px");
                 notifyPanel.correcIEBug();
             }
         }
@@ -1004,9 +985,7 @@ public class FancyFileUpload extends Composite implements HasText,
      */
     public void uploadNewPendingFile() {
         // Execute pending workflows
-        if (actualFileToUpload != null
-                && actualFileToUpload.getWorkflow() != null
-                && actualFileToUpload.isLastToBeUploaded()) {
+        if (actualFileToUpload != null && actualFileToUpload.getWorkflow() != null && actualFileToUpload.isLastToBeUploaded()) {
             uploadedWorkflowFiles.add(actualFileToUpload.clone());
             executeWorkflow(actualFileToUpload.getWorkflowTaskId());
         }
@@ -1017,33 +996,25 @@ public class FancyFileUpload extends Composite implements HasText,
 
             // Here always with default size
             if (actualFileToUpload.getUploadForm() == null) {
-                actualFileToUpload.setUploadForm(new FileUploadForm(
-                        actualFileToUpload.getFileUpload(),
-                        FileToUpload.DEFAULT_SIZE));
+                actualFileToUpload.setUploadForm(new FileUploadForm(actualFileToUpload.getFileUpload(), FileToUpload.DEFAULT_SIZE));
             }
 
-            final FileUploadForm uploadForm = actualFileToUpload
-                    .getUploadForm();
+            final FileUploadForm uploadForm = actualFileToUpload.getUploadForm();
             uploadForm.setEncoding(FormPanel.ENCODING_MULTIPART);
             uploadItem.hFileUpload.add(uploadForm);
             uploadForm.setVisible(false);
-            actualFileToUpload.getUploadForm().setPath(
-                    actualFileToUpload.getPath());
-            actualFileToUpload.getUploadForm().setAction(
-                    String.valueOf(actualFileToUpload.getAction()));
-            actualFileToUpload.getUploadForm().setRename(
-                    actualFileToUpload.getDesiredDocumentName());
+            actualFileToUpload.getUploadForm().setPath(actualFileToUpload.getPath());
+            actualFileToUpload.getUploadForm().setAction(String.valueOf(actualFileToUpload.getAction()));
+            actualFileToUpload.getUploadForm().setRename(actualFileToUpload.getDesiredDocumentName());
 
             setAction(actualFileToUpload.getAction());
             addSubmitCompleteHandler(uploadForm);
 
             // Case fileupload is workflow notify to users must be disabled ( popup hidden then (modal==false) )
-            if (!Main.get().fileUpload.isModal()
-                    && actualFileToUpload.getWorkflow() != null) {
-                Main.get().fileUpload.showPopup(
-                        actualFileToUpload.isEnableAddButton(),
-                        actualFileToUpload.isEnableImport(),
-                        actualFileToUpload.getWorkflow() == null);
+            if (!Main.get().fileUpload.isModal() && actualFileToUpload.getWorkflow() != null) {
+                Main.get().fileUpload.showPopup(actualFileToUpload.isEnableAddButton(), actualFileToUpload.isEnableImport(),
+                        Main.get().workspaceUserProperties.getWorkspace().isUploadNotifyUsers());
+                reset(actualFileToUpload.isEnableImport(), Main.get().workspaceUserProperties.getWorkspace().isUploadNotifyUsers()); // force reset
             }
 
             fileName = uploadForm.getFileName();
@@ -1051,7 +1022,6 @@ public class FancyFileUpload extends Composite implements HasText,
             Main.get().mainPanel.topPanel.setPercentageUploading(0);
 
             p = new Timer() {
-                @Override
                 public void run() {
                     uploadItem.setLoading();
                     uploadForm.submit();
@@ -1061,32 +1031,29 @@ public class FancyFileUpload extends Composite implements HasText,
 
             p.schedule(PENDING_UPDATE_DELAY);
         } else {
-            if (actualFileToUpload != null
-                    && actualFileToUpload.getWorkflow() != null) {
+            if (actualFileToUpload != null && actualFileToUpload.getWorkflow() != null) {
                 Main.get().fileUpload.executeClose();
             }
             actualFileToUpload = null;
         }
 
-        Main.get().mainPanel.topPanel
-                .setPendingFilesToUpload(calculatePendingFilesToUpload());
+        Main.get().mainPanel.topPanel.setPendingFilesToUpload(calculatePendingFilesToUpload());
         diclousureFilesPanel.setVisible(filesToUpload.size() > 0);
     }
 
     /**
      * executeWorkflow
      */
-    private void executeWorkflow(final double taskId) {
-        final List<FileToUpload> uploadedFiles = new ArrayList<FileToUpload>();
+    private void executeWorkflow(double taskId) {
+        List<FileToUpload> uploadedFiles = new ArrayList<FileToUpload>();
 
-        for (final FileToUpload uploaded : uploadedWorkflowFiles) {
+        for (FileToUpload uploaded : uploadedWorkflowFiles) {
             if (uploaded.getWorkflowTaskId() == taskId) {
                 uploadedFiles.add(uploaded);
             }
         }
 
-        actualFileToUpload.getWorkflow().setTaskInstanceValues(
-                actualFileToUpload.getWorkflowTaskId(),
+        actualFileToUpload.getWorkflow().setTaskInstanceValues(actualFileToUpload.getWorkflowTaskId(),
                 actualFileToUpload.getWorkflowTransition(), uploadedFiles);
     }
 
@@ -1098,8 +1065,7 @@ public class FancyFileUpload extends Composite implements HasText,
         int i = 0;
 
         while (i < uploadItem.hFileUpload.getWidgetCount()) {
-            final FileUploadForm uploadForm = (FileUploadForm) uploadItem.hFileUpload
-                    .getWidget(i);
+            FileUploadForm uploadForm = (FileUploadForm) uploadItem.hFileUpload.getWidget(i);
             if (uploadForm.isVisible()) {
                 uploadItem.hFileUpload.remove(uploadForm);
             } else {
@@ -1114,17 +1080,17 @@ public class FancyFileUpload extends Composite implements HasText,
     public void resetOnlyShowUploading() {
         hNotifyPanel.setVisible(false);
         hUnzipPanel.setVisible(false);
+        hIncreaseVersionPanel.setVisible(false);
     }
 
     /**
      * addSubmitCompleteHandler
      */
-    private FileUploadForm addSubmitCompleteHandler(
-            final FileUploadForm uploadForm) {
+    private FileUploadForm addSubmitCompleteHandler(final FileUploadForm uploadForm) {
         // Add an event handler to the form.
         uploadForm.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
-            public void onSubmitComplete(final SubmitCompleteEvent event) {
+            public void onSubmitComplete(SubmitCompleteEvent event) {
                 // Fire an onChange Event
                 fireChange();
 
@@ -1136,11 +1102,10 @@ public class FancyFileUpload extends Composite implements HasText,
 
                 // Check the result to see if an OK message is returned from the server.
                 // Return params could be <pre> or <pre style=""> with some IE and chrome
-                final GWTFileUploadResponse fuResponse = new GWTFileUploadResponse(
-                        event.getResults());
+                GWTFileUploadResponse fuResponse = new GWTFileUploadResponse(event.getResults());
 
                 if (fuResponse.getError().equals("")) {
-                    final String docPath = fuResponse.getPath();
+                    String docPath = fuResponse.getPath();
 
                     // Normal case document uploaded is not a workflow
                     if (actualFileToUpload.getWorkflow() == null) {
@@ -1148,34 +1113,19 @@ public class FancyFileUpload extends Composite implements HasText,
                         if (fuResponse.isHasAutomation()) {
                             // If is importing file as zip wizard should be disabled
                             if (!uploadForm.isImportZip()
-                                    && (fuResponse.isDigitalSignature()
-                                            || fuResponse
-                                                    .isShowWizardCategories()
-                                            || fuResponse
-                                                    .isShowWizardKeywords()
-                                            || fuResponse.getGroupsList()
-                                                    .size() > 0 || fuResponse
+                                    && (fuResponse.isDigitalSignature() || fuResponse.isShowWizardCategories()
+                                            || fuResponse.isShowWizardKeywords() || fuResponse.getGroupsList().size() > 0 || fuResponse
                                             .getWorkflowList().size() > 0)) {
-                                Main.get().wizardPopup.start(docPath,
-                                        fuResponse, false);
+                                Main.get().wizardPopup.start(docPath, fuResponse, false);
                             }
                         } else {
                             if (!uploadForm.isImportZip()
                                     && action == UIFileUploadConstants.ACTION_INSERT
-                                    && (Main.get().workspaceUserProperties
-                                            .getWorkspace()
-                                            .isWizardPropertyGroups()
-                                            || Main.get().workspaceUserProperties
-                                                    .getWorkspace()
-                                                    .isWizardWorkflows()
-                                            || Main.get().workspaceUserProperties
-                                                    .getWorkspace()
-                                                    .isWizardCategories() || Main
-                                                .get().workspaceUserProperties
+                                    && (Main.get().workspaceUserProperties.getWorkspace().isWizardPropertyGroups()
+                                            || Main.get().workspaceUserProperties.getWorkspace().isWizardWorkflows()
+                                            || Main.get().workspaceUserProperties.getWorkspace().isWizardCategories() || Main.get().workspaceUserProperties
                                             .getWorkspace().isWizardKeywords())) {
                                 wizard = true;
-                            } else if (uploadForm.isImportZip()) {
-                                // Nothing to to here
                             }
 
                             if (wizard && docPath != null) {
@@ -1185,28 +1135,24 @@ public class FancyFileUpload extends Composite implements HasText,
 
                         // By default selected row after uploading is uploaded file
                         if (docPath != null && !docPath.equals("")) {
-                            Main.get().mainPanel.desktop.browser.fileBrowser
-                                    .mantainSelectedRowByPath(docPath);
+                            Main.get().mainPanel.desktop.browser.fileBrowser.mantainSelectedRowByPath(docPath);
                         }
 
                         uploadItem.setLoaded();
                     } else {
                         actualFileToUpload.setDocumentPath(docPath);
-                        repositoryService.getUUIDByPath(docPath,
-                                new AsyncCallback<String>() {
-                                    @Override
-                                    public void onSuccess(final String result) {
-                                        actualFileToUpload
-                                                .setDocumentUUID(result);
-                                        uploadItem.setLoaded();
-                                    }
+                        repositoryService.getUUIDByPath(docPath, new AsyncCallback<String>() {
+                            @Override
+                            public void onSuccess(String result) {
+                                actualFileToUpload.setDocumentUUID(result);
+                                uploadItem.setLoaded();
+                            }
 
-                                    @Override
-                                    public void onFailure(final Throwable caught) {
-                                        Main.get().showError("getUUIDByPath",
-                                                caught);
-                                    }
-                                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Main.get().showError("getUUIDByPath", caught);
+                            }
+                        });
                     }
                 } else {
                     uploadItem.setFailed(fuResponse.getError());
@@ -1226,13 +1172,12 @@ public class FancyFileUpload extends Composite implements HasText,
      * @param docPath Related document path.
      * @param result json encoded response.
      */
-    public void jsWizard(final String docPath, final String result) {
+    public void jsWizard(String docPath, String result) {
         Log.debug("jsWizard(" + docPath + ", " + result + ")");
 
         // Check the result to see if an OK message is returned from the server.
         // Return params could be <pre> or <pre style=""> with some IE and chrome
-        final GWTFileUploadResponse fuResponse = new GWTFileUploadResponse(
-                result);
+        GWTFileUploadResponse fuResponse = new GWTFileUploadResponse(result);
 
         if (fuResponse.getError().equals("")) {
             // TODO: Posible problem if actualFileToUpload != null ( other file is uploading and the queue is not repected
@@ -1240,22 +1185,15 @@ public class FancyFileUpload extends Composite implements HasText,
             // Case is not importing a zip and wizard is enabled
             if (fuResponse.isHasAutomation()) {
                 // If is importing file as zip wizard should be disabled
-                if (fuResponse.isDigitalSignature()
-                        || fuResponse.isShowWizardCategories()
-                        || fuResponse.isShowWizardKeywords()
-                        || fuResponse.getGroupsList().size() > 0
-                        || fuResponse.getWorkflowList().size() > 0) {
+                if ((fuResponse.isDigitalSignature() || fuResponse.isShowWizardCategories() || fuResponse.isShowWizardKeywords()
+                        || fuResponse.getGroupsList().size() > 0 || fuResponse.getWorkflowList().size() > 0)) {
                     Main.get().wizardPopup.start(docPath, fuResponse, true);
                 }
             } else {
-                if (Main.get().workspaceUserProperties.getWorkspace()
-                        .isWizardPropertyGroups()
-                        || Main.get().workspaceUserProperties.getWorkspace()
-                                .isWizardWorkflows()
-                        || Main.get().workspaceUserProperties.getWorkspace()
-                                .isWizardCategories()
-                        || Main.get().workspaceUserProperties.getWorkspace()
-                                .isWizardKeywords()) {
+                if (Main.get().workspaceUserProperties.getWorkspace().isWizardPropertyGroups()
+                        || Main.get().workspaceUserProperties.getWorkspace().isWizardWorkflows()
+                        || Main.get().workspaceUserProperties.getWorkspace().isWizardCategories()
+                        || Main.get().workspaceUserProperties.getWorkspace().isWizardKeywords()) {
 
                     wizard = true;
                 }
@@ -1264,19 +1202,14 @@ public class FancyFileUpload extends Composite implements HasText,
                     Main.get().wizardPopup.start(docPath, true);
                 } else if (!wizard) {
                     if (docPath != null && !docPath.equals("")) {
-                        Main.get().mainPanel.desktop.browser.fileBrowser
-                                .mantainSelectedRowByPath(docPath);
+                        Main.get().mainPanel.desktop.browser.fileBrowser.mantainSelectedRowByPath(docPath);
                     }
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .refresh(Main.get().activeFolderTree
-                                    .getActualPath());
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refresh(Main.get().activeFolderTree.getActualPath());
                 }
             }
 
         } else {
-            Main.get().showError(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMUploadService,
-                            ErrorCode.CAUSE_General),
+            Main.get().showError(ErrorCode.get(ErrorCode.ORIGIN_OKMUploadService, ErrorCode.CAUSE_General),
                     new Throwable(fuResponse.getError()));
         }
     }
@@ -1284,7 +1217,7 @@ public class FancyFileUpload extends Composite implements HasText,
     /**
      * setUploadNotifyUsers
      */
-    public void setUploadNotifyUsers(final boolean visible) {
+    public void setUploadNotifyUsers(boolean visible) {
         if (!visible) {
             mainPanel.remove(hNotifyPanel);
         }
@@ -1296,6 +1229,7 @@ public class FancyFileUpload extends Composite implements HasText,
     public native void initJavaScriptApi(FancyFileUpload ffu) /*-{
                                                               $wnd.jsWizard = function(docPath, result) {
                                                               ffu.@com.openkm.frontend.client.widget.upload.FancyFileUpload::jsWizard(Ljava/lang/String;Ljava/lang/String;)(docPath, result);
+                                                              return true;
                                                               }
                                                               }-*/;
 }

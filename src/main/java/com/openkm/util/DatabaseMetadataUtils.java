@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,21 +45,17 @@ import com.openkm.frontend.client.util.metadata.DatabaseMetadataMap;
  * @author pavila
  */
 public class DatabaseMetadataUtils {
-    private static Logger log = LoggerFactory
-            .getLogger(DatabaseMetadataUtils.class);
+    private static Logger log = LoggerFactory.getLogger(DatabaseMetadataUtils.class);
 
     /**
      * Build a query
      */
-    public static String buildQuery(final String table, final String filter,
-            final String order) throws DatabaseException {
-        log.debug("buildQuery({}, {}, {})",
-                new Object[] { table, filter, order });
-        final StringBuilder sb = new StringBuilder();
+    public static String buildQuery(String table, String filter, String order) throws DatabaseException {
+        log.debug("buildQuery({}, {}, {})", new Object[] { table, filter, order });
+        StringBuilder sb = new StringBuilder();
         String ret = null;
 
-        sb.append("from DatabaseMetadataValue dmv where dmv.table='" + table
-                + "'");
+        sb.append("from DatabaseMetadataValue dmv where dmv.table='" + table + "'");
 
         if (filter != null && filter.length() > 0) {
             sb.append(" and ").append(replaceVirtual(table, filter));
@@ -77,14 +73,12 @@ public class DatabaseMetadataUtils {
     /**
      * Build a query
      */
-    public static String buildQuery(final String table, final String filter)
-            throws DatabaseException {
+    public static String buildQuery(String table, String filter) throws DatabaseException {
         log.debug("buildQuery({}, {})", new Object[] { table, filter });
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         String ret = null;
 
-        sb.append("from DatabaseMetadataValue dmv where dmv.table='" + table
-                + "'");
+        sb.append("from DatabaseMetadataValue dmv where dmv.table='" + table + "'");
 
         if (filter != null && filter.length() > 0) {
             sb.append(" and ").append(replaceVirtual(table, filter));
@@ -98,11 +92,9 @@ public class DatabaseMetadataUtils {
     /**
      * Build a query
      */
-    public static String buildUpdate(final String table, final String values,
-            final String filter) throws DatabaseException {
-        log.debug("buildUpdate({}, {}, {})", new Object[] { table, values,
-                filter });
-        final StringBuilder sb = new StringBuilder();
+    public static String buildUpdate(String table, String values, String filter) throws DatabaseException {
+        log.debug("buildUpdate({}, {}, {})", new Object[] { table, values, filter });
+        StringBuilder sb = new StringBuilder();
         String ret = null;
 
         sb.append("update DatabaseMetadataValue dmv set");
@@ -125,14 +117,12 @@ public class DatabaseMetadataUtils {
     /**
      * Build a query
      */
-    public static String buildDelete(final String table, final String filter)
-            throws DatabaseException {
+    public static String buildDelete(String table, String filter) throws DatabaseException {
         log.debug("buildDelete({}, {})", new Object[] { table, filter });
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         String ret = null;
 
-        sb.append("delete from DatabaseMetadataValue dmv where dmv.table='"
-                + table + "'");
+        sb.append("delete from DatabaseMetadataValue dmv where dmv.table='" + table + "'");
 
         if (filter != null && filter.length() > 0) {
             sb.append(" and ").append(replaceVirtual(table, filter));
@@ -146,14 +136,11 @@ public class DatabaseMetadataUtils {
     /**
      * Get virtual column string value
      */
-    public static String getString(final DatabaseMetadataValue value,
-            final String column) throws DatabaseException,
-            IllegalAccessException, InvocationTargetException,
-            NoSuchMethodException {
-        final List<DatabaseMetadataType> types = DatabaseMetadataDAO
-                .findAllTypes(value.getTable());
+    public static String getString(DatabaseMetadataValue value, String column) throws DatabaseException, IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException {
+        List<DatabaseMetadataType> types = DatabaseMetadataDAO.findAllTypes(value.getTable());
 
-        for (final DatabaseMetadataType emt : types) {
+        for (DatabaseMetadataType emt : types) {
             if (emt.getVirtualColumn().equals(column)) {
                 return BeanUtils.getProperty(value, emt.getRealColumn());
             }
@@ -163,19 +150,25 @@ public class DatabaseMetadataUtils {
     }
 
     /**
+     * Get value from id. This is a shortcut method.
+     */
+    public static String getString(String table, String filter, String column) throws DatabaseException, IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException {
+        String query = DatabaseMetadataUtils.buildQuery(table, filter);
+        DatabaseMetadataValue dmv = DatabaseMetadataDAO.executeValueQueryUnique(query);
+        return DatabaseMetadataUtils.getString(dmv, column);
+    }
+
+    /**
      * Get virtual column date value
      */
-    public static Calendar getDate(final DatabaseMetadataValue value,
-            final String column) throws DatabaseException,
-            IllegalAccessException, InvocationTargetException,
-            NoSuchMethodException {
-        final List<DatabaseMetadataType> types = DatabaseMetadataDAO
-                .findAllTypes(value.getTable());
+    public static Calendar getDate(DatabaseMetadataValue value, String column) throws DatabaseException, IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException {
+        List<DatabaseMetadataType> types = DatabaseMetadataDAO.findAllTypes(value.getTable());
 
-        for (final DatabaseMetadataType emt : types) {
+        for (DatabaseMetadataType emt : types) {
             if (emt.getVirtualColumn().equals(column)) {
-                return ISO8601.parseBasic(BeanUtils.getProperty(value,
-                        emt.getRealColumn()));
+                return ISO8601.parseBasic(BeanUtils.getProperty(value, emt.getRealColumn()));
             }
         }
 
@@ -185,26 +178,19 @@ public class DatabaseMetadataUtils {
     /**
      * Obtain a Map from a DatabaseMetadataValue.
      */
-    public static Map<String, String> getDatabaseMetadataValueMap(
-            final DatabaseMetadataValue value) throws DatabaseException,
-            IllegalAccessException, InvocationTargetException,
-            NoSuchMethodException {
-        final Map<String, String> map = new HashMap<String, String>();
-        final List<DatabaseMetadataType> types = DatabaseMetadataDAO
-                .findAllTypes(value.getTable());
+    public static Map<String, String> getDatabaseMetadataValueMap(DatabaseMetadataValue value) throws DatabaseException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        Map<String, String> map = new HashMap<String, String>();
+        List<DatabaseMetadataType> types = DatabaseMetadataDAO.findAllTypes(value.getTable());
 
-        for (final DatabaseMetadataType emt : types) {
+        for (DatabaseMetadataType emt : types) {
             if (emt.getVirtualColumn().equals(DatabaseMetadataMap.MV_NAME_ID)
-                    || emt.getVirtualColumn().equals(
-                            DatabaseMetadataMap.MV_NAME_TABLE)) {
-                throw new DatabaseException(
-                        "Virtual column name restriction violated "
-                                + DatabaseMetadataMap.MV_NAME_ID + " or "
-                                + DatabaseMetadataMap.MV_NAME_TABLE);
+                    || emt.getVirtualColumn().equals(DatabaseMetadataMap.MV_NAME_TABLE)) {
+                throw new DatabaseException("Virtual column name restriction violated " + DatabaseMetadataMap.MV_NAME_ID + " or "
+                        + DatabaseMetadataMap.MV_NAME_TABLE);
             }
 
-            map.put(emt.getVirtualColumn(),
-                    BeanUtils.getProperty(value, emt.getRealColumn()));
+            map.put(emt.getVirtualColumn(), BeanUtils.getProperty(value, emt.getRealColumn()));
         }
 
         map.put(DatabaseMetadataMap.MV_NAME_TABLE, value.getTable());
@@ -216,30 +202,23 @@ public class DatabaseMetadataUtils {
     /**
      * Obtain a DatabaseMetadataValue from a Map
      */
-    public static DatabaseMetadataValue getDatabaseMetadataValueByMap(
-            final Map<String, String> map) throws DatabaseException,
+    public static DatabaseMetadataValue getDatabaseMetadataValueByMap(Map<String, String> map) throws DatabaseException,
             IllegalAccessException, InvocationTargetException {
-        final DatabaseMetadataValue dmv = new DatabaseMetadataValue();
+        DatabaseMetadataValue dmv = new DatabaseMetadataValue();
 
-        if (!map.isEmpty()
-                && map.containsKey(DatabaseMetadataMap.MV_NAME_TABLE)) {
+        if (!map.isEmpty() && map.containsKey(DatabaseMetadataMap.MV_NAME_TABLE)) {
             dmv.setTable(map.get(DatabaseMetadataMap.MV_NAME_TABLE));
 
             if (map.containsKey(DatabaseMetadataMap.MV_NAME_ID)) {
-                dmv.setId(new Double(map.get(DatabaseMetadataMap.MV_NAME_ID))
-                        .longValue());
+                dmv.setId(new Double(map.get(DatabaseMetadataMap.MV_NAME_ID)).longValue());
             }
 
-            final List<DatabaseMetadataType> types = DatabaseMetadataDAO
-                    .findAllTypes(dmv.getTable());
-            for (final DatabaseMetadataType emt : types) {
-                if (!emt.getVirtualColumn().equals(
-                        DatabaseMetadataMap.MV_NAME_ID)
-                        && !emt.getVirtualColumn().equals(
-                                DatabaseMetadataMap.MV_NAME_TABLE)) {
+            List<DatabaseMetadataType> types = DatabaseMetadataDAO.findAllTypes(dmv.getTable());
+            for (DatabaseMetadataType emt : types) {
+                if (!emt.getVirtualColumn().equals(DatabaseMetadataMap.MV_NAME_ID)
+                        && !emt.getVirtualColumn().equals(DatabaseMetadataMap.MV_NAME_TABLE)) {
                     if (map.keySet().contains(emt.getVirtualColumn())) {
-                        BeanUtils.setProperty(dmv, emt.getRealColumn(),
-                                map.get(emt.getVirtualColumn()));
+                        BeanUtils.setProperty(dmv, emt.getRealColumn(), map.get(emt.getVirtualColumn()));
                     }
                 }
             }
@@ -251,10 +230,9 @@ public class DatabaseMetadataUtils {
     /**
      * Replace virtual columns by real ones
      */
-    public static String replaceVirtual(final List<String> tables,
-            final String query) throws DatabaseException {
+    public static String replaceVirtual(List<String> tables, String query) throws DatabaseException {
         String ret = query;
-        for (final String table : tables) {
+        for (String table : tables) {
             ret = replaceVirtual(table, ret);
         }
 
@@ -264,20 +242,19 @@ public class DatabaseMetadataUtils {
     /**
      * Replace virtual columns by real ones
      */
-    private static String replaceVirtual(final String table, String query)
-            throws DatabaseException {
+    private static String replaceVirtual(String table, String query) throws DatabaseException {
         log.debug("replaceVirtual({}, {})", new Object[] { table, query });
         String ret = "";
 
         if (query != null && query.length() > 0) {
-            final List<DatabaseMetadataType> types = DatabaseMetadataDAO
-                    .findAllTypes(table);
-            Collections.sort(types, LenComparator.getInstance()); //avoid the case in which one of the virtual columns is a substring of another (ex. id and admin_id)
-            for (final DatabaseMetadataType emt : types) {
-                final String vcol = "\\$"
-                        + emt.getVirtualColumn().toLowerCase();
-                query = query.replaceAll(vcol, emt.getRealColumn()
-                        .toLowerCase());
+            List<DatabaseMetadataType> types = DatabaseMetadataDAO.findAllTypes(table);
+
+            // avoid the case in which one of the virtual columns is a substring of another (ex. id and admin_id)
+            Collections.sort(types, LenComparator.getInstance());
+
+            for (DatabaseMetadataType emt : types) {
+                String vcol = "\\$" + emt.getVirtualColumn().toLowerCase();
+                query = query.replaceAll(vcol, emt.getRealColumn().toLowerCase());
             }
 
             ret = query;
@@ -292,17 +269,13 @@ public class DatabaseMetadataUtils {
      * 
      * @author danilo
      */
-    public static class LenComparator implements
-            Comparator<DatabaseMetadataType> {
+    public static class LenComparator implements Comparator<DatabaseMetadataType> {
         public static LenComparator getInstance() {
             return new LenComparator();
         }
 
-        @Override
-        public int compare(final DatabaseMetadataType s1,
-                final DatabaseMetadataType s2) {
-            return s2.getVirtualColumn().length()
-                    - s1.getVirtualColumn().length();
+        public int compare(DatabaseMetadataType s1, DatabaseMetadataType s2) {
+            return s2.getVirtualColumn().length() - s1.getVirtualColumn().length();
         }
     }
 }

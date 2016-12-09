@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -22,6 +22,7 @@
 package com.openkm.principal;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,24 +33,24 @@ import com.openkm.core.DatabaseException;
 import com.openkm.dao.AuthDAO;
 import com.openkm.dao.bean.Role;
 import com.openkm.dao.bean.User;
+import com.openkm.spring.PrincipalUtils;
 
 public class DatabasePrincipalAdapter implements PrincipalAdapter {
-    private static Logger log = LoggerFactory
-            .getLogger(DatabasePrincipalAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(DatabasePrincipalAdapter.class);
 
     @Override
     public List<String> getUsers() throws PrincipalAdapterException {
         log.debug("getUsers()");
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
         try {
-            final List<User> col = AuthDAO
-                    .findAllUsers(Config.PRINCIPAL_DATABASE_FILTER_INACTIVE_USERS);
+            List<User> col = AuthDAO.findAllUsers(Config.PRINCIPAL_DATABASE_FILTER_INACTIVE_USERS);
 
-            for (final User dbUser : col) {
+            for (Iterator<User> it = col.iterator(); it.hasNext();) {
+                User dbUser = it.next();
                 list.add(dbUser.getId());
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -60,15 +61,16 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     @Override
     public List<String> getRoles() throws PrincipalAdapterException {
         log.debug("getRoles()");
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
         try {
-            final List<Role> col = AuthDAO.findAllRoles();
+            List<Role> col = AuthDAO.findAllRoles();
 
-            for (final Role dbRole : col) {
+            for (Iterator<Role> it = col.iterator(); it.hasNext();) {
+                Role dbRole = it.next();
                 list.add(dbRole.getId());
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -77,18 +79,18 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public List<String> getUsersByRole(final String role)
-            throws PrincipalAdapterException {
+    public List<String> getUsersByRole(String role) throws PrincipalAdapterException {
         log.debug("getUsersByRole({})", role);
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
         try {
-            final List<User> col = AuthDAO.findUsersByRole(role, true);
+            List<User> col = AuthDAO.findUsersByRole(role, true);
 
-            for (final User dbUser : col) {
+            for (Iterator<User> it = col.iterator(); it.hasNext();) {
+                User dbUser = it.next();
                 list.add(dbUser.getId());
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -97,18 +99,18 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public List<String> getRolesByUser(final String user)
-            throws PrincipalAdapterException {
+    public List<String> getRolesByUser(String user) throws PrincipalAdapterException {
         log.debug("getRolesByUser({})", user);
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
         try {
-            final List<Role> col = AuthDAO.findRolesByUser(user, true);
+            List<Role> col = AuthDAO.findRolesByUser(user, true);
 
-            for (final Role dbRole : col) {
+            for (Iterator<Role> it = col.iterator(); it.hasNext();) {
+                Role dbRole = it.next();
                 list.add(dbRole.getId());
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -117,16 +119,17 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getMail(final String user) throws PrincipalAdapterException {
+    public String getMail(String user) throws PrincipalAdapterException {
         log.debug("getMail({})", user);
         String mail = null;
 
         try {
-            final com.openkm.dao.bean.User usr = AuthDAO.findUserByPk(user);
+            User usr = AuthDAO.findUserByPk(user);
+
             if (usr != null && !usr.getEmail().equals("")) {
                 mail = usr.getEmail();
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -135,16 +138,17 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getName(final String user) throws PrincipalAdapterException {
+    public String getName(String user) throws PrincipalAdapterException {
         log.debug("getName({})", user);
         String name = null;
 
         try {
-            final com.openkm.dao.bean.User usr = AuthDAO.findUserByPk(user);
+            User usr = AuthDAO.findUserByPk(user);
+
             if (usr != null && !usr.getName().equals("")) {
                 name = usr.getName();
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
@@ -153,21 +157,149 @@ public class DatabasePrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getPassword(final String user)
-            throws PrincipalAdapterException {
+    public String getPassword(String user) throws PrincipalAdapterException {
         log.debug("getPassword({})", user);
         String password = null;
 
         try {
-            final com.openkm.dao.bean.User usr = AuthDAO.findUserByPk(user);
+            User usr = AuthDAO.findUserByPk(user);
+
             if (usr != null && !usr.getName().equals("")) {
                 password = usr.getPassword();
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new PrincipalAdapterException(e.getMessage(), e);
         }
 
         log.debug("getPassword: {}", password);
         return password;
+    }
+
+    @Override
+    public void createUser(String user, String password, String email, String name, boolean active) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                User usr = new User();
+                usr.setId(user);
+                usr.setPassword(password);
+                usr.setName(name);
+                usr.setEmail(email);
+                usr.setActive(active);
+                AuthDAO.createUser(usr);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can create users");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteUser(String user) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                AuthDAO.deleteUser(user);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can delete users");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateUser(String user, String password, String email, String name, boolean active) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                User usr = new User();
+                usr.setId(user);
+                usr.setPassword(password);
+                usr.setName(name);
+                usr.setEmail(email);
+                usr.setActive(active);
+                AuthDAO.updateUser(usr);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can delete users");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void createRole(String role, boolean active) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                Role rol = new Role();
+                rol.setId(role);
+                rol.setActive(active);
+                AuthDAO.createRole(rol);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can create roles");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteRole(String role) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                AuthDAO.deleteRole(role);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can delete roles");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateRole(String role, boolean active) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                Role rol = new Role();
+                rol.setId(role);
+                rol.setActive(active);
+                AuthDAO.updateRole(rol);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can create roles");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void assignRole(String user, String role) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                User usr = AuthDAO.findUserByPk(user);
+                Role rol = AuthDAO.findRoleByPk(role);
+                usr.getRoles().add(rol);
+                AuthDAO.updateUser(usr);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can assign roles");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void removeRole(String user, String role) throws PrincipalAdapterException {
+        try {
+            if (PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+                User usr = AuthDAO.findUserByPk(user);
+                Role rol = AuthDAO.findRoleByPk(role);
+                usr.getRoles().remove(rol);
+                AuthDAO.updateUser(usr);
+            } else {
+                throw new PrincipalAdapterException("Only administrators can remove roles");
+            }
+        } catch (DatabaseException e) {
+            throw new PrincipalAdapterException(e.getMessage(), e);
+        }
     }
 }

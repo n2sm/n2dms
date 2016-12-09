@@ -1,35 +1,41 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import javax.mail.MessagingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import com.openkm.automation.AutomationException;
+import com.openkm.bean.ExtendedAttributes;
+import com.openkm.bean.FileUploadResponse;
 import com.openkm.bean.Mail;
 import com.openkm.bean.Repository;
 import com.openkm.core.AccessDeniedException;
@@ -37,7 +43,10 @@ import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.ItemExistsException;
 import com.openkm.core.LockException;
+import com.openkm.core.NoSuchGroupException;
+import com.openkm.core.ParseException;
 import com.openkm.core.PathNotFoundException;
+import com.openkm.core.Ref;
 import com.openkm.core.RepositoryException;
 import com.openkm.core.UserQuotaExceededException;
 import com.openkm.core.VirusDetectedException;
@@ -50,34 +59,37 @@ import com.openkm.module.MailModule;
 import com.openkm.module.db.base.BaseMailModule;
 import com.openkm.module.db.base.BaseNotificationModule;
 import com.openkm.spring.PrincipalUtils;
+import com.openkm.util.FileUtils;
 import com.openkm.util.PathUtils;
 import com.openkm.util.UserActivity;
+import com.openkm.util.impexp.RepositoryExporter;
 
 public class DbMailModule implements MailModule {
     private static Logger log = LoggerFactory.getLogger(DbMailModule.class);
 
     @Override
-    public Mail create(final String token, final Mail mail)
-            throws PathNotFoundException, ItemExistsException,
-            VirusDetectedException, AccessDeniedException, RepositoryException,
-            DatabaseException, UserQuotaExceededException {
+    public Mail create(String token, Mail mail) throws PathNotFoundException, ItemExistsException, VirusDetectedException,
+            AccessDeniedException, RepositoryException, DatabaseException, UserQuotaExceededException, AutomationException {
         log.debug("create({}, {})", token, mail);
-        return create(token, mail, null);
+        return create(token, mail, null, new Ref<FileUploadResponse>(null));
     }
 
     /**
      * Used when importing mail from scheduler
      */
-    public Mail create(final String token, final Mail mail, String userId)
-            throws AccessDeniedException, RepositoryException,
-            PathNotFoundException, ItemExistsException, VirusDetectedException,
-            DatabaseException, UserQuotaExceededException {
+    public Mail create(String token, Mail mail, String userId, Ref<FileUploadResponse> fuResponse) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, VirusDetectedException, DatabaseException,
+            UserQuotaExceededException, AutomationException {
         log.debug("create({}, {}, {})", new Object[] { token, mail, userId });
         Mail newMail = null;
         Authentication auth = null, oldAuth = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
+        }
+
+        if (!PathUtils.checkPath(mail.getPath())) {
+            throw new RepositoryException("Invalid path: " + mail.getPath());
         }
 
         try {
@@ -92,7 +104,7 @@ public class DbMailModule implements MailModule {
                 userId = auth.getName();
             }
 
-            final String parentPath = PathUtils.getParent(mail.getPath());
+            String parentPath = PathUtils.getParent(mail.getPath());
             String name = PathUtils.getName(mail.getPath());
 
             // Escape dangerous chars in name
@@ -101,33 +113,29 @@ public class DbMailModule implements MailModule {
             if (!name.isEmpty()) {
                 mail.setPath(parentPath + "/" + name);
 
-                final String parentUuid = NodeBaseDAO.getInstance()
-                        .getUuidFromPath(parentPath);
-                final NodeFolder parentFolder = NodeFolderDAO.getInstance()
-                        .findByPk(parentUuid);
+                String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(parentPath);
+                NodeFolder parentFolder = NodeFolderDAO.getInstance().findByPk(parentUuid);
+
+                // AUTOMATION - PRE
+                // INSIDE BaseMailModule.create
 
                 // Create node
-                final NodeMail mailNode = BaseMailModule.create(userId,
-                        parentFolder, name, mail.getSize(), mail.getFrom(),
-                        mail.getReply(), mail.getTo(), mail.getCc(),
-                        mail.getBcc(), mail.getSentDate(),
-                        mail.getReceivedDate(), mail.getSubject(),
-                        mail.getContent(), mail.getMimeType());
+                NodeMail mailNode =
+                        BaseMailModule.create(userId, parentPath, parentFolder, name, mail.getSize(), mail.getFrom(), mail.getReply(),
+                                mail.getTo(), mail.getCc(), mail.getBcc(), mail.getSentDate(), mail.getReceivedDate(), mail.getSubject(),
+                                mail.getContent(), mail.getMimeType(), new HashSet<String>(), new HashSet<String>(), fuResponse);
+
+                // AUTOMATION - POST
+                // INSIDE BaseMailModule.create
 
                 // Set returned mail properties
-                newMail = BaseMailModule
-                        .getProperties(auth.getName(), mailNode);
+                newMail = BaseMailModule.getProperties(auth.getName(), mailNode);
 
                 // Check subscriptions
-                BaseNotificationModule.checkSubscriptions(mailNode, userId,
-                        "CREATE_MAIL", null);
-
-                // Check scripting
-                // BaseScriptingModule.checkScripts(session, parentNode, mailNode, "CREATE_MAIL");
+                BaseNotificationModule.checkSubscriptions(mailNode, userId, "CREATE_MAIL", null);
 
                 // Activity log
-                UserActivity.log(userId, "CREATE_MAIL", mailNode.getUuid(),
-                        mail.getPath(), null);
+                UserActivity.log(userId, "CREATE_MAIL", mailNode.getUuid(), mail.getPath(), null);
             } else {
                 throw new RepositoryException("Invalid mail name");
             }
@@ -142,12 +150,13 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public Mail getProperties(final String token, final String mailPath)
-            throws PathNotFoundException, RepositoryException,
+    public Mail getProperties(String token, String mailId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getProperties({}, {})", token, mailPath);
+        log.debug("getProperties({}, {})", token, mailId);
         Mail mail = null;
         Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
 
         try {
             if (token == null) {
@@ -157,16 +166,20 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-            final NodeMail mailNode = NodeMailDAO.getInstance().findByPk(
-                    mailUuid);
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
+
+            NodeMail mailNode = NodeMailDAO.getInstance().findByPk(mailUuid);
             mail = BaseMailModule.getProperties(auth.getName(), mailNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_MAIL_PROPERTIES", mailUuid,
-                    mailPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_MAIL_PROPERTIES", mailUuid, mailPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -179,11 +192,12 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public void delete(final String token, final String mailPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void delete(String token, String mailId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("delete({}, {})", new Object[] { token, mailPath });
+        log.debug("delete({}, {})", new Object[] { token, mailId });
         Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -197,31 +211,31 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
 
             if (BaseMailModule.hasLockedNodes(mailUuid)) {
-                throw new LockException(
-                        "Can't delete a mail with child locked attachments");
+                throw new LockException("Can't delete a mail with child locked attachments");
             }
 
             if (!BaseMailModule.hasWriteAccess(mailUuid)) {
-                throw new AccessDeniedException(
-                        "Can't delete a mail with readonly attachments");
+                throw new AccessDeniedException("Can't delete a mail with readonly attachments");
             }
 
-            final String userTrashPath = "/" + Repository.TRASH + "/"
-                    + auth.getName();
-            final String userTrashUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(userTrashPath);
-            final String name = PathUtils.getName(mailPath);
+            String userTrashPath = "/" + Repository.TRASH + "/" + auth.getName();
+            String userTrashUuid = NodeBaseDAO.getInstance().getUuidFromPath(userTrashPath);
+            String name = PathUtils.getName(mailPath);
 
             NodeMailDAO.getInstance().delete(name, mailUuid, userTrashUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_MAIL", mailUuid, mailPath,
-                    null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "DELETE_MAIL", mailUuid, mailPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -233,63 +247,13 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public void purge(final String token, final String mailPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("purge({}, {})", token, mailPath);
+    public void purge(String token, String mailId) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("purge({}, {})", token, mailId);
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
-
-        if (Config.SYSTEM_READONLY) {
-            throw new AccessDeniedException("System is in read-only mode");
-        }
-
-        try {
-            if (token == null) {
-                PrincipalUtils.getAuthentication();
-            } else {
-                oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
-            }
-
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-
-            if (BaseMailModule.hasLockedNodes(mailUuid)) {
-                throw new LockException(
-                        "Can't delete a mail with child locked attachments");
-            }
-
-            if (!BaseMailModule.hasWriteAccess(mailUuid)) {
-                throw new AccessDeniedException(
-                        "Can't delete a mail with readonly attachments");
-            }
-
-            NodeMailDAO.getInstance().purge(mailUuid);
-
-            // Activity log - Already inside DAO
-            // UserActivity.log(auth.getName(), "PURGE_MAIL", mailUuid, mailPath, null);
-        } catch (final IOException e) {
-            throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
-            throw e;
-        } finally {
-            if (token != null) {
-                PrincipalUtils.setAuthentication(oldAuth);
-            }
-        }
-
-        log.debug("purge: void");
-    }
-
-    @Override
-    public Mail rename(final String token, final String mailPath, String newName)
-            throws PathNotFoundException, ItemExistsException,
-            AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("rename({}, {}, {})",
-                new Object[] { token, mailPath, newName });
-        Mail renamedMail = null;
         Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -303,30 +267,97 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String name = PathUtils.getName(mailPath);
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
+
+            if (Config.REPOSITORY_PURGATORY_HOME != null && !Config.REPOSITORY_PURGATORY_HOME.isEmpty()) {
+                File dateDir = FileUtils.createDateDir(Config.REPOSITORY_PURGATORY_HOME);
+                File dstPath = new File(dateDir, PathUtils.getName(mailPath));
+                RepositoryExporter.exportMail(null, mailPath, dstPath.getPath() + ".eml", true, null, null);
+            }
+
+            if (BaseMailModule.hasLockedNodes(mailUuid)) {
+                throw new LockException("Can't delete a mail with child locked attachments");
+            }
+
+            if (!BaseMailModule.hasWriteAccess(mailUuid)) {
+                throw new AccessDeniedException("Can't delete a mail with readonly attachments");
+            }
+
+            NodeMailDAO.getInstance().purge(mailUuid);
+
+            // Activity log - Already inside DAO
+            // UserActivity.log(auth.getName(), "PURGE_MAIL", mailUuid, mailPath, null);
+        } catch (IOException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (ParseException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (NoSuchGroupException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (MessagingException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (DatabaseException e) {
+            throw e;
+        } finally {
+            if (token != null) {
+                PrincipalUtils.setAuthentication(oldAuth);
+            }
+        }
+
+        log.debug("purge: void");
+    }
+
+    @Override
+    public Mail rename(String token, String mailId, String newName) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("rename({}, {}, {})", new Object[] { token, mailId, newName });
+        Mail renamedMail = null;
+        Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
+
+        if (Config.SYSTEM_READONLY) {
+            throw new AccessDeniedException("System is in read-only mode");
+        }
+
+        try {
+            if (token == null) {
+                auth = PrincipalUtils.getAuthentication();
+            } else {
+                oldAuth = PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthenticationByToken(token);
+            }
+
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
+
+            String name = PathUtils.getName(mailPath);
 
             // Escape dangerous chars in name
             newName = PathUtils.escape(newName);
 
             if (newName != null && !newName.isEmpty() && !newName.equals(name)) {
-                final NodeMail mailNode = NodeMailDAO.getInstance().rename(
-                        mailUuid, newName);
-                renamedMail = BaseMailModule.getProperties(auth.getName(),
-                        mailNode);
+                NodeMail mailNode = NodeMailDAO.getInstance().rename(mailUuid, newName);
+                renamedMail = BaseMailModule.getProperties(auth.getName(), mailNode);
             } else {
                 // Don't change anything
-                final NodeMail mailNode = NodeMailDAO.getInstance().findByPk(
-                        mailUuid);
-                renamedMail = BaseMailModule.getProperties(auth.getName(),
-                        mailNode);
+                NodeMail mailNode = NodeMailDAO.getInstance().findByPk(mailUuid);
+                renamedMail = BaseMailModule.getProperties(auth.getName(), mailNode);
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "RENAME_MAIL", mailUuid, mailPath,
-                    newName);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "RENAME_MAIL", mailUuid, mailPath, newName);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -339,12 +370,14 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public void move(final String token, final String mailPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException {
-        log.debug("move({}, {}, {})", new Object[] { token, mailPath, dstPath });
+    public void move(String token, String mailId, String dstId) throws PathNotFoundException, ItemExistsException, AccessDeniedException,
+            RepositoryException, DatabaseException {
+        log.debug("move({}, {}, {})", new Object[] { token, mailId, dstId });
         Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
+        String dstPath = null;
+        String dstUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -358,16 +391,35 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-            final String dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    dstPath);
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
+
+            if (PathUtils.isPath(dstId)) {
+                if (!PathUtils.checkPath(dstId)) {
+                    throw new RepositoryException("Invalid destination path: " + dstId);
+                }
+
+                dstPath = dstId;
+                dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(dstId);
+            } else {
+                dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstId);
+                dstUuid = dstId;
+
+                if (!PathUtils.checkPath(dstPath)) {
+                    throw new RepositoryException("Invalid destination path: " + dstPath);
+                }
+            }
+
             NodeMailDAO.getInstance().move(mailUuid, dstUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "MOVE_MAIL", mailUuid, mailPath,
-                    dstPath);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "MOVE_MAIL", mailUuid, mailPath, dstPath);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -379,14 +431,22 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public void copy(final String token, final String mailPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            IOException, AutomationException, DatabaseException,
+    public void copy(String token, String mailId, String dstId) throws PathNotFoundException, ItemExistsException, AccessDeniedException,
+            RepositoryException, IOException, AutomationException, DatabaseException, UserQuotaExceededException {
+        log.debug("copy({}, {}, {})", new Object[] { token, mailId, dstId });
+        extendedCopy(token, mailId, dstId, new ExtendedAttributes());
+    }
+
+    @Override
+    public void extendedCopy(String token, String mailId, String dstId, ExtendedAttributes extAttr) throws PathNotFoundException,
+            ItemExistsException, AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException,
             UserQuotaExceededException {
-        log.debug("copy({}, {}, {}, {})", new Object[] { token, mailPath,
-                dstPath });
+        log.debug("extendedCopy({}, {}, {}, {})", new Object[] { token, mailId, dstId, extAttr });
         Authentication auth = null, oldAuth = null;
+        String mailPath = null;
+        String mailUuid = null;
+        String dstPath = null;
+        String dstUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -400,25 +460,32 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-            final String dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    dstPath);
-            final NodeMail srcMailNode = NodeMailDAO.getInstance().findByPk(
-                    mailUuid);
-            final NodeFolder dstFldNode = NodeFolderDAO.getInstance().findByPk(
-                    dstUuid);
-            final NodeMail newMailNode = BaseMailModule.copy(auth.getName(),
-                    srcMailNode, dstFldNode);
+            if (PathUtils.isPath(mailId)) {
+                mailPath = mailId;
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailPath = NodeBaseDAO.getInstance().getPathFromUuid(mailId);
+                mailUuid = mailId;
+            }
+
+            if (PathUtils.isPath(dstId)) {
+                dstPath = dstId;
+                dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(dstId);
+            } else {
+                dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstId);
+                dstUuid = dstId;
+            }
+
+            NodeMail srcMailNode = NodeMailDAO.getInstance().findByPk(mailUuid);
+            NodeFolder dstFldNode = NodeFolderDAO.getInstance().findByPk(dstUuid);
+            NodeMail newMailNode = BaseMailModule.copy(auth.getName(), srcMailNode, dstPath, dstFldNode, extAttr);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(dstFldNode,
-                    auth.getName(), "COPY_MAIL", null);
+            BaseNotificationModule.checkSubscriptions(dstFldNode, auth.getName(), "COPY_MAIL", null);
 
             // Activity log
-            UserActivity.log(auth.getName(), "COPY_MAIL",
-                    newMailNode.getUuid(), mailPath, dstPath);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "COPY_MAIL", newMailNode.getUuid(), mailPath, dstPath);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -426,24 +493,25 @@ public class DbMailModule implements MailModule {
             }
         }
 
-        log.debug("copy: void");
+        log.debug("extendedCopy: void");
     }
 
     @Override
     @Deprecated
-    public List<Mail> getChilds(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Mail> getChilds(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        return getChildren(token, fldPath);
+        return getChildren(token, fldId);
     }
 
     @Override
-    public List<Mail> getChildren(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Mail> getChildren(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChildren({}, {})", token, fldPath);
-        final List<Mail> children = new ArrayList<Mail>();
+        log.debug("getChildren({}, {})", token, fldId);
+        long begin = System.currentTimeMillis();
+        List<Mail> children = new ArrayList<Mail>();
         Authentication auth = null, oldAuth = null;
+        String fldPath = null;
+        String fldUuid = null;
 
         try {
             if (token == null) {
@@ -453,20 +521,21 @@ public class DbMailModule implements MailModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String fldUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    fldPath);
-            final NodeFolder fldNode = NodeFolderDAO.getInstance().findByPk(
-                    fldUuid);
+            if (PathUtils.isPath(fldId)) {
+                fldPath = fldId;
+                fldUuid = NodeBaseDAO.getInstance().getUuidFromPath(fldId);
+            } else {
+                fldPath = NodeBaseDAO.getInstance().getPathFromUuid(fldId);
+                fldUuid = fldId;
+            }
 
-            for (final NodeMail nMail : NodeMailDAO.getInstance().findByParent(
-                    fldNode.getUuid())) {
+            for (NodeMail nMail : NodeMailDAO.getInstance().findByParent(fldUuid)) {
                 children.add(BaseMailModule.getProperties(auth.getName(), nMail));
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_CHILDREN_MAILS",
-                    fldNode.getUuid(), fldPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_CHILDREN_MAILS", fldUuid, fldPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -474,36 +543,40 @@ public class DbMailModule implements MailModule {
             }
         }
 
+        log.trace("getChildren.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getChildren: {}", children);
         return children;
     }
 
     @Override
-    public boolean isValid(final String token, final String mailPath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("isValid({}, {})", token, mailPath);
+    public boolean isValid(String token, String mailId) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("isValid({}, {})", token, mailId);
         boolean valid = true;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        String mailUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
+            if (PathUtils.isPath(mailId)) {
+                mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailId);
+            } else {
+                mailUuid = mailId;
+            }
 
             try {
                 NodeMailDAO.getInstance().findByPk(mailUuid);
-            } catch (final PathNotFoundException e) {
+            } catch (PathNotFoundException e) {
                 valid = false;
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -516,12 +589,10 @@ public class DbMailModule implements MailModule {
     }
 
     @Override
-    public String getPath(final String token, final String uuid)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String getPath(String token, String uuid) throws AccessDeniedException, RepositoryException, DatabaseException {
         try {
             return NodeBaseDAO.getInstance().getPathFromUuid(uuid);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
         }
     }

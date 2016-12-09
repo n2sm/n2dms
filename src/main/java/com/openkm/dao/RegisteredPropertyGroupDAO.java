@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,11 +35,8 @@ import org.slf4j.LoggerFactory;
 import com.openkm.core.DatabaseException;
 import com.openkm.dao.bean.RegisteredPropertyGroup;
 
-public class RegisteredPropertyGroupDAO extends
-        GenericDAO<RegisteredPropertyGroup, String> {
-    private static Logger log = LoggerFactory
-            .getLogger(RegisteredPropertyGroupDAO.class);
-
+public class RegisteredPropertyGroupDAO extends GenericDAO<RegisteredPropertyGroup, String> {
+    private static Logger log = LoggerFactory.getLogger(RegisteredPropertyGroupDAO.class);
     private static RegisteredPropertyGroupDAO single = new RegisteredPropertyGroupDAO();
 
     private RegisteredPropertyGroupDAO() {
@@ -52,8 +49,7 @@ public class RegisteredPropertyGroupDAO extends
     /**
      * Create or update
      */
-    public void createOrUpdate(final RegisteredPropertyGroup rpg)
-            throws DatabaseException {
+    public void createOrUpdate(RegisteredPropertyGroup rpg) throws DatabaseException {
         log.debug("create({})", rpg);
         Session session = null;
         Transaction tx = null;
@@ -64,7 +60,7 @@ public class RegisteredPropertyGroupDAO extends
             session.saveOrUpdate(rpg);
             HibernateUtil.commit(tx);
             log.debug("create: void");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -75,20 +71,17 @@ public class RegisteredPropertyGroupDAO extends
     /**
      * Find by pk
      */
-    @Override
-    public RegisteredPropertyGroup findByPk(final String grpName)
-            throws DatabaseException {
+    public RegisteredPropertyGroup findByPk(String grpName) throws DatabaseException {
         log.debug("findByPk({})", grpName);
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final RegisteredPropertyGroup ret = (RegisteredPropertyGroup) session
-                    .load(RegisteredPropertyGroup.class, grpName);
+            RegisteredPropertyGroup ret = (RegisteredPropertyGroup) session.load(RegisteredPropertyGroup.class, grpName);
             initialize(ret);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -98,21 +91,20 @@ public class RegisteredPropertyGroupDAO extends
     /**
      * Find all property groups
      */
-    @Override
     @SuppressWarnings("unchecked")
     public List<RegisteredPropertyGroup> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from RegisteredPropertyGroup rpg";
+        String qs = "from RegisteredPropertyGroup rpg";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<RegisteredPropertyGroup> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<RegisteredPropertyGroup> ret = q.list();
             initialize(ret);
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -122,12 +114,11 @@ public class RegisteredPropertyGroupDAO extends
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final RegisteredPropertyGroup propGroup) {
+    private void initialize(RegisteredPropertyGroup propGroup) {
         if (propGroup != null) {
             Hibernate.initialize(propGroup);
 
-            for (final Entry<String, String> entry : propGroup.getProperties()
-                    .entrySet()) {
+            for (Entry<String, String> entry : propGroup.getProperties().entrySet()) {
                 Hibernate.initialize(entry);
             }
         }
@@ -136,8 +127,8 @@ public class RegisteredPropertyGroupDAO extends
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final List<RegisteredPropertyGroup> propGroupList) {
-        for (final RegisteredPropertyGroup propGroup : propGroupList) {
+    private void initialize(List<RegisteredPropertyGroup> propGroupList) {
+        for (RegisteredPropertyGroup propGroup : propGroupList) {
             initialize(propGroup);
         }
     }

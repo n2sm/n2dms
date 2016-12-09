@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,7 +47,7 @@ public class BookmarkDAO {
     /**
      * Create
      */
-    public static void create(final Bookmark bm) throws DatabaseException {
+    public static void create(Bookmark bm) throws DatabaseException {
         log.debug("create({})", bm);
         Session session = null;
         Transaction tx = null;
@@ -57,7 +57,7 @@ public class BookmarkDAO {
             tx = session.beginTransaction();
             session.save(bm);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -70,7 +70,7 @@ public class BookmarkDAO {
     /**
      * Update
      */
-    public static void update(final Bookmark bm) throws DatabaseException {
+    public static void update(Bookmark bm) throws DatabaseException {
         log.debug("update({})", bm);
         Session session = null;
         Transaction tx = null;
@@ -80,7 +80,7 @@ public class BookmarkDAO {
             tx = session.beginTransaction();
             session.update(bm);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -93,7 +93,7 @@ public class BookmarkDAO {
     /**
      * Delete
      */
-    public static void delete(final long bmId) throws DatabaseException {
+    public static void delete(long bmId) throws DatabaseException {
         log.debug("delete({})", bmId);
         Session session = null;
         Transaction tx = null;
@@ -101,10 +101,10 @@ public class BookmarkDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Bookmark bm = (Bookmark) session.load(Bookmark.class, bmId);
+            Bookmark bm = (Bookmark) session.load(Bookmark.class, bmId);
             session.delete(bm);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -118,29 +118,26 @@ public class BookmarkDAO {
      * Find by user
      */
     @SuppressWarnings("unchecked")
-    public static List<Bookmark> findByUser(final String usrId)
-            throws DatabaseException, RepositoryException {
+    public static List<Bookmark> findByUser(String usrId) throws DatabaseException, RepositoryException {
         log.debug("findByUser({})", usrId);
-        final String qs = "from Bookmark bm where bm.user=:user order by bm.id";
+        String qs = "from Bookmark bm where bm.user=:user order by bm.id";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", usrId);
-            final List<Bookmark> ret = q.list();
+            List<Bookmark> ret = q.list();
 
-            for (final Bookmark bm : ret) {
+            for (Bookmark bm : ret) {
                 // If user bookmark is missing, set a default
-                final NodeBase nBase = (NodeBase) session.get(NodeBase.class,
-                        bm.getNode());
+                NodeBase nBase = (NodeBase) session.get(NodeBase.class, bm.getNode());
 
                 if (nBase == null) {
-                    final String rootPath = "/" + Repository.ROOT;
-                    final String rootUuid = NodeBaseDAO.getInstance()
-                            .getUuidFromPath(session, rootPath);
+                    String rootPath = "/" + Repository.ROOT;
+                    String rootUuid = NodeBaseDAO.getInstance().getUuidFromPath(session, rootPath);
                     bm.setNode(rootUuid);
                     bm.setType(Folder.TYPE);
                     session.save(bm);
@@ -150,10 +147,10 @@ public class BookmarkDAO {
             HibernateUtil.commit(tx);
             log.debug("findByUser: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -164,29 +161,26 @@ public class BookmarkDAO {
     /**
      * Find by pk
      */
-    public static Bookmark findByPk(final long bmId) throws DatabaseException,
-            RepositoryException {
+    public static Bookmark findByPk(long bmId) throws DatabaseException, RepositoryException {
         log.debug("findByPk({})", bmId);
-        final String qs = "from Bookmark bm where bm.id=:id";
+        String qs = "from Bookmark bm where bm.id=:id";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", bmId);
-            final Bookmark ret = (Bookmark) q.setMaxResults(1).uniqueResult();
+            Bookmark ret = (Bookmark) q.setMaxResults(1).uniqueResult();
 
             if (ret != null) {
                 // If user bookmark is missing, set a default
-                final NodeBase nBase = (NodeBase) session.get(NodeBase.class,
-                        ret.getNode());
+                NodeBase nBase = (NodeBase) session.get(NodeBase.class, ret.getNode());
 
                 if (nBase == null) {
-                    final String rootPath = "/" + Repository.ROOT;
-                    final String rootUuid = NodeBaseDAO.getInstance()
-                            .getUuidFromPath(session, rootPath);
+                    String rootPath = "/" + Repository.ROOT;
+                    String rootUuid = NodeBaseDAO.getInstance().getUuidFromPath(session, rootPath);
                     ret.setNode(rootUuid);
                     ret.setType(Folder.TYPE);
                     session.save(ret);
@@ -196,10 +190,10 @@ public class BookmarkDAO {
             HibernateUtil.commit(tx);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -210,10 +204,9 @@ public class BookmarkDAO {
     /**
      * Remove bookmarks by parent node
      */
-    public static void purgeBookmarksByNode(final String nodeUuid)
-            throws DatabaseException {
+    public static void purgeBookmarksByNode(String nodeUuid) throws DatabaseException {
         log.debug("purgeBookmarksByNode({})", nodeUuid);
-        final String qs = "delete from Bookmark bm where bm.node=:uuid";
+        String qs = "delete from Bookmark bm where bm.node=:uuid";
         Session session = null;
         Transaction tx = null;
 
@@ -221,13 +214,13 @@ public class BookmarkDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("uuid", nodeUuid);
             q.executeUpdate();
 
             HibernateUtil.commit(tx);
             log.debug("purgeBookmarksByNode: void");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

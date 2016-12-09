@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,15 +47,11 @@ import com.openkm.bean.form.TextArea;
 import com.openkm.core.ParseException;
 
 public class BasePropertyGroupModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BasePropertyGroupModule.class);
+    private static Logger log = LoggerFactory.getLogger(BasePropertyGroupModule.class);
 
-    public static void addGroup(final Session session, final Node node,
-            final String grpName) throws NoSuchNodeTypeException,
-            VersionException, ConstraintViolationException, LockException,
-            RepositoryException {
-        log.debug("addGroup({}, {}, {})",
-                new Object[] { session, node, grpName });
+    public static void addGroup(Session session, Node node, String grpName) throws NoSuchNodeTypeException, VersionException,
+            ConstraintViolationException, LockException, RepositoryException {
+        log.debug("addGroup({}, {}, {})", new Object[] { session, node, grpName });
         synchronized (node) {
             node.addMixin(grpName);
             node.save();
@@ -65,18 +61,14 @@ public class BasePropertyGroupModule {
     /**
      * Set node property value
      */
-    public static void setPropertyValue(final Node node,
-            final PropertyDefinition pd, final FormElement fe)
-            throws javax.jcr.PathNotFoundException,
+    public static void setPropertyValue(Node node, PropertyDefinition pd, FormElement fe) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException, ParseException {
-        final Property prop = node.getProperty(pd.getName());
+        Property prop = node.getProperty(pd.getName());
 
-        if (fe instanceof Select
-                && ((Select) fe).getType().equals(Select.TYPE_MULTIPLE)
-                && pd.isMultiple()) {
-            final List<String> tmp = new ArrayList<String>();
+        if (fe instanceof Select && ((Select) fe).getType().equals(Select.TYPE_MULTIPLE) && pd.isMultiple()) {
+            List<String> tmp = new ArrayList<String>();
 
-            for (final Option opt : ((Select) fe).getOptions()) {
+            for (Option opt : ((Select) fe).getOptions()) {
                 if (opt.isSelected()) {
                     tmp.add(opt.getValue());
                 }
@@ -93,18 +85,16 @@ public class BasePropertyGroupModule {
             } else if (fe instanceof TextArea) {
                 prop.setValue(((TextArea) fe).getValue());
             } else if (fe instanceof Select) {
-                for (final Option opt : ((Select) fe).getOptions()) {
+                for (Option opt : ((Select) fe).getOptions()) {
                     if (opt.isSelected()) {
                         prop.setValue(opt.getValue());
                     }
                 }
             } else {
-                throw new ParseException("Unknown property definition: "
-                        + pd.getName());
+                throw new ParseException("Unknown property definition: " + pd.getName());
             }
         } else {
-            throw new ParseException("Inconsistent property definition: "
-                    + pd.getName());
+            throw new ParseException("Inconsistent property definition: " + pd.getName());
         }
     }
 }

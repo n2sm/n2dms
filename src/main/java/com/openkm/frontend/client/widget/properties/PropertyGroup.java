@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,10 +34,13 @@ import com.openkm.frontend.client.bean.GWTDocument;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTMail;
 import com.openkm.frontend.client.bean.GWTPermission;
+import com.openkm.frontend.client.bean.GWTProfileFileBrowser;
 import com.openkm.frontend.client.bean.GWTPropertyGroup;
+import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
 import com.openkm.frontend.client.extension.event.handler.PropertyGroupHandlerExtension;
 import com.openkm.frontend.client.extension.event.hashandler.HasPropertyGroupHandlerExtension;
 import com.openkm.frontend.client.widget.ConfirmPopup;
+import com.openkm.frontend.client.widget.filebrowser.FileBrowser;
 import com.openkm.frontend.client.widget.propertygroup.PropertyGroupWidget;
 import com.openkm.frontend.client.widget.propertygroup.PropertyGroupWidgetToFire;
 
@@ -45,32 +48,23 @@ import com.openkm.frontend.client.widget.propertygroup.PropertyGroupWidgetToFire
  * PropertyGroup
  * 
  * @author jllort
- *
  */
-public class PropertyGroup extends Composite implements
-        HasPropertyGroupHandlerExtension {
+public class PropertyGroup extends Composite implements HasPropertyGroupHandlerExtension {
     private ScrollPanel scrollPanel;
-
     private PropertyGroupWidget propertyGroupWidget;
-
     private Button changeButton;
-
     private Button removeButton;
-
     private Button cancelButton;
-
     private boolean editValues = false;
-
     private FiredHorizontalPanel hPanelFired;
-
     private GWTPropertyGroup propertyGroup;
+    private Object node;
 
     /**
      * PropertyGroup
      */
-    public PropertyGroup(final GWTPropertyGroup propertyGroup,
-            final Object node, final GWTFolder parentFolder,
-            final boolean visible, final boolean readOnly) {
+    public PropertyGroup(GWTPropertyGroup propertyGroup, Object node, GWTFolder parentFolder, boolean visible, boolean readOnly) {
+        this.node = node;
         String path = "";
         int permissions = 0;
 
@@ -86,69 +80,68 @@ public class PropertyGroup extends Composite implements
         }
 
         hPanelFired = new FiredHorizontalPanel();
-        propertyGroupWidget = new PropertyGroupWidget(path, propertyGroup,
-                hPanelFired, hPanelFired);
+        propertyGroupWidget = new PropertyGroupWidget(path, propertyGroup, hPanelFired, hPanelFired);
         scrollPanel = new ScrollPanel(propertyGroupWidget);
         this.propertyGroup = propertyGroup;
 
-        changeButton = new Button(Main.i18n("button.change"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (!editValues) {
-                            Main.get().mainPanel.disableKeyShorcuts(); // Disables key shortcuts while updating
-                            changeButton.setHTML(Main.i18n("button.memory"));
-                            cancelButton.setVisible(true);
-                            edit();
-                            editValues = true;
-                            removeButton.setVisible(false);
-                        } else {
-                            if (propertyGroupWidget.getValidationProcessor()
-                                    .validate()) {
-                                Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
-                                changeButton.setHTML(Main.i18n("button.change"));
-                                setProperties();
-                                editValues = false;
-                                removeButton.setVisible(true);
-                                cancelButton.setVisible(false);
-                            }
-                        }
+        changeButton = new Button(Main.i18n("button.change"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!editValues) {
+                    Main.get().mainPanel.disableKeyShorcuts(); // Disables key shortcuts while updating
+                    changeButton.setHTML(Main.i18n("button.memory"));
+                    cancelButton.setVisible(true);
+                    edit();
+                    editValues = true;
+                    removeButton.setVisible(false);
+                } else {
+                    if (propertyGroupWidget.getValidationProcessor().validate()) {
+                        Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
+                        changeButton.setHTML(Main.i18n("button.change"));
+                        setProperties();
+                        editValues = false;
+                        removeButton.setVisible(true);
+                        cancelButton.setVisible(false);
                     }
-                });
+                }
+            }
+        });
 
-        removeButton = new Button(Main.i18n("button.delete"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (!editValues) {
-                            Main.get().confirmPopup
-                                    .setConfirm(ConfirmPopup.CONFIRM_DELETE_PROPERTY_GROUP);
-                            Main.get().confirmPopup.show();
-                        }
-                    }
-                });
+        removeButton = new Button(Main.i18n("button.delete"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!editValues) {
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_PROPERTY_GROUP);
+                    Main.get().confirmPopup.show();
+                }
+            }
+        });
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (editValues) {
-                            Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
-                            changeButton.setHTML(Main.i18n("button.change"));
-                            editValues = false;
-                            cancelEdit();
-                            removeButton.setVisible(true);
-                            cancelButton.setVisible(false);
-                        }
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (editValues) {
+                    Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
+                    changeButton.setHTML(Main.i18n("button.change"));
+                    editValues = false;
+                    cancelEdit();
+                    removeButton.setVisible(true);
+                    cancelButton.setVisible(false);
+                }
+            }
+        });
 
         // Checking button permisions
         if (!visible) {
             changeButton.setVisible(visible);
             removeButton.setVisible(visible);
-        } else if ((permissions & GWTPermission.WRITE) == GWTPermission.WRITE
-                && (parentFolder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
+        } else if ((Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS
+                || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES || Main.get().mainPanel.desktop.navigator
+                .getStackIndex() == UIDesktopConstants.NAVIGATOR_METADATA) && ((permissions & GWTPermission.WRITE) == GWTPermission.WRITE)) {
+            changeButton.setVisible(!readOnly);
+            removeButton.setVisible(true);
+        } else if (((permissions & GWTPermission.WRITE) == GWTPermission.WRITE)
+                && ((parentFolder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE)) {
             changeButton.setVisible(!readOnly);
             removeButton.setVisible(true);
         } else {
@@ -161,8 +154,7 @@ public class PropertyGroup extends Composite implements
         hPanelFired.add(cancelButton);
         hPanelFired.add(new HTML("&nbsp;&nbsp;"));
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .getProfileToolbar().isRemovePropertyGroupVisible()) {
+        if (Main.get().workspaceUserProperties.getWorkspace().getProfileToolbar().isRemovePropertyGroupVisible()) {
             hPanelFired.add(removeButton);
         }
 
@@ -173,7 +165,7 @@ public class PropertyGroup extends Composite implements
         removeButton.setStyleName("okm-DeleteButton");
         cancelButton.setStyleName("okm-NoButton");
 
-        getProperties();
+        getProperties(false);
         initWidget(scrollPanel);
     }
 
@@ -185,6 +177,13 @@ public class PropertyGroup extends Composite implements
     }
 
     /**
+     * @return
+     */
+    public boolean isUpdatePropertyGrouupEnabled() {
+        return changeButton.isEnabled() && changeButton.isVisible();
+    }
+
+    /**
      * Lang refresh
      */
     public void langRefresh() {
@@ -193,10 +192,10 @@ public class PropertyGroup extends Composite implements
     }
 
     /**
-     * Gets all group properties 
+     * Gets all group properties
      */
-    private void getProperties() {
-        propertyGroupWidget.getProperties();
+    private void getProperties(boolean suggestion) {
+        propertyGroupWidget.getProperties(suggestion);
     }
 
     /**
@@ -210,8 +209,7 @@ public class PropertyGroup extends Composite implements
      * set document property group
      */
     public void setProperties() {
-        Main.get().mainPanel.desktop.browser.tabMultiple.status
-                .setGroupProperties();
+        Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         propertyGroupWidget.setProperties();
     }
 
@@ -251,10 +249,8 @@ public class PropertyGroup extends Composite implements
      * FiredHorizontalPanel
      * 
      * @author jllort
-     *
      */
-    private class FiredHorizontalPanel extends Composite implements
-            PropertyGroupWidgetToFire {
+    private class FiredHorizontalPanel extends Composite implements PropertyGroupWidgetToFire {
         private HorizontalPanel hPanel;
 
         public FiredHorizontalPanel() {
@@ -268,12 +264,25 @@ public class PropertyGroup extends Composite implements
 
         @Override
         public void finishedSetProperties() {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+            if (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS
+                    || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES
+                    || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_METADATA) {
+                Main.get().activeFolderTree.refresh(true);
+            } else {
+                refreshingActualNode();
+            }
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
         }
 
         @Override
         public void finishedRemoveGroup() {
+            if (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS
+                    || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES
+                    || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_METADATA) {
+                Main.get().activeFolderTree.refresh(true);
+            } else {
+                refreshingActualNode();
+            }
         }
 
         /**
@@ -281,14 +290,34 @@ public class PropertyGroup extends Composite implements
          * 
          * @param widget
          */
-        public void add(final Widget widget) {
+        public void add(Widget widget) {
             hPanel.add(widget);
+        }
+
+        /**
+         * Used when properties are changed and filebrowser has extra columns
+         * refreshingActualNode
+         */
+        private void refreshingActualNode() {
+            GWTProfileFileBrowser pfb = Main.get().workspaceUserProperties.getWorkspace().getProfileFileBrowser();
+            if (pfb.isExtraColumns() && Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
+                if (node instanceof GWTDocument) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser
+                            .setFileBrowserAction(FileBrowser.ACTION_PROPERTY_GROUP_REFRESH_DOCUMENT);
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refreshDocumentValues();
+                } else if (node instanceof GWTFolder) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.setFileBrowserAction(FileBrowser.ACTION_PROPERTY_GROUP_REFRESH_FOLDER);
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refreshFolderValues();
+                } else if (node instanceof GWTMail) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.setFileBrowserAction(FileBrowser.ACTION_PROPERTY_GROUP_REFRESH_MAIL);
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refreshMailValues();
+                }
+            }
         }
     }
 
     @Override
-    public void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
+    public void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
         propertyGroupWidget.addPropertyGroupHandlerExtension(handlerExtension);
     }
 }

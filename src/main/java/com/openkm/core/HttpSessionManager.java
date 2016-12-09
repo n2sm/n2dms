@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,11 +42,8 @@ import com.openkm.bean.HttpSessionInfo;
  */
 public class HttpSessionManager {
     @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory
-            .getLogger(HttpSessionManager.class);
-
+    private static Logger log = LoggerFactory.getLogger(HttpSessionManager.class);
     private static HttpSessionManager instance = new HttpSessionManager();
-
     private List<HttpSessionInfo> sessions = new ArrayList<HttpSessionInfo>();
 
     /**
@@ -65,12 +62,12 @@ public class HttpSessionManager {
     /**
      * Add a new session
      */
-    public synchronized void add(final HttpServletRequest request) {
-        final HttpSessionInfo si = new HttpSessionInfo();
-        final HttpSession s = request.getSession();
+    public synchronized void add(HttpServletRequest request) {
+        HttpSessionInfo si = new HttpSessionInfo();
+        HttpSession s = request.getSession();
         boolean add = true;
 
-        for (final HttpSessionInfo rsi : sessions) {
+        for (HttpSessionInfo rsi : sessions) {
             if (rsi.getId().equals(s.getId())) {
                 add = false;
             }
@@ -81,24 +78,23 @@ public class HttpSessionManager {
             si.setIp(request.getRemoteAddr());
 
             try {
-                final InetAddress addr = Address.getByAddress(request
-                        .getRemoteAddr());
-                final String hostName = Address.getHostName(addr);
+                InetAddress addr = Address.getByAddress(request.getRemoteAddr());
+                String hostName = Address.getHostName(addr);
 
                 if (hostName.endsWith(".")) {
                     si.setHost(hostName.substring(0, hostName.length() - 1));
                 } else {
                     si.setHost(hostName);
                 }
-            } catch (final UnknownHostException e) {
+            } catch (UnknownHostException e) {
                 si.setHost(request.getRemoteHost());
             }
 
             si.setId(s.getId());
-            final Calendar creation = Calendar.getInstance();
+            Calendar creation = Calendar.getInstance();
             creation.setTimeInMillis(s.getCreationTime());
             si.setCreation(creation);
-            final Calendar lastAccess = Calendar.getInstance();
+            Calendar lastAccess = Calendar.getInstance();
             lastAccess.setTimeInMillis(s.getLastAccessedTime());
             si.setLastAccess(lastAccess);
 
@@ -110,8 +106,8 @@ public class HttpSessionManager {
     /**
      * Update session last accessed time
      */
-    public synchronized void update(final String id) {
-        for (final HttpSessionInfo si : sessions) {
+    public synchronized void update(String id) {
+        for (HttpSessionInfo si : sessions) {
             if (si.getId().equals(id)) {
                 si.setLastAccess(Calendar.getInstance());
             }
@@ -121,10 +117,9 @@ public class HttpSessionManager {
     /**
      * Remove a session
      */
-    public synchronized void remove(final String id) {
-        for (final Iterator<HttpSessionInfo> it = sessions.iterator(); it
-                .hasNext();) {
-            final HttpSessionInfo si = it.next();
+    public synchronized void remove(String id) {
+        for (Iterator<HttpSessionInfo> it = sessions.iterator(); it.hasNext();) {
+            HttpSessionInfo si = it.next();
 
             if (si.getId().equals(id)) {
                 it.remove();
@@ -136,8 +131,8 @@ public class HttpSessionManager {
     /**
      * Return a session info
      */
-    public HttpSessionInfo getSession(final String id) {
-        for (final HttpSessionInfo si : sessions) {
+    public HttpSessionInfo getSession(String id) {
+        for (HttpSessionInfo si : sessions) {
             if (si.getId().equals(id)) {
                 return si;
             }

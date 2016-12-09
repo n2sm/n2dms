@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,24 +21,30 @@
 
 package com.openkm.api;
 
-import java.io.IOException;
-import java.util.List;
-
+import com.auxilii.msgparser.Message;
+import com.auxilii.msgparser.MsgParser;
+import com.openkm.automation.AutomationException;
+import com.openkm.bean.ExtendedAttributes;
+import com.openkm.bean.Mail;
+import com.openkm.core.*;
+import com.openkm.extension.core.ExtensionException;
+import com.openkm.module.MailModule;
+import com.openkm.module.ModuleManager;
+import com.openkm.spring.PrincipalUtils;
+import com.openkm.util.MailUtils;
+import com.openkm.util.PathUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openkm.automation.AutomationException;
-import com.openkm.bean.Mail;
-import com.openkm.core.AccessDeniedException;
-import com.openkm.core.DatabaseException;
-import com.openkm.core.ItemExistsException;
-import com.openkm.core.LockException;
-import com.openkm.core.PathNotFoundException;
-import com.openkm.core.RepositoryException;
-import com.openkm.core.UserQuotaExceededException;
-import com.openkm.core.VirusDetectedException;
-import com.openkm.module.MailModule;
-import com.openkm.module.ModuleManager;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * @author pavila
@@ -46,7 +52,6 @@ import com.openkm.module.ModuleManager;
  */
 public class OKMMail implements MailModule {
     private static Logger log = LoggerFactory.getLogger(OKMMail.class);
-
     private static OKMMail instance = new OKMMail();
 
     private OKMMail() {
@@ -57,126 +62,186 @@ public class OKMMail implements MailModule {
     }
 
     @Override
-    public Mail create(final String token, final Mail mail)
-            throws PathNotFoundException, ItemExistsException,
-            VirusDetectedException, AccessDeniedException, RepositoryException,
-            DatabaseException, UserQuotaExceededException {
+    public Mail create(String token, Mail mail) throws PathNotFoundException, ItemExistsException, VirusDetectedException,
+            AccessDeniedException, RepositoryException, DatabaseException, UserQuotaExceededException, AutomationException {
         log.debug("create({}, {})", token, mail);
-        final MailModule mm = ModuleManager.getMailModule();
-        final Mail newMail = mm.create(token, mail);
+        MailModule mm = ModuleManager.getMailModule();
+        Mail newMail = mm.create(token, mail);
         log.debug("create: {}", newMail);
         return newMail;
     }
 
     @Override
-    public Mail getProperties(final String token, final String mailPath)
-            throws PathNotFoundException, RepositoryException,
+    public Mail getProperties(String token, String mailId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getProperties({}, {})", token, mailPath);
-        final MailModule mm = ModuleManager.getMailModule();
-        final Mail mail = mm.getProperties(token, mailPath);
+        log.debug("getProperties({}, {})", token, mailId);
+        MailModule mm = ModuleManager.getMailModule();
+        Mail mail = mm.getProperties(token, mailId);
         log.debug("getProperties: {}", mail);
         return mail;
     }
 
     @Override
-    public void delete(final String token, final String mailPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void delete(String token, String mailPath) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("delete({}, {})", token, mailPath);
-        final MailModule mm = ModuleManager.getMailModule();
+        MailModule mm = ModuleManager.getMailModule();
         mm.delete(token, mailPath);
         log.debug("delete: void");
     }
 
     @Override
-    public void purge(final String token, final String mailPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void purge(String token, String mailPath) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("purge({}, {})", token, mailPath);
-        final MailModule mm = ModuleManager.getMailModule();
+        MailModule mm = ModuleManager.getMailModule();
         mm.purge(token, mailPath);
         log.debug("purge: void");
     }
 
     @Override
-    public Mail rename(final String token, final String mailPath,
-            final String newName) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException {
-        log.debug("rename({}, {}, {})",
-                new Object[] { token, mailPath, newName });
-        final MailModule mm = ModuleManager.getMailModule();
-        final Mail renamedMail = mm.rename(token, mailPath, newName);
+    public Mail rename(String token, String mailPath, String newName) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("rename({}, {}, {})", new Object[] { token, mailPath, newName });
+        MailModule mm = ModuleManager.getMailModule();
+        Mail renamedMail = mm.rename(token, mailPath, newName);
         log.debug("rename: {}", renamedMail);
         return renamedMail;
     }
 
     @Override
-    public void move(final String token, final String mailPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void move(String token, String mailPath, String dstPath) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("move({}, {}, {})", new Object[] { token, mailPath, dstPath });
-        final MailModule mm = ModuleManager.getMailModule();
+        MailModule mm = ModuleManager.getMailModule();
         mm.move(token, mailPath, dstPath);
         log.debug("move: void");
     }
 
     @Override
-    public void copy(final String token, final String mailPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            IOException, AutomationException, DatabaseException,
-            UserQuotaExceededException {
+    public void copy(String token, String mailPath, String dstPath) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException, UserQuotaExceededException {
         log.debug("copy({}, {}, {})", new Object[] { token, mailPath, dstPath });
-        final MailModule mm = ModuleManager.getMailModule();
+        MailModule mm = ModuleManager.getMailModule();
         mm.copy(token, mailPath, dstPath);
         log.debug("copy: void");
     }
 
     @Override
+    public void extendedCopy(String token, String mailPath, String dstPath, ExtendedAttributes extAttr) throws PathNotFoundException,
+            ItemExistsException, AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException,
+            UserQuotaExceededException {
+        log.debug("extendedCopy({}, {}, {}, {})", new Object[] { token, mailPath, dstPath, extAttr });
+        MailModule mm = ModuleManager.getMailModule();
+        mm.extendedCopy(token, mailPath, dstPath, extAttr);
+        log.debug("extendedCopy: void");
+    }
+
+    @Override
     @Deprecated
-    public List<Mail> getChilds(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Mail> getChilds(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChilds({}, {})", token, fldPath);
-        final MailModule mm = ModuleManager.getMailModule();
-        final List<Mail> col = mm.getChilds(token, fldPath);
+        log.debug("getChilds({}, {})", token, fldId);
+        MailModule mm = ModuleManager.getMailModule();
+        List<Mail> col = mm.getChilds(token, fldId);
         log.debug("getChilds: {}", col);
         return col;
     }
 
     @Override
-    public List<Mail> getChildren(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Mail> getChildren(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChildren({}, {})", token, fldPath);
-        final MailModule mm = ModuleManager.getMailModule();
-        final List<Mail> col = mm.getChildren(token, fldPath);
+        log.debug("getChildren({}, {})", token, fldId);
+        MailModule mm = ModuleManager.getMailModule();
+        List<Mail> col = mm.getChildren(token, fldId);
         log.debug("getChildren: {}", col);
         return col;
     }
 
     @Override
-    public boolean isValid(final String token, final String mailPath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("isValid({}, {})", token, mailPath);
-        final MailModule mm = ModuleManager.getMailModule();
-        final boolean valid = mm.isValid(token, mailPath);
+    public boolean isValid(String token, String mailId) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("isValid({}, {})", token, mailId);
+        MailModule mm = ModuleManager.getMailModule();
+        boolean valid = mm.isValid(token, mailId);
         log.debug("isValid: {}", valid);
         return valid;
     }
 
     @Override
-    public String getPath(final String token, final String uuid)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String getPath(String token, String uuid) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getPath({})", uuid);
-        final MailModule mm = ModuleManager.getMailModule();
-        final String path = mm.getPath(token, uuid);
+        MailModule mm = ModuleManager.getMailModule();
+        String path = mm.getPath(token, uuid);
         log.debug("getPath: {}", path);
         return path;
+    }
+
+    /**
+     * Import EML file as MailNode.
+     */
+    public Mail importEml(String path, InputStream is) throws MessagingException, PathNotFoundException, ItemExistsException,
+            VirusDetectedException, AccessDeniedException, RepositoryException, DatabaseException, UserQuotaExceededException,
+            UnsupportedMimeTypeException, FileSizeExceededException, ExtensionException, AutomationException, IOException {
+        log.debug("importEml({}, {})", path, is);
+        Properties props = System.getProperties();
+        props.put("mail.host", "smtp.dummydomain.com");
+        props.put("mail.transport.protocol", "smtp");
+        Mail newMail = null;
+
+        try {
+            // Convert file
+            Session mailSession = Session.getDefaultInstance(props, null);
+            MimeMessage msg = new MimeMessage(mailSession, is);
+            Mail mail = MailUtils.messageToMail(msg);
+
+            // Create phantom path. In this case we don't have the IMAP message
+            // ID, son create a random one.
+            mail.setPath(path + "/" + UUID.randomUUID().toString() + "-" + PathUtils.escape(mail.getSubject()));
+
+            // Import files
+            newMail = OKMMail.getInstance().create(null, mail);
+            MailUtils.addAttachments(null, mail, msg, PrincipalUtils.getUser());
+        } catch (IOException e) {
+            log.error("Error importing eml", e);
+            throw e;
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+
+        log.debug("importEml: {}", newMail);
+        return newMail;
+    }
+
+    /**
+     * Import MSG file as MailNode.
+     */
+    public Mail importMsg(String path, InputStream is) throws MessagingException, PathNotFoundException, ItemExistsException,
+            VirusDetectedException, AccessDeniedException, RepositoryException, DatabaseException, UserQuotaExceededException,
+            UnsupportedMimeTypeException, FileSizeExceededException, ExtensionException, AutomationException, IOException {
+        log.debug("importMsg({}, {})", path, is);
+        Mail newMail = null;
+
+        try {
+            // Convert file
+            MsgParser msgp = new MsgParser();
+            Message msg = msgp.parseMsg(is);
+            Mail mail = MailUtils.messageToMail(msg);
+
+            // Create phantom path. In this case we don't have the IMAP message ID, son create a random one.
+            mail.setPath(path + "/" + UUID.randomUUID().toString() + "-" + PathUtils.escape(mail.getSubject()));
+
+            // Import files
+            newMail = OKMMail.getInstance().create(null, mail);
+            MailUtils.addAttachments(null, mail, msg, PrincipalUtils.getUser());
+        } catch (IOException e) {
+            log.error("Error importing msg", e);
+            throw e;
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+
+        log.debug("importMsg: {}", newMail);
+        return newMail;
     }
 }

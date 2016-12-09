@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,22 +28,16 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 @SuppressWarnings("serial")
 public class StartsWithTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String string;
-
     private String prefix;
 
     @Override
     public int doStartTag() {
-        final boolean ret = string.startsWith(prefix);
+        boolean ret = string.startsWith(prefix);
 
         try {
             pageContext.getOut().write(Boolean.toString(ret));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -61,7 +55,7 @@ public class StartsWithTag extends TagSupport {
         return string;
     }
 
-    public void setString(final String string) {
+    public void setString(String string) {
         this.string = string;
     }
 
@@ -69,7 +63,7 @@ public class StartsWithTag extends TagSupport {
         return prefix;
     }
 
-    public void setPrefix(final String prefix) {
+    public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 }

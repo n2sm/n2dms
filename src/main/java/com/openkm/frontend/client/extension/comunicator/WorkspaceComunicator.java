@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,17 +43,15 @@ public class WorkspaceComunicator {
     /**
      * ChangeSelectedTab
      */
-    public static void changeSelectedTab(final int selectedTab) {
-        Main.get().mainPanel.topPanel.tabWorkspace
-                .changeSelectedTab(selectedTab);
+    public static void changeSelectedTab(int selectedTab) {
+        Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(selectedTab);
     }
 
     /**
      * SelectedWorkspace
      */
     public static int getSelectedWorkspace() {
-        return Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace();
+        return Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace();
     }
 
     /**
@@ -66,8 +64,7 @@ public class WorkspaceComunicator {
     /**
      * TabExtensionIndex
      */
-    public static int getTabExtensionIndex(final TabWorkspaceExtension widget) {
-        return Main.get().mainPanel.topPanel.tabWorkspace
-                .getTabExtensionIndex(widget);
+    public static int getTabExtensionIndex(TabWorkspaceExtension widget) {
+        return Main.get().mainPanel.topPanel.tabWorkspace.getTabExtensionIndex(widget);
     }
 }

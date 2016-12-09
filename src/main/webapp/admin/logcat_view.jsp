@@ -11,12 +11,12 @@
   <title>LogCat</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
         <li class="path">
-          <a href="experimental.jsp">Experimental</a>
+          <a href="utilities.jsp">Utilities</a>
         </li>
         <li class="path">
           <a href="LogCat">LogCat</a>

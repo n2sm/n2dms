@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,14 +25,11 @@ import java.io.Serializable;
 
 public class Scripting implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String TYPE = "mix:scripting";
-
     public static final String SCRIPT_CODE = "okm:scriptCode";
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("}");
         return sb.toString();

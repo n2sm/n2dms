@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -40,21 +41,16 @@ import com.openkm.frontend.client.Main;
  *
  */
 public class ErrorPopup extends DialogBox implements ClickHandler {
-
     private VerticalPanel vPanel;
-
     private HTML text;
-
     private Button button;
-
     private ScrollPanel sPanel;
-
     private boolean logout;
 
     /**
      * Error popup
      */
-    public ErrorPopup(final boolean logout) {
+    public ErrorPopup(boolean logout) {
         // Establishes auto-close when click outside
         super(false, true);
 
@@ -84,10 +80,8 @@ public class ErrorPopup extends DialogBox implements ClickHandler {
         vPanel.add(new HTML("<br>"));
 
         text.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        vPanel.setCellHorizontalAlignment(sPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(sPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, VerticalPanel.ALIGN_CENTER);
 
         button.setStyleName("okm-YesButton");
 
@@ -98,8 +92,7 @@ public class ErrorPopup extends DialogBox implements ClickHandler {
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
      */
-    @Override
-    public void onClick(final ClickEvent event) {
+    public void onClick(ClickEvent event) {
         Log.debug("onClick(" + event + ")");
         hide();
         // Removes all previous text for next errors messages, varios errors can be added simultanealy
@@ -127,7 +120,7 @@ public class ErrorPopup extends DialogBox implements ClickHandler {
      * 
      * @param msg Error message
      */
-    public void show(final String msg) {
+    public void show(String msg) {
         //TODO: aqui pueden haber problemas de concurrencia al ser llamado simultaneamente este método
         // cabe la posibilidad de perder algun mensaje de error.
         if (!text.getHTML().equals("")) {
@@ -136,8 +129,8 @@ public class ErrorPopup extends DialogBox implements ClickHandler {
             text.setHTML(msg);
         }
         setText(Main.i18n("error.label"));
-        final int left = (Window.getClientWidth() - 380) / 2;
-        final int top = (Window.getClientHeight() - 200) / 2;
+        int left = (Window.getClientWidth() - 380) / 2;
+        int top = (Window.getClientHeight() - 200) / 2;
         setPopupPosition(left, top);
         super.show();
     }

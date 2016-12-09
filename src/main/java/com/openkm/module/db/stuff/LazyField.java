@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,21 +39,12 @@ import com.openkm.extractor.RegisteredExtractors;
  */
 @SuppressWarnings("serial")
 public class LazyField extends AbstractField implements Fieldable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(LazyField.class);
-
     PersistentFile persistentFile;
-
     String content;
 
-    public LazyField(final String name, final PersistentFile persistentFile,
-            final LuceneOptions luceneOptions) {
-        super(name, luceneOptions.getStore(), luceneOptions.getIndex(),
-                luceneOptions.getTermVector());
+    public LazyField(String name, PersistentFile persistentFile, LuceneOptions luceneOptions) {
+        super(name, luceneOptions.getStore(), luceneOptions.getIndex(), luceneOptions.getTermVector());
         lazy = true;
         this.persistentFile = persistentFile;
     }
@@ -63,7 +54,7 @@ public class LazyField extends AbstractField implements Fieldable {
         if (content == null) {
             try {
                 content = RegisteredExtractors.getText(persistentFile);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }

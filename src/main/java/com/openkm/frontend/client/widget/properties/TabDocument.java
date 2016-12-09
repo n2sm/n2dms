@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,13 +22,13 @@
 package com.openkm.frontend.client.widget.properties;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -40,82 +40,57 @@ import com.openkm.frontend.client.bean.GWTDocument;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTPermission;
 import com.openkm.frontend.client.bean.GWTPropertyGroup;
-import com.openkm.frontend.client.constants.service.RPCService;
 import com.openkm.frontend.client.extension.event.HasDocumentEvent;
 import com.openkm.frontend.client.extension.event.handler.DocumentHandlerExtension;
 import com.openkm.frontend.client.extension.event.handler.PropertyGroupHandlerExtension;
 import com.openkm.frontend.client.extension.event.hashandler.HasDocumentHandlerExtension;
 import com.openkm.frontend.client.extension.event.hashandler.HasPropertyGroupHandlerExtension;
+import com.openkm.frontend.client.extension.widget.preview.PreviewExtension;
 import com.openkm.frontend.client.extension.widget.tabdocument.TabDocumentExtension;
 import com.openkm.frontend.client.service.OKMPropertyGroupService;
 import com.openkm.frontend.client.service.OKMPropertyGroupServiceAsync;
 import com.openkm.frontend.client.util.Util;
+import com.openkm.frontend.client.widget.properties.version.VersionScrollTable;
 
 /**
  * The tab document
  * 
  * @author jllort
- *
  */
-public class TabDocument extends Composite implements HasDocumentEvent,
-        HasDocumentHandlerExtension, HasPropertyGroupHandlerExtension {
-
+public class TabDocument extends Composite implements HasDocumentEvent, HasDocumentHandlerExtension, HasPropertyGroupHandlerExtension {
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
 
     private static final int TAB_HEIGHT = 20;
-
     public int PREVIEW_TAB = -1;
-
     private int SECURITY_TAB = -1;
 
     public TabLayoutPanel tabPanel;
-
     public Document document;
-
     public VersionScrollTable version;
-
     public SecurityScrollTable security;
-
     private VerticalPanel panel;
-
     private List<PropertyGroup> propertyGroup;
-
     private GWTDocument doc;
-
     public Notes notes;
-
-    private Preview preview;
-
-    private int selectedTab = 0; // Used to determine selected tab to mantain on change document, because not all documents
-                                 // have the same number of tabs ( document group properties are variable )
-
+    public Preview preview;
+    private int selectedTab = 0; // Used to determine selected tab to mantain on
+                                 // change document, because not all documents
+                                 // have the same number of tabs ( document
+                                 // group properties are variable )
     private int latestSelectedTab = 0;
-
-    private boolean visibleButton = true; // Sets visibleButtons enabled to default view 
-
+    private boolean visibleButton = true; // Sets visibleButtons enabled to default view
     private List<TabDocumentExtension> widgetExtensionList;
-
     private List<DocumentHandlerExtension> docHandlerExtensionList;
-
     private int height = 0;
-
     private int width = 0;
-
     private boolean documentVisible = false;
-
     private boolean notesVisible = false;
-
     private boolean versionVisible = false;
-
     private boolean securityVisible = false;
-
     private boolean previewVisible = false;
-
     private boolean propertyGroupsVisible = false;
-
     private List<PropertyGroupHandlerExtension> propertyGroupHandlerExtensionList;
-
     private int IEBugCorrections = 0;
 
     /**
@@ -129,7 +104,7 @@ public class TabDocument extends Composite implements HasDocumentEvent,
         notes = new Notes(Notes.DOCUMENT_NOTE);
         version = new VersionScrollTable();
         security = new SecurityScrollTable();
-        preview = new Preview();
+        preview = new Preview(null);
         panel = new VerticalPanel();
         propertyGroup = new ArrayList<PropertyGroup>();
         widgetExtensionList = new ArrayList<TabDocumentExtension>();
@@ -137,23 +112,25 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
+            public void onSelection(SelectionEvent<Integer> event) {
                 final int tabIndex = event.getSelectedItem().intValue();
-                Main.get().mainPanel.topPanel.toolBar
-                        .evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
+                Main.get().mainPanel.topPanel.toolBar.evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
                 selectedTab = tabIndex;
+
                 if (tabIndex == SECURITY_TAB) {
-                    final Timer timer = new Timer() {
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
                             security.fillWidth(); // Always when shows fires fill width
                         }
                     };
-                    timer.schedule(50); // Fill width must be done after really it'll be visible
+                    timer.schedule(500); // Fill width must be done after really it'll be visible
                 }
+
                 preview.cleanPreview(); // Always clean preview tab
+
                 if (tabIndex == PREVIEW_TAB) {
-                    final Timer previewTimer = new Timer() {
+                    Timer previewTimer = new Timer() {
                         @Override
                         public void run() {
                             previewDocument(false);
@@ -161,6 +138,7 @@ public class TabDocument extends Composite implements HasDocumentEvent,
                     };
                     previewTimer.schedule(500);
                 }
+
                 fireEvent(HasDocumentEvent.TAB_CHANGED);
             }
         });
@@ -170,7 +148,6 @@ public class TabDocument extends Composite implements HasDocumentEvent,
         document.setSize("100%", "100%");
         notes.setSize("100%", "100%");
         panel.setSize("100%", "100%");
-
         tabPanel.setStyleName("okm-DisableSelect");
 
         initWidget(panel);
@@ -182,35 +159,34 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * @param width With of the widget
      * @param height Height of the widget
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         //do not set if width and height are not changed
-        if (this.height == height && this.width == width) {
+        if (this.height == height && this.width == width)
             return;
-        }
 
         this.height = height;
         this.width = width;
         tabPanel.setPixelSize(width, height);
-        document.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        notes.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        version.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        document.setPixelSize(width, height - TAB_HEIGHT);
+        notes.setPixelSize(width, height - TAB_HEIGHT);
+        version.setPixelSize(width, height - TAB_HEIGHT);
         version.fillWidth();
-        security.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        security.setPixelSize(width, height - TAB_HEIGHT);
         security.fillWidth();
 
         // Setting size to extension
-        for (final TabDocumentExtension tabDocumentExtension : widgetExtensionList) {
-            tabDocumentExtension.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        for (Iterator<TabDocumentExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            it.next().setPixelSize(width, height - TAB_HEIGHT);
         }
 
-        if (!propertyGroup.isEmpty()) { // Sets size to propety groups	
-            for (final PropertyGroup group : propertyGroup) {
+        if (!propertyGroup.isEmpty()) { // Sets size to propety groups
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 group.setPixelSize(width, height - TAB_HEIGHT);
             }
         }
 
-        preview.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        preview.setPixelSize(width, height - TAB_HEIGHT);
         if (selectedTab == PREVIEW_TAB) {
             previewDocument(true);
         }
@@ -223,62 +199,64 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * 
      * @param doc The document object
      */
-    public void setProperties(final GWTDocument doc) {
+    public void setProperties(GWTDocument doc) {
         // We must declare status here due pending downloading ( fired by status )
         if (securityVisible) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setUserSecurity();
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setRoleSecurity();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setUserSecurity();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setRoleSecurity();
         }
+
         if (versionVisible) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setVersionHistory();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setVersionHistory();
         }
+
         if (propertyGroupsVisible) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         }
 
         this.doc = doc;
-        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selected Tab
+        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selected tab
         latestSelectedTab = selectedTab; // stores latest selected tab
 
         document.set(doc); // Used by TabDocumentCommunicator
         notes.set(doc); // Used by TabDocumentCommunicator
+
         if (versionVisible) {
             version.set(doc);
             version.getVersionHistory();
         }
+
         if (securityVisible) {
-            security.setPath(doc.getPath());
+            security.setUuid(doc.getUuid());
             security.GetGrants();
 
-            final GWTFolder parentFolder = Main.get().activeFolderTree
-                    .getFolder();
+            GWTFolder parentFolder = Main.get().activeFolderTree.getFolder();
+
             if ((parentFolder.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
-                    && (doc.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
-                    && !doc.isCheckedOut() && !doc.isLocked()) {
+                    && (doc.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY && !doc.isCheckedOut() && !doc.isLocked()) {
                 security.setChangePermision(true);
             } else {
                 security.setChangePermision(false);
             }
         }
+
         if (previewVisible) {
-            preview.setPreviewAvailable(doc.isConvertibleToSwf());
+            preview.setPreviewAvailable(doc.isConvertibleToSwf() || doc.isConvertibleToDxf()
+                    || doc.getMimeType().equals("application/x-shockwave-flash") || HTMLPreview.isPreviewAvailable(doc.getMimeType()));
         }
 
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup propertyGroup2 : propertyGroup) {
-                tabPanel.remove(propertyGroup2);
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                tabPanel.remove(it.next());
             }
             propertyGroup.clear();
         }
 
         // Only gets groups if really are visible
         if (propertyGroupsVisible) {
-            getGroups(doc.getPath()); // Gets all the property group assigned to a document
-                                      // Here evalutates selectedTab
+            getGroups(doc.getPath()); // Gets all the property group assigned to
+                                      // a document
+                                      // Here evaluates selectedTab
         }
 
         // Refresh preview if tab is visible
@@ -288,12 +266,13 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
         // TODO:Solves minor bug with IE ( now shows contents )
         if (Util.getUserAgent().startsWith("ie") && IEBugCorrections == 1) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
                     correctIEDefect();
                 }
             };
+
             timer.schedule(500);
         }
 
@@ -305,6 +284,7 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      */
     public void correctIEDefect() {
         IEBugCorrections++;
+
         if (tabPanel.getWidgetCount() > 1) {
             tabPanel.selectTab(1);
             tabPanel.selectTab(0);
@@ -314,9 +294,7 @@ public class TabDocument extends Composite implements HasDocumentEvent,
     }
 
     /**
-     * refreshPreviewDocument
-     * 
-     * Used by extended previewers
+     * refreshPreviewDocument Used by extended previewers
      */
     public void refreshPreviewDocument() {
         if (selectedTab == PREVIEW_TAB) {
@@ -334,11 +312,8 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
     /**
      * isWidgetExtensionVisible
-     * 
-     * @param widget
-     * @return
      */
-    public boolean isWidgetExtensionVisible(final Widget widget) {
+    public boolean isWidgetExtensionVisible(Widget widget) {
         if (tabPanel.getWidget(selectedTab).equals(widget)) {
             return true;
         } else {
@@ -360,30 +335,36 @@ public class TabDocument extends Composite implements HasDocumentEvent,
             tabPanel.add(document, Main.i18n("tab.document.properties"));
             document.langRefresh();
         }
+
         if (notesVisible) {
             tabPanel.add(notes, Main.i18n("tab.document.notes"));
             notes.langRefresh();
         }
+
         if (versionVisible) {
             tabPanel.add(version, Main.i18n("tab.document.history"));
             version.langRefresh();
         }
+
         if (securityVisible) {
             tabPanel.add(security, Main.i18n("tab.document.security"));
             security.langRefresh();
         }
+
         if (previewVisible) {
             tabPanel.add(preview, Main.i18n("tab.document.preview"));
             preview.langRefresh();
         }
 
-        for (final TabDocumentExtension extension : widgetExtensionList) {
+        for (Iterator<TabDocumentExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            TabDocumentExtension extension = it.next();
             tabPanel.add(extension, extension.getTabText());
         }
 
         // Refresh lang property group
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup group : propertyGroup) {
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 tabPanel.add(group, group.getGrpLabel());
                 group.langRefresh();
             }
@@ -399,8 +380,8 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
-        visibleButton = visible; // Save to be used by property group
+    public void setVisibleButtons(boolean visible) {
+        this.visibleButton = visible; // Save to be used by property group
         document.setVisibleButtons(visible);
         notes.setVisibleButtons(visible);
         version.setVisibleButtons(visible);
@@ -411,8 +392,6 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
     /**
      * isVisibleButton
-     * 
-     * @return
      */
     public boolean isVisibleButton() {
         return visibleButton;
@@ -422,38 +401,49 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * Gets asynchronous to get all groups assigned to a document
      */
     final AsyncCallback<List<GWTPropertyGroup>> callbackGetGroups = new AsyncCallback<List<GWTPropertyGroup>>() {
-        @Override
-        public void onSuccess(final List<GWTPropertyGroup> result) {
-            final GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
+        public void onSuccess(List<GWTPropertyGroup> result) {
+            GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
 
-            for (final GWTPropertyGroup gwtGroup : result) {
-                final String groupTranslation = gwtGroup.getLabel();
-                final PropertyGroup group = new PropertyGroup(gwtGroup, doc,
-                        gwtFolder, visibleButton, gwtGroup.isReadonly());
+            boolean enableUpdatePropertyGroup = false;
+            for (GWTPropertyGroup gwtGroup : result) {
+                String groupTranslation = gwtGroup.getLabel();
+                PropertyGroup group = new PropertyGroup(gwtGroup, doc, gwtFolder, visibleButton, gwtGroup.isReadonly());
                 tabPanel.add(group, groupTranslation);
                 propertyGroup.add(group);
 
                 // Adds property group handlers
-                for (final PropertyGroupHandlerExtension propertyGroupHandlerExtension : propertyGroupHandlerExtensionList) {
-                    group.addPropertyGroupHandlerExtension(propertyGroupHandlerExtension);
+                for (Iterator<PropertyGroupHandlerExtension> itx = propertyGroupHandlerExtensionList.iterator(); itx.hasNext();) {
+                    group.addPropertyGroupHandlerExtension(itx.next());
+                }
+
+                // has update property group
+                if (!enableUpdatePropertyGroup && group.isUpdatePropertyGrouupEnabled()) {
+                    enableUpdatePropertyGroup = true;
                 }
             }
 
-            // To prevent change on document that has minor tabs than previous the new selected tab it'll be the max - 1 on that cases
+            // enable property group
+            if (enableUpdatePropertyGroup) {
+                Main.get().mainPanel.topPanel.toolBar.enableUpdatePropertyGroup();
+            }
+
+            // To prevent change on document that has minor tabs than previous
+            // the new selected tab it'll be the max - 1 on that cases
             if (tabPanel.getWidgetCount() - 1 < latestSelectedTab) {
                 tabPanel.selectTab(tabPanel.getWidgetCount() - 1);
             } else {
-                tabPanel.selectTab(latestSelectedTab); // Always enable selected tab because on document change tab group are removed
-                                                       // and on remove loses selectedTab
+                tabPanel.selectTab(latestSelectedTab); // Always enable selected
+                                                       // tab because on
+                                                       // document change tab
+                                                       // group are removed
+                                                       // and on remove loses
+                                                       // selectedTab
             }
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
             Main.get().showError("GetGroups", caught);
         }
     };
@@ -461,9 +451,8 @@ public class TabDocument extends Composite implements HasDocumentEvent,
     /**
      * Gets all property groups assigned to document
      */
-    private void getGroups(final String docPath) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.status
-                .setGroupProperties();
+    private void getGroups(String docPath) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         propertyGroupService.getGroups(docPath, callbackGetGroups);
     }
 
@@ -471,11 +460,11 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * Removes the actual property group
      */
     public void removePropertyGroup() {
-        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selectedted Tab
+        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual
+                                                   // selectedted Tab
 
-        // Removes group 
-        final PropertyGroup group = (PropertyGroup) tabPanel
-                .getWidget(selectedTab);
+        // Removes group
+        PropertyGroup group = (PropertyGroup) tabPanel.getWidget(selectedTab);
         group.removeGroup();
         propertyGroup.remove(group);
 
@@ -494,58 +483,54 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
     /**
      * Return if actual tab selected is group property and can be removed
-     * 
-     * @return
      */
-    private boolean isRemovePropertyGroupEnabled(final int tabIndex) {
-        if (tabPanel.getWidget(tabIndex) instanceof PropertyGroup) {
-            return ((PropertyGroup) tabPanel.getWidget(tabIndex))
-                    .isRemovePropertyGroupEnabled();
+    private boolean isRemovePropertyGroupEnabled(int tabIndex) {
+        if ((tabPanel.getWidget(tabIndex) instanceof PropertyGroup)) {
+            return ((PropertyGroup) (tabPanel.getWidget(tabIndex))).isRemovePropertyGroupEnabled();
         } else {
             return false;
         }
     }
 
     /**
-     * resizingIncubatorWidgets 
-     * 
-     * Needs resizing if not widgets disapears
+     * resizingIncubatorWidgets Needs resizing if not widgets disapears
      */
     public void resizingIncubatorWidgets() {
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup group : propertyGroup) {
-                group.setPixelSize(getOffsetWidth(), getOffsetHeight()
-                        - TAB_HEIGHT); // Substract tab height
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
+                group.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
             }
         }
-        version.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT); // Substract tab height
-        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT); // Substract tab height
+        version.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
+        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
         version.fillWidth();
         security.fillWidth();
+
         // TODO:Solves minor bug with IE
         if (Util.getUserAgent().startsWith("ie")) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
-                    tabPanel.setWidth("" + width);
-                    tabPanel.setWidth("" + (width + 1));
-                    final Timer timer = new Timer() {
+                    tabPanel.setWidth("" + width + "px");
+                    tabPanel.setWidth("" + (width + 1) + "px");
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
-                            tabPanel.setWidth("" + width);
+                            tabPanel.setWidth("" + width + "px");
                         }
                     };
+
                     timer.schedule(50);
                 }
             };
+
             timer.schedule(100);
         }
     }
 
     /**
      * getSelectedTab
-     * 
-     * @return
      */
     public int getSelectedTab() {
         return selectedTab;
@@ -553,8 +538,6 @@ public class TabDocument extends Composite implements HasDocumentEvent,
 
     /**
      * getDocument
-     * 
-     * @return
      */
     public GWTDocument getDocument() {
         return doc;
@@ -610,43 +593,24 @@ public class TabDocument extends Composite implements HasDocumentEvent,
      * showExtensions
      */
     public void showExtensions() {
-        for (final TabDocumentExtension extension : widgetExtensionList) {
+        for (TabDocumentExtension extension : widgetExtensionList) {
             tabPanel.add(extension, extension.getTabText());
-            extension.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+            extension.setPixelSize(width, height - TAB_HEIGHT);
         }
     }
 
     /**
      * setKeywordEnabled
-     * 
-     * @param enabled
      */
-    public void setKeywordEnabled(final boolean enabled) {
+    public void setKeywordEnabled(boolean enabled) {
         document.setKeywordEnabled(enabled);
     }
 
     /**
      * previewDocument
      */
-    private void previewDocument(final boolean refreshing) {
-        if (doc.getMimeType().equals("video/x-flv")
-                || doc.getMimeType().equals("video/mp4")
-                || doc.getMimeType().equals("application/x-shockwave-flash")
-                || doc.getMimeType().equals("audio/mpeg")) {
-            if (!refreshing) {
-                preview.showMediaFile(RPCService.DownloadServlet + "?uuid="
-                        + URL.encodeQueryString(getDocument().getUuid()),
-                        getDocument().getMimeType());
-            } else {
-                preview.resizeMediaFile(width, height - TAB_HEIGHT);
-            }
-        } else {
-            if (!refreshing) {
-                preview.showEmbedSWF(doc.getUuid());
-            } else {
-                preview.resizeEmbedSWF(width, height - TAB_HEIGHT);
-            }
-        }
+    private void previewDocument(boolean refreshing) {
+        preview.previewDocument(refreshing, doc);
     }
 
     /**
@@ -657,14 +621,14 @@ public class TabDocument extends Composite implements HasDocumentEvent,
             tabPanel.selectTab(0);
 
             if (securityVisible && doc != null) {
-                security.setPath(doc.getPath());
+                security.setUuid(doc.getUuid());
                 security.GetGrants();
 
-                final GWTFolder parentFolder = Main.get().activeFolderTree
-                        .getFolder();
+                GWTFolder parentFolder = Main.get().activeFolderTree.getFolder();
+
                 if ((parentFolder.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
-                        && (doc.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
-                        && !doc.isCheckedOut() && !doc.isLocked()) {
+                        && (doc.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY && !doc.isCheckedOut()
+                        && !doc.isLocked()) {
                     security.setChangePermision(true);
                 } else {
                     security.setChangePermision(false);
@@ -674,39 +638,47 @@ public class TabDocument extends Composite implements HasDocumentEvent,
     }
 
     /**
-     * addDocumentExtension
-     * 
-     * @param extension
+     * initSecurity
      */
-    public void addDocumentExtension(final TabDocumentExtension extension) {
+    public void initSecurity() {
+        security.initSecurity();
+    }
+
+    /**
+     * addDocumentExtension
+     */
+    public void addDocumentExtension(TabDocumentExtension extension) {
         widgetExtensionList.add(extension);
     }
 
     @Override
-    public void addDocumentHandlerExtension(
-            final DocumentHandlerExtension handlerExtension) {
+    public void addDocumentHandlerExtension(DocumentHandlerExtension handlerExtension) {
         docHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final DocumentEventConstant event) {
-        for (final DocumentHandlerExtension handler : docHandlerExtensionList) {
-            handler.onChange(event);
+    public void fireEvent(DocumentEventConstant event) {
+        for (Iterator<DocumentHandlerExtension> it = docHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 
     @Override
-    public void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
+    public void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
         propertyGroupHandlerExtensionList.add(handlerExtension);
     }
 
     /**
+     * addPreviewExtension
+     */
+    public void addPreviewExtension(PreviewExtension extension) {
+        preview.addPreviewExtension(extension);
+    }
+
+    /**
      * hasPropertyGroups
-     * 
-     * @return
      */
     public boolean hasPropertyGroups() {
-        return propertyGroup.size() > 0;
+        return (propertyGroup.size() > 0);
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,15 +32,15 @@ public class SearchException extends Exception {
         super();
     }
 
-    public SearchException(final String arg0) {
+    public SearchException(String arg0) {
         super(arg0);
     }
 
-    public SearchException(final String arg0, final Throwable arg1) {
+    public SearchException(String arg0, Throwable arg1) {
         super(arg0, arg1);
     }
 
-    public SearchException(final Throwable arg0) {
+    public SearchException(Throwable arg0) {
         super(arg0);
     }
 }

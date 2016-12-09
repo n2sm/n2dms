@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,8 +47,7 @@ public class OOTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(OOTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(OOTextExtractor.class);
 
     //private static OpenOfficeConnection connection = null;
 
@@ -56,31 +55,30 @@ public class OOTextExtractor extends AbstractTextExtractor {
      * Creates a new <code>JpegTextExtractor</code> instance.
      */
     public OOTextExtractor() {
-        super(
-                new String[] {
-                        // MsExcel
-                        "application/vnd.ms-excel",
-                        "application/msexcel",
-                        "application/excel",
+        super(new String[] {
+                // MsExcel
+                "application/vnd.ms-excel",
+                "application/msexcel",
+                "application/excel",
 
-                        // MsPowerPoint
-                        "application/vnd.ms-powerpoint",
-                        "application/mspowerpoint",
-                        "application/powerpoint",
+                // MsPowerPoint
+                "application/vnd.ms-powerpoint",
+                "application/mspowerpoint",
+                "application/powerpoint",
 
-                        // MsWord
-                        "application/vnd.ms-word",
-                        "application/msword",
-                        "application/word",
+                // MsWord
+                "application/vnd.ms-word",
+                "application/msword",
+                "application/word",
 
-                        // MsOffice2007
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-                        "application/vnd.openxmlformats-officedocument.presentationml.template",
-                        "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.template" });
+                // MsOffice2007
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+                "application/vnd.openxmlformats-officedocument.presentationml.template",
+                "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.template" });
     }
 
     //-------------------------------------------------------< TextExtractor >
@@ -88,15 +86,13 @@ public class OOTextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         String ret = "";
-        final File fIn = File.createTempFile("okm", ".doc");
-        final File fOut = File.createTempFile("okm", ".txt");
+        File fIn = File.createTempFile("okm", ".doc");
+        File fOut = File.createTempFile("okm", ".txt");
 
         try {
-            final FileOutputStream fos = new FileOutputStream(fIn);
+            FileOutputStream fos = new FileOutputStream(fIn);
             IOUtils.copy(stream, fos);
             fos.flush();
             fos.close();
@@ -106,7 +102,7 @@ public class OOTextExtractor extends AbstractTextExtractor {
             ret = FileUtils.readFileToString(fOut);
             log.debug("TEXT: " + ret);
             return new StringReader(ret);
-        } catch (final ConversionException e) {
+        } catch (ConversionException e) {
             log.warn("Failed to extract text", e);
             return new StringReader("");
         } finally {

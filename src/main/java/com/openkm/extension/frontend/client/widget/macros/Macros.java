@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -43,12 +43,12 @@ import com.openkm.frontend.client.extension.comunicator.TabFolderComunicator;
 import com.openkm.frontend.client.extension.comunicator.TabMailComunicator;
 import com.openkm.frontend.client.extension.comunicator.WorkspaceComunicator;
 import com.openkm.frontend.client.extension.event.HasDocumentEvent;
-import com.openkm.frontend.client.extension.event.HasDocumentEvent.DocumentEventConstant;
 import com.openkm.frontend.client.extension.event.HasFolderEvent;
-import com.openkm.frontend.client.extension.event.HasFolderEvent.FolderEventConstant;
 import com.openkm.frontend.client.extension.event.HasLanguageEvent;
-import com.openkm.frontend.client.extension.event.HasLanguageEvent.LanguageEventConstant;
 import com.openkm.frontend.client.extension.event.HasMailEvent;
+import com.openkm.frontend.client.extension.event.HasDocumentEvent.DocumentEventConstant;
+import com.openkm.frontend.client.extension.event.HasFolderEvent.FolderEventConstant;
+import com.openkm.frontend.client.extension.event.HasLanguageEvent.LanguageEventConstant;
 import com.openkm.frontend.client.extension.event.HasMailEvent.MailEventConstant;
 import com.openkm.frontend.client.extension.event.HasWorkspaceEvent;
 import com.openkm.frontend.client.extension.event.HasWorkspaceEvent.WorkspaceEventConstant;
@@ -63,34 +63,22 @@ import com.openkm.frontend.client.extension.widget.toolbar.ToolBarButtonExtensio
  * Macros
  * 
  * @author jllort
- * 
  */
-public class Macros implements DocumentHandlerExtension,
-        FolderHandlerExtension, MailHandlerExtension,
-        WorkspaceHandlerExtension, LanguageHandlerExtension {
+public class Macros implements DocumentHandlerExtension, FolderHandlerExtension, MailHandlerExtension, WorkspaceHandlerExtension,
+        LanguageHandlerExtension {
     public static final int TAB_DOCUMENT = 0;
-
     public static final int TAB_FOLDER = 1;
-
     public static final int TAB_MAIL = 2;
 
-    private final OKMMacrosServiceAsync macrosService = (OKMMacrosServiceAsync) GWT
-            .create(OKMMacrosService.class);
-
+    private final OKMMacrosServiceAsync macrosService = (OKMMacrosServiceAsync) GWT.create(OKMMacrosService.class);
     public static Macros singleton;
-
     public static final String UUID = "c60082c2-7d4c-4750-901b-a817f246cfa1";
 
     private ToolBarButton button;
-
     private boolean enabled = false;
-
     private List<GWTMacros> actions = new ArrayList<GWTMacros>();
-
     private int selectedPanel = TAB_FOLDER;
-
     private GWTMacros selectedAction;
-
     public Status status;
 
     /**
@@ -98,67 +86,53 @@ public class Macros implements DocumentHandlerExtension,
      * 
      * @param uuidList
      */
-    public Macros(final List<String> uuidList) {
+    public Macros(List<String> uuidList) {
         if (isRegistered(uuidList)) {
             singleton = this;
             status = new Status();
             status.setStyleName("okm-StatusPopup");
-            button = new ToolBarButton(new Image(
-                    OKMBundleResources.INSTANCE.fastActionDisabled()),
-                    GeneralComunicator.i18nExtension("macros.button.title"),
-                    new ClickHandler() {
-                        @Override
-                        public void onClick(final ClickEvent event) {
-                            if (enabled) {
-                                status.setExecuteAction();
-                                macrosService.executeAction(selectedAction,
-                                        getPath(), new AsyncCallback<Object>() {
+            button =
+                    new ToolBarButton(new Image(OKMBundleResources.INSTANCE.fastActionDisabled()),
+                            GeneralComunicator.i18nExtension("macros.button.title"), new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    if (enabled) {
+                                        status.setExecuteAction();
+                                        macrosService.executeAction(selectedAction, getPath(), new AsyncCallback<Object>() {
                                             @Override
-                                            public void onSuccess(
-                                                    final Object result) {
+                                            public void onSuccess(Object result) {
                                                 switch (selectedPanel) {
                                                 case TAB_DOCUMENT:
                                                 case TAB_MAIL:
-                                                    GeneralComunicator
-                                                            .refreshUI();
+                                                    GeneralComunicator.refreshUI();
                                                     break;
                                                 case TAB_FOLDER:
                                                     // Calculating new folder path
                                                     String fldPath = getPath();
-                                                    fldPath = fldPath
-                                                            .substring(
-                                                                    0,
-                                                                    fldPath.lastIndexOf("/"));
-                                                    GeneralComunicator
-                                                            .openAllFolderPath(
-                                                                    fldPath,
-                                                                    null);
+                                                    fldPath = fldPath.substring(0, fldPath.lastIndexOf("/"));
+                                                    GeneralComunicator.openAllFolderPath(fldPath, null);
                                                     break;
                                                 }
                                                 status.unsetExecuteAction();
                                             }
 
                                             @Override
-                                            public void onFailure(
-                                                    final Throwable caught) {
+                                            public void onFailure(Throwable caught) {
                                                 status.unsetExecuteAction();
-                                                GeneralComunicator
-                                                        .showError(
-                                                                "executeAction",
-                                                                caught);
+                                                GeneralComunicator.showError("executeAction", caught);
                                             }
                                         });
-                            }
-                        }
-                    });
+                                    }
+                                }
+                            });
             macrosService.getActions(new AsyncCallback<List<GWTMacros>>() {
                 @Override
-                public void onSuccess(final List<GWTMacros> result) {
+                public void onSuccess(List<GWTMacros> result) {
                     actions = result;
                 }
 
                 @Override
-                public void onFailure(final Throwable caught) {
+                public void onFailure(Throwable caught) {
                     GeneralComunicator.showError("getActions", caught);
                 }
             });
@@ -169,7 +143,7 @@ public class Macros implements DocumentHandlerExtension,
      * getExtensions
      */
     public List<Object> getExtensions() {
-        final List<Object> extensions = new ArrayList<Object>();
+        List<Object> extensions = new ArrayList<Object>();
         extensions.add(singleton);
         extensions.add(button);
         return extensions;
@@ -181,13 +155,25 @@ public class Macros implements DocumentHandlerExtension,
     public String getPath() {
         switch (selectedPanel) {
         case TAB_DOCUMENT:
-            return TabDocumentComunicator.getDocument().getPath();
+            if (TabDocumentComunicator.getDocument() != null) {
+                return TabDocumentComunicator.getDocument().getPath();
+            } else {
+                return null;
+            }
 
         case TAB_FOLDER:
-            return TabFolderComunicator.getFolder().getPath();
+            if (TabFolderComunicator.getFolder() != null) {
+                return TabFolderComunicator.getFolder().getPath();
+            } else {
+                return null;
+            }
 
         case TAB_MAIL:
-            return TabMailComunicator.getMail().getPath();
+            if (TabMailComunicator.getMail() != null) {
+                return TabMailComunicator.getMail().getPath();
+            } else {
+                return null;
+            }
 
         default:
             return null;
@@ -195,7 +181,7 @@ public class Macros implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final DocumentEventConstant event) {
+    public void onChange(DocumentEventConstant event) {
         if (event.equals(HasDocumentEvent.DOCUMENT_CHANGED)) {
             selectedPanel = TAB_DOCUMENT;
             enabled = actionFound(getPath());
@@ -204,7 +190,7 @@ public class Macros implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final FolderEventConstant event) {
+    public void onChange(FolderEventConstant event) {
         if (event.equals(HasFolderEvent.FOLDER_CHANGED)) {
             selectedPanel = TAB_FOLDER;
             enabled = actionFound(getPath());
@@ -213,7 +199,7 @@ public class Macros implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final MailEventConstant event) {
+    public void onChange(MailEventConstant event) {
         if (event.equals(HasMailEvent.MAIL_CHANGED)) {
             selectedPanel = TAB_MAIL;
             enabled = actionFound(getPath());
@@ -222,7 +208,7 @@ public class Macros implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final WorkspaceEventConstant event) {
+    public void onChange(WorkspaceEventConstant event) {
         if (event.equals(HasWorkspaceEvent.STACK_CHANGED)) {
             if (WorkspaceComunicator.getSelectedWorkspace() == UIDockPanelConstants.DESKTOP) {
                 enabled = actionFound(getPath());
@@ -239,24 +225,25 @@ public class Macros implements DocumentHandlerExtension,
      * @param path
      * @return
      */
-    private boolean actionFound(final String path) {
+    private boolean actionFound(String path) {
         boolean found = false;
         selectedAction = null;
-        for (final GWTMacros action : actions) {
-            if (path.startsWith(action.getPathOrigin())) {
-                selectedAction = action;
-                found = true;
-                break;
+        if (path != null) {
+            for (GWTMacros action : actions) {
+                if (path.startsWith(action.getPathOrigin())) {
+                    selectedAction = action;
+                    found = true;
+                    break;
+                }
             }
         }
         return found;
     }
 
     @Override
-    public void onChange(final LanguageEventConstant event) {
+    public void onChange(LanguageEventConstant event) {
         if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
-            button.setTitle(GeneralComunicator
-                    .i18nExtension("macros.button.title"));
+            button.setTitle(GeneralComunicator.i18nExtension("macros.button.title"));
         }
     }
 
@@ -264,31 +251,27 @@ public class Macros implements DocumentHandlerExtension,
      * ToolBarButton
      * 
      * @author jllort
-     * 
      */
     private class ToolBarButton extends ToolBarButtonExtension {
 
-        public ToolBarButton(final Image image, final String title,
-                final ClickHandler handler) {
+        public ToolBarButton(Image image, String title, ClickHandler handler) {
             super(image, title, handler);
         }
 
         @Override
-        public void checkPermissions(final GWTFolder folder,
-                final GWTFolder folderParent, final int originPanel) {
+        public void checkPermissions(GWTFolder folder, GWTFolder folderParent, int originPanel) {
         }
 
         @Override
-        public void checkPermissions(final GWTDocument doc,
-                final GWTFolder folder) {
+        public void checkPermissions(GWTDocument doc, GWTFolder folder) {
         }
 
         @Override
-        public void checkPermissions(final GWTMail mail, final GWTFolder folder) {
+        public void checkPermissions(GWTMail mail, GWTFolder folder) {
         }
 
         @Override
-        public void enable(final boolean enable) {
+        public void enable(boolean enable) {
         }
 
         @Override
@@ -332,7 +315,7 @@ public class Macros implements DocumentHandlerExtension,
      * @param uuidList
      * @return
      */
-    public static boolean isRegistered(final List<String> uuidList) {
+    public static boolean isRegistered(List<String> uuidList) {
         return uuidList.contains(UUID);
     }
 }

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
@@ -20,7 +20,7 @@
   <title>Configuration</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -35,13 +35,13 @@
             <td colspan="4" align="right">
               <form action="Config" method="get">
                 <input type="hidden" name="action" value="list"/>
-                <b>Key</b> <input type="text" name="filter" value="${filter}" size="35"/>
-                <input type="submit" value="Filter"/>
+                <b>Property</b> <input type="text" name="filter" value="${filter}" size="35"/>
+                <input type="submit" value="Filter" class="searchButton"/>
               </form>
             </td>
           </tr>
           <tr>
-            <th>Key</th><th>Type</th><th>Value</th>
+            <th>Property</th><th>Type</th><th>Value</th>
             <th width="50px">
               <c:url value="Config" var="urlCheck">
                 <c:param name="action" value="check"/>
@@ -51,7 +51,7 @@
               </c:url>
               <a href="${urlCheck}"><img src="img/action/check.png" alt="Check" title="Check"/></a>
               &nbsp;
-              <a href="${urlExport}"><img src="img/action/export.png" alt="Export" title="Export"/></a>
+              <a href="${urlExport}"><img src="img/action/export_sql.png" alt="SQL export" title="SQL export"/></a>
             </th>
           </tr>
         </thead>
@@ -107,7 +107,7 @@
                 <table>
                   <tr>
                     <td><input class=":required :only_on_blur" type="file" name="sql-file"/></td>
-                    <td><input type="submit" value="Import"/></td>
+                    <td><input type="submit" value="Import" class="addButton"/></td>
                   </tr>
                 </table>
               </form>

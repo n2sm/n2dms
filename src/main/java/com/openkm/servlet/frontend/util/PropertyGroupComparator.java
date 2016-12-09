@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,32 +29,30 @@ import com.openkm.frontend.client.bean.GWTPropertyGroup;
  * @author jllort
  *
  */
-public class PropertyGroupComparator extends
-        CultureComparator<GWTPropertyGroup> {
+public class PropertyGroupComparator extends CultureComparator<GWTPropertyGroup> {
 
-    protected PropertyGroupComparator(final String locale) {
+    protected PropertyGroupComparator(String locale) {
         super(locale);
     }
 
-    public static PropertyGroupComparator getInstance(final String locale) {
+    public static PropertyGroupComparator getInstance(String locale) {
         try {
-            final PropertyGroupComparator comparator = (PropertyGroupComparator) CultureComparator
-                    .getInstance(PropertyGroupComparator.class, locale);
+            PropertyGroupComparator comparator =
+                    (PropertyGroupComparator) CultureComparator.getInstance(PropertyGroupComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new PropertyGroupComparator(locale);
         }
     }
 
     public static PropertyGroupComparator getInstance() {
-        final PropertyGroupComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        PropertyGroupComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTPropertyGroup arg0, final GWTPropertyGroup arg1) {
-        final GWTPropertyGroup first = arg0;
-        final GWTPropertyGroup second = arg1;
+    public int compare(GWTPropertyGroup arg0, GWTPropertyGroup arg1) {
+        GWTPropertyGroup first = arg0;
+        GWTPropertyGroup second = arg1;
 
         return collator.compare(first.getLabel(), second.getLabel());
     }

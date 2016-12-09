@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.frontend.client.bean;
@@ -30,174 +30,103 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * GWTWorkspace
  * 
  * @author jllort
- *
+ * 
  */
 public class GWTWorkspace implements IsSerializable {
     private String sessionId = "";
-
     private GWTUser user;
-
     private List<String> roleList = new ArrayList<String>();
-
     private String applicationURL = "";
-
-    private String imapHost = "";
-
-    private String imapUser = "";
-
-    private String imapPassword = "";
-
-    private String imapFolder = "";
-
-    private long imapID = -1;
-
+    private String mailProtocol = "";
+    private String mailHost = "";
+    private String mailUser = "";
+    private String mailPassword = "";
+    private String mailFolder = "";
+    private long mailID = -1;
     private String password = "";
-
     private boolean changePassword = true;
-
     private String email = "";
-
     private String webSkin = "";
-
     private boolean adminRole = false;
-
     private String previewer = "";
-
     private List<GWTReport> reports = new ArrayList<GWTReport>();
-
     private int minSearchCharacters = 0;
 
     // System wide
     private GWTAppVersion appVersion = new GWTAppVersion();
-
     private String workflowRunConfigForm = "";
-
     private String workflowProcessIntanceVariableUUID = "";
-
     private String workflowProcessIntanceVariablePath = "";
-
     private long keepAliveSchedule;
-
     private long dashboardSchedule;
-
     private long uINotificationSchedule;
-
     private boolean securityModeMultiple = false;
 
     // User Profile
     private boolean advancedFilters;
-
     private boolean chatEnabled;
-
     private boolean chatAutoLogin;
-
     private long userQuotaLimit;
-
+    private boolean printPreview;
     private boolean keywordEnabled;
-
     private boolean uploadNotifyUsers;
-
+    private boolean notifyExternalUsers;
+    private boolean acrobatPluginPreview;
+    private int increaseVersion = 0;
     private boolean userQuotaEnabled;
-
     private boolean webdavFix;
-
     private List<GWTPropertyGroup> wizardPropertyGroupList = new ArrayList<GWTPropertyGroup>();
-
     private List<String> wizardWorkflowList = new ArrayList<String>();
-
     private List<String> miscWorkflowList = new ArrayList<String>();
-
     private boolean wizardPropertyGroups;
-
     private boolean wizardWorkflows;
-
     private boolean wizardKeywords;
-
     private boolean wizardCategories;
-
     private boolean stackTaxonomy;
-
     private boolean stackCategoriesVisible;
-
+    private boolean stackMetadataVisible;
     private boolean stackThesaurusVisible;
-
     private boolean stackTemplatesVisible;
-
     private boolean stackPersonalVisible;
-
     private boolean stackMailVisible;
-
     private boolean stackTrashVisible;
-
     private boolean menuFileVisible;
-
     private boolean menuEditVisible;
-
     private boolean menuToolsVisible;
-
     private boolean menuBookmarksVisible;
-
     private boolean menuTemplatesVisible;
-
     private boolean menuHelpVisible;
-
+    private String defaultTab;
     private boolean tabDesktopVisible;
-
     private boolean tabSearchVisible;
-
     private boolean tabDashboardVisible;
-
     private boolean tabAdminVisible;
-
     private boolean dashboardUserVisible;
-
     private boolean dashboardMailVisible;
-
     private boolean dashboardNewsVisible;
-
     private boolean dashboardGeneralVisible;
-
     private boolean dashboardWorkflowVisible;
-
     private boolean dashboardKeywordsVisible;
-
     private boolean tabDocumentPropertiesVisible;
-
     private boolean tabDocumentNotesVisible;
-
     private boolean tabDocumentSecurityVisible;
-
     private boolean tabDocumentVersionVisible;
-
     private boolean tabDocumentPreviewVisible;
-
     private boolean tabDocumentPropertyGroupsVisible;
-
     private boolean tabDocumentVersionDownloadVisible;
-
     private boolean tabFolderPropertiesVisible;
-
     private boolean tabFolderSecurityVisible;
-
     private boolean tabFolderNotesVisible;
-
     private boolean tabMailPropertiesVisible;
-
     private boolean tabMailSecurityVisible;
-
     private boolean tabMailPreviewVisible;
-
     private boolean tabMailNotesVisible;
-
     private GWTAvailableOption availableOption = new GWTAvailableOption();
-
     private List<GWTLanguage> langs = new ArrayList<GWTLanguage>();
-
     private GWTProfileToolbar profileToolbar = new GWTProfileToolbar();
-
     private GWTProfileFileBrowser profileFileBrowser = new GWTProfileFileBrowser();
-
-    private GWTProfileExplorer profileExplorer = new GWTProfileExplorer();
+    private GWTProfilePagination profilePagination = new GWTProfilePagination();
+    private List<GWTMimeType> mimeTypes;
 
     /**
      * GWTWorkspace
@@ -209,7 +138,7 @@ public class GWTWorkspace implements IsSerializable {
         return sessionId;
     }
 
-    public void setSessionId(final String sessionId) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -217,7 +146,7 @@ public class GWTWorkspace implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 
@@ -225,55 +154,63 @@ public class GWTWorkspace implements IsSerializable {
         return applicationURL;
     }
 
-    public void setApplicationURL(final String applicationURL) {
+    public void setApplicationURL(String applicationURL) {
         this.applicationURL = applicationURL;
     }
 
-    public String getImapHost() {
-        return imapHost;
+    public String getMailProtocol() {
+        return mailProtocol;
     }
 
-    public void setImapHost(final String imapHost) {
-        this.imapHost = imapHost;
+    public void setMailProtocol(String mailProtocol) {
+        this.mailProtocol = mailProtocol;
     }
 
-    public String getImapUser() {
-        return imapUser;
+    public String getMailHost() {
+        return mailHost;
     }
 
-    public void setImapUser(final String imapUser) {
-        this.imapUser = imapUser;
+    public void setMailHost(String mailHost) {
+        this.mailHost = mailHost;
     }
 
-    public String getImapPassword() {
-        return imapPassword;
+    public String getMailUser() {
+        return mailUser;
     }
 
-    public void setImapPassword(final String imapPassword) {
-        this.imapPassword = imapPassword;
+    public void setMailUser(String mailUser) {
+        this.mailUser = mailUser;
     }
 
-    public String getImapFolder() {
-        return imapFolder;
+    public String getMailPassword() {
+        return mailPassword;
     }
 
-    public void setImapFolder(final String imapFolder) {
-        this.imapFolder = imapFolder;
+    public void setMailPassword(String mailPassword) {
+        this.mailPassword = mailPassword;
     }
 
-    public long getImapID() {
-        return imapID;
+    public String getMailFolder() {
+        return mailFolder;
     }
 
-    public void setImapID(final long imapID) {
-        this.imapID = imapID;
+    public void setMailFolder(String mailFolder) {
+        this.mailFolder = mailFolder;
+    }
+
+    public long getMailID() {
+        return mailID;
+    }
+
+    public void setMailID(long mailID) {
+        this.mailID = mailID;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -281,7 +218,7 @@ public class GWTWorkspace implements IsSerializable {
         return changePassword;
     }
 
-    public void setChangePassword(final boolean changePassword) {
+    public void setChangePassword(boolean changePassword) {
         this.changePassword = changePassword;
     }
 
@@ -289,7 +226,7 @@ public class GWTWorkspace implements IsSerializable {
         return email;
     }
 
-    public void setEmail(final String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -300,7 +237,7 @@ public class GWTWorkspace implements IsSerializable {
         return appVersion;
     }
 
-    public void setAppVersion(final GWTAppVersion appVersion) {
+    public void setAppVersion(GWTAppVersion appVersion) {
         this.appVersion = appVersion;
     }
 
@@ -308,7 +245,7 @@ public class GWTWorkspace implements IsSerializable {
         return workflowRunConfigForm;
     }
 
-    public void setWorkflowRunConfigForm(final String workflowRunConfigForm) {
+    public void setWorkflowRunConfigForm(String workflowRunConfigForm) {
         this.workflowRunConfigForm = workflowRunConfigForm;
     }
 
@@ -316,8 +253,7 @@ public class GWTWorkspace implements IsSerializable {
         return workflowProcessIntanceVariableUUID;
     }
 
-    public void setWorkflowProcessIntanceVariableUUID(
-            final String workflowProcessIntanceVariableUUID) {
+    public void setWorkflowProcessIntanceVariableUUID(String workflowProcessIntanceVariableUUID) {
         this.workflowProcessIntanceVariableUUID = workflowProcessIntanceVariableUUID;
     }
 
@@ -325,8 +261,7 @@ public class GWTWorkspace implements IsSerializable {
         return workflowProcessIntanceVariablePath;
     }
 
-    public void setWorkflowProcessIntanceVariablePath(
-            final String workflowProcessIntanceVariablePath) {
+    public void setWorkflowProcessIntanceVariablePath(String workflowProcessIntanceVariablePath) {
         this.workflowProcessIntanceVariablePath = workflowProcessIntanceVariablePath;
     }
 
@@ -334,7 +269,7 @@ public class GWTWorkspace implements IsSerializable {
         return chatEnabled;
     }
 
-    public void setChatEnabled(final boolean chatEnabled) {
+    public void setChatEnabled(boolean chatEnabled) {
         this.chatEnabled = chatEnabled;
     }
 
@@ -342,7 +277,7 @@ public class GWTWorkspace implements IsSerializable {
         return chatAutoLogin;
     }
 
-    public void setChatAutoLogin(final boolean chatAutoLogin) {
+    public void setChatAutoLogin(boolean chatAutoLogin) {
         this.chatAutoLogin = chatAutoLogin;
     }
 
@@ -350,7 +285,7 @@ public class GWTWorkspace implements IsSerializable {
         return keepAliveSchedule;
     }
 
-    public void setKeepAliveSchedule(final long keepAliveSchedule) {
+    public void setKeepAliveSchedule(long keepAliveSchedule) {
         this.keepAliveSchedule = keepAliveSchedule;
     }
 
@@ -358,7 +293,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardSchedule;
     }
 
-    public void setDashboardSchedule(final long dashboardSchedule) {
+    public void setDashboardSchedule(long dashboardSchedule) {
         this.dashboardSchedule = dashboardSchedule;
     }
 
@@ -366,16 +301,8 @@ public class GWTWorkspace implements IsSerializable {
         return uINotificationSchedule;
     }
 
-    public void setUINotificationSchedule(final long uINotificationSchedule) {
+    public void setUINotificationSchedule(long uINotificationSchedule) {
         this.uINotificationSchedule = uINotificationSchedule;
-    }
-
-    public boolean isSecurityModeMultiple() {
-        return securityModeMultiple;
-    }
-
-    public void setSecurityModeMultiple(final boolean securityModeMultiple) {
-        this.securityModeMultiple = securityModeMultiple;
     }
 
     /**
@@ -385,7 +312,7 @@ public class GWTWorkspace implements IsSerializable {
         return advancedFilters;
     }
 
-    public void setAdvancedFilters(final boolean advancedFilters) {
+    public void setAdvancedFilters(boolean advancedFilters) {
         this.advancedFilters = advancedFilters;
     }
 
@@ -393,15 +320,23 @@ public class GWTWorkspace implements IsSerializable {
         return userQuotaLimit;
     }
 
-    public void setUserQuotaLimit(final long userQuotaLimit) {
+    public void setUserQuotaLimit(long userQuotaLimit) {
         this.userQuotaLimit = userQuotaLimit;
+    }
+
+    public boolean isPrintPreview() {
+        return printPreview;
+    }
+
+    public void setPrintPreview(boolean printPreview) {
+        this.printPreview = printPreview;
     }
 
     public boolean isKeywordEnabled() {
         return keywordEnabled;
     }
 
-    public void setKeywordEnabled(final boolean keywordEnabled) {
+    public void setKeywordEnabled(boolean keywordEnabled) {
         this.keywordEnabled = keywordEnabled;
     }
 
@@ -409,15 +344,39 @@ public class GWTWorkspace implements IsSerializable {
         return uploadNotifyUsers;
     }
 
-    public void setUploadNotifyUsers(final boolean uploadNotifyUsers) {
+    public void setUploadNotifyUsers(boolean uploadNotifyUsers) {
         this.uploadNotifyUsers = uploadNotifyUsers;
+    }
+
+    public boolean isNotifyExternalUsers() {
+        return notifyExternalUsers;
+    }
+
+    public void setNotifyExternalUsers(boolean notifyExternalUsers) {
+        this.notifyExternalUsers = notifyExternalUsers;
+    }
+
+    public boolean isAcrobatPluginPreview() {
+        return acrobatPluginPreview;
+    }
+
+    public void setAcrobatPluginPreview(boolean acrobatPluginPreview) {
+        this.acrobatPluginPreview = acrobatPluginPreview;
+    }
+
+    public int getIncreaseVersion() {
+        return increaseVersion;
+    }
+
+    public void setIncreaseVersion(int increaseVersion) {
+        this.increaseVersion = increaseVersion;
     }
 
     public boolean isUserQuotaEnabled() {
         return userQuotaEnabled;
     }
 
-    public void setUserQuotaEnabled(final boolean userQuotaEnabled) {
+    public void setUserQuotaEnabled(boolean userQuotaEnabled) {
         this.userQuotaEnabled = userQuotaEnabled;
     }
 
@@ -425,7 +384,7 @@ public class GWTWorkspace implements IsSerializable {
         return webdavFix;
     }
 
-    public void setWebdavFix(final boolean webdavFix) {
+    public void setWebdavFix(boolean webdavFix) {
         this.webdavFix = webdavFix;
     }
 
@@ -433,7 +392,7 @@ public class GWTWorkspace implements IsSerializable {
         return wizardPropertyGroups;
     }
 
-    public void setWizardPropertyGroups(final boolean wizardPropertyGroups) {
+    public void setWizardPropertyGroups(boolean wizardPropertyGroups) {
         this.wizardPropertyGroups = wizardPropertyGroups;
     }
 
@@ -441,8 +400,7 @@ public class GWTWorkspace implements IsSerializable {
         return wizardPropertyGroupList;
     }
 
-    public void setWizardPropertyGroupList(
-            final List<GWTPropertyGroup> wizardPropertyGroupList) {
+    public void setWizardPropertyGroupList(List<GWTPropertyGroup> wizardPropertyGroupList) {
         this.wizardPropertyGroupList = wizardPropertyGroupList;
     }
 
@@ -450,15 +408,15 @@ public class GWTWorkspace implements IsSerializable {
         return wizardWorkflowList;
     }
 
-    public void setWizardWorkflowList(final List<String> wizardWorkflowsList) {
-        wizardWorkflowList = wizardWorkflowsList;
+    public void setWizardWorkflowList(List<String> wizardWorkflowsList) {
+        this.wizardWorkflowList = wizardWorkflowsList;
     }
 
     public boolean isWizardWorkflows() {
         return wizardWorkflows;
     }
 
-    public void setWizardWorkflows(final boolean wizardWorkflows) {
+    public void setWizardWorkflows(boolean wizardWorkflows) {
         this.wizardWorkflows = wizardWorkflows;
     }
 
@@ -466,7 +424,7 @@ public class GWTWorkspace implements IsSerializable {
         return wizardKeywords;
     }
 
-    public void setWizardKeywords(final boolean wizardKeywords) {
+    public void setWizardKeywords(boolean wizardKeywords) {
         this.wizardKeywords = wizardKeywords;
     }
 
@@ -474,7 +432,7 @@ public class GWTWorkspace implements IsSerializable {
         return wizardCategories;
     }
 
-    public void setWizardCategories(final boolean wizardCategories) {
+    public void setWizardCategories(boolean wizardCategories) {
         this.wizardCategories = wizardCategories;
     }
 
@@ -482,7 +440,7 @@ public class GWTWorkspace implements IsSerializable {
         return stackTaxonomy;
     }
 
-    public void setStackTaxonomy(final boolean stackTaxonomy) {
+    public void setStackTaxonomy(boolean stackTaxonomy) {
         this.stackTaxonomy = stackTaxonomy;
     }
 
@@ -490,15 +448,23 @@ public class GWTWorkspace implements IsSerializable {
         return stackCategoriesVisible;
     }
 
-    public void setStackCategoriesVisible(final boolean stackCategoriesVisible) {
+    public void setStackCategoriesVisible(boolean stackCategoriesVisible) {
         this.stackCategoriesVisible = stackCategoriesVisible;
+    }
+
+    public boolean isStackMetadataVisible() {
+        return stackMetadataVisible;
+    }
+
+    public void setStackMetadataVisible(boolean stackMetadataVisible) {
+        this.stackMetadataVisible = stackMetadataVisible;
     }
 
     public boolean isStackThesaurusVisible() {
         return stackThesaurusVisible;
     }
 
-    public void setStackThesaurusVisible(final boolean stackThesaurusVisible) {
+    public void setStackThesaurusVisible(boolean stackThesaurusVisible) {
         this.stackThesaurusVisible = stackThesaurusVisible;
     }
 
@@ -506,7 +472,7 @@ public class GWTWorkspace implements IsSerializable {
         return stackTemplatesVisible;
     }
 
-    public void setStackTemplatesVisible(final boolean stackTemplatesVisible) {
+    public void setStackTemplatesVisible(boolean stackTemplatesVisible) {
         this.stackTemplatesVisible = stackTemplatesVisible;
     }
 
@@ -514,7 +480,7 @@ public class GWTWorkspace implements IsSerializable {
         return stackPersonalVisible;
     }
 
-    public void setStackPersonalVisible(final boolean stackPersonalVisible) {
+    public void setStackPersonalVisible(boolean stackPersonalVisible) {
         this.stackPersonalVisible = stackPersonalVisible;
     }
 
@@ -522,7 +488,7 @@ public class GWTWorkspace implements IsSerializable {
         return stackMailVisible;
     }
 
-    public void setStackMailVisible(final boolean stackMailVisible) {
+    public void setStackMailVisible(boolean stackMailVisible) {
         this.stackMailVisible = stackMailVisible;
     }
 
@@ -530,7 +496,7 @@ public class GWTWorkspace implements IsSerializable {
         return stackTrashVisible;
     }
 
-    public void setStackTrashVisible(final boolean stackTrashVisible) {
+    public void setStackTrashVisible(boolean stackTrashVisible) {
         this.stackTrashVisible = stackTrashVisible;
     }
 
@@ -538,7 +504,7 @@ public class GWTWorkspace implements IsSerializable {
         return menuFileVisible;
     }
 
-    public void setMenuFileVisible(final boolean menuFileVisible) {
+    public void setMenuFileVisible(boolean menuFileVisible) {
         this.menuFileVisible = menuFileVisible;
     }
 
@@ -546,7 +512,7 @@ public class GWTWorkspace implements IsSerializable {
         return menuEditVisible;
     }
 
-    public void setMenuEditVisible(final boolean menuEditVisible) {
+    public void setMenuEditVisible(boolean menuEditVisible) {
         this.menuEditVisible = menuEditVisible;
     }
 
@@ -554,7 +520,7 @@ public class GWTWorkspace implements IsSerializable {
         return menuToolsVisible;
     }
 
-    public void setMenuToolsVisible(final boolean menuToolsVisible) {
+    public void setMenuToolsVisible(boolean menuToolsVisible) {
         this.menuToolsVisible = menuToolsVisible;
     }
 
@@ -562,7 +528,7 @@ public class GWTWorkspace implements IsSerializable {
         return menuBookmarksVisible;
     }
 
-    public void setMenuBookmarksVisible(final boolean menuBookmarksVisible) {
+    public void setMenuBookmarksVisible(boolean menuBookmarksVisible) {
         this.menuBookmarksVisible = menuBookmarksVisible;
     }
 
@@ -570,7 +536,7 @@ public class GWTWorkspace implements IsSerializable {
         return menuTemplatesVisible;
     }
 
-    public void setMenuTemplatesVisible(final boolean menuTemplatesVisible) {
+    public void setMenuTemplatesVisible(boolean menuTemplatesVisible) {
         this.menuTemplatesVisible = menuTemplatesVisible;
     }
 
@@ -578,15 +544,23 @@ public class GWTWorkspace implements IsSerializable {
         return menuHelpVisible;
     }
 
-    public void setMenuHelpVisible(final boolean menuHelpVisible) {
+    public void setMenuHelpVisible(boolean menuHelpVisible) {
         this.menuHelpVisible = menuHelpVisible;
+    }
+
+    public String getDefaultTab() {
+        return defaultTab;
+    }
+
+    public void setDefaultTab(String defaultTab) {
+        this.defaultTab = defaultTab;
     }
 
     public boolean isTabDesktopVisible() {
         return tabDesktopVisible;
     }
 
-    public void setTabDesktopVisible(final boolean tabDesktopVisible) {
+    public void setTabDesktopVisible(boolean tabDesktopVisible) {
         this.tabDesktopVisible = tabDesktopVisible;
     }
 
@@ -594,7 +568,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabSearchVisible;
     }
 
-    public void setTabSearchVisible(final boolean tabSearchVisible) {
+    public void setTabSearchVisible(boolean tabSearchVisible) {
         this.tabSearchVisible = tabSearchVisible;
     }
 
@@ -602,7 +576,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabDashboardVisible;
     }
 
-    public void setTabDashboardVisible(final boolean tabDashboardVisible) {
+    public void setTabDashboardVisible(boolean tabDashboardVisible) {
         this.tabDashboardVisible = tabDashboardVisible;
     }
 
@@ -610,7 +584,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabAdminVisible;
     }
 
-    public void setTabAdminVisible(final boolean tabAdminVisible) {
+    public void setTabAdminVisible(boolean tabAdminVisible) {
         this.tabAdminVisible = tabAdminVisible;
     }
 
@@ -618,7 +592,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardUserVisible;
     }
 
-    public void setDashboardUserVisible(final boolean dashboardUserVisible) {
+    public void setDashboardUserVisible(boolean dashboardUserVisible) {
         this.dashboardUserVisible = dashboardUserVisible;
     }
 
@@ -626,7 +600,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardMailVisible;
     }
 
-    public void setDashboardMailVisible(final boolean dashboardMailVisible) {
+    public void setDashboardMailVisible(boolean dashboardMailVisible) {
         this.dashboardMailVisible = dashboardMailVisible;
     }
 
@@ -634,7 +608,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardNewsVisible;
     }
 
-    public void setDashboardNewsVisible(final boolean dashboardNewsVisible) {
+    public void setDashboardNewsVisible(boolean dashboardNewsVisible) {
         this.dashboardNewsVisible = dashboardNewsVisible;
     }
 
@@ -642,7 +616,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardGeneralVisible;
     }
 
-    public void setDashboardGeneralVisible(final boolean dashboardGeneralVisible) {
+    public void setDashboardGeneralVisible(boolean dashboardGeneralVisible) {
         this.dashboardGeneralVisible = dashboardGeneralVisible;
     }
 
@@ -650,8 +624,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardWorkflowVisible;
     }
 
-    public void setDashboardWorkflowVisible(
-            final boolean dashboardWorkflowVisible) {
+    public void setDashboardWorkflowVisible(boolean dashboardWorkflowVisible) {
         this.dashboardWorkflowVisible = dashboardWorkflowVisible;
     }
 
@@ -659,8 +632,7 @@ public class GWTWorkspace implements IsSerializable {
         return dashboardKeywordsVisible;
     }
 
-    public void setDashboardKeywordsVisible(
-            final boolean dashboardKeywordsVisible) {
+    public void setDashboardKeywordsVisible(boolean dashboardKeywordsVisible) {
         this.dashboardKeywordsVisible = dashboardKeywordsVisible;
     }
 
@@ -668,7 +640,7 @@ public class GWTWorkspace implements IsSerializable {
         return availableOption;
     }
 
-    public void setAvailableOption(final GWTAvailableOption availableOption) {
+    public void setAvailableOption(GWTAvailableOption availableOption) {
         this.availableOption = availableOption;
     }
 
@@ -676,7 +648,7 @@ public class GWTWorkspace implements IsSerializable {
         return roleList;
     }
 
-    public void setRoleList(final List<String> roleList) {
+    public void setRoleList(List<String> roleList) {
         this.roleList = roleList;
     }
 
@@ -684,58 +656,55 @@ public class GWTWorkspace implements IsSerializable {
         return tabDocumentPropertiesVisible;
     }
 
-    public void setTabDocumentPropertiesVisible(
-            final boolean tabDocumentProperties) {
-        tabDocumentPropertiesVisible = tabDocumentProperties;
+    public void setTabDocumentPropertiesVisible(boolean tabDocumentProperties) {
+        this.tabDocumentPropertiesVisible = tabDocumentProperties;
     }
 
     public boolean isTabDocumentNotesVisible() {
         return tabDocumentNotesVisible;
     }
 
-    public void setTabDocumentNotesVisible(final boolean tabDocumentNotes) {
-        tabDocumentNotesVisible = tabDocumentNotes;
+    public void setTabDocumentNotesVisible(boolean tabDocumentNotes) {
+        this.tabDocumentNotesVisible = tabDocumentNotes;
     }
 
     public boolean isTabDocumentSecurityVisible() {
         return tabDocumentSecurityVisible;
     }
 
-    public void setTabDocumentSecurityVisible(final boolean tabDocumentSecurity) {
-        tabDocumentSecurityVisible = tabDocumentSecurity;
+    public void setTabDocumentSecurityVisible(boolean tabDocumentSecurity) {
+        this.tabDocumentSecurityVisible = tabDocumentSecurity;
     }
 
     public boolean isTabDocumentVersionVisible() {
         return tabDocumentVersionVisible;
     }
 
-    public void setTabDocumentVersionVisible(final boolean tabDocumentVersion) {
-        tabDocumentVersionVisible = tabDocumentVersion;
+    public void setTabDocumentVersionVisible(boolean tabDocumentVersion) {
+        this.tabDocumentVersionVisible = tabDocumentVersion;
     }
 
     public boolean isTabDocumentPreviewVisible() {
         return tabDocumentPreviewVisible;
     }
 
-    public void setTabDocumentPreviewVisible(final boolean tabDocumentPreview) {
-        tabDocumentPreviewVisible = tabDocumentPreview;
+    public void setTabDocumentPreviewVisible(boolean tabDocumentPreview) {
+        this.tabDocumentPreviewVisible = tabDocumentPreview;
     }
 
     public boolean isTabDocumentPropertyGroupsVisible() {
         return tabDocumentPropertyGroupsVisible;
     }
 
-    public void setTabDocumentPropertyGroupsVisible(
-            final boolean tabDocumentPropertyGroups) {
-        tabDocumentPropertyGroupsVisible = tabDocumentPropertyGroups;
+    public void setTabDocumentPropertyGroupsVisible(boolean tabDocumentPropertyGroups) {
+        this.tabDocumentPropertyGroupsVisible = tabDocumentPropertyGroups;
     }
 
     public boolean isTabDocumentVersionDownloadVisible() {
         return tabDocumentVersionDownloadVisible;
     }
 
-    public void setTabDocumentVersionDownloadVisible(
-            final boolean tabDocumentVersionDownloadVisible) {
+    public void setTabDocumentVersionDownloadVisible(boolean tabDocumentVersionDownloadVisible) {
         this.tabDocumentVersionDownloadVisible = tabDocumentVersionDownloadVisible;
     }
 
@@ -743,8 +712,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabFolderPropertiesVisible;
     }
 
-    public void setTabFolderPropertiesVisible(
-            final boolean tabFolderPropertiesVisible) {
+    public void setTabFolderPropertiesVisible(boolean tabFolderPropertiesVisible) {
         this.tabFolderPropertiesVisible = tabFolderPropertiesVisible;
     }
 
@@ -752,8 +720,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabFolderSecurityVisible;
     }
 
-    public void setTabFolderSecurityVisible(
-            final boolean tabFolderSecurityVisible) {
+    public void setTabFolderSecurityVisible(boolean tabFolderSecurityVisible) {
         this.tabFolderSecurityVisible = tabFolderSecurityVisible;
     }
 
@@ -761,7 +728,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabFolderNotesVisible;
     }
 
-    public void setTabFolderNotesVisible(final boolean tabFolderNotesVisible) {
+    public void setTabFolderNotesVisible(boolean tabFolderNotesVisible) {
         this.tabFolderNotesVisible = tabFolderNotesVisible;
     }
 
@@ -769,8 +736,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabMailPropertiesVisible;
     }
 
-    public void setTabMailPropertiesVisible(
-            final boolean tabMailPropertiesVisible) {
+    public void setTabMailPropertiesVisible(boolean tabMailPropertiesVisible) {
         this.tabMailPropertiesVisible = tabMailPropertiesVisible;
     }
 
@@ -778,7 +744,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabMailSecurityVisible;
     }
 
-    public void setTabMailSecurityVisible(final boolean tabMailSecurityVisible) {
+    public void setTabMailSecurityVisible(boolean tabMailSecurityVisible) {
         this.tabMailSecurityVisible = tabMailSecurityVisible;
     }
 
@@ -786,7 +752,7 @@ public class GWTWorkspace implements IsSerializable {
         return webSkin;
     }
 
-    public void setWebSkin(final String webSkin) {
+    public void setWebSkin(String webSkin) {
         this.webSkin = webSkin;
     }
 
@@ -794,7 +760,7 @@ public class GWTWorkspace implements IsSerializable {
         return adminRole;
     }
 
-    public void setAdminRole(final boolean adminRole) {
+    public void setAdminRole(boolean adminRole) {
         this.adminRole = adminRole;
     }
 
@@ -802,7 +768,7 @@ public class GWTWorkspace implements IsSerializable {
         return previewer;
     }
 
-    public void setPreviewer(final String previewer) {
+    public void setPreviewer(String previewer) {
         this.previewer = previewer;
     }
 
@@ -810,7 +776,7 @@ public class GWTWorkspace implements IsSerializable {
         return langs;
     }
 
-    public void setLangs(final List<GWTLanguage> langs) {
+    public void setLangs(List<GWTLanguage> langs) {
         this.langs = langs;
     }
 
@@ -818,7 +784,7 @@ public class GWTWorkspace implements IsSerializable {
         return profileToolbar;
     }
 
-    public void setProfileToolbar(final GWTProfileToolbar profileToolbar) {
+    public void setProfileToolbar(GWTProfileToolbar profileToolbar) {
         this.profileToolbar = profileToolbar;
     }
 
@@ -826,8 +792,7 @@ public class GWTWorkspace implements IsSerializable {
         return profileFileBrowser;
     }
 
-    public void setProfileFileBrowser(
-            final GWTProfileFileBrowser profileFileBrowser) {
+    public void setProfileFileBrowser(GWTProfileFileBrowser profileFileBrowser) {
         this.profileFileBrowser = profileFileBrowser;
     }
 
@@ -835,7 +800,7 @@ public class GWTWorkspace implements IsSerializable {
         return reports;
     }
 
-    public void setReports(final List<GWTReport> reports) {
+    public void setReports(List<GWTReport> reports) {
         this.reports = reports;
     }
 
@@ -843,7 +808,7 @@ public class GWTWorkspace implements IsSerializable {
         return minSearchCharacters;
     }
 
-    public void setMinSearchCharacters(final int minSearchCharacters) {
+    public void setMinSearchCharacters(int minSearchCharacters) {
         this.minSearchCharacters = minSearchCharacters;
     }
 
@@ -851,7 +816,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabMailPreviewVisible;
     }
 
-    public void setTabMailPreviewVisible(final boolean tabMailPreviewVisible) {
+    public void setTabMailPreviewVisible(boolean tabMailPreviewVisible) {
         this.tabMailPreviewVisible = tabMailPreviewVisible;
     }
 
@@ -859,7 +824,7 @@ public class GWTWorkspace implements IsSerializable {
         return tabMailNotesVisible;
     }
 
-    public void setTabMailNotesVisible(final boolean tabMailNotesVisible) {
+    public void setTabMailNotesVisible(boolean tabMailNotesVisible) {
         this.tabMailNotesVisible = tabMailNotesVisible;
     }
 
@@ -867,7 +832,7 @@ public class GWTWorkspace implements IsSerializable {
         return uINotificationSchedule;
     }
 
-    public void setuINotificationSchedule(final long uINotificationSchedule) {
+    public void setuINotificationSchedule(long uINotificationSchedule) {
         this.uINotificationSchedule = uINotificationSchedule;
     }
 
@@ -875,15 +840,31 @@ public class GWTWorkspace implements IsSerializable {
         return miscWorkflowList;
     }
 
-    public void setMiscWorkflowList(final List<String> miscWorkflowList) {
+    public void setMiscWorkflowList(List<String> miscWorkflowList) {
         this.miscWorkflowList = miscWorkflowList;
     }
 
-    public GWTProfileExplorer getProfileExplorer() {
-        return profileExplorer;
+    public boolean isSecurityModeMultiple() {
+        return securityModeMultiple;
     }
 
-    public void setProfileExplorer(final GWTProfileExplorer profileExplorer) {
-        this.profileExplorer = profileExplorer;
+    public void setSecurityModeMultiple(boolean securityModeMultiple) {
+        this.securityModeMultiple = securityModeMultiple;
+    }
+
+    public GWTProfilePagination getProfilePagination() {
+        return profilePagination;
+    }
+
+    public void setProfilePagination(GWTProfilePagination profilePagination) {
+        this.profilePagination = profilePagination;
+    }
+
+    public List<GWTMimeType> getMimeTypes() {
+        return mimeTypes;
+    }
+
+    public void setMimeTypes(List<GWTMimeType> mimeTypes) {
+        this.mimeTypes = mimeTypes;
     }
 }

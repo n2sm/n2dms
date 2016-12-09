@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,7 +25,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public abstract class MsOffice2007ContentHandler extends DefaultHandler {
     protected StringBuffer content;
-
     protected boolean appendChar;
 
     public MsOffice2007ContentHandler() {
@@ -37,7 +36,7 @@ public abstract class MsOffice2007ContentHandler extends DefaultHandler {
      * Returns the text content extracted from parsed xml
      */
     public String getContent() {
-        final String ret = content.toString();
+        String ret = content.toString();
         content.setLength(0);
         return ret;
     }

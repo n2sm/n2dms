@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,57 +38,44 @@ import org.slf4j.LoggerFactory;
 
 public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
     private static Logger log = LoggerFactory.getLogger(HeaderHandler.class);
-
     private final String URI_WSS_SEC = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-
     private final String URI_WSS_UTIL = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-
     private final String URI_WSS_PASS = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText";
-
     private String username = "";
-
     private String password = "";
 
-    public HeaderHandler(final String username, final String password) {
+    public HeaderHandler(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    @Override
-    public boolean handleMessage(final SOAPMessageContext messageContext) {
-        final Boolean outboundProperty = (Boolean) messageContext
-                .get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+    public boolean handleMessage(SOAPMessageContext messageContext) {
+        Boolean outboundProperty = (Boolean) messageContext.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
         if (outboundProperty.booleanValue()) {
-            final SOAPMessage message = messageContext.getMessage();
+            SOAPMessage message = messageContext.getMessage();
 
             try {
-                final SOAPEnvelope envelope = message.getSOAPPart()
-                        .getEnvelope();
-                final SOAPHeader header = envelope.addHeader();
-                final SOAPElement security = header.addChildElement("Security",
-                        "wsse", URI_WSS_SEC);
-                final SOAPElement usernameToken = security.addChildElement(
-                        "UsernameToken", "wsse");
-                usernameToken
-                        .addAttribute(new QName("xmlns:wsu"), URI_WSS_UTIL);
+                SOAPEnvelope envelope = message.getSOAPPart().getEnvelope();
+                SOAPHeader header = envelope.addHeader();
+                SOAPElement security = header.addChildElement("Security", "wsse", URI_WSS_SEC);
+                SOAPElement usernameToken = security.addChildElement("UsernameToken", "wsse");
+                usernameToken.addAttribute(new QName("xmlns:wsu"), URI_WSS_UTIL);
 
-                final SOAPElement username = usernameToken.addChildElement(
-                        "Username", "wsse");
+                SOAPElement username = usernameToken.addChildElement("Username", "wsse");
                 username.addTextNode(this.username);
 
-                final SOAPElement password = usernameToken.addChildElement(
-                        "Password", "wsse");
+                SOAPElement password = usernameToken.addChildElement("Password", "wsse");
                 password.setAttribute("Type", URI_WSS_PASS);
                 password.addTextNode(this.password);
 
                 if (log.isDebugEnabled()) {
                     // Print out the outbound SOAP message
-                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     message.writeTo(baos);
                     log.debug(baos.toString());
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -96,12 +83,12 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
                 if (log.isDebugEnabled()) {
                     // This handler does nothing with the response from the Web
                     // Service so we just print out the SOAP message.
-                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    final SOAPMessage message = messageContext.getMessage();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    SOAPMessage message = messageContext.getMessage();
                     message.writeTo(baos);
                     log.debug(baos.toString());
                 }
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -109,17 +96,14 @@ public class HeaderHandler implements SOAPHandler<SOAPMessageContext> {
         return outboundProperty;
     }
 
-    @Override
     public Set<QName> getHeaders() {
         return null;
     }
 
-    @Override
-    public boolean handleFault(final SOAPMessageContext messageContext) {
+    public boolean handleFault(SOAPMessageContext messageContext) {
         return true;
     }
 
-    @Override
-    public void close(final MessageContext messageContext) {
+    public void close(MessageContext messageContext) {
     }
 }

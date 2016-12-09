@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -76,7 +76,7 @@
               </select>
             </td>
           </tr>
-          <tr><td align="right"><input type="submit" value="Search"/></td></tr>
+          <tr><td align="right"><input type="submit" value="Search" class="searchButton"/></td></tr>
         </table>
       </form>
       <br/>
@@ -87,7 +87,7 @@
         <tbody>
           <c:forEach var="act" items="${results}" varStatus="row">
             <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
-              <td nowrap="nowrap"><fmt:formatDate value="${act.date.time}" type="both"/></td>
+              <td nowrap="nowrap"><u:formatDate calendar="${act.date}"/></td>
               <td>${act.user}</td><td>${act.action}</td><td>${act.item}</td><td>${act.path}</td><td>${act.params}</td>
             </tr>
           </c:forEach>

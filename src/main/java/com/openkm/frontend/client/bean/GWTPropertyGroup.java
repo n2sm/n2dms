@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,26 +29,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTPropertyGroup implements IsSerializable {
     public static final String GROUP = "okg";
-
     public static final String GROUP_URI = "http://www.openkm.org/group/1.0";
-
     public static final String GROUP_PROPERTY = "okp";
-
     public static final String GROUP_PROPERTY_URI = "http://www.openkm.org/group/property/1.0";
 
     private String label = "";
-
     private String name = "";
-
     private boolean visible = true;
-
     private boolean readonly = false;
 
     public String getLabel() {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -56,7 +50,7 @@ public class GWTPropertyGroup implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -64,7 +58,7 @@ public class GWTPropertyGroup implements IsSerializable {
         return visible;
     }
 
-    public void setVisible(final boolean visible) {
+    public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
@@ -72,13 +66,12 @@ public class GWTPropertyGroup implements IsSerializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

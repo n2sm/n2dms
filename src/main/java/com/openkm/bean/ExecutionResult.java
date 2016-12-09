@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,16 +23,14 @@ package com.openkm.bean;
 
 public class ExecutionResult {
     private int exitValue = -1;
-
     private String stderr;
-
     private String stdout;
 
     public String getStdout() {
         return stdout;
     }
 
-    public void setStdout(final String stdout) {
+    public void setStdout(String stdout) {
         this.stdout = stdout;
     }
 
@@ -40,7 +38,7 @@ public class ExecutionResult {
         return stderr;
     }
 
-    public void setStderr(final String stderr) {
+    public void setStderr(String stderr) {
         this.stderr = stderr;
     }
 
@@ -48,13 +46,12 @@ public class ExecutionResult {
         return exitValue;
     }
 
-    public void setExitValue(final int exitValue) {
+    public void setExitValue(int exitValue) {
         this.exitValue = exitValue;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{ ");
         sb.append("exitValue=");
         sb.append(exitValue);

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,20 +32,19 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "OKM_CSS", uniqueConstraints = {
 // ALTER TABLE OKM_CSS ADD CONSTRAINT IDX_CSS_NAME_CTX UNIQUE (CSS_NAME, CSS_CONTEXT)
-@UniqueConstraint(name = "IDX_CSS_NAME_CTX", columnNames = { "CSS_NAME",
-        "CSS_CONTEXT" }) })
+@UniqueConstraint(name = "IDX_CSS_NAME_CTX", columnNames = { "CSS_NAME", "CSS_CONTEXT" }) })
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Css implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String CONTEXT_FRONTEND = "frontend";
-
     public static final String CONTEXT_ADMINISTRATION = "administration";
-
     public static final String CONTEXT_EXTENSION = "extension";
 
     @Id
@@ -72,7 +71,7 @@ public class Css implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -80,7 +79,7 @@ public class Css implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -88,7 +87,7 @@ public class Css implements Serializable {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -96,7 +95,7 @@ public class Css implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -104,13 +103,12 @@ public class Css implements Serializable {
         return context;
     }
 
-    public void setContext(final String context) {
+    public void setContext(String context) {
         this.context = context;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", name=").append(name);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -60,7 +60,7 @@ public class AutomationValidation implements Serializable {
     @CollectionTable(name = "OKM_AUTO_VALIDATION_PARAMS", joinColumns = { @JoinColumn(name = "AVP_VALIDATION") })
     private List<String> params = new ArrayList<String>();
 
-    @Column(name = "AVL_ACTIVE")
+    @Column(name = "AVL_ACTIVE", nullable = false)
     @Type(type = "true_false")
     private boolean active;
 
@@ -68,7 +68,7 @@ public class AutomationValidation implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -76,7 +76,7 @@ public class AutomationValidation implements Serializable {
         return type;
     }
 
-    public void setType(final long type) {
+    public void setType(long type) {
         this.type = type;
     }
 
@@ -84,7 +84,7 @@ public class AutomationValidation implements Serializable {
         return order;
     }
 
-    public void setOrder(final int order) {
+    public void setOrder(int order) {
         this.order = order;
     }
 
@@ -92,7 +92,7 @@ public class AutomationValidation implements Serializable {
         return params;
     }
 
-    public void setParams(final List<String> params) {
+    public void setParams(List<String> params) {
         this.params = params;
     }
 
@@ -100,13 +100,12 @@ public class AutomationValidation implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", type=").append(type);

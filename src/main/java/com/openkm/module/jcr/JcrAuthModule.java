@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.jcr;
@@ -71,9 +71,9 @@ public class JcrAuthModule implements AuthModule {
 
             // Activity log
             UserActivity.log(session.getUserID(), "LOGIN", null, null, null);
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             JCRUtils.logout(session);
@@ -81,30 +81,25 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public String login(final String user, final String password)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String login(String user, String password) throws AccessDeniedException, RepositoryException, DatabaseException {
         String token = null;
 
         try {
             if (Config.SYSTEM_MAINTENANCE) {
                 throw new AccessDeniedException("System under maintenance");
             } else {
-                final javax.jcr.Repository r = JcrRepositoryModule
-                        .getRepository();
-                final Session session = r.login(new SimpleCredentials(user,
-                        password.toCharArray()), null);
+                javax.jcr.Repository r = JcrRepositoryModule.getRepository();
+                Session session = r.login(new SimpleCredentials(user, password.toCharArray()), null);
                 token = UUID.randomUUID().toString();
                 JcrSessionManager.getInstance().add(token, session);
 
                 // Activity log
-                UserActivity.log(session.getUserID(), "LOGIN", null, null,
-                        token);
+                UserActivity.log(session.getUserID(), "LOGIN", null, null, token);
             }
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             log.error(e.getMessage(), e);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         }
@@ -113,8 +108,7 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public void logout(final String token) throws RepositoryException,
-            DatabaseException {
+    public void logout(String token) throws RepositoryException, DatabaseException {
         Session session = null;
 
         try {
@@ -126,15 +120,14 @@ public class JcrAuthModule implements AuthModule {
 
             if (session != null) {
                 // Activity log
-                UserActivity.log(session.getUserID(), "LOGOUT", token, null,
-                        null);
+                UserActivity.log(session.getUserID(), "LOGOUT", token, null, null);
 
                 JcrSessionManager.getInstance().remove(token);
                 session.logout();
             }
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -146,35 +139,27 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Load user data
      */
-    public static void loadUserData(final Session session)
-            throws DatabaseException, javax.jcr.RepositoryException {
+    public static void loadUserData(Session session) throws DatabaseException, javax.jcr.RepositoryException {
         log.debug("loadUserData({}) -> {}", session.getUserID(), session);
 
         synchronized (session.getUserID()) {
-            if (!session.itemExists("/" + Repository.TRASH + "/"
-                    + session.getUserID())) {
+            if (!session.itemExists("/" + Repository.TRASH + "/" + session.getUserID())) {
                 log.info("Create {}/{}", Repository.TRASH, session.getUserID());
-                final Node okmTrash = session.getRootNode().getNode(
-                        Repository.TRASH);
+                Node okmTrash = session.getRootNode().getNode(Repository.TRASH);
                 createBase(session, okmTrash);
                 okmTrash.save();
             }
 
-            if (!session.itemExists("/" + Repository.PERSONAL + "/"
-                    + session.getUserID())) {
-                log.info("Create {}/{}", Repository.PERSONAL,
-                        session.getUserID());
-                final Node okmPersonal = session.getRootNode().getNode(
-                        Repository.PERSONAL);
+            if (!session.itemExists("/" + Repository.PERSONAL + "/" + session.getUserID())) {
+                log.info("Create {}/{}", Repository.PERSONAL, session.getUserID());
+                Node okmPersonal = session.getRootNode().getNode(Repository.PERSONAL);
                 createBase(session, okmPersonal);
                 okmPersonal.save();
             }
 
-            if (!session.itemExists("/" + Repository.MAIL + "/"
-                    + session.getUserID())) {
+            if (!session.itemExists("/" + Repository.MAIL + "/" + session.getUserID())) {
                 log.info("Create {}/{}", Repository.MAIL, session.getUserID());
-                final Node okmMail = session.getRootNode().getNode(
-                        Repository.MAIL);
+                Node okmMail = session.getRootNode().getNode(Repository.MAIL);
                 createBase(session, okmMail);
                 okmMail.save();
             }
@@ -186,27 +171,21 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Create base node
      */
-    private static Node createBase(final Session session, final Node root)
-            throws javax.jcr.RepositoryException {
+    private static Node createBase(Session session, Node root) throws javax.jcr.RepositoryException {
         log.debug("createBase({}, {})", session, root);
-        final Node base = root.addNode(session.getUserID(), Folder.TYPE);
+        Node base = root.addNode(session.getUserID(), Folder.TYPE);
 
         // Add basic properties
         base.setProperty(Folder.AUTHOR, session.getUserID());
         base.setProperty(Folder.NAME, session.getUserID());
         base.setProperty(Property.KEYWORDS, new String[] {});
-        base.setProperty(Property.CATEGORIES, new String[] {},
-                PropertyType.REFERENCE);
+        base.setProperty(Property.CATEGORIES, new String[] {}, PropertyType.REFERENCE);
 
         // Auth info
-        base.setProperty(Permission.USERS_READ,
-                new String[] { session.getUserID() });
-        base.setProperty(Permission.USERS_WRITE,
-                new String[] { session.getUserID() });
-        base.setProperty(Permission.USERS_DELETE,
-                new String[] { session.getUserID() });
-        base.setProperty(Permission.USERS_SECURITY,
-                new String[] { session.getUserID() });
+        base.setProperty(Permission.USERS_READ, new String[] { session.getUserID() });
+        base.setProperty(Permission.USERS_WRITE, new String[] { session.getUserID() });
+        base.setProperty(Permission.USERS_DELETE, new String[] { session.getUserID() });
+        base.setProperty(Permission.USERS_SECURITY, new String[] { session.getUserID() });
         base.setProperty(Permission.ROLES_READ, new String[] {});
         base.setProperty(Permission.ROLES_WRITE, new String[] {});
         base.setProperty(Permission.ROLES_DELETE, new String[] {});
@@ -216,12 +195,9 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public void grantUser(final String token, final String nodePath,
-            final String user, final int permissions, final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("grantUser({}, {}, {}, {})", new Object[] { nodePath, user,
-                permissions, recursive });
+    public void grantUser(String token, String nodePath, String user, int permissions, boolean recursive) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("grantUser({}, {}, {}, {})", new Object[] { nodePath, user, permissions, recursive });
         Node node = null;
         Session session = null;
 
@@ -255,18 +231,17 @@ public class JcrAuthModule implements AuthModule {
                 }
 
                 // Activity log
-                UserActivity.log(session.getUserID(), "GRANT_USER",
-                        node.getUUID(), nodePath, user + ", " + permissions);
+                UserActivity.log(session.getUserID(), "GRANT_USER", node.getUUID(), nodePath, user + ", " + permissions);
             }
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new RepositoryException(e.getMessage(), e);
@@ -282,14 +257,13 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Grant user
      */
-    private void grantUser(final Node node, final String user,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
-        final Value[] actualUsers = node.getProperty(property).getValues();
-        final ArrayList<String> newUsers = new ArrayList<String>();
+    private void grantUser(Node node, String user, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
+        Value[] actualUsers = node.getProperty(property).getValues();
+        ArrayList<String> newUsers = new ArrayList<String>();
 
-        for (final Value actualUser : actualUsers) {
-            newUsers.add(actualUser.getString());
+        for (int i = 0; i < actualUsers.length; i++) {
+            newUsers.add(actualUsers[i].getString());
         }
 
         // If the user isn't already granted add him
@@ -298,13 +272,12 @@ public class JcrAuthModule implements AuthModule {
         }
 
         try {
-            node.setProperty(property,
-                    newUsers.toArray(new String[newUsers.size()]));
+            node.setProperty(property, (String[]) newUsers.toArray(new String[newUsers.size()]));
             node.save();
-        } catch (final javax.jcr.lock.LockException e) {
+        } catch (javax.jcr.lock.LockException e) {
             log.warn("grantUser -> LockException : {}", node.getPath());
             JCRUtils.discardsPendingChanges(node);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn("grantUser -> AccessDeniedException : {}", node.getPath());
             JCRUtils.discardsPendingChanges(node);
         }
@@ -313,16 +286,15 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Grant user recursively
      */
-    private void grantUserInDepth(final Node node, final String user,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
+    private void grantUserInDepth(Node node, String user, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
         if (node.isNodeType(Document.TYPE)) {
             grantUser(node, user, property);
         } else if (node.isNodeType(Folder.TYPE)) {
             grantUser(node, user, property);
 
-            for (final NodeIterator it = node.getNodes(); it.hasNext();) {
-                final Node child = it.nextNode();
+            for (NodeIterator it = node.getNodes(); it.hasNext();) {
+                Node child = it.nextNode();
                 grantUserInDepth(child, user, property);
             }
         } else if (node.isNodeType(Mail.TYPE)) {
@@ -333,12 +305,9 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public void revokeUser(final String token, final String nodePath,
-            final String user, final int permissions, final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("revokeUser({}, {}, {}, {})", new Object[] { nodePath, user,
-                permissions, recursive });
+    public void revokeUser(String token, String nodePath, String user, int permissions, boolean recursive) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("revokeUser({}, {}, {}, {})", new Object[] { nodePath, user, permissions, recursive });
         Node node = null;
         Session session = null;
 
@@ -372,18 +341,17 @@ public class JcrAuthModule implements AuthModule {
                 }
 
                 // Activity log
-                UserActivity.log(session.getUserID(), "REVOKE_USER",
-                        node.getUUID(), nodePath, user + ", " + permissions);
+                UserActivity.log(session.getUserID(), "REVOKE_USER", node.getUUID(), nodePath, user + ", " + permissions);
             }
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new RepositoryException(e.getMessage(), e);
@@ -399,11 +367,10 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Revoke user
      */
-    private void revokeUser(final Node node, final String user,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
-        final Value[] actualUsers = node.getProperty(property).getValues();
-        final List<String> newUsers = new ArrayList<String>();
+    private void revokeUser(Node node, String user, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
+        Value[] actualUsers = node.getProperty(property).getValues();
+        List<String> newUsers = new ArrayList<String>();
 
         for (int i = 0; i < actualUsers.length; i++) {
             if (!actualUsers[i].getString().equals(user)) {
@@ -412,13 +379,12 @@ public class JcrAuthModule implements AuthModule {
         }
 
         try {
-            node.setProperty(property,
-                    newUsers.toArray(new String[newUsers.size()]));
+            node.setProperty(property, (String[]) newUsers.toArray(new String[newUsers.size()]));
             node.save();
-        } catch (final javax.jcr.lock.LockException e) {
+        } catch (javax.jcr.lock.LockException e) {
             log.warn("revokeUser -> LockException : " + node.getPath());
             JCRUtils.discardsPendingChanges(node);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn("revokeUser -> AccessDeniedException : " + node.getPath());
             JCRUtils.discardsPendingChanges(node);
         }
@@ -427,16 +393,15 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Revoke user recursively
      */
-    private void revokeUserInDepth(final Node node, final String user,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
+    private void revokeUserInDepth(Node node, String user, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
         if (node.isNodeType(Document.TYPE)) {
             revokeUser(node, user, property);
         } else if (node.isNodeType(Folder.TYPE)) {
             revokeUser(node, user, property);
 
-            for (final NodeIterator it = node.getNodes(); it.hasNext();) {
-                final Node child = it.nextNode();
+            for (NodeIterator it = node.getNodes(); it.hasNext();) {
+                Node child = it.nextNode();
                 revokeUserInDepth(child, user, property);
             }
         } else if (node.isNodeType(Mail.TYPE)) {
@@ -447,12 +412,9 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public void grantRole(final String token, final String nodePath,
-            final String role, final int permissions, final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("grantRole({}, {}, {}, {})", new Object[] { nodePath, role,
-                permissions, recursive });
+    public void grantRole(String token, String nodePath, String role, int permissions, boolean recursive) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("grantRole({}, {}, {}, {})", new Object[] { nodePath, role, permissions, recursive });
         Node node = null;
         Session session = null;
 
@@ -486,18 +448,17 @@ public class JcrAuthModule implements AuthModule {
                 }
 
                 // Activity log
-                UserActivity.log(session.getUserID(), "GRANT_ROLE",
-                        node.getUUID(), nodePath, role + ", " + permissions);
+                UserActivity.log(session.getUserID(), "GRANT_ROLE", node.getUUID(), nodePath, role + ", " + permissions);
             }
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new RepositoryException(e.getMessage(), e);
@@ -513,14 +474,13 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Grant role
      */
-    private void grantRole(final Node node, final String role,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
-        final Value[] actualRoles = node.getProperty(property).getValues();
-        final List<String> newRoles = new ArrayList<String>();
+    private void grantRole(Node node, String role, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
+        Value[] actualRoles = node.getProperty(property).getValues();
+        List<String> newRoles = new ArrayList<String>();
 
-        for (final Value actualRole : actualRoles) {
-            newRoles.add(actualRole.getString());
+        for (int i = 0; i < actualRoles.length; i++) {
+            newRoles.add(actualRoles[i].getString());
         }
 
         // If the role isn't already granted add him
@@ -529,13 +489,12 @@ public class JcrAuthModule implements AuthModule {
         }
 
         try {
-            node.setProperty(property,
-                    newRoles.toArray(new String[newRoles.size()]));
+            node.setProperty(property, (String[]) newRoles.toArray(new String[newRoles.size()]));
             node.save();
-        } catch (final javax.jcr.lock.LockException e) {
+        } catch (javax.jcr.lock.LockException e) {
             log.warn("grantRole -> LockException : {}", node.getPath());
             JCRUtils.discardsPendingChanges(node);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn("grantRole -> AccessDeniedException : {}", node.getPath());
             JCRUtils.discardsPendingChanges(node);
         }
@@ -544,16 +503,15 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Grant role recursively
      */
-    private void grantRoleInDepth(final Node node, final String role,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
+    private void grantRoleInDepth(Node node, String role, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
         if (node.isNodeType(Document.TYPE)) {
             grantRole(node, role, property);
         } else if (node.isNodeType(Folder.TYPE)) {
             grantRole(node, role, property);
 
-            for (final NodeIterator it = node.getNodes(); it.hasNext();) {
-                final Node child = it.nextNode();
+            for (NodeIterator it = node.getNodes(); it.hasNext();) {
+                Node child = it.nextNode();
                 grantRoleInDepth(child, role, property);
             }
         } else if (node.isNodeType(Mail.TYPE)) {
@@ -564,12 +522,9 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public void revokeRole(final String token, final String nodePath,
-            final String role, final int permissions, final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("revokeRole({}, {}, {}, {})", new Object[] { nodePath, role,
-                permissions, recursive });
+    public void revokeRole(String token, String nodePath, String role, int permissions, boolean recursive) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("revokeRole({}, {}, {}, {})", new Object[] { nodePath, role, permissions, recursive });
         Node node = null;
         Session session = null;
 
@@ -603,18 +558,17 @@ public class JcrAuthModule implements AuthModule {
                 }
 
                 // Activity log
-                UserActivity.log(session.getUserID(), "REVOKE_ROLE",
-                        node.getUUID(), nodePath, role + ", " + permissions);
+                UserActivity.log(session.getUserID(), "REVOKE_ROLE", node.getUUID(), nodePath, role + ", " + permissions);
             }
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(node);
             throw new RepositoryException(e.getMessage(), e);
@@ -630,11 +584,10 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Revoke role
      */
-    private void revokeRole(final Node node, final String role,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
-        final Value[] actualRoles = node.getProperty(property).getValues();
-        final List<String> newRoles = new ArrayList<String>();
+    private void revokeRole(Node node, String role, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
+        Value[] actualRoles = node.getProperty(property).getValues();
+        List<String> newRoles = new ArrayList<String>();
 
         for (int i = 0; i < actualRoles.length; i++) {
             if (!actualRoles[i].getString().equals(role)) {
@@ -643,13 +596,12 @@ public class JcrAuthModule implements AuthModule {
         }
 
         try {
-            node.setProperty(property,
-                    newRoles.toArray(new String[newRoles.size()]));
+            node.setProperty(property, (String[]) newRoles.toArray(new String[newRoles.size()]));
             node.save();
-        } catch (final javax.jcr.lock.LockException e) {
+        } catch (javax.jcr.lock.LockException e) {
             log.warn("revokeRole -> LockException : " + node.getPath());
             JCRUtils.discardsPendingChanges(node);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn("revokeRole -> AccessDeniedException : " + node.getPath());
             JCRUtils.discardsPendingChanges(node);
         }
@@ -658,16 +610,15 @@ public class JcrAuthModule implements AuthModule {
     /**
      * Revoke role recursively
      */
-    private void revokeRoleInDepth(final Node node, final String role,
-            final String property) throws ValueFormatException,
-            PathNotFoundException, javax.jcr.RepositoryException {
+    private void revokeRoleInDepth(Node node, String role, String property) throws ValueFormatException, PathNotFoundException,
+            javax.jcr.RepositoryException {
         if (node.isNodeType(Document.TYPE)) {
             revokeRole(node, role, property);
         } else if (node.isNodeType(Folder.TYPE)) {
             revokeRole(node, role, property);
 
-            for (final NodeIterator it = node.getNodes(); it.hasNext();) {
-                final Node child = it.nextNode();
+            for (NodeIterator it = node.getNodes(); it.hasNext();) {
+                Node child = it.nextNode();
                 revokeRoleInDepth(child, role, property);
             }
         } else if (node.isNodeType(Mail.TYPE)) {
@@ -678,11 +629,10 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public HashMap<String, Integer> getGrantedUsers(final String token,
-            final String nodePath) throws PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
+    public HashMap<String, Integer> getGrantedUsers(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("getGrantedUsers({})", nodePath);
-        final HashMap<String, Integer> users = new HashMap<String, Integer>();
+        HashMap<String, Integer> users = new HashMap<String, Integer>();
         Session session = null;
 
         try {
@@ -692,66 +642,52 @@ public class JcrAuthModule implements AuthModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node node = session.getRootNode().getNode(
-                    nodePath.substring(1));
-            final Value[] usersRead = node.getProperty(Permission.USERS_READ)
-                    .getValues();
+            Node node = session.getRootNode().getNode(nodePath.substring(1));
+            Value[] usersRead = node.getProperty(Permission.USERS_READ).getValues();
 
-            for (final Value element : usersRead) {
-                users.put(element.getString(), new Integer(Permission.READ));
+            for (int i = 0; i < usersRead.length; i++) {
+                users.put(usersRead[i].getString(), new Integer(Permission.READ));
             }
 
-            final Value[] usersWrite = node.getProperty(Permission.USERS_WRITE)
-                    .getValues();
+            Value[] usersWrite = node.getProperty(Permission.USERS_WRITE).getValues();
 
-            for (final Value element : usersWrite) {
-                final Integer previous = users.get(element.getString());
+            for (int i = 0; i < usersWrite.length; i++) {
+                Integer previous = (Integer) users.get(usersWrite[i].getString());
 
                 if (previous != null) {
-                    users.put(
-                            element.getString(),
-                            new Integer(previous.byteValue() | Permission.WRITE));
+                    users.put(usersWrite[i].getString(), new Integer(previous.byteValue() | Permission.WRITE));
                 } else {
-                    users.put(element.getString(),
-                            new Integer(Permission.WRITE));
+                    users.put(usersWrite[i].getString(), new Integer(Permission.WRITE));
                 }
             }
 
-            final Value[] usersDelete = node.getProperty(
-                    Permission.USERS_DELETE).getValues();
+            Value[] usersDelete = node.getProperty(Permission.USERS_DELETE).getValues();
 
-            for (final Value element : usersDelete) {
-                final Integer previous = users.get(element.getString());
+            for (int i = 0; i < usersDelete.length; i++) {
+                Integer previous = (Integer) users.get(usersDelete[i].getString());
 
                 if (previous != null) {
-                    users.put(element.getString(),
-                            new Integer(previous.byteValue()
-                                    | Permission.DELETE));
+                    users.put(usersDelete[i].getString(), new Integer(previous.byteValue() | Permission.DELETE));
                 } else {
-                    users.put(element.getString(), new Integer(
-                            Permission.DELETE));
+                    users.put(usersDelete[i].getString(), new Integer(Permission.DELETE));
                 }
             }
 
-            final Value[] usersSecurity = node.getProperty(
-                    Permission.USERS_SECURITY).getValues();
+            Value[] usersSecurity = node.getProperty(Permission.USERS_SECURITY).getValues();
 
-            for (final Value element : usersSecurity) {
-                final Integer previous = users.get(element.getString());
+            for (int i = 0; i < usersSecurity.length; i++) {
+                Integer previous = (Integer) users.get(usersSecurity[i].getString());
 
                 if (previous != null) {
-                    users.put(element.getString(),
-                            new Integer(previous.byteValue()
-                                    | Permission.SECURITY));
+                    users.put(usersSecurity[i].getString(), new Integer(previous.byteValue() | Permission.SECURITY));
                 } else {
-                    users.put(element.getString(), new Integer(
-                            Permission.SECURITY));
+                    users.put(usersSecurity[i].getString(), new Integer(Permission.SECURITY));
                 }
             }
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -765,11 +701,10 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public Map<String, Integer> getGrantedRoles(final String token,
-            final String nodePath) throws PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
+    public Map<String, Integer> getGrantedRoles(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("getGrantedRoles({})", nodePath);
-        final Map<String, Integer> roles = new HashMap<String, Integer>();
+        Map<String, Integer> roles = new HashMap<String, Integer>();
         Session session = null;
 
         try {
@@ -779,65 +714,52 @@ public class JcrAuthModule implements AuthModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node node = session.getRootNode().getNode(
-                    nodePath.substring(1));
-            final Value[] rolesRead = node.getProperty(Permission.ROLES_READ)
-                    .getValues();
+            Node node = session.getRootNode().getNode(nodePath.substring(1));
+            Value[] rolesRead = node.getProperty(Permission.ROLES_READ).getValues();
 
-            for (final Value element : rolesRead) {
-                roles.put(element.getString(), new Integer(Permission.READ));
+            for (int i = 0; i < rolesRead.length; i++) {
+                roles.put(rolesRead[i].getString(), new Integer(Permission.READ));
             }
 
-            final Value[] rolesWrite = node.getProperty(Permission.ROLES_WRITE)
-                    .getValues();
+            Value[] rolesWrite = node.getProperty(Permission.ROLES_WRITE).getValues();
 
-            for (final Value element : rolesWrite) {
-                final Integer previous = roles.get(element.getString());
+            for (int i = 0; i < rolesWrite.length; i++) {
+                Integer previous = (Integer) roles.get(rolesWrite[i].getString());
 
                 if (previous != null) {
-                    roles.put(element.getString(),
-                            new Integer(previous.intValue() | Permission.WRITE));
+                    roles.put(rolesWrite[i].getString(), new Integer(previous.intValue() | Permission.WRITE));
                 } else {
-                    roles.put(element.getString(),
-                            new Integer(Permission.WRITE));
+                    roles.put(rolesWrite[i].getString(), new Integer(Permission.WRITE));
                 }
             }
 
-            final Value[] rolesDelete = node.getProperty(
-                    Permission.ROLES_DELETE).getValues();
+            Value[] rolesDelete = node.getProperty(Permission.ROLES_DELETE).getValues();
 
-            for (final Value element : rolesDelete) {
-                final Integer previous = roles.get(element.getString());
+            for (int i = 0; i < rolesDelete.length; i++) {
+                Integer previous = (Integer) roles.get(rolesDelete[i].getString());
 
                 if (previous != null) {
-                    roles.put(
-                            element.getString(),
-                            new Integer(previous.intValue() | Permission.DELETE));
+                    roles.put(rolesDelete[i].getString(), new Integer(previous.intValue() | Permission.DELETE));
                 } else {
-                    roles.put(element.getString(), new Integer(
-                            Permission.DELETE));
+                    roles.put(rolesDelete[i].getString(), new Integer(Permission.DELETE));
                 }
             }
 
-            final Value[] rolesSecurity = node.getProperty(
-                    Permission.ROLES_SECURITY).getValues();
+            Value[] rolesSecurity = node.getProperty(Permission.ROLES_SECURITY).getValues();
 
-            for (final Value element : rolesSecurity) {
-                final Integer previous = roles.get(element.getString());
+            for (int i = 0; i < rolesSecurity.length; i++) {
+                Integer previous = (Integer) roles.get(rolesSecurity[i].getString());
 
                 if (previous != null) {
-                    roles.put(element.getString(),
-                            new Integer(previous.intValue()
-                                    | Permission.SECURITY));
+                    roles.put(rolesSecurity[i].getString(), new Integer(previous.intValue() | Permission.SECURITY));
                 } else {
-                    roles.put(element.getString(), new Integer(
-                            Permission.SECURITY));
+                    roles.put(rolesSecurity[i].getString(), new Integer(Permission.SECURITY));
                 }
             }
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -851,10 +773,9 @@ public class JcrAuthModule implements AuthModule {
     }
 
     /**
-     *  View user session info
+     * View user session info
      */
-    public void view(final String token) throws RepositoryException,
-            DatabaseException {
+    public void view(String token) throws RepositoryException, DatabaseException {
         Session session = null;
 
         try {
@@ -864,21 +785,21 @@ public class JcrAuthModule implements AuthModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final String[] atributes = session.getAttributeNames();
+            String[] atributes = session.getAttributeNames();
             log.info("** ATRIBUTES **");
-            for (final String atribute : atributes) {
-                log.info(atribute + " -> " + session.getAttribute(atribute));
+            for (int i = 0; i < atributes.length; i++) {
+                log.info(atributes[i] + " -> " + session.getAttribute(atributes[i]));
             }
 
-            final String[] lockTokens = session.getLockTokens();
+            String[] lockTokens = session.getLockTokens();
             log.info("** LOCK TOKENS **");
-            for (final String lockToken : lockTokens) {
-                log.info(lockToken);
+            for (int i = 0; i < lockTokens.length; i++) {
+                log.info(lockTokens[i]);
             }
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -889,49 +810,81 @@ public class JcrAuthModule implements AuthModule {
     }
 
     @Override
-    public List<String> getUsers(final String token)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getUsers(token);
+    public List<String> getUsers(String token) throws PrincipalAdapterException {
+        return CommonAuthModule.getUsers();
     }
 
     @Override
-    public List<String> getRoles(final String token)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getRoles(token);
+    public List<String> getRoles(String token) throws PrincipalAdapterException {
+        return CommonAuthModule.getRoles();
     }
 
     @Override
-    public List<String> getUsersByRole(final String token, final String role)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getUsersByRole(token, role);
+    public List<String> getUsersByRole(String token, String role) throws PrincipalAdapterException {
+        return CommonAuthModule.getUsersByRole(role);
     }
 
     @Override
-    public List<String> getRolesByUser(final String token, final String user)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getRolesByUser(token, user);
+    public List<String> getRolesByUser(String token, String user) throws PrincipalAdapterException {
+        return CommonAuthModule.getRolesByUser(user);
     }
 
     @Override
-    public String getMail(final String token, final String user)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getMail(token, user);
+    public String getMail(String token, String user) throws PrincipalAdapterException {
+        return CommonAuthModule.getMail(user);
     }
 
     @Override
-    public String getName(final String token, final String user)
-            throws PrincipalAdapterException {
-        return CommonAuthModule.getName(token, user);
+    public String getName(String token, String user) throws PrincipalAdapterException {
+        return CommonAuthModule.getName(user);
     }
 
     @Override
-    public void changeSecurity(final String token, final String nodePath,
-            final Map<String, Integer> grantUsers,
-            final Map<String, Integer> revokeUsers,
-            final Map<String, Integer> grantRoles,
-            final Map<String, Integer> revokeRoles, final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void changeSecurity(String token, String nodePath, Map<String, Integer> grantUsers, Map<String, Integer> revokeUsers,
+            Map<String, Integer> grantRoles, Map<String, Integer> revokeRoles, boolean recursive) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
         throw new NotImplementedException("changeSecurity");
+    }
+
+    @Override
+    public void createUser(String token, String user, String password, String email, String name, boolean active)
+            throws PrincipalAdapterException {
+        throw new NotImplementedException("createUser");
+    }
+
+    @Override
+    public void deleteUser(String token, String user) throws PrincipalAdapterException {
+        throw new NotImplementedException("deleteUser");
+    }
+
+    @Override
+    public void updateUser(String token, String user, String password, String email, String name, boolean active)
+            throws PrincipalAdapterException {
+        throw new NotImplementedException("updateUser");
+    }
+
+    @Override
+    public void createRole(String token, String role, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("createRole");
+    }
+
+    @Override
+    public void deleteRole(String token, String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("deleteRole");
+    }
+
+    @Override
+    public void updateRole(String token, String role, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("updateRole");
+    }
+
+    @Override
+    public void assignRole(String token, String user, String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("assignRole");
+    }
+
+    @Override
+    public void removeRole(String token, String user, String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("removeRole");
     }
 }

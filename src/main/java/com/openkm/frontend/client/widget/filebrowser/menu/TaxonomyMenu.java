@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,41 +39,26 @@ import com.openkm.frontend.client.widget.MenuBase;
 public class TaxonomyMenu extends MenuBase {
 
     private ToolBarOption toolBarOption;
-
     private MenuBar dirMenu;
-
     private MenuItem checkout;
-
     private MenuItem checkin;
-
     private MenuItem cancelCheckout;
-
     private MenuItem delete;
-
     private MenuItem rename;
-
     private MenuItem download;
-
     private MenuItem lock;
-
     private MenuItem unlock;
-
     private MenuItem move;
-
     private MenuItem copy;
-
+    private MenuItem convert;
     private MenuItem note;
-
     private MenuItem category;
-
     private MenuItem keyword;
-
     private MenuItem propertyGroup;
-
+    private MenuItem updatePropertyGroup;
+    private MenuItem merge;
     private MenuItem bookmark;
-
     private MenuItem home;
-
     private MenuItem export;
 
     /**
@@ -85,78 +70,71 @@ public class TaxonomyMenu extends MenuBase {
 
         // First initialize language values
         dirMenu = new MenuBar(true);
-        download = new MenuItem(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("filebrowser.menu.download")), true, downloadFile);
+        download = new MenuItem(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("filebrowser.menu.download")), true, downloadFile);
         download.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(download);
-        checkout = new MenuItem(Util.menuHTML("img/icon/actions/checkout.gif",
-                Main.i18n("filebrowser.menu.checkout")), true, checkoutFile);
+        checkout = new MenuItem(Util.menuHTML("img/icon/actions/checkout.gif", Main.i18n("filebrowser.menu.checkout")), true, checkoutFile);
         checkout.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(checkout);
-        checkin = new MenuItem(Util.menuHTML("img/icon/actions/checkin.gif",
-                Main.i18n("filebrowser.menu.checkin")), true, checkinFile);
+        checkin = new MenuItem(Util.menuHTML("img/icon/actions/checkin.gif", Main.i18n("filebrowser.menu.checkin")), true, checkinFile);
         checkin.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(checkin);
-        cancelCheckout = new MenuItem(Util.menuHTML(
-                "img/icon/actions/cancel_checkout.gif",
-                Main.i18n("filebrowser.menu.checkout.cancel")), true,
-                cancelCheckinFile);
+        cancelCheckout =
+                new MenuItem(Util.menuHTML("img/icon/actions/cancel_checkout.gif", Main.i18n("filebrowser.menu.checkout.cancel")), true,
+                        cancelCheckoutFile);
         cancelCheckout.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(cancelCheckout);
-        lock = new MenuItem(Util.menuHTML("img/icon/actions/lock.gif",
-                Main.i18n("filebrowser.menu.lock")), true, lockFile);
+        lock = new MenuItem(Util.menuHTML("img/icon/actions/lock.gif", Main.i18n("filebrowser.menu.lock")), true, lockFile);
         lock.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(lock);
-        unlock = new MenuItem(Util.menuHTML("img/icon/actions/unlock.gif",
-                Main.i18n("filebrowser.menu.unlock")), true, unlockFile);
+        unlock = new MenuItem(Util.menuHTML("img/icon/actions/unlock.gif", Main.i18n("filebrowser.menu.unlock")), true, unlockFile);
         unlock.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(unlock);
-        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("filebrowser.menu.delete")), true, deleteFile);
+        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("filebrowser.menu.delete")), true, deleteFile);
         delete.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(delete);
-        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("general.menu.edit.rename")), true, renameFile);
+        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("general.menu.edit.rename")), true, renameFile);
         rename.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(rename);
-        move = new MenuItem(Util.menuHTML("img/icon/actions/move_document.gif",
-                Main.i18n("general.menu.edit.move")), true, moveFile);
+        move = new MenuItem(Util.menuHTML("img/icon/actions/move_document.gif", Main.i18n("general.menu.edit.move")), true, moveFile);
         move.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(move);
-        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")), true, copyFile);
+        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")), true, copyFile);
         copy.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(copy);
-        note = new MenuItem(Util.menuHTML("img/icon/actions/add_note.png",
-                Main.i18n("general.menu.edit.add.note")), true, addNote);
+        convert = new MenuItem(Util.menuHTML("img/icon/menu/convert.png", Main.i18n("general.menu.tools.convert")), true, showConvert);
+        convert.addStyleName("okm-MainMenuItem");
+        dirMenu.addItem(convert);
+        note = new MenuItem(Util.menuHTML("img/icon/actions/add_note.png", Main.i18n("general.menu.edit.add.note")), true, addNote);
         note.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(note);
-        category = new MenuItem(
-                Util.menuHTML("img/icon/stackpanel/table_key.gif",
-                        Main.i18n("category.add")), true, addCategory);
+        category = new MenuItem(Util.menuHTML("img/icon/stackpanel/table_key.gif", Main.i18n("category.add")), true, addCategory);
         category.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(category);
-        keyword = new MenuItem(Util.menuHTML("img/icon/actions/book_add.png",
-                Main.i18n("keyword.add")), true, addKeyword);
+        keyword = new MenuItem(Util.menuHTML("img/icon/actions/book_add.png", Main.i18n("keyword.add")), true, addKeyword);
         keyword.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(keyword);
-        propertyGroup = new MenuItem(Util.menuHTML(
-                "img/icon/actions/add_property_group.gif",
-                Main.i18n("general.menu.edit.add.property.group")), true,
-                addPropertyGroup);
+        propertyGroup =
+                new MenuItem(Util.menuHTML("img/icon/actions/add_property_group.gif", Main.i18n("general.menu.edit.add.property.group")),
+                        true, addPropertyGroup);
         propertyGroup.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(propertyGroup);
-        bookmark = new MenuItem(Util.menuHTML(
-                "img/icon/actions/add_bookmark.gif",
-                Main.i18n("general.menu.bookmark.add")), true, addBookmark);
+        updatePropertyGroup =
+                new MenuItem(Util.menuHTML("img/icon/actions/update_property_group.png",
+                        Main.i18n("general.menu.edit.update.property.group")), true, updatePropertyGroupOKM);
+        updatePropertyGroup.addStyleName("okm-MenuItem-strike");
+        dirMenu.addItem(updatePropertyGroup);
+        merge = new MenuItem(Util.menuHTML("img/icon/actions/merge_pdf.png", Main.i18n("general.menu.edit.merge.pdf")), true, mergePdf);
+        merge.addStyleName("okm-MenuItem-strike");
+        dirMenu.addItem(merge);
+        bookmark =
+                new MenuItem(Util.menuHTML("img/icon/actions/add_bookmark.gif", Main.i18n("general.menu.bookmark.add")), true, addBookmark);
         bookmark.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(bookmark);
-        home = new MenuItem(Util.menuHTML("img/icon/actions/bookmark.gif",
-                Main.i18n("filebrowser.menu.set.home")), true, setHome);
+        home = new MenuItem(Util.menuHTML("img/icon/actions/bookmark.gif", Main.i18n("filebrowser.menu.set.home")), true, setHome);
         home.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(home);
-        export = new MenuItem(Util.menuHTML("img/icon/actions/export.gif",
-                Main.i18n("general.menu.file.export")), true, exportToFile);
+        export = new MenuItem(Util.menuHTML("img/icon/actions/export.gif", Main.i18n("general.menu.file.export")), true, exportToFile);
         export.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(export);
 
@@ -166,7 +144,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to download file
     Command downloadFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.downloadOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeDownload();
@@ -177,7 +154,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to checkout file
     Command checkoutFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.checkoutOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeCheckout();
@@ -188,7 +164,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to checkin file
     Command checkinFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.checkinOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeCheckin();
@@ -198,8 +173,7 @@ public class TaxonomyMenu extends MenuBase {
     };
 
     // Command menu to cancel checkin file
-    Command cancelCheckinFile = new Command() {
-        @Override
+    Command cancelCheckoutFile = new Command() {
         public void execute() {
             if (toolBarOption.cancelCheckoutOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeCancelCheckout();
@@ -210,7 +184,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to lock file
     Command lockFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.lockOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeLock();
@@ -221,7 +194,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to unlock file
     Command unlockFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.unLockOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeUnlock();
@@ -232,7 +204,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to lock file
     Command deleteFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.deleteOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeDelete();
@@ -243,7 +214,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to rename file
     Command renameFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.renameOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeRename();
@@ -254,15 +224,9 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to rename file
     Command moveFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.moveOption) {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMassive()) {
-                    Main.get().activeFolderTree.massiveMove();
-                } else {
-                    Main.get().mainPanel.desktop.browser.fileBrowser.move();
-                }
+                Main.get().mainPanel.topPanel.toolBar.executeMove();
                 hide();
             }
         }
@@ -270,15 +234,19 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to copy file
     Command copyFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.copyOption) {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMassive()) {
-                    Main.get().activeFolderTree.massiveCopy();
-                } else {
-                    Main.get().mainPanel.desktop.browser.fileBrowser.copy();
-                }
+                Main.get().mainPanel.topPanel.toolBar.executeCopy();
+                hide();
+            }
+        }
+    };
+
+    // Command menu to convert
+    Command showConvert = new Command() {
+        public void execute() {
+            if (toolBarOption.convertOption) {
+                Main.get().mainPanel.topPanel.toolBar.executeConvert();
                 hide();
             }
         }
@@ -286,7 +254,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to add note
     Command addNote = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addNoteOption) {
                 Main.get().mainPanel.topPanel.toolBar.addNote();
@@ -297,7 +264,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to add category
     Command addCategory = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addCategoryOption) {
                 Main.get().mainPanel.topPanel.toolBar.addCategory();
@@ -308,7 +274,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to add category
     Command addKeyword = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addKeywordOption) {
                 Main.get().mainPanel.topPanel.toolBar.addKeyword();
@@ -319,7 +284,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to add property group
     Command addPropertyGroup = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addPropertyGroupOption) {
                 Main.get().mainPanel.topPanel.toolBar.addPropertyGroup();
@@ -328,9 +292,28 @@ public class TaxonomyMenu extends MenuBase {
         }
     };
 
+    // Command menu to update property group
+    Command updatePropertyGroupOKM = new Command() {
+        public void execute() {
+            if (toolBarOption.updatePropertyGroupOption) {
+                Main.get().mainPanel.topPanel.toolBar.updatePropertyGroup();
+                hide();
+            }
+        }
+    };
+
+    // Command menu to merge pdf
+    Command mergePdf = new Command() {
+        public void execute() {
+            if (toolBarOption.mergePdfOption) {
+                Main.get().mainPanel.topPanel.toolBar.mergePdf();
+                hide();
+            }
+        }
+    };
+
     // Command menu to add bookmark
     Command addBookmark = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.bookmarkOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeAddBookmark();
@@ -341,7 +324,6 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to set default home
     Command setHome = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.homeOption) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.setHome();
@@ -352,11 +334,9 @@ public class TaxonomyMenu extends MenuBase {
 
     // Command menu to set default home
     Command exportToFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.exportOption) {
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .exportFolderToFile();
+                Main.get().mainPanel.desktop.browser.fileBrowser.exportFolderToFile();
                 hide();
             }
         }
@@ -364,46 +344,31 @@ public class TaxonomyMenu extends MenuBase {
 
     @Override
     public void langRefresh() {
-        checkout.setHTML(Util.menuHTML("img/icon/actions/checkout.gif",
-                Main.i18n("filebrowser.menu.checkout")));
-        checkin.setHTML(Util.menuHTML("img/icon/actions/checkin.gif",
-                Main.i18n("filebrowser.menu.checkin")));
-        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("filebrowser.menu.delete")));
-        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("general.menu.edit.rename")));
-        cancelCheckout.setHTML(Util.menuHTML(
-                "img/icon/actions/cancel_checkout.gif",
-                Main.i18n("filebrowser.menu.checkout.cancel")));
-        lock.setHTML(Util.menuHTML("img/icon/actions/lock.gif",
-                Main.i18n("filebrowser.menu.lock")));
-        unlock.setHTML(Util.menuHTML("img/icon/actions/unlock.gif",
-                Main.i18n("filebrowser.menu.unlock")));
-        download.setHTML(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("filebrowser.menu.download")));
-        move.setHTML(Util.menuHTML("img/icon/actions/move_document.gif",
-                Main.i18n("general.menu.edit.move")));
-        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")));
-        note.setHTML(Util.menuHTML("img/icon/actions/add_note.png",
-                Main.i18n("general.menu.edit.add.note")));
-        category.setHTML(Util.menuHTML("img/icon/stackpanel/table_key.gif",
-                Main.i18n("category.add")));
-        keyword.setHTML(Util.menuHTML("img/icon/actions/book_add.png",
-                Main.i18n("keyword.add")));
-        propertyGroup.setHTML(Util.menuHTML(
-                "img/icon/actions/add_property_group.gif",
-                Main.i18n("general.menu.edit.add.property.group")));
-        bookmark.setHTML(Util.menuHTML("img/icon/actions/add_bookmark.gif",
-                Main.i18n("general.menu.bookmark.add")));
-        home.setHTML(Util.menuHTML("img/icon/actions/bookmark.gif",
-                Main.i18n("filebrowser.menu.set.home")));
-        export.setHTML(Util.menuHTML("img/icon/actions/export.gif",
-                Main.i18n("general.menu.file.export")));
+        checkout.setHTML(Util.menuHTML("img/icon/actions/checkout.gif", Main.i18n("filebrowser.menu.checkout")));
+        checkin.setHTML(Util.menuHTML("img/icon/actions/checkin.gif", Main.i18n("filebrowser.menu.checkin")));
+        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("filebrowser.menu.delete")));
+        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("general.menu.edit.rename")));
+        cancelCheckout.setHTML(Util.menuHTML("img/icon/actions/cancel_checkout.gif", Main.i18n("filebrowser.menu.checkout.cancel")));
+        lock.setHTML(Util.menuHTML("img/icon/actions/lock.gif", Main.i18n("filebrowser.menu.lock")));
+        unlock.setHTML(Util.menuHTML("img/icon/actions/unlock.gif", Main.i18n("filebrowser.menu.unlock")));
+        download.setHTML(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("filebrowser.menu.download")));
+        move.setHTML(Util.menuHTML("img/icon/actions/move_document.gif", Main.i18n("general.menu.edit.move")));
+        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")));
+        convert.setHTML(Util.menuHTML("img/icon/menu/convert.png", Main.i18n("general.menu.tools.convert")));
+        note.setHTML(Util.menuHTML("img/icon/actions/add_note.png", Main.i18n("general.menu.edit.add.note")));
+        category.setHTML(Util.menuHTML("img/icon/stackpanel/table_key.gif", Main.i18n("category.add")));
+        keyword.setHTML(Util.menuHTML("img/icon/actions/book_add.png", Main.i18n("keyword.add")));
+        propertyGroup.setHTML(Util.menuHTML("img/icon/actions/add_property_group.gif", Main.i18n("general.menu.edit.add.property.group")));
+        updatePropertyGroup.setHTML(Util.menuHTML("img/icon/actions/update_property_group.png",
+                Main.i18n("general.menu.edit.update.property.group")));
+        merge.setHTML(Util.menuHTML("img/icon/actions/merge_pdf.png", Main.i18n("general.menu.edit.merge.pdf")));
+        bookmark.setHTML(Util.menuHTML("img/icon/actions/add_bookmark.gif", Main.i18n("general.menu.bookmark.add")));
+        home.setHTML(Util.menuHTML("img/icon/actions/bookmark.gif", Main.i18n("filebrowser.menu.set.home")));
+        export.setHTML(Util.menuHTML("img/icon/actions/export.gif", Main.i18n("general.menu.file.export")));
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         this.toolBarOption = toolBarOption;
         evaluateMenuOptions();
     }
@@ -466,6 +431,11 @@ public class TaxonomyMenu extends MenuBase {
         } else {
             disable(copy);
         }
+        if (toolBarOption.convertOption) {
+            enable(convert);
+        } else {
+            disable(convert);
+        }
         if (toolBarOption.addNoteOption) {
             enable(note);
         } else {
@@ -486,10 +456,20 @@ public class TaxonomyMenu extends MenuBase {
         } else {
             disable(propertyGroup);
         }
+        if (toolBarOption.updatePropertyGroupOption) {
+            enable(updatePropertyGroup);
+        } else {
+            disable(updatePropertyGroup);
+        }
         if (toolBarOption.bookmarkOption) {
             enable(bookmark);
         } else {
             disable(bookmark);
+        }
+        if (toolBarOption.mergePdfOption) {
+            enable(merge);
+        } else {
+            disable(merge);
         }
         if (toolBarOption.homeOption) {
             enable(home);
@@ -509,7 +489,7 @@ public class TaxonomyMenu extends MenuBase {
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
         if (!option.isDownloadOption()) {
             dirMenu.removeItem(download);
         }
@@ -540,6 +520,9 @@ public class TaxonomyMenu extends MenuBase {
         if (!option.isCopyOption()) {
             dirMenu.removeItem(copy);
         }
+        if (!option.isConvertOption()) {
+            dirMenu.removeItem(convert);
+        }
         if (!option.isAddNoteOption()) {
             dirMenu.removeItem(note);
         }
@@ -551,6 +534,12 @@ public class TaxonomyMenu extends MenuBase {
         }
         if (!option.isAddPropertyGroupOption()) {
             dirMenu.removeItem(propertyGroup);
+        }
+        if (!option.isUpdatePropertyGroupOption()) {
+            dirMenu.removeItem(updatePropertyGroup);
+        }
+        if (!option.isMergePdfOption()) {
+            dirMenu.removeItem(merge);
         }
         if (!option.isAddBookmarkOption()) {
             dirMenu.removeItem(bookmark);
@@ -579,11 +568,26 @@ public class TaxonomyMenu extends MenuBase {
         disable(propertyGroup);
     }
 
+    @Override
+    public void disablePdfMerge() {
+        if (dirMenu != null) { // Condition caused by loading case
+            toolBarOption.mergePdfOption = false;
+        }
+        disable(merge);
+    }
+
+    @Override
+    public void enablePdfMerge() {
+        if (dirMenu != null) { // Condition caused by loading case
+            toolBarOption.mergePdfOption = true;
+        }
+        enable(merge);
+    }
+
     /**
      * Hide popup menu
      */
     public void hide() {
-        Main.get().mainPanel.desktop.browser.fileBrowser.taxonomyMenuPopup
-                .hide();
+        Main.get().mainPanel.desktop.browser.fileBrowser.taxonomyMenuPopup.hide();
     }
 }

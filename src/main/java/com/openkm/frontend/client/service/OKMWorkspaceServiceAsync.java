@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.service;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import com.openkm.frontend.client.bean.GWTWorkspace;
 
 /**
@@ -33,8 +34,7 @@ public interface OKMWorkspaceServiceAsync {
 
     public void getUserDocumentsSize(AsyncCallback<Double> callback);
 
-    public void updateUserWorkspace(GWTWorkspace workspace,
-            AsyncCallback<?> callback);
+    public void updateUserWorkspace(GWTWorkspace workspace, AsyncCallback<?> callback);
 
     public void deleteMailAccount(long id, AsyncCallback<?> callback);
 

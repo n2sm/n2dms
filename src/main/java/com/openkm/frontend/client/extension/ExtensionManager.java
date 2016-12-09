@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.extension;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.openkm.frontend.client.Main;
@@ -36,6 +37,7 @@ import com.openkm.frontend.client.extension.event.handler.ToolBarHandlerExtensio
 import com.openkm.frontend.client.extension.event.handler.WidgetHandlerExtension;
 import com.openkm.frontend.client.extension.event.handler.WorkspaceHandlerExtension;
 import com.openkm.frontend.client.extension.widget.menu.MenuItemExtension;
+import com.openkm.frontend.client.extension.widget.preview.PreviewExtension;
 import com.openkm.frontend.client.extension.widget.tabdocument.TabDocumentExtension;
 import com.openkm.frontend.client.extension.widget.tabfolder.TabFolderExtension;
 import com.openkm.frontend.client.extension.widget.tabmail.TabMailExtension;
@@ -52,8 +54,10 @@ import com.openkm.frontend.client.extension.widget.userinfo.UserInfoExtension;
 public class ExtensionManager {
 
     // Declare here your new widgets
-    public static void start(final List<Object> extensions) {
-        for (final Object obj : extensions) {
+    public static void start(List<Object> extensions) {
+        for (Iterator<Object> it = extensions.iterator(); it.hasNext();) {
+            Object obj = it.next();
+
             // Registering widgets
             if (obj instanceof TabDocumentExtension) {
                 addTabDocumentExtension((TabDocumentExtension) obj);
@@ -69,6 +73,8 @@ public class ExtensionManager {
                 addWorkspaceExtension((TabWorkspaceExtension) obj);
             } else if (obj instanceof ToolBarBoxExtension) {
                 addToolBarBoxExtension((ToolBarBoxExtension) obj);
+            } else if (obj instanceof PreviewExtension) {
+                addPreviewExtension((PreviewExtension) obj);
             } else if (obj instanceof UserInfoExtension) {
                 addUserInfoExtension((UserInfoExtension) obj);
             }
@@ -112,10 +118,8 @@ public class ExtensionManager {
      * 
      * @param extension
      */
-    private static void addTabDocumentExtension(
-            final TabDocumentExtension extension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .addDocumentExtension(extension);
+    private static void addTabDocumentExtension(TabDocumentExtension extension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.addDocumentExtension(extension);
     }
 
     /**
@@ -123,9 +127,8 @@ public class ExtensionManager {
      * 
      * @param extension
      */
-    private static void addTabFolderExtension(final TabFolderExtension extension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .addFolderExtension(extension);
+    private static void addTabFolderExtension(TabFolderExtension extension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.addFolderExtension(extension);
     }
 
     /**
@@ -133,9 +136,8 @@ public class ExtensionManager {
      * 
      * @param extension
      */
-    private static void addTabMailExtension(final TabMailExtension extension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                .addMailExtension(extension);
+    private static void addTabMailExtension(TabMailExtension extension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.addMailExtension(extension);
     }
 
     /**
@@ -143,7 +145,7 @@ public class ExtensionManager {
      * 
      * @param extension
      */
-    private static void addMenuExtension(final MenuItemExtension extension) {
+    private static void addMenuExtension(MenuItemExtension extension) {
         switch (extension.getMenuLocation()) {
         case UIMenuConstants.NEW_MENU:
         case UIMenuConstants.MAIN_MENU_FILE:
@@ -161,10 +163,8 @@ public class ExtensionManager {
      * 
      * @param extension Extension to add
      */
-    private static void addToolBarButtonExtension(
-            final ToolBarButtonExtension extension) {
-        Main.get().mainPanel.topPanel.toolBar
-                .addToolBarButtonExtension(extension);
+    private static void addToolBarButtonExtension(ToolBarButtonExtension extension) {
+        Main.get().mainPanel.topPanel.toolBar.addToolBarButtonExtension(extension);
     }
 
     /**
@@ -172,10 +172,8 @@ public class ExtensionManager {
      * 
      * @param extension Extension to add
      */
-    private static void addWorkspaceExtension(
-            final TabWorkspaceExtension extension) {
-        Main.get().mainPanel.topPanel.tabWorkspace
-                .addWorkspaceExtension(extension);
+    private static void addWorkspaceExtension(TabWorkspaceExtension extension) {
+        Main.get().mainPanel.topPanel.tabWorkspace.addWorkspaceExtension(extension);
     }
 
     /**
@@ -183,9 +181,17 @@ public class ExtensionManager {
      * 
      * @param extension Extension to add
      */
-    private static void addToolBarBoxExtension(
-            final ToolBarBoxExtension extension) {
+    private static void addToolBarBoxExtension(ToolBarBoxExtension extension) {
         Main.get().mainPanel.dashboard.addToolBarBoxExtension(extension);
+    }
+
+    /**
+     * addPreviewExtension
+     * 
+     * @param extension Extension to add
+     */
+    private static void addPreviewExtension(PreviewExtension extension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.addPreviewExtension(extension);
     }
 
     /**
@@ -193,9 +199,8 @@ public class ExtensionManager {
      * 
      * @param extension Extension to add
      */
-    private static void addUserInfoExtension(final UserInfoExtension extension) {
-        Main.get().mainPanel.bottomPanel.userInfo
-                .addUserInfoExtension(extension);
+    private static void addUserInfoExtension(UserInfoExtension extension) {
+        Main.get().mainPanel.bottomPanel.userInfo.addUserInfoExtension(extension);
     }
 
     /**
@@ -203,12 +208,9 @@ public class ExtensionManager {
      * 
      * @param handlerExtension 
      */
-    private static void addDocumentHandlerExtension(
-            final DocumentHandlerExtension handlerExtension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .addDocumentHandlerExtension(handlerExtension);
-        Main.get().mainPanel.desktop.browser.fileBrowser
-                .addDocumentHandlerExtension(handlerExtension);
+    private static void addDocumentHandlerExtension(DocumentHandlerExtension handlerExtension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.addDocumentHandlerExtension(handlerExtension);
+        Main.get().mainPanel.desktop.browser.fileBrowser.addDocumentHandlerExtension(handlerExtension);
     }
 
     /**
@@ -216,12 +218,9 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addFolderHandlerExtension(
-            final FolderHandlerExtension handlerExtension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .addFolderHandlerExtension(handlerExtension);
-        Main.get().mainPanel.desktop.browser.fileBrowser
-                .addFolderHandlerExtension(handlerExtension);
+    private static void addFolderHandlerExtension(FolderHandlerExtension handlerExtension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.addFolderHandlerExtension(handlerExtension);
+        Main.get().mainPanel.desktop.browser.fileBrowser.addFolderHandlerExtension(handlerExtension);
     }
 
     /**
@@ -229,12 +228,9 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addMailHandlerExtension(
-            final MailHandlerExtension handlerExtension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                .addMailHandlerExtension(handlerExtension);
-        Main.get().mainPanel.desktop.browser.fileBrowser
-                .addMailHandlerExtension(handlerExtension);
+    private static void addMailHandlerExtension(MailHandlerExtension handlerExtension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.addMailHandlerExtension(handlerExtension);
+        Main.get().mainPanel.desktop.browser.fileBrowser.addMailHandlerExtension(handlerExtension);
     }
 
     /**
@@ -242,10 +238,8 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addToolBarHandlerExtension(
-            final ToolBarHandlerExtension handlerExtension) {
-        Main.get().mainPanel.topPanel.toolBar
-                .addToolBarHandlerExtension(handlerExtension);
+    private static void addToolBarHandlerExtension(ToolBarHandlerExtension handlerExtension) {
+        Main.get().mainPanel.topPanel.toolBar.addToolBarHandlerExtension(handlerExtension);
     }
 
     /**
@@ -253,8 +247,7 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addLanguageHandlerExtension(
-            final LanguageHandlerExtension handlerExtension) {
+    private static void addLanguageHandlerExtension(LanguageHandlerExtension handlerExtension) {
         Main.get().addLanguageHandlerExtension(handlerExtension);
     }
 
@@ -263,10 +256,8 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addNavigatorHandlerExtension(
-            final NavigatorHandlerExtension handlerExtension) {
-        Main.get().mainPanel.desktop.navigator.stackPanel
-                .addNavigatorHandlerExtension(handlerExtension);
+    private static void addNavigatorHandlerExtension(NavigatorHandlerExtension handlerExtension) {
+        Main.get().mainPanel.desktop.navigator.stackPanel.addNavigatorHandlerExtension(handlerExtension);
     }
 
     /**
@@ -274,10 +265,8 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addWorkspaceHandlerExtension(
-            final WorkspaceHandlerExtension handlerExtension) {
-        Main.get().mainPanel.topPanel.tabWorkspace
-                .addWorkspaceHandlerExtension(handlerExtension);
+    private static void addWorkspaceHandlerExtension(WorkspaceHandlerExtension handlerExtension) {
+        Main.get().mainPanel.topPanel.tabWorkspace.addWorkspaceHandlerExtension(handlerExtension);
     }
 
     /**
@@ -285,12 +274,9 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .addPropertyGroupHandlerExtension(handlerExtension);
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .addPropertyGroupHandlerExtension(handlerExtension);
+    private static void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.addPropertyGroupHandlerExtension(handlerExtension);
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.addPropertyGroupHandlerExtension(handlerExtension);
     }
 
     /**
@@ -298,10 +284,8 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addDashboardHandlerExtension(
-            final DashboardHandlerExtension handlerExtension) {
-        Main.get().mainPanel.dashboard
-                .addDashboardHandlerExtension(handlerExtension);
+    private static void addDashboardHandlerExtension(DashboardHandlerExtension handlerExtension) {
+        Main.get().mainPanel.dashboard.addDashboardHandlerExtension(handlerExtension);
     }
 
     /**
@@ -309,8 +293,7 @@ public class ExtensionManager {
      * 
      * @param handlerExtension
      */
-    private static void addWidgetHandlerExtension(
-            final WidgetHandlerExtension handlerExtension) {
+    private static void addWidgetHandlerExtension(WidgetHandlerExtension handlerExtension) {
         Main.get().startUp.addWidgetHandlerExtension(handlerExtension);
     }
 }

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -25,7 +25,7 @@
         <tr>
           <th>Mail protocol</th><th>Mail host</th><th>Mail user</th>
           <th>Mail folder</th><th>Active</th>
-          <th width="75px">
+          <th width="100px">
             <c:url value="MailAccount" var="urlCreate">
               <c:param name="action" value="create"/>
               <c:param name="ma_user" value="${ma_user}"/>
@@ -49,6 +49,11 @@
             <c:param name="ma_id" value="${ma.id}"/>
             <c:param name="ma_user" value="${ma_user}"/>
           </c:url>
+          <c:url value="MailAccount" var="urlServerList">
+            <c:param name="action" value="serverList"/>
+            <c:param name="ma_id" value="${ma.id}"/>
+            <c:param name="ma_user" value="${ma_user}"/>
+          </c:url>
           <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
             <td>${ma.mailProtocol}</td><td>${ma.mailHost}</td>
             <td>${ma.mailUser}</td><td>${ma.mailFolder}</td>
@@ -68,6 +73,8 @@
               <a href="${urlDelete}"><img src="img/action/delete.png" alt="Delete" title="Delete"/></a>
               &nbsp;
               <a href="${urlFilter}"><img src="img/action/filter.png" alt="Filters" title="Filters"/></a>
+              &nbsp;
+              <a href="${urlServerList}"><img src="img/action/table.png" alt="Server List" title="Server List"/></a>
             </td>
           </tr>
         </c:forEach>

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,13 +21,13 @@
 
 package com.openkm.frontend.client.widget.searchsaved;
 
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlexTable;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -39,11 +39,8 @@ import com.openkm.frontend.client.Main;
 public class ExtendedFlexTable extends FlexTable {
 
     private int mouseX = 0;
-
     private int mouseY = 0;
-
     private boolean panelSelected = true; // Indicates if panel is selected
-
     private int selectedRow = -1;
 
     /**
@@ -56,7 +53,7 @@ public class ExtendedFlexTable extends FlexTable {
         sinkEvents(Event.ONDBLCLICK | Event.MOUSEEVENTS);
         addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 // Mark selected row or orders rows if header row (0) is clicked 
                 // And row must be other than the selected one
                 markSelectedRow(getCellForEvent(event).getRowIndex());
@@ -67,18 +64,15 @@ public class ExtendedFlexTable extends FlexTable {
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.EventListener#onBrowserEvent(com.google.gwt.user.client.Event)
      */
-    @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
         int selectedRow = 0;
 
-        if (DOM.eventGetType(event) == Event.ONDBLCLICK
-                || DOM.eventGetType(event) == Event.ONMOUSEDOWN) {
-            final Element td = getMouseEventTargetCell(event);
-            if (td == null) {
+        if (DOM.eventGetType(event) == Event.ONDBLCLICK || DOM.eventGetType(event) == Event.ONMOUSEDOWN) {
+            Element td = getMouseEventTargetCell(event);
+            if (td == null)
                 return;
-            }
-            final Element tr = DOM.getParent(td);
-            final Element body = DOM.getParent(tr);
+            Element tr = DOM.getParent(td);
+            Element body = DOM.getParent(tr);
             selectedRow = DOM.getChildIndex(body, tr);
         }
 
@@ -95,15 +89,13 @@ public class ExtendedFlexTable extends FlexTable {
                 // Two time entry onCellClicked before entry on onBrowserEvent and disbles the
                 // Tree onCellClicked that produces inconsistence error refreshing
                 DOM.eventCancelBubble(event, true);
-                Main.get().mainPanel.search.historySearch.searchSaved
-                        .getSearch();
+                Main.get().mainPanel.search.historySearch.searchSaved.getSearch();
 
             } else if (DOM.eventGetType(event) == Event.ONMOUSEDOWN) {
                 switch (DOM.eventGetButton(event)) {
-                case NativeEvent.BUTTON_RIGHT:
+                case Event.BUTTON_RIGHT:
                     markSelectedRow(selectedRow);
-                    Main.get().mainPanel.search.historySearch.searchSaved
-                            .showMenu();
+                    Main.get().mainPanel.search.historySearch.searchSaved.showMenu();
                     DOM.eventPreventDefault(event); // Prevent to fire event to browser
                     break;
                 default:
@@ -119,7 +111,7 @@ public class ExtendedFlexTable extends FlexTable {
      * 
      * @param row
      */
-    private void markSelectedRow(final int row) {
+    private void markSelectedRow(int row) {
         setSelectedPanel(true);
         if (row != selectedRow) {
             styleRow(selectedRow, false);
@@ -132,20 +124,19 @@ public class ExtendedFlexTable extends FlexTable {
      * Method originally copied from HTMLTable superclass where it was defined private
      * Now implemented differently to only return target cell if it'spart of 'this' table
      */
-    private Element getMouseEventTargetCell(final Event event) {
+    private Element getMouseEventTargetCell(Event event) {
         Element td = DOM.eventGetTarget(event);
         //locate enclosing td element
         while (!DOM.getElementProperty(td, "tagName").equalsIgnoreCase("td")) {
             // If we run out of elements, or run into the table itself, then give up.
-            if (td == null || td == getElement()) {
+            if ((td == null) || td == getElement())
                 return null;
-            }
             td = DOM.getParent(td);
         }
         //test if the td is actually from this table
-        final Element tr = DOM.getParent(td);
-        final Element body = DOM.getParent(tr);
-        if (body == getBodyElement()) {
+        Element tr = DOM.getParent(td);
+        Element body = DOM.getParent(tr);
+        if (body == this.getBodyElement()) {
             return td;
         }
         //Didn't find appropriate cell
@@ -157,23 +148,18 @@ public class ExtendedFlexTable extends FlexTable {
      * 
      * @param selected The selected panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
         // Case panel is not still selected and must enable this and disable result search panel
         if (!isPanelSelected() && selected) {
-            Main.get().mainPanel.search.searchBrowser.searchResult
-                    .setSelectedPanel(false);
+            Main.get().mainPanel.search.searchBrowser.searchResult.setSelectedPanel(false);
         }
 
         if (selected) {
-            Main.get().mainPanel.search.historySearch.scrollSearchSavedPanel
-                    .addStyleName("okm-PanelSelected");
-            Main.get().mainPanel.search.historySearch.scrollUserNewsSavedPanel
-                    .addStyleName("okm-PanelSelected");
+            Main.get().mainPanel.search.historySearch.scrollSearchSavedPanel.addStyleName("okm-PanelSelected");
+            Main.get().mainPanel.search.historySearch.scrollUserNewsSavedPanel.addStyleName("okm-PanelSelected");
         } else {
-            Main.get().mainPanel.search.historySearch.scrollSearchSavedPanel
-                    .removeStyleName("okm-PanelSelected");
-            Main.get().mainPanel.search.historySearch.scrollUserNewsSavedPanel
-                    .removeStyleName("okm-PanelSelected");
+            Main.get().mainPanel.search.historySearch.scrollSearchSavedPanel.removeStyleName("okm-PanelSelected");
+            Main.get().mainPanel.search.historySearch.scrollUserNewsSavedPanel.removeStyleName("okm-PanelSelected");
         }
         panelSelected = selected;
     }
@@ -184,15 +170,13 @@ public class ExtendedFlexTable extends FlexTable {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    public void styleRow(final int row, final boolean selected) {
+    public void styleRow(int row, boolean selected) {
         // Ensures that header is never changed
         if (row >= 0) {
             if (selected) {
-                getRowFormatter().addStyleName(row,
-                        "okm-SearchSaved-SelectedRow");
+                getRowFormatter().addStyleName(row, "okm-SearchSaved-SelectedRow");
             } else {
-                getRowFormatter().removeStyleName(row,
-                        "okm-SearchSaved-SelectedRow");
+                getRowFormatter().removeStyleName(row, "okm-SearchSaved-SelectedRow");
             }
         }
     }
@@ -200,7 +184,6 @@ public class ExtendedFlexTable extends FlexTable {
     /**
      * Removes all rows except the first
      */
-    @Override
     public void removeAllRows() {
         // Resets selected Rows and Col values
         selectedRow = -1;

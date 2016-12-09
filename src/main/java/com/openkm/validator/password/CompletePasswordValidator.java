@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,11 +32,10 @@ import com.openkm.validator.ValidatorException;
  */
 public class CompletePasswordValidator implements PasswordValidator {
     @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory
-            .getLogger(CompletePasswordValidator.class);
+    private static Logger log = LoggerFactory.getLogger(CompletePasswordValidator.class);
 
     @Override
-    public void Validate(final String password) throws ValidatorException {
+    public void Validate(String password) throws ValidatorException {
         validateLength(password);
         checkLowerCase(password);
         checkUpperCase(password);
@@ -47,26 +46,20 @@ public class CompletePasswordValidator implements PasswordValidator {
     /**
      * Validate length
      */
-    private void validateLength(final String password)
-            throws ValidatorException {
-        if (Config.VALIDATOR_PASSWORD_MIN_LENGTH > 0
-                && password.length() < Config.VALIDATOR_PASSWORD_MIN_LENGTH) {
-            throw new ValidatorException(
-                    Config.VALIDATOR_PASSWORD_ERROR_MIN_LENGTH);
+    private void validateLength(String password) throws ValidatorException {
+        if (Config.VALIDATOR_PASSWORD_MIN_LENGTH > 0 && password.length() < Config.VALIDATOR_PASSWORD_MIN_LENGTH) {
+            throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MIN_LENGTH);
         }
 
-        if (Config.VALIDATOR_PASSWORD_MAX_LENGTH > 0
-                && password.length() > Config.VALIDATOR_PASSWORD_MAX_LENGTH) {
-            throw new ValidatorException(
-                    Config.VALIDATOR_PASSWORD_ERROR_MAX_LENGTH);
+        if (Config.VALIDATOR_PASSWORD_MAX_LENGTH > 0 && password.length() > Config.VALIDATOR_PASSWORD_MAX_LENGTH) {
+            throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MAX_LENGTH);
         }
     }
 
     /**
      * Validate lowercase characters
      */
-    private void checkLowerCase(final String password)
-            throws ValidatorException {
+    private void checkLowerCase(String password) throws ValidatorException {
         int count = 0;
 
         if (Config.VALIDATOR_PASSWORD_MIN_LOWERCASE > 0) {
@@ -77,8 +70,7 @@ public class CompletePasswordValidator implements PasswordValidator {
             }
 
             if (Config.VALIDATOR_PASSWORD_MIN_LOWERCASE > count) {
-                throw new ValidatorException(
-                        Config.VALIDATOR_PASSWORD_ERROR_MIN_LOWERCASE);
+                throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MIN_LOWERCASE);
             }
         }
     }
@@ -86,8 +78,7 @@ public class CompletePasswordValidator implements PasswordValidator {
     /**
      * Validate uppercase characters
      */
-    private void checkUpperCase(final String password)
-            throws ValidatorException {
+    private void checkUpperCase(String password) throws ValidatorException {
         int count = 0;
 
         if (Config.VALIDATOR_PASSWORD_MIN_UPPERCASE > 0) {
@@ -98,8 +89,7 @@ public class CompletePasswordValidator implements PasswordValidator {
             }
 
             if (Config.VALIDATOR_PASSWORD_MIN_UPPERCASE > count) {
-                throw new ValidatorException(
-                        Config.VALIDATOR_PASSWORD_ERROR_MIN_UPPERCASE);
+                throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MIN_UPPERCASE);
             }
         }
     }
@@ -107,7 +97,7 @@ public class CompletePasswordValidator implements PasswordValidator {
     /**
      * Validate digits
      */
-    private void checkDigits(final String password) throws ValidatorException {
+    private void checkDigits(String password) throws ValidatorException {
         int count = 0;
 
         if (Config.VALIDATOR_PASSWORD_MIN_DIGITS > 0) {
@@ -118,8 +108,7 @@ public class CompletePasswordValidator implements PasswordValidator {
             }
 
             if (Config.VALIDATOR_PASSWORD_MIN_DIGITS > count) {
-                throw new ValidatorException(
-                        Config.VALIDATOR_PASSWORD_ERROR_MIN_DIGITS);
+                throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MIN_DIGITS);
             }
         }
     }
@@ -127,20 +116,18 @@ public class CompletePasswordValidator implements PasswordValidator {
     /**
      * Validate special characters
      */
-    private void checkSpecial(final String password) throws ValidatorException {
+    private void checkSpecial(String password) throws ValidatorException {
         int count = 0;
 
         if (Config.VALIDATOR_PASSWORD_MIN_SPECIAL > 0) {
             for (int i = 0; i < password.length(); i++) {
-                if (!Character.isLetterOrDigit(password.charAt(i))
-                        && !Character.isWhitespace(password.charAt(i))) {
+                if (!Character.isLetterOrDigit(password.charAt(i)) && !Character.isWhitespace(password.charAt(i))) {
                     count++;
                 }
             }
 
             if (Config.VALIDATOR_PASSWORD_MIN_SPECIAL > count) {
-                throw new ValidatorException(
-                        Config.VALIDATOR_PASSWORD_ERROR_MIN_SPECIAL);
+                throw new ValidatorException(Config.VALIDATOR_PASSWORD_ERROR_MIN_SPECIAL);
             }
         }
     }

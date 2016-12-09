@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,13 +29,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTBookmark implements IsSerializable {
     private int id = 0;
-
     private String name = "";
-
     private String path = "";
-
     private String uuid = "";
-
     private String type = "";
 
     public GWTBookmark() {
@@ -45,7 +41,7 @@ public class GWTBookmark implements IsSerializable {
         return id;
     }
 
-    public void setId(final int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -53,7 +49,7 @@ public class GWTBookmark implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -61,7 +57,7 @@ public class GWTBookmark implements IsSerializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -69,7 +65,7 @@ public class GWTBookmark implements IsSerializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -77,7 +73,7 @@ public class GWTBookmark implements IsSerializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 }

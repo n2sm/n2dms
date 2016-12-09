@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,8 +26,8 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 
 import eu.maydu.gwt.validation.client.ValidationAction;
 import eu.maydu.gwt.validation.client.ValidationResult;
-import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.Validator;
+import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.i18n.StandardValidationMessages;
 import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 
@@ -40,92 +40,74 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 public class StringGtValidator extends Validator<StringGtValidator> {
 
     protected TextBoxBase text;
-
     protected SuggestBox suggest;
-
     protected String value;
 
-    public StringGtValidator(final TextBoxBase text) {
+    public StringGtValidator(TextBoxBase text) {
         this(text, false);
     }
 
-    public StringGtValidator(final TextBoxBase text, final String value) {
+    public StringGtValidator(TextBoxBase text, String value) {
         this(text, value, false);
     }
 
-    public StringGtValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringGtValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain) {
         this(text, preventsPropagationOfValidationChain, null);
     }
 
-    public StringGtValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringGtValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringGtValidator(final TextBoxBase text, final String value,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringGtValidator(TextBoxBase text, String value, boolean preventsPropagationOfValidationChain) {
         this(text, value, preventsPropagationOfValidationChain, null);
     }
 
-    public StringGtValidator(final TextBoxBase text, final String value,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringGtValidator(TextBoxBase text, String value, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
         setVAlue(value);
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringGtValidator(final SuggestBox suggest) {
+    public StringGtValidator(SuggestBox suggest) {
         this(suggest, false);
     }
 
-    public StringGtValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringGtValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain) {
         this(suggest, preventsPropagationOfValidationChain, null);
     }
 
-    public StringGtValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringGtValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new IllegalArgumentException("suggest must not be null");
-        }
         this.suggest = suggest;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         String str;
-        if (text != null) {
+        if (text != null)
             str = text.getText();
-        } else {
+        else
             str = suggest.getText();
-        }
-        if (str == null) {
+        if (str == null)
             str = "";
-        }
         if (value.compareTo(str) > 0) {
-            final ValidationResult result = new ValidationResult();
-            final ValidationError error = result.new ValidationError(null,
-                    getErrorMessage(allMessages, messages.validator_max()));
+            ValidationResult result = new ValidationResult();
+            ValidationError error = result.new ValidationError(null, getErrorMessage(allMessages, messages.validator_max()));
             result.getErrors().add(error);
             return result;
         }
@@ -133,20 +115,17 @@ public class StringGtValidator extends Validator<StringGtValidator> {
         return null;
     }
 
-    @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (text != null) {
-            for (final ValidationAction<TextBoxBase> action : getFailureActions()) {
+            for (ValidationAction<TextBoxBase> action : getFailureActions())
                 action.invoke(result, text);
-            }
         } else {
-            for (final ValidationAction<SuggestBox> action : getFailureActions()) {
+            for (ValidationAction<SuggestBox> action : getFailureActions())
                 action.invoke(result, suggest);
-            }
         }
     }
 
-    public StringGtValidator setVAlue(final String value) {
+    public StringGtValidator setVAlue(String value) {
         this.value = value;
         return this;
     }

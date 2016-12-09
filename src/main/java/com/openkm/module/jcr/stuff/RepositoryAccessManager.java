@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,9 +21,9 @@
 
 package com.openkm.module.jcr.stuff;
 
-import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.jcr.AccessDeniedException;
@@ -59,56 +59,51 @@ import com.openkm.module.jcr.JcrRepositoryModule;
  * @author pavila
  */
 public class RepositoryAccessManager implements AccessManager {
-    private static Logger log = LoggerFactory
-            .getLogger(RepositoryAccessManager.class);
-
+    private static Logger log = LoggerFactory.getLogger(RepositoryAccessManager.class);
     private AMContext context;
-
     private Subject subject = null;
-
     private String principalUser = null;
-
     private Set<String> principalRoles = null;
 
     @SuppressWarnings("unused")
     @Override
-    public void init(final AMContext context) throws AccessDeniedException,
-            Exception {
+    public void init(AMContext context) throws AccessDeniedException, Exception {
         log.debug("init({})", context);
         this.context = context;
         subject = context.getSubject();
         principalRoles = new HashSet<String>();
 
-        for (final Principal principal2 : subject.getPrincipals()) {
-            final Object obj = principal2;
+        for (Iterator<java.security.Principal> it = subject.getPrincipals().iterator(); it.hasNext();) {
+            Object obj = it.next();
             log.debug("##### {}", obj.getClass());
 
             if (obj instanceof org.apache.jackrabbit.core.security.principal.EveryonePrincipal) {
                 // Needed for test.
                 log.debug("o.a.j.c.s.p.EveryonePrincipal: {}", obj);
+                org.apache.jackrabbit.core.security.principal.EveryonePrincipal everyonePrincipal =
+                        (org.apache.jackrabbit.core.security.principal.EveryonePrincipal) obj;
             } else if (obj instanceof org.apache.jackrabbit.core.security.UserPrincipal) {
                 // Needed for test.
                 log.debug("o.a.j.c.s.UserPrincipal: {}", obj);
-                final org.apache.jackrabbit.core.security.UserPrincipal userPrincipal = (org.apache.jackrabbit.core.security.UserPrincipal) obj;
+                org.apache.jackrabbit.core.security.UserPrincipal userPrincipal = (org.apache.jackrabbit.core.security.UserPrincipal) obj;
                 principalUser = userPrincipal.getName();
                 principalRoles.add(Config.DEFAULT_USER_ROLE);
             } else if (obj instanceof java.security.acl.Group) {
                 log.debug("j.s.a.Group: {}", obj);
-                final java.security.acl.Group group = (java.security.acl.Group) obj;
+                java.security.acl.Group group = (java.security.acl.Group) obj;
 
-                for (final Enumeration<? extends java.security.Principal> groups = group
-                        .members(); groups.hasMoreElements();) {
-                    final java.security.Principal rol = groups.nextElement();
+                for (Enumeration<? extends java.security.Principal> groups = group.members(); groups.hasMoreElements();) {
+                    java.security.Principal rol = (java.security.Principal) groups.nextElement();
                     log.debug("Rol: {}", rol.getName());
                     principalRoles.add(rol.getName());
                 }
             } else if (obj instanceof com.openkm.jaas.RoleImpl) {
-                final com.openkm.jaas.RoleImpl rol = (com.openkm.jaas.RoleImpl) obj;
+                com.openkm.jaas.RoleImpl rol = (com.openkm.jaas.RoleImpl) obj;
                 log.debug("Rol: {}", rol.getName());
                 principalRoles.add(rol.getName());
             } else if (obj instanceof java.security.Principal) {
                 log.debug("j.s.Principal: {}", obj);
-                final java.security.Principal principal = (java.security.Principal) obj;
+                java.security.Principal principal = (java.security.Principal) obj;
                 principalUser = principal.getName();
             }
         }
@@ -118,12 +113,9 @@ public class RepositoryAccessManager implements AccessManager {
     }
 
     @Override
-    public void init(final AMContext context,
-            final AccessControlProvider acProvider,
-            final WorkspaceAccessManager wspAccessMgr)
+    public void init(AMContext context, AccessControlProvider acProvider, WorkspaceAccessManager wspAccessMgr)
             throws AccessDeniedException, Exception {
-        log.debug("init({}, {}, {}", new Object[] { context, acProvider,
-                wspAccessMgr });
+        log.debug("init({}, {}, {}", new Object[] { context, acProvider, wspAccessMgr });
         init(context);
     }
 
@@ -133,14 +125,13 @@ public class RepositoryAccessManager implements AccessManager {
     }
 
     @Override
-    public boolean canAccess(final String workspaceName)
-            throws RepositoryException {
+    public boolean canAccess(String workspaceName) throws RepositoryException {
         //log.info("canAccess({})", workspaceName);
         return true;
     }
 
     @Override
-    public boolean canRead(final Path itemPath) throws RepositoryException {
+    public boolean canRead(Path itemPath) throws RepositoryException {
         //log.info("canRead({})", itemPath);
         //return isGranted(itemPath, Permission.READ);
         return true;
@@ -148,9 +139,7 @@ public class RepositoryAccessManager implements AccessManager {
 
     @Override
     // This method is deprecated in Jackrabbit 1.5.0
-    public void checkPermission(final ItemId id, final int permissions)
-            throws AccessDeniedException, ItemNotFoundException,
-            RepositoryException {
+    public void checkPermission(ItemId id, int permissions) throws AccessDeniedException, ItemNotFoundException, RepositoryException {
         //log.info("deprecated - checkPermission({}, {})", id, permissionsToString(permissions));
         //if (isGranted(id, deprecatedPermissionsToNewApi(permissions))) {
         //return;
@@ -159,8 +148,7 @@ public class RepositoryAccessManager implements AccessManager {
     }
 
     @Override
-    public void checkPermission(final Path absPath, final int permissions)
-            throws AccessDeniedException, RepositoryException {
+    public void checkPermission(Path absPath, int permissions) throws AccessDeniedException, RepositoryException {
         //log.info("used in jackrabbit 1.6 - checkPermission({}, {})", absPath, permissions);
         //if (isGranted(absPath, permissions)) {
         //return;
@@ -170,24 +158,17 @@ public class RepositoryAccessManager implements AccessManager {
 
     @Override
     // This method is deprecated in Jackrabbit 1.5.0
-    public boolean isGranted(final ItemId id, final int permissions)
-            throws ItemNotFoundException, RepositoryException {
-        log.debug(
-                "deprecated - isGranted({}, {} => {})",
-                new Object[] {
-                        id,
-                        permissions,
-                        permissionsToString(deprecatedPermissionsToNewApi(permissions)) });
-        final Path path = context.getHierarchyManager().getPath(id);
-        final boolean access = isGranted(path,
-                deprecatedPermissionsToNewApi(permissions));
+    public boolean isGranted(ItemId id, int permissions) throws ItemNotFoundException, RepositoryException {
+        log.debug("deprecated - isGranted({}, {} => {})", new Object[] { id, permissions,
+                permissionsToString(deprecatedPermissionsToNewApi(permissions)) });
+        Path path = context.getHierarchyManager().getPath(id);
+        boolean access = isGranted(path, deprecatedPermissionsToNewApi(permissions));
         log.debug("deprecated - isGranted: {}", access);
         return access;
     }
 
     @Override
-    public boolean isGranted(final Path parentPath, final Name childName,
-            final int permissions) throws RepositoryException {
+    public boolean isGranted(Path parentPath, Name childName, int permissions) throws RepositoryException {
         //log.info("isGranted({}, {}, {} => {})", new Object[] { parentPath, childName, permissions,
         //permissionsToString(permissions) });
         //Path p = PathFactoryImpl.getInstance().create(parentPath, childName, true);
@@ -197,11 +178,9 @@ public class RepositoryAccessManager implements AccessManager {
     }
 
     @Override
-    public boolean isGranted(final Path absPath, final int permissions)
-            throws RepositoryException {
-        log.debug("isGranted({}, {} => {})", new Object[] { absPath,
-                permissions, permissionsToString(permissions) });
-        final boolean access = checkAccess(absPath, permissions);
+    public boolean isGranted(Path absPath, int permissions) throws RepositoryException {
+        log.debug("isGranted({}, {} => {})", new Object[] { absPath, permissions, permissionsToString(permissions) });
+        boolean access = checkAccess(absPath, permissions);
         log.debug("isGranted: {}", access);
         return access;
     }
@@ -209,11 +188,9 @@ public class RepositoryAccessManager implements AccessManager {
     /**
      * Check access
      */
-    private boolean checkAccess(final Path absPath, final int permissions)
-            throws RepositoryException {
-        log.debug("checkAccess({}, {} => {})", new Object[] { absPath,
-                permissions, permissionsToString(permissions) });
-        final Session systemSession = JcrRepositoryModule.getSystemSession();
+    private boolean checkAccess(Path absPath, int permissions) throws RepositoryException {
+        log.debug("checkAccess({}, {} => {})", new Object[] { absPath, permissions, permissionsToString(permissions) });
+        Session systemSession = JcrRepositoryModule.getSystemSession();
         boolean access = false;
 
         if (principalRoles.contains(Config.DEFAULT_ADMIN_ROLE)) {
@@ -221,26 +198,22 @@ public class RepositoryAccessManager implements AccessManager {
             access = true;
         } else {
             log.debug("{} Path: {}", subject.getPrincipals(), absPath);
-            NodeId nodeId = context.getHierarchyManager().resolveNodePath(
-                    absPath);
+            NodeId nodeId = context.getHierarchyManager().resolveNodePath(absPath);
 
             if (nodeId != null) {
                 log.debug("{} This is a NODE", subject.getPrincipals());
             } else {
-                final PropertyId propertyId = context.getHierarchyManager()
-                        .resolvePropertyPath(absPath);
+                PropertyId propertyId = context.getHierarchyManager().resolvePropertyPath(absPath);
 
                 if (propertyId != null) {
                     log.debug("{} This is a PROPERTY", subject.getPrincipals());
                     nodeId = propertyId.getParentId();
                 } else {
                     // Seems to be a just-removed property
-                    log.debug("{} This is a UNKNOWN: {}",
-                            subject.getPrincipals(), absPath);
-                    final Path ancestor = absPath.getAncestor(1);
+                    log.debug("{} This is a UNKNOWN: {}", subject.getPrincipals(), absPath);
+                    Path ancestor = absPath.getAncestor(1);
                     log.debug("UNKNOWN ancestor: {}", ancestor);
-                    nodeId = context.getHierarchyManager().resolveNodePath(
-                            ancestor);
+                    nodeId = context.getHierarchyManager().resolveNodePath(ancestor);
                 }
             }
 
@@ -252,17 +225,15 @@ public class RepositoryAccessManager implements AccessManager {
 
                 try {
                     node = ((SessionImpl) systemSession).getNodeById(nodeId);
-                } catch (final ItemNotFoundException e) {
+                } catch (ItemNotFoundException e) {
                     // When creating a new node, the path references the node to be created.
                     // In this moment, it does not exists so need to check the parent node permissions.
                     if ((permissions & Permission.ADD_NODE) != 0) {
-                        nodeId = context.getHierarchyManager().resolveNodePath(
-                                absPath.getAncestor(1));
+                        nodeId = context.getHierarchyManager().resolveNodePath(absPath.getAncestor(1));
 
                         try {
-                            node = ((SessionImpl) systemSession)
-                                    .getNodeById(nodeId);
-                        } catch (final ItemNotFoundException e2) {
+                            node = ((SessionImpl) systemSession).getNodeById(nodeId);
+                        } catch (ItemNotFoundException e2) {
                             //log.info("Nodo: {}", absPath);
                             //log.info("Ancestor: {}", absPath.getAncestor(1));
                             //Element elt = absPath.getNameElement();
@@ -279,134 +250,88 @@ public class RepositoryAccessManager implements AccessManager {
                 if (node == null) {
                     access = true;
                 } else {
-                    log.debug("{} Node Name: {}", subject.getPrincipals(),
-                            node.getPath());
-                    log.debug("{} Node Type: {}", subject.getPrincipals(), node
-                            .getPrimaryNodeType().getName());
+                    log.debug("{} Node Name: {}", subject.getPrincipals(), node.getPath());
+                    log.debug("{} Node Type: {}", subject.getPrincipals(), node.getPrimaryNodeType().getName());
 
                     if (node.isNodeType(Document.CONTENT_TYPE)) {
-                        log.debug("{} Node is CONTENT_TYPE",
-                                subject.getPrincipals());
+                        log.debug("{} Node is CONTENT_TYPE", subject.getPrincipals());
                         node = node.getParent();
-                        log.debug("{} Real -> {}", subject.getPrincipals(),
-                                node.getPath());
+                        log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
                     } else if (node.isNodeType(Note.LIST_TYPE)) {
-                        log.debug("{} Node is NOTE_LIST_TYPE",
-                                subject.getPrincipals());
+                        log.debug("{} Node is NOTE_LIST_TYPE", subject.getPrincipals());
                         node = node.getParent();
-                        log.debug("{} Real -> {}", subject.getPrincipals(),
-                                node.getPath());
+                        log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
                     } else if (node.isNodeType(Note.TYPE)) {
-                        log.debug("{} Node is NOTE_TYPE",
-                                subject.getPrincipals());
+                        log.debug("{} Node is NOTE_TYPE", subject.getPrincipals());
                         node = node.getParent().getParent();
-                        log.debug("{} Real -> {}", subject.getPrincipals(),
-                                node.getPath());
+                        log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
                     } else if (node.isNodeType("nt:frozenNode")) {
-                        log.debug("{} Node is FROZEN_NODE",
-                                subject.getPrincipals());
-                        final String realNodeId = node.getProperty(
-                                "jcr:frozenUuid").getString();
-                        node = systemSession.getNodeByUUID(realNodeId)
-                                .getParent();
-                        log.debug("{} Real -> {}", subject.getPrincipals(),
-                                node.getPath());
+                        log.debug("{} Node is FROZEN_NODE", subject.getPrincipals());
+                        String realNodeId = node.getProperty("jcr:frozenUuid").getString();
+                        node = systemSession.getNodeByUUID(realNodeId).getParent();
+                        log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
                     } else if (node.isNodeType("nt:version")) {
                         log.debug("{} Node is VERSION", subject.getPrincipals());
-                        final Node frozenNode = node.getNode("jcr:frozenNode");
-                        log.debug("{} Frozen node -> {}",
-                                subject.getPrincipals(), frozenNode.getPath());
-                        final String realNodeId = frozenNode.getProperty(
-                                "jcr:frozenUuid").getString();
+                        Node frozenNode = node.getNode("jcr:frozenNode");
+                        log.debug("{} Frozen node -> {}", subject.getPrincipals(), frozenNode.getPath());
+                        String realNodeId = frozenNode.getProperty("jcr:frozenUuid").getString();
 
                         try {
-                            node = systemSession.getNodeByUUID(realNodeId)
-                                    .getParent();
-                            log.debug("{} Real -> {}", subject.getPrincipals(),
-                                    node.getPath());
-                        } catch (final ItemNotFoundException e) {
-                            log.warn(
-                                    "Real node not found, so we are purging: {}",
-                                    realNodeId);
+                            node = systemSession.getNodeByUUID(realNodeId).getParent();
+                            log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
+                        } catch (ItemNotFoundException e) {
+                            log.warn("Real node not found, so we are purging: {}", realNodeId);
                             access = true;
                         }
                     } else if (node.isNodeType("nt:versionHistory")) {
-                        log.debug("{} Node is VERSION_HISTORY",
-                                subject.getPrincipals());
-                        final String realNodeId = node.getProperty(
-                                "jcr:versionableUuid").getString();
-                        node = systemSession.getNodeByUUID(realNodeId)
-                                .getParent();
-                        log.debug("{} Real -> {}", subject.getPrincipals(),
-                                node.getPath());
+                        log.debug("{} Node is VERSION_HISTORY", subject.getPrincipals());
+                        String realNodeId = node.getProperty("jcr:versionableUuid").getString();
+                        node = systemSession.getNodeByUUID(realNodeId).getParent();
+                        log.debug("{} Real -> {}", subject.getPrincipals(), node.getPath());
                     }
 
                     if (!access) {
                         if ((permissions & Permission.READ) != 0) {
                             // Check for READ permissions
                             try {
-                                access = checkProperties(node,
-                                        com.openkm.bean.Permission.USERS_READ,
-                                        com.openkm.bean.Permission.ROLES_READ);
-                            } catch (final PathNotFoundException e) {
-                                log.warn("{} PathNotFoundException({}) in {}",
-                                        new Object[] {
-                                                subject.getPrincipals(),
-                                                e.getMessage(),
-                                                node.getPrimaryNodeType()
-                                                        .getName() });
+                                access =
+                                        checkProperties(node, com.openkm.bean.Permission.USERS_READ, com.openkm.bean.Permission.ROLES_READ);
+                            } catch (PathNotFoundException e) {
+                                log.warn("{} PathNotFoundException({}) in {}", new Object[] { subject.getPrincipals(), e.getMessage(),
+                                        node.getPrimaryNodeType().getName() });
                                 access = true;
                             }
-                        } else if ((permissions & Permission.ADD_NODE) != 0
-                                || (permissions & Permission.SET_PROPERTY) != 0) {
+                        } else if ((permissions & Permission.ADD_NODE) != 0 || (permissions & Permission.SET_PROPERTY) != 0) {
                             // Check for WRITE permissions
                             try {
-                                access = checkProperties(node,
-                                        com.openkm.bean.Permission.USERS_WRITE,
-                                        com.openkm.bean.Permission.ROLES_WRITE);
-                            } catch (final PathNotFoundException e) {
-                                log.debug(
-                                        "{} PropertyNotFoundException({}) in {}",
-                                        new Object[] {
-                                                subject.getPrincipals(),
-                                                e.getMessage(),
-                                                node.getPrimaryNodeType()
-                                                        .getName() });
+                                access =
+                                        checkProperties(node, com.openkm.bean.Permission.USERS_WRITE,
+                                                com.openkm.bean.Permission.ROLES_WRITE);
+                            } catch (PathNotFoundException e) {
+                                log.debug("{} PropertyNotFoundException({}) in {}", new Object[] { subject.getPrincipals(), e.getMessage(),
+                                        node.getPrimaryNodeType().getName() });
                                 access = true;
                             }
-                        } else if ((permissions & Permission.REMOVE_NODE) != 0
-                                || (permissions & Permission.REMOVE_PROPERTY) != 0) {
+                        } else if ((permissions & Permission.REMOVE_NODE) != 0 || (permissions & Permission.REMOVE_PROPERTY) != 0) {
                             // Check for DELETE permissions
                             try {
-                                access = checkProperties(
-                                        node,
-                                        com.openkm.bean.Permission.USERS_DELETE,
-                                        com.openkm.bean.Permission.ROLES_DELETE);
-                            } catch (final PathNotFoundException e) {
-                                log.debug(
-                                        "{} PropertyNotFoundException({}) in {}",
-                                        new Object[] {
-                                                subject.getPrincipals(),
-                                                e.getMessage(),
-                                                node.getPrimaryNodeType()
-                                                        .getName() });
+                                access =
+                                        checkProperties(node, com.openkm.bean.Permission.USERS_DELETE,
+                                                com.openkm.bean.Permission.ROLES_DELETE);
+                            } catch (PathNotFoundException e) {
+                                log.debug("{} PropertyNotFoundException({}) in {}", new Object[] { subject.getPrincipals(), e.getMessage(),
+                                        node.getPrimaryNodeType().getName() });
                                 access = true;
                             }
                         } else if ((permissions & Permission.MODIFY_AC) != 0) {
                             // Check for PERMISSION permissions
                             try {
-                                access = checkProperties(
-                                        node,
-                                        com.openkm.bean.Permission.USERS_SECURITY,
-                                        com.openkm.bean.Permission.ROLES_SECURITY);
-                            } catch (final PathNotFoundException e) {
-                                log.debug(
-                                        "{} PropertyNotFoundException({}) in {}",
-                                        new Object[] {
-                                                subject.getPrincipals(),
-                                                e.getMessage(),
-                                                node.getPrimaryNodeType()
-                                                        .getName() });
+                                access =
+                                        checkProperties(node, com.openkm.bean.Permission.USERS_SECURITY,
+                                                com.openkm.bean.Permission.ROLES_SECURITY);
+                            } catch (PathNotFoundException e) {
+                                log.debug("{} PropertyNotFoundException({}) in {}", new Object[] { subject.getPrincipals(), e.getMessage(),
+                                        node.getPrimaryNodeType().getName() });
                                 access = true;
                             }
                         }
@@ -422,18 +347,17 @@ public class RepositoryAccessManager implements AccessManager {
     /**
      * Check access properties
      */
-    private boolean checkProperties(final Node node, final String userProperty,
-            final String roleProperty) throws ValueFormatException,
-            RepositoryException, PathNotFoundException {
+    private boolean checkProperties(Node node, String userProperty, String roleProperty) throws ValueFormatException, RepositoryException,
+            PathNotFoundException {
         log.debug("checkProperties({})", node);
         // Propiedad no definida en nt:versionHistory, nt:version y okm:resource
-        final Value[] users = node.getProperty(userProperty).getValues();
+        Value[] users = node.getProperty(userProperty).getValues();
         boolean access = false;
 
-        for (final Value user : users) {
-            log.debug("{} User: {}", userProperty, user.getString());
+        for (int i = 0; i < users.length; i++) {
+            log.debug("{} User: {}", userProperty, users[i].getString());
 
-            if (principalUser.equals(user.getString())) {
+            if (principalUser.equals(users[i].getString())) {
                 access = true;
                 break;
             }
@@ -442,12 +366,12 @@ public class RepositoryAccessManager implements AccessManager {
         // If there is no user specific access, try with roles
         if (!access) {
             // Propiedad no definida en nt:versionHistory, nt:version y okm:resource
-            final Value[] roles = node.getProperty(roleProperty).getValues();
+            Value[] roles = node.getProperty(roleProperty).getValues();
 
-            for (final Value role : roles) {
-                log.debug("{} Rol: {}", roleProperty, role.getString());
+            for (int i = 0; i < roles.length; i++) {
+                log.debug("{} Rol: {}", roleProperty, roles[i].getString());
 
-                if (principalRoles.contains(role.getString())) {
+                if (principalRoles.contains(roles[i].getString())) {
                     access = true;
                     break;
                 }
@@ -462,10 +386,10 @@ public class RepositoryAccessManager implements AccessManager {
      * 
      */
     @SuppressWarnings("deprecation")
-    private int deprecatedPermissionsToNewApi(final int permissions) {
-        final boolean read = (permissions & READ) != 0;
-        final boolean write = (permissions & WRITE) != 0;
-        final boolean remove = (permissions & REMOVE) != 0;
+    private int deprecatedPermissionsToNewApi(int permissions) {
+        boolean read = (permissions & READ) != 0;
+        boolean write = (permissions & WRITE) != 0;
+        boolean remove = (permissions & REMOVE) != 0;
         int result = 0;
 
         if (read) {
@@ -488,8 +412,8 @@ public class RepositoryAccessManager implements AccessManager {
     /**
      * 
      */
-    private String permissionsToString(final int permissions) {
-        final StringBuilder sb = new StringBuilder();
+    private String permissionsToString(int permissions) {
+        StringBuilder sb = new StringBuilder();
 
         if (!(permissions == Permission.NONE)) {
             // if ((actions & Permission.ALL) != 0) {

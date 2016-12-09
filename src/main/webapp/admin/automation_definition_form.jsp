@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ page import="com.openkm.util.WebUtils" %>
 <%@ page import="com.openkm.dao.bean.AutomationMetadata" %>
@@ -15,7 +15,7 @@
     <script type="text/javascript">
 	    $(document).ready(function() {
 	  	  $dm = $('.ds').openDOMWindow({
-	  		height:200, width:300,
+	  		height:300, width:400,
 	  		eventType:'click',
 	  		overlayOpacity:'57',
 	  		windowSource:'iframe', windowPadding:0
@@ -57,8 +57,8 @@
 		  	<th colspan="2" align="center">
 		  	  <c:choose>
         		<c:when test="${action=='createValidation' || action=='createAction'}"><b>Create ${am.group}</b></c:when>
-        		<c:when test="${action == 'editAction' || action == 'editValidation'}"><b>Edit  ${am.group}</b></c:when>
-        		<c:when test="${action == 'deleteAction' || action == 'deleteValidation'}"><b>Delete  ${am.group}</b></c:when>
+        		<c:when test="${action == 'editAction' || action == 'editValidation'}"><b>Edit ${am.group}</b></c:when>
+        		<c:when test="${action == 'deleteAction' || action == 'deleteValidation'}"><b>Delete ${am.group}</b></c:when>
       		  </c:choose>
 		  	</th>
 		  </tr>
@@ -113,13 +113,17 @@
 		  	<td colspan="2" align="right">
 		  	  <c:choose>
     			<c:when test="${action=='createValidation' || action=='deleteValidation' || action=='editValidation'}">
-    		  	  <input type="button" onclick="javascript:hideValidation()" value="Cancel"/>
+    		  	  <input type="button" onclick="javascript:hideValidation()" value="Cancel" class="noButton"/>
     			</c:when>
     			<c:when test="${action=='createAction' || action=='deleteAction' || action=='editAction'}">
-  		  	  	  <input type="button" onclick="javascript:hideAction()" value="Cancel"/>
+  		  	  	  <input type="button" onclick="javascript:hideAction()" value="Cancel" class="noButton"/>
   				</c:when>
   		  	  </c:choose>
-              <input type="submit" value="Send"/>
+              <c:choose>
+                <c:when test="${action=='createValidation' || action=='createAction'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                <c:when test="${action == 'editAction' || action == 'editValidation'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                <c:when test="${action == 'deleteAction' || action == 'deleteValidation'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+              </c:choose>
 		  	</td>
 		  </tr>
 		</table>

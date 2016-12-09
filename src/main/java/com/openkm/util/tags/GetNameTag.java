@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,20 +30,15 @@ import com.openkm.util.PathUtils;
 
 @SuppressWarnings("serial")
 public class GetNameTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String path;
 
     @Override
     public int doStartTag() {
-        final String ret = PathUtils.getName(path);
+        String ret = PathUtils.getName(path);
 
         try {
             pageContext.getOut().write(ret);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -60,7 +55,7 @@ public class GetNameTag extends TagSupport {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 }

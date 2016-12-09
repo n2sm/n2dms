@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,8 +39,7 @@ public class TabMailComunicator {
      * @return
      */
     public static int getSelectedTab() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                .getSelectedTab();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.getSelectedTab();
     }
 
     /**
@@ -49,8 +48,7 @@ public class TabMailComunicator {
      * @return
      */
     public static GWTMail getMail() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                .getMail();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.getMail();
     }
 
     /**
@@ -59,8 +57,7 @@ public class TabMailComunicator {
      * @param widget
      * @return
      */
-    public static boolean isWidgetExtensionVisible(final Widget widget) {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                .isWidgetExtensionVisible(widget);
+    public static boolean isWidgetExtensionVisible(Widget widget) {
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.isWidgetExtensionVisible(widget);
     }
 }

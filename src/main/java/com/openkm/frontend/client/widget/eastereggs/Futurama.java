@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,9 +30,7 @@ import com.openkm.frontend.client.Main;
 public class Futurama {
 
     private String phrase = "Be Open, my friend!";
-
     private char[] pass = phrase.toUpperCase().toCharArray();
-
     private int count = 0;
 
     /**
@@ -53,10 +51,9 @@ public class Futurama {
      * 
      * @param key
      */
-    public void evaluateKey(final char key) {
+    public void evaluateKey(char key) {
 
-        if (Character.toUpperCase(key) == pass[count]
-                && count < phrase.length()) {
+        if (Character.toUpperCase(key) == pass[count] && count < phrase.length()) {
             count++;
             String msg = "<b><font color=\"red\">";
             msg += phrase.substring(0, count);
@@ -65,7 +62,7 @@ public class Futurama {
             msg += "<br><br>";
             Main.get().aboutPopup.setText(msg);
         } else {
-            final String msg = "<b>" + phrase + "</b><br><br>";
+            String msg = "<b>" + phrase + "</b><br><br>";
             Main.get().aboutPopup.setText(msg);
             count = 0;
         }

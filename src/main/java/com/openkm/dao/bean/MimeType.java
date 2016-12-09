@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.dao.bean;
@@ -55,13 +55,20 @@ public class MimeType implements Serializable {
     @Column(name = "MT_NAME", length = 128, unique = true)
     private String name;
 
+    @Column(name = "MT_DESCRIPTION", length = 128, unique = true)
+    private String description;
+
     @Column(name = "MT_IMAGE_CONTENT")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Type(type = "org.hibernate.type.StringClobType")
     private String imageContent;
 
     @Column(name = "MT_IMAGE_MIME", length = 32)
     private String imageMime;
+
+    @Column(name = "MT_SEARCH", nullable = false)
+    @Type(type = "true_false")
+    private boolean search = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "MTE_NAME")
@@ -72,7 +79,7 @@ public class MimeType implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -80,15 +87,23 @@ public class MimeType implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImageContent() {
         return imageContent;
     }
 
-    public void setImageContent(final String imageContent) {
+    public void setImageContent(String imageContent) {
         this.imageContent = imageContent;
     }
 
@@ -96,32 +111,36 @@ public class MimeType implements Serializable {
         return imageMime;
     }
 
-    public void setImageMime(final String imageMime) {
+    public void setImageMime(String imageMime) {
         this.imageMime = imageMime;
+    }
+
+    public boolean isSearch() {
+        return search;
+    }
+
+    public void setSearch(boolean search) {
+        this.search = search;
     }
 
     public Set<String> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(final Set<String> extensions) {
+    public void setExtensions(Set<String> extensions) {
         this.extensions = extensions;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("id=");
-        sb.append(id);
-        sb.append(", name=");
-        sb.append(name);
-        sb.append(", imageMime=");
-        sb.append(imageMime);
-        sb.append(", imageContent=");
-        sb.append("[BIG]");
-        sb.append(", extensions=");
-        sb.append(extensions);
+        sb.append("id=").append(id);
+        sb.append(", name=").append(name);
+        sb.append(", description=").append(description);
+        sb.append(", search=").append(search);
+        sb.append(", imageMime=").append(imageMime);
+        sb.append(", imageContent=").append("[BIG]");
+        sb.append(", extensions=").append(extensions);
         sb.append("}");
         return sb.toString();
     }

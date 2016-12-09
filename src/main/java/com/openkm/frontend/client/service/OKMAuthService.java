@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,42 +37,31 @@ import com.openkm.frontend.client.bean.GWTUser;
 public interface OKMAuthService extends RemoteService {
     public void logout() throws OKMException;
 
-    public List<GWTGrantedUser> getGrantedUsers(String nodePath)
-            throws OKMException;
+    public List<GWTGrantedUser> getGrantedUsers(String nodePath) throws OKMException;
 
-    public Map<String, Integer> getGrantedRoles(String nodePath)
-            throws OKMException;
+    public Map<String, Integer> getGrantedRoles(String nodePath) throws OKMException;
 
     public String getRemoteUser();
 
-    public List<GWTGrantedUser> getUngrantedUsers(String nodePath)
-            throws OKMException;
+    public List<GWTGrantedUser> getUngrantedUsers(String nodePath) throws OKMException;
 
     public List<String> getUngrantedRoles(String nodePath) throws OKMException;
 
-    public List<GWTGrantedUser> getFilteredUngrantedUsers(String nodePath,
-            String filter) throws OKMException;
+    public List<GWTGrantedUser> getFilteredUngrantedUsers(String nodePath, String filter) throws OKMException;
 
-    public List<String> getFilteredUngrantedRoles(String nodePath, String filter)
-            throws OKMException;
+    public List<String> getFilteredUngrantedRoles(String nodePath, String filter) throws OKMException;
 
-    public void grantUser(String path, String user, int permissions,
-            boolean recursive) throws OKMException;
+    public void grantUser(String path, String user, int permissions, boolean recursive) throws OKMException;
 
-    public void revokeUser(String path, String user, boolean recursive)
-            throws OKMException;
+    public void revokeUser(String path, String user, boolean recursive) throws OKMException;
 
-    public void revokeUser(String path, String user, int permissions,
-            boolean recursive) throws OKMException;
+    public void revokeUser(String path, String user, int permissions, boolean recursive) throws OKMException;
 
-    public void grantRole(String path, String role, int permissions,
-            boolean recursive) throws OKMException;
+    public void grantRole(String path, String role, int permissions, boolean recursive) throws OKMException;
 
-    public void revokeRole(String path, String role, boolean recursive)
-            throws OKMException;
+    public void revokeRole(String path, String role, boolean recursive) throws OKMException;
 
-    public void revokeRole(String path, String role, int permissions,
-            boolean recursive) throws OKMException;
+    public void revokeRole(String path, String role, int permissions, boolean recursive) throws OKMException;
 
     public void keepAlive() throws OKMException;
 
@@ -80,14 +69,10 @@ public interface OKMAuthService extends RemoteService {
 
     public List<String> getAllRoles() throws OKMException;
 
-    public List<GWTUser> getFilteredAllUsers(String filter,
-            List<String> selectedUsers) throws OKMException;
+    public List<GWTUser> getFilteredAllUsers(String filter, List<String> selectedUsers) throws OKMException;
 
-    public List<String> getFilteredAllRoles(String filter,
-            List<String> selectedRoles) throws OKMException;
+    public List<String> getFilteredAllRoles(String filter, List<String> selectedRoles) throws OKMException;
 
-    public void changeSecurity(String path, Map<String, Integer> grantUsers,
-            Map<String, Integer> revokeUsers, Map<String, Integer> grantRoles,
-            Map<String, Integer> revokeRoles, boolean recursive)
-            throws OKMException;
+    public void changeSecurity(String path, Map<String, Integer> grantUsers, Map<String, Integer> revokeUsers,
+            Map<String, Integer> grantRoles, Map<String, Integer> revokeRoles, boolean recursive) throws OKMException;
 }

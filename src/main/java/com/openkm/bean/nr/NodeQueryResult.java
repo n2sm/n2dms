@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,24 +29,18 @@ import com.openkm.dao.bean.NodeMail;
 
 public class NodeQueryResult implements Serializable {
     private static final long serialVersionUID = -1L;
-
     private NodeDocument document;
-
     private NodeFolder folder;
-
     private NodeMail mail;
-
     private NodeDocument attachment;
-
     private String excerpt;
-
     private float score;
 
     public NodeDocument getDocument() {
         return document;
     }
 
-    public void setDocument(final NodeDocument document) {
+    public void setDocument(NodeDocument document) {
         this.document = document;
     }
 
@@ -54,7 +48,7 @@ public class NodeQueryResult implements Serializable {
         return folder;
     }
 
-    public void setFolder(final NodeFolder folder) {
+    public void setFolder(NodeFolder folder) {
         this.folder = folder;
     }
 
@@ -62,7 +56,7 @@ public class NodeQueryResult implements Serializable {
         return mail;
     }
 
-    public void setMail(final NodeMail mail) {
+    public void setMail(NodeMail mail) {
         this.mail = mail;
     }
 
@@ -70,7 +64,7 @@ public class NodeQueryResult implements Serializable {
         return attachment;
     }
 
-    public void setAttachment(final NodeDocument attachment) {
+    public void setAttachment(NodeDocument attachment) {
         this.attachment = attachment;
     }
 
@@ -78,7 +72,7 @@ public class NodeQueryResult implements Serializable {
         return excerpt;
     }
 
-    public void setExcerpt(final String excerpt) {
+    public void setExcerpt(String excerpt) {
         this.excerpt = excerpt;
     }
 
@@ -86,13 +80,12 @@ public class NodeQueryResult implements Serializable {
         return score;
     }
 
-    public void setScore(final float score) {
+    public void setScore(float score) {
         this.score = score;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("document=");
         sb.append(document);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,11 +22,13 @@
 package com.openkm.frontend.client.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTFolder;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 
 /**
  * OKMFolderService
@@ -36,13 +38,11 @@ import com.openkm.frontend.client.bean.GWTFolder;
  */
 @RemoteServiceRelativePath("Folder")
 public interface OKMFolderService extends RemoteService {
-    public List<GWTFolder> getChilds(String fldId, boolean extraColumns)
-            throws OKMException;
+    public List<GWTFolder> getChilds(String fldId, boolean extraColumns, Map<String, GWTFilter> mapFilter) throws OKMException;
 
     public void delete(String fldPath) throws OKMException;
 
-    public GWTFolder create(String fldId, String fldIdParent)
-            throws OKMException;
+    public GWTFolder create(String fldId, String fldIdParent) throws OKMException;
 
     public GWTFolder rename(String fldId, String newName) throws OKMException;
 
@@ -56,9 +56,9 @@ public interface OKMFolderService extends RemoteService {
 
     public Boolean isValid(String fldPath) throws OKMException;
 
-    public List<GWTFolder> getCategorizedChilds(String fldPath)
-            throws OKMException;
+    public List<GWTFolder> getCategorizedChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException;
 
-    public List<GWTFolder> getThesaurusChilds(String fldPath)
-            throws OKMException;
+    public List<GWTFolder> getMetadataChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException;
+
+    public List<GWTFolder> getThesaurusChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException;
 }

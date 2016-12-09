@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,9 +34,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTPrint extends GWTFormElement implements IsSerializable {
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private List<GWTNode> nodes = new ArrayList<GWTNode>();
-
     private String data = "";
 
     public GWTPrint() {
@@ -47,7 +45,7 @@ public class GWTPrint extends GWTFormElement implements IsSerializable {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -55,7 +53,7 @@ public class GWTPrint extends GWTFormElement implements IsSerializable {
         return nodes;
     }
 
-    public void setNodes(final List<GWTNode> nodes) {
+    public void setNodes(List<GWTNode> nodes) {
         this.nodes = nodes;
     }
 
@@ -63,13 +61,12 @@ public class GWTPrint extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

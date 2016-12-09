@@ -67,5 +67,31 @@
         </c:choose>
       </td>
     </tr>
+    <tr>
+      <td nowrap>OMR</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMenu.prfTool.omrVisible}">
+            <input name="prf_menu_tool_omr_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_menu_tool_omr_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
+      <td>Convert</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMenu.prfTool.convertVisible}">
+            <input name="prf_menu_tool_convert_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_menu_tool_convert_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
   </table>
 </fieldset>

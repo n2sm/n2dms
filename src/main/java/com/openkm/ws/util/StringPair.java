@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,9 +25,7 @@ import java.io.Serializable;
 
 public class StringPair implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String key = null;
-
     private String value = null;
 
     public StringPair() {
@@ -37,7 +35,7 @@ public class StringPair implements Serializable {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -45,7 +43,16 @@ public class StringPair implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("key=").append(key);
+        sb.append(", value=").append(value);
+        sb.append("}");
+        return sb.toString();
     }
 }

@@ -8,8 +8,8 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="Shortcut icon" href="favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
-  <script src="../js/jquery-1.7.1.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css?v=%{TIMESTAMP}%" />
+  <script src="../js/jquery-1.8.3.min.js" type="text/javascript"></script>
   <script src="../js/vanadium-min.js" type="text/javascript"></script>
   <title>Omr Template</title>
 </head>
@@ -41,19 +41,18 @@
           <tr>
             <td colspan="2" align="right">
               <div id="buttons">
-              	<input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              	<input type="submit" value="Send"/>
+              	<input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              	<input type="submit" value="Check" class="yesButton"/>
               </div>
             </td>
           </tr>
-          
-          <c:if test="${results!=null}">
+          <c:if test="${results != null}">
 	        <tr>
-	          <td colspan="2" align="center"><b>RESULTS</b></td>
+	          <td colspan="2" align="center"><b>Results</b></td>
 	        </tr>
           	<tr>
           	  <td colspan="2">
-          	  <table class="results" border="0" cellspacing="4" width="100%">
+          	  <table class="results-old" border="0" cellspacing="4" width="100%">
           	  	<tr>
           	  		<th>Key</th>
           	  		<th>Value</th>
@@ -63,7 +62,7 @@
           	  	  	<td>${result.key} </td>
           	  	  	<td>${result.value} </td>
           	  	  </tr>
-	  			</c:forEach>
+	  			      </c:forEach>
           	  </table>
           	  </td>
           	</tr>

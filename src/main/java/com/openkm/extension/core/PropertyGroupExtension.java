@@ -42,50 +42,38 @@ public interface PropertyGroupExtension extends Extension {
     /**
      * Executed BEFORE addGroup
      */
-    public void preAddGroup(Session session, Ref<Node> node, String grpName)
-            throws NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException;
+    public void preAddGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException;
 
     /**
      * Executed AFTER addGroup
      */
-    public void postAddGroup(Session session, Ref<Node> node, String grpName)
-            throws NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException;
+    public void postAddGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException;
 
     /**
      * Executed BEFORE removeGroup
      */
-    public void preRemoveGroup(Session session, Ref<Node> node, String grpName)
-            throws AccessDeniedException, NoSuchGroupException, LockException,
-            PathNotFoundException, RepositoryException, DatabaseException,
-            ExtensionException;
+    public void preRemoveGroup(Session session, Ref<Node> node, String grpName) throws AccessDeniedException, NoSuchGroupException,
+            LockException, PathNotFoundException, RepositoryException, DatabaseException, ExtensionException;
 
     /**
      * Executed AFTER removeGroup
      */
-    public void postRemoveGroup(Session session, Ref<Node> node, String grpName)
-            throws AccessDeniedException, NoSuchGroupException, LockException,
-            PathNotFoundException, RepositoryException, DatabaseException,
-            ExtensionException;
+    public void postRemoveGroup(Session session, Ref<Node> node, String grpName) throws AccessDeniedException, NoSuchGroupException,
+            LockException, PathNotFoundException, RepositoryException, DatabaseException, ExtensionException;
 
     /**
      * Executed BEFORE setProperties
      */
-    public void preSetProperties(Session session, Ref<Node> node,
-            String grpName, List<FormElement> properties) throws IOException,
-            ParseException, NoSuchPropertyException, NoSuchGroupException,
-            LockException, PathNotFoundException, AccessDeniedException,
+    public void preSetProperties(Session session, Ref<Node> node, String grpName, List<FormElement> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException, ExtensionException;
 
     /**
      * Executed AFTER setProperties
      */
-    public void postSetProperties(Session session, Ref<Node> node,
-            String grpName, List<FormElement> properties) throws IOException,
-            ParseException, NoSuchPropertyException, NoSuchGroupException,
-            LockException, PathNotFoundException, AccessDeniedException,
+    public void postSetProperties(Session session, Ref<Node> node, String grpName, List<FormElement> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException, ExtensionException;
 }

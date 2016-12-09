@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -59,31 +59,28 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class ISO8601 {
     private static final String BASIC_PATTERN = "yyyyMMddHHmmss";
-
-    static final Pattern EXTENDED_PATTERN = Pattern
-            .compile("(\\d{4})-(\\d{2})-(\\d{2})T((\\d{2}):"
-                    + "(\\d{2}):(\\d{2})\\.(\\d{3}))((\\+|-)(\\d{2}):(\\d{2}))");
+    static final Pattern EXTENDED_PATTERN = Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2})T((\\d{2}):"
+            + "(\\d{2}):(\\d{2})\\.(\\d{3}))((\\+|-)(\\d{2}):(\\d{2}))");
 
     /**
      * Check if the value is a valid ISO8601 extended date
      */
-    public static boolean isExtended(final String value) {
+    public static boolean isExtended(String value) {
         return EXTENDED_PATTERN.matcher(value).matches();
     }
 
     /**
      * Parse string date in format "YYYY-MM-DDThh:mm:ss.SSSTZD"
      */
-    public static Calendar parseExtended(final String value) {
+    public static Calendar parseExtended(String value) {
         if (value == null) {
             return null;
         } else {
             try {
-                final DatatypeFactory dtf = DatatypeFactory.newInstance();
-                final XMLGregorianCalendar xml = dtf
-                        .newXMLGregorianCalendar(value);
+                DatatypeFactory dtf = DatatypeFactory.newInstance();
+                XMLGregorianCalendar xml = dtf.newXMLGregorianCalendar(value);
                 return xml.toGregorianCalendar();
-            } catch (final DatatypeConfigurationException e) {
+            } catch (DatatypeConfigurationException e) {
                 throw new IllegalArgumentException(value);
             }
         }
@@ -92,16 +89,15 @@ public class ISO8601 {
     /**
      * Format date with format "YYYY-MM-DDThh:mm:ss.SSSTZD"
      */
-    public static String formatExtended(final Calendar value) {
+    public static String formatExtended(Calendar value) {
         if (value == null) {
             return null;
         } else {
             try {
-                final DatatypeFactory dtf = DatatypeFactory.newInstance();
-                final XMLGregorianCalendar xml = dtf
-                        .newXMLGregorianCalendar((GregorianCalendar) value);
+                DatatypeFactory dtf = DatatypeFactory.newInstance();
+                XMLGregorianCalendar xml = dtf.newXMLGregorianCalendar((GregorianCalendar) value);
                 return xml.toString();
-            } catch (final DatatypeConfigurationException e) {
+            } catch (DatatypeConfigurationException e) {
                 throw new IllegalArgumentException();
             }
         }
@@ -110,16 +106,16 @@ public class ISO8601 {
     /**
      * Parse string date in format "yyyyMMddHHmmss"
      */
-    public static Calendar parseBasic(final String value) {
+    public static Calendar parseBasic(String value) {
         if (value == null) {
             return null;
         } else {
             try {
-                final SimpleDateFormat sdf = new SimpleDateFormat(BASIC_PATTERN);
-                final Calendar cal = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat(BASIC_PATTERN);
+                Calendar cal = Calendar.getInstance();
                 cal.setTime(sdf.parse(value));
                 return cal;
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 throw new IllegalArgumentException(value);
             }
         }
@@ -128,11 +124,11 @@ public class ISO8601 {
     /**
      * Format date with format "yyyyMMddHHmmss"
      */
-    public static String formatBasic(final Calendar value) {
+    public static String formatBasic(Calendar value) {
         if (value == null) {
             return null;
         } else {
-            final SimpleDateFormat sdf = new SimpleDateFormat(BASIC_PATTERN);
+            SimpleDateFormat sdf = new SimpleDateFormat(BASIC_PATTERN);
             return sdf.format(value.getTime());
         }
     }

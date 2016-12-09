@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,32 +30,23 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTConverterStatus implements IsSerializable {
     public static final int STATUS_LOADING = 1;
-
     public static final int STATUS_CONVERTING_TO_DXF = 2;
-
     public static final int STATUS_CONVERTING_TO_DXF_FINISHED = 3;
-
     public static final int STATUS_CONVERTING_TO_PDF = 4;
-
     public static final int STATUS_CONVERTING_TO_PDF_FINISHED = 5;
-
     public static final int STATUS_CONVERTING_TO_SWF = 6;
-
     public static final int STATUS_CONVERTING_TO_SWF_FINISHED = 7;
-
     public static final int STATUS_SENDING_FILE = 8;
 
     private int status = STATUS_LOADING;
-
     private String error;
-
     private boolean conversionFinish = false;
 
     public String getError() {
         return error;
     }
 
-    public void setError(final String error) {
+    public void setError(String error) {
         this.error = error;
     }
 
@@ -63,7 +54,7 @@ public class GWTConverterStatus implements IsSerializable {
         return status;
     }
 
-    public void setStatus(final int status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
@@ -71,7 +62,7 @@ public class GWTConverterStatus implements IsSerializable {
         return conversionFinish;
     }
 
-    public void setConversionFinish(final boolean conversionFinish) {
+    public void setConversionFinish(boolean conversionFinish) {
         this.conversionFinish = conversionFinish;
     }
 }

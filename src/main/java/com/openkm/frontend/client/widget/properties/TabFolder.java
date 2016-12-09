@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.properties;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -38,6 +39,7 @@ import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTPermission;
 import com.openkm.frontend.client.bean.GWTPropertyGroup;
+import com.openkm.frontend.client.constants.GWTRepository;
 import com.openkm.frontend.client.extension.event.HasFolderEvent;
 import com.openkm.frontend.client.extension.event.handler.FolderHandlerExtension;
 import com.openkm.frontend.client.extension.event.handler.PropertyGroupHandlerExtension;
@@ -54,51 +56,31 @@ import com.openkm.frontend.client.util.Util;
  * @author jllort
  *
  */
-public class TabFolder extends Composite implements HasFolderEvent,
-        HasFolderHandlerExtension, HasPropertyGroupHandlerExtension {
+public class TabFolder extends Composite implements HasFolderEvent, HasFolderHandlerExtension, HasPropertyGroupHandlerExtension {
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
 
     private static final int TAB_HEIGHT = 20;
-
     private int SECURITY_TAB = -1;
 
     public TabLayoutPanel tabPanel;
-
     public Folder folder;
-
     private SecurityScrollTable security;
-
     public Notes notes;
-
     private VerticalPanel panel;
-
     private List<PropertyGroup> propertyGroup;
-
     private List<TabFolderExtension> widgetExtensionList;
-
     private List<FolderHandlerExtension> folderHandlerExtensionList;
-
     private List<PropertyGroupHandlerExtension> propertyGroupHandlerExtensionList;
-
     private boolean visibleButton = true; // Sets visibleButtons enabled to default view 
-
     private int selectedTab = 0;
-
     private int latestSelectedTab = 0;
-
     private int height = 0;
-
     private int width = 0;
-
     private boolean propertiesVisible = false;
-
     private boolean securityVisible = false;
-
     private boolean notesVisible = false;
-
     private boolean propertyGroupsVisible = false;
-
     private int IEBugCorrections = 0;
 
     /**
@@ -117,30 +99,30 @@ public class TabFolder extends Composite implements HasFolderEvent,
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
-                final int tabIndex = event.getSelectedItem().intValue();
-                Main.get().mainPanel.topPanel.toolBar
-                        .evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
+            public void onSelection(SelectionEvent<Integer> event) {
+                int tabIndex = event.getSelectedItem().intValue();
+                Main.get().mainPanel.topPanel.toolBar.evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
                 selectedTab = tabIndex;
+
                 if (tabIndex == SECURITY_TAB) {
-                    final Timer timer = new Timer() {
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
                             security.fillWidth(); // Always when shows fires fill width
                         }
                     };
-                    timer.schedule(50); // Fill width must be done after really it'll be visible
+                    timer.schedule(500); // Fill width must be done after really it'll be visible
                 }
+
                 fireEvent(HasFolderEvent.TAB_CHANGED);
             }
         });
-        panel.add(tabPanel);
 
+        panel.add(tabPanel);
         tabPanel.setWidth("100%");
         folder.setSize("100%", "100%");
         notes.setSize("100%", "100%");
         panel.setSize("100%", "100%");
-
         tabPanel.setStyleName("okm-DisableSelect");
 
         initWidget(panel);
@@ -152,23 +134,23 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * @param width With of the widget
      * @param height Height of the widget
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         this.height = height;
         this.width = width;
         tabPanel.setPixelSize(width, height);
-        folder.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        security.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        notes.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        folder.setPixelSize(width, height - TAB_HEIGHT);
+        security.setPixelSize(width, height - TAB_HEIGHT);
+        notes.setPixelSize(width, height - TAB_HEIGHT);
         security.fillWidth();
 
         // Setting size to extension
-        for (final TabFolderExtension tabFolderExtension : widgetExtensionList) {
-            tabFolderExtension.setPixelSize(width, height - TAB_HEIGHT);
+        for (Iterator<TabFolderExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            it.next().setPixelSize(width, height - TAB_HEIGHT);
         }
 
         if (!propertyGroup.isEmpty()) { // Sets size to propety groups	
-            for (final PropertyGroup group : propertyGroup) {
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 group.setPixelSize(width, height - TAB_HEIGHT);
             }
         }
@@ -181,7 +163,7 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * 
      * @param folder The folder object
      */
-    public void setProperties(final GWTFolder folder) {
+    public void setProperties(GWTFolder folder) {
         this.folder.set(folder); // Used by tabFolderCommunicator
         notes.set(folder); // Used by TabFolderCommunicator
 
@@ -189,7 +171,11 @@ public class TabFolder extends Composite implements HasFolderEvent,
         latestSelectedTab = selectedTab; // stores latest selected tab
 
         if (securityVisible) {
-            security.setPath(folder.getPath());
+            if (folder.getPath().startsWith("/" + GWTRepository.METADATA)) {
+                security.setUuid(folder.getPath());
+            } else {
+                security.setUuid(folder.getUuid());
+            }
             security.GetGrants();
 
             if ((folder.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
@@ -198,37 +184,39 @@ public class TabFolder extends Composite implements HasFolderEvent,
                 security.setChangePermision(false);
             }
         }
+
         if (propertyGroupsVisible) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         }
 
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup propertyGroup2 : propertyGroup) {
-                tabPanel.remove(propertyGroup2);
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                tabPanel.remove(it.next());
             }
+
             propertyGroup.clear();
         }
 
         // Only gets groups if really are visible
         if (propertyGroupsVisible) {
             getGroups(folder.getPath()); // Gets all the property group assigned to a document
-                                         // Here evalutates selectedTab
+                                         // Here evaluates selectedTab
         }
 
         // Setting folder object to extensions
-        for (final TabFolderExtension tabFolderExtension : widgetExtensionList) {
-            tabFolderExtension.set(folder);
+        for (Iterator<TabFolderExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            it.next().set(folder);
         }
 
         // TODO:Solves minor bug with IE ( now shows contents )
         if (Util.getUserAgent().startsWith("ie") && IEBugCorrections == 1) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
                     correctIEDefect();
                 }
             };
+
             timer.schedule(500);
         }
 
@@ -240,6 +228,7 @@ public class TabFolder extends Composite implements HasFolderEvent,
      */
     public void correctIEDefect() {
         IEBugCorrections++;
+
         if (tabPanel.getWidgetCount() > 1) {
             tabPanel.selectTab(1);
             tabPanel.selectTab(0);
@@ -260,16 +249,14 @@ public class TabFolder extends Composite implements HasFolderEvent,
         } else {
             Main.get().activeFolderTree.securityRefresh();
         }
+
         fireEvent(HasFolderEvent.SECURITY_CHANGED);
     }
 
     /**
      * isWidgetExtensionVisible
-     * 
-     * @param widget
-     * @return
      */
-    public boolean isWidgetExtensionVisible(final Widget widget) {
+    public boolean isWidgetExtensionVisible(Widget widget) {
         if (tabPanel.getWidget(selectedTab).equals(widget)) {
             return true;
         } else {
@@ -301,13 +288,15 @@ public class TabFolder extends Composite implements HasFolderEvent,
         }
 
         // Adding extensions
-        for (final TabFolderExtension extension : widgetExtensionList) {
+        for (Iterator<TabFolderExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            TabFolderExtension extension = it.next();
             tabPanel.add(extension, extension.getTabText());
         }
 
         // Refresh lang property group
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup group : propertyGroup) {
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 tabPanel.add(group, group.getGrpLabel());
                 group.langRefresh();
             }
@@ -323,8 +312,8 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
-        visibleButton = visible;
+    public void setVisibleButtons(boolean visible) {
+        this.visibleButton = visible;
         folder.setVisibleButtons(visible);
         security.setVisibleButtons(visible);
         notes.setVisibleButtons(visible);
@@ -345,21 +334,30 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * Gets asynchronous to get all groups assigned to a document
      */
     final AsyncCallback<List<GWTPropertyGroup>> callbackGetGroups = new AsyncCallback<List<GWTPropertyGroup>>() {
-        @Override
-        public void onSuccess(final List<GWTPropertyGroup> result) {
-            final GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
+        public void onSuccess(List<GWTPropertyGroup> result) {
+            GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
 
-            for (final GWTPropertyGroup gwtGroup : result) {
-                final String groupTranslation = gwtGroup.getLabel();
-                final PropertyGroup group = new PropertyGroup(gwtGroup,
-                        folder.get(), gwtFolder, visibleButton,
-                        gwtGroup.isReadonly());
+            boolean enableUpdatePropertyGroup = false;
+            for (GWTPropertyGroup gwtGroup : result) {
+                String groupTranslation = gwtGroup.getLabel();
+                PropertyGroup group = new PropertyGroup(gwtGroup, folder.get(), gwtFolder, visibleButton, gwtGroup.isReadonly());
                 tabPanel.add(group, groupTranslation);
                 propertyGroup.add(group);
+
                 // Adds property group handlers
-                for (final PropertyGroupHandlerExtension propertyGroupHandlerExtension : propertyGroupHandlerExtensionList) {
-                    group.addPropertyGroupHandlerExtension(propertyGroupHandlerExtension);
+                for (Iterator<PropertyGroupHandlerExtension> itx = propertyGroupHandlerExtensionList.iterator(); itx.hasNext();) {
+                    group.addPropertyGroupHandlerExtension(itx.next());
                 }
+
+                // has update property group
+                if (!enableUpdatePropertyGroup && group.isUpdatePropertyGrouupEnabled()) {
+                    enableUpdatePropertyGroup = true;
+                }
+            }
+
+            // enable property group
+            if (enableUpdatePropertyGroup) {
+                Main.get().mainPanel.topPanel.toolBar.enableUpdatePropertyGroup();
             }
 
             // To prevent change on document that has minor tabs than previous the new selected tab it'll be the max - 1 on that cases
@@ -370,14 +368,11 @@ public class TabFolder extends Composite implements HasFolderEvent,
                                                        // and on remove loses selectedTab
             }
 
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
             Main.get().showError("GetGroups", caught);
         }
     };
@@ -385,9 +380,8 @@ public class TabFolder extends Composite implements HasFolderEvent,
     /**
      * Gets all property groups assigned to document
      */
-    private void getGroups(final String docPath) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.status
-                .setGroupProperties();
+    private void getGroups(String docPath) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         propertyGroupService.getGroups(docPath, callbackGetGroups);
     }
 
@@ -395,11 +389,10 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * Removes the actual property group
      */
     public void removePropertyGroup() {
-        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selectedted Tab
+        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selected Tab
 
         // Removes group 
-        final PropertyGroup group = (PropertyGroup) tabPanel
-                .getWidget(selectedTab);
+        PropertyGroup group = (PropertyGroup) tabPanel.getWidget(selectedTab);
         group.removeGroup();
         propertyGroup.remove(group);
 
@@ -421,10 +414,9 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * 
      * @return
      */
-    private boolean isRemovePropertyGroupEnabled(final int tabIndex) {
-        if (tabPanel.getWidget(tabIndex) instanceof PropertyGroup) {
-            return ((PropertyGroup) tabPanel.getWidget(tabIndex))
-                    .isRemovePropertyGroupEnabled();
+    private boolean isRemovePropertyGroupEnabled(int tabIndex) {
+        if ((tabPanel.getWidget(tabIndex) instanceof PropertyGroup)) {
+            return ((PropertyGroup) (tabPanel.getWidget(tabIndex))).isRemovePropertyGroupEnabled();
         } else {
             return false;
         }
@@ -437,37 +429,40 @@ public class TabFolder extends Composite implements HasFolderEvent,
      */
     public void resizingIncubatorWidgets() {
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup group : propertyGroup) {
-                group.setPixelSize(getOffsetWidth(), getOffsetHeight()
-                        - TAB_HEIGHT); // Substract tab height
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
+                group.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
             }
         }
-        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT); // Substract tab height
+
+        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
         security.fillWidth();
+
         // TODO:Solves minor bug with IE
         if (Util.getUserAgent().startsWith("ie")) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
-                    tabPanel.setWidth("" + width);
-                    tabPanel.setWidth("" + (width + 1));
-                    final Timer timer = new Timer() {
+                    tabPanel.setWidth("" + width + "px");
+                    tabPanel.setWidth("" + (width + 1) + "px");
+
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
-                            tabPanel.setWidth("" + width);
+                            tabPanel.setWidth("" + width + "px");
                         }
                     };
+
                     timer.schedule(50);
                 }
             };
+
             timer.schedule(100);
         }
     }
 
     /**
      * getSelectedTab
-     * 
-     * @return
      */
     public int getSelectedTab() {
         return selectedTab;
@@ -475,8 +470,6 @@ public class TabFolder extends Composite implements HasFolderEvent,
 
     /**
      * getFolder
-     * 
-     * @return
      */
     public GWTFolder getFolder() {
         return folder.get();
@@ -492,21 +485,21 @@ public class TabFolder extends Composite implements HasFolderEvent,
     /**
      * setNumberOfFolders
      */
-    public void setNumberOfFolders(final int num) {
+    public void setNumberOfFolders(int num) {
         folder.setNumberOfFolders(num);
     }
 
     /**
      * setNumberOfDocuments
      */
-    public void setNumberOfDocuments(final int num) {
+    public void setNumberOfDocuments(int num) {
         folder.setNumberOfDocuments(num);
     }
 
     /**
      * setNumberOfMails
      */
-    public void setNumberOfMails(final int num) {
+    public void setNumberOfMails(int num) {
         folder.setNumberOfMails(num);
     }
 
@@ -522,7 +515,7 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * showNotes
      */
     public void showNotes() {
-        tabPanel.add(notes, Main.i18n("tab.document.notes"));
+        tabPanel.add(notes, Main.i18n("tab.folder.notes"));
         notesVisible = true;
     }
 
@@ -539,7 +532,7 @@ public class TabFolder extends Composite implements HasFolderEvent,
      * showExtensions
      */
     public void showExtensions() {
-        for (final TabFolderExtension extension : widgetExtensionList) {
+        for (TabFolderExtension extension : widgetExtensionList) {
             tabPanel.add(extension, extension.getTabText());
             extension.setPixelSize(width, height - TAB_HEIGHT);
         }
@@ -547,10 +540,8 @@ public class TabFolder extends Composite implements HasFolderEvent,
 
     /**
      * setKeywordEnabled
-     * 
-     * @param enabled
      */
-    public void setKeywordEnabled(final boolean enabled) {
+    public void setKeywordEnabled(boolean enabled) {
         folder.setKeywordEnabled(enabled);
     }
 
@@ -569,7 +560,7 @@ public class TabFolder extends Composite implements HasFolderEvent,
             tabPanel.selectTab(0);
 
             if (securityVisible && folder.get() != null) {
-                security.setPath(folder.get().getPath());
+                security.setUuid(folder.get().getUuid());
                 security.GetGrants();
 
                 if ((folder.get().getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
@@ -582,30 +573,33 @@ public class TabFolder extends Composite implements HasFolderEvent,
     }
 
     /**
-     * addFolderExtension
-     * 
-     * @param extension
+     * initSecurity
      */
-    public void addFolderExtension(final TabFolderExtension extension) {
+    public void initSecurity() {
+        security.initSecurity();
+    }
+
+    /**
+     * addFolderExtension
+     */
+    public void addFolderExtension(TabFolderExtension extension) {
         widgetExtensionList.add(extension);
     }
 
     @Override
-    public void addFolderHandlerExtension(
-            final FolderHandlerExtension handlerExtension) {
+    public void addFolderHandlerExtension(FolderHandlerExtension handlerExtension) {
         folderHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final FolderEventConstant event) {
-        for (final FolderHandlerExtension folderHandlerExtension : folderHandlerExtensionList) {
-            folderHandlerExtension.onChange(event);
+    public void fireEvent(FolderEventConstant event) {
+        for (Iterator<FolderHandlerExtension> it = folderHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 
     @Override
-    public void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
+    public void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
         propertyGroupHandlerExtensionList.add(handlerExtension);
     }
 }

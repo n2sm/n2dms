@@ -1,30 +1,23 @@
 package com.openkm.extractor;
 
-import java.io.BufferedInputStream;
-import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.RandomStringUtils;
+import com.openkm.core.Config;
+import com.openkm.util.*;
 import org.apache.jackrabbit.extractor.AbstractTextExtractor;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObject;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openkm.core.Config;
-import com.openkm.util.FileUtils;
+import javax.imageio.ImageIO;
+import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Text extractor for Portable Document Format (PDF).
@@ -34,8 +27,7 @@ public class PdfTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(PdfTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(PdfTextExtractor.class);
 
     /**
      * Force loading of dependent class.
@@ -51,67 +43,107 @@ public class PdfTextExtractor extends AbstractTextExtractor {
         super(new String[] { "application/pdf" });
     }
 
-    //-------------------------------------------------------< TextExtractor >
+    // -------------------------------------------------------< TextExtractor >
 
     /**
      * {@inheritDoc}
      */
-    @Override
     @SuppressWarnings("rawtypes")
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         try {
-            final PDFParser parser = new PDFParser(new BufferedInputStream(
-                    stream));
+            PDFParser parser = new PDFParser(new BufferedInputStream(stream));
 
             try {
                 parser.parse();
-                final PDDocument document = parser.getPDDocument();
-                final CharArrayWriter writer = new CharArrayWriter();
+                PDDocument document = parser.getPDDocument();
 
-                final PDFTextStripper stripper = new PDFTextStripper();
+                if (document.isEncrypted()) {
+                    try {
+                        document.decrypt("");
+                        document.setAllSecurityToBeRemoved(true);
+                    } catch (Exception e) {
+                        throw new IOException("Unable to extract text: document encrypted", e);
+                    }
+                }
+
+                CharArrayWriter writer = new CharArrayWriter();
+                PDFTextStripper stripper = new PDFTextStripper();
                 stripper.setLineSeparator("\n");
                 stripper.writeText(document, writer);
-                final String st = writer.toString().trim();
+                String st = writer.toString().trim();
                 log.debug("TextStripped: '{}'", st);
 
                 if (Config.SYSTEM_PDF_FORCE_OCR || st.length() <= 1) {
                     log.warn("PDF does not contains text layer");
 
                     // Extract images from PDF
-                    final List pages = document.getDocumentCatalog()
-                            .getAllPages();
-                    final StringBuilder sb = new StringBuilder();
+                    StringBuilder sb = new StringBuilder();
 
-                    for (final Iterator itPg = pages.iterator(); itPg.hasNext();) {
-                        final PDPage page = (PDPage) itPg.next();
-                        final PDResources resources = page.getResources();
-                        final Map images = resources.getImages();
+                    if (!Config.SYSTEM_PDFIMAGES.isEmpty()) {
+                        File tmpPdf = FileUtils.createTempFile("pdf");
+                        File tmpDir = new File(EnvironmentDetector.getTempDir());
+                        String baseName = FileUtils.getFileName(tmpPdf.getName());
+                        document.save(tmpPdf);
+                        int pgNum = 1;
 
-                        if (images != null) {
-                            for (final Iterator itImg = images.keySet()
-                                    .iterator(); itImg.hasNext();) {
-                                String key = (String) itImg.next();
-                                final PDXObjectImage image = (PDXObjectImage) images
-                                        .get(key);
-                                File pdfImg = null;
+                        try {
+                            for (PDPage page : (List<PDPage>) document.getDocumentCatalog().getAllPages()) {
+                                HashMap<String, Object> hm = new HashMap<String, Object>();
+                                hm.put("fileIn", tmpPdf.getPath());
+                                hm.put("firstPage", pgNum);
+                                hm.put("lastPage", pgNum++);
+                                hm.put("imageRoot", tmpDir + File.separator + baseName);
+                                String cmd = TemplateUtils.replace("SYSTEM_PDFIMAGES", Config.SYSTEM_PDFIMAGES, hm);
+                                ExecutionUtils.runCmd(cmd);
 
-                                if (key.length() < 3) {
-                                    key = key.concat(RandomStringUtils
-                                            .randomAlphabetic(2));
+                                for (File tmp : tmpDir.listFiles()) {
+                                    if (tmp.getName().startsWith(baseName + "-")) {
+                                        if (page.findRotation() > 0) {
+                                            ImageUtils.rotate(tmp, tmp, page.findRotation());
+                                        }
+
+                                        try {
+                                            String txt = doOcr(tmp);
+                                            sb.append(txt).append(" ");
+                                            log.debug("OCR Extracted: {}", txt);
+                                        } finally {
+                                            FileUtils.deleteQuietly(tmp);
+                                        }
+                                    }
                                 }
+                            }
+                        } finally {
+                            FileUtils.deleteQuietly(tmpPdf);
+                        }
+                    } else {
+                        for (PDPage page : (List<PDPage>) document.getDocumentCatalog().getAllPages()) {
+                            PDResources resources = page.getResources();
+                            Map<String, PDXObject> images = resources.getXObjects();
 
-                                try {
-                                    pdfImg = File.createTempFile(key, "."
-                                            + image.getSuffix());
-                                    log.debug("Writing image: {}",
-                                            pdfImg.getPath());
-                                    image.write2file(pdfImg);
-                                    final String txt = doOcr(pdfImg);
-                                    sb.append(txt).append(" ");
-                                    log.debug("OCR Extracted: {}", txt);
-                                } finally {
-                                    FileUtils.deleteQuietly(pdfImg);
+                            if (images != null) {
+                                for (String key : images.keySet()) {
+                                    PDXObjectImage image = (PDXObjectImage) images.get(key);
+                                    String prefix = "img-" + key + "-";
+                                    File pdfImg = null;
+
+                                    try {
+                                        pdfImg = File.createTempFile(prefix, ".png");
+                                        log.debug("Writing image: {}", pdfImg.getPath());
+
+                                        // Won't work until PDFBox 1.8.9
+                                        ImageIO.write(image.getRGBImage(), "png", pdfImg);
+
+                                        if (page.findRotation() > 0) {
+                                            ImageUtils.rotate(pdfImg, pdfImg, page.findRotation());
+                                        }
+
+                                        // Do OCR
+                                        String txt = doOcr(pdfImg);
+                                        sb.append(txt).append(" ");
+                                        log.debug("OCR Extracted: {}", txt);
+                                    } finally {
+                                        FileUtils.deleteQuietly(pdfImg);
+                                    }
                                 }
                             }
                         }
@@ -119,23 +151,23 @@ public class PdfTextExtractor extends AbstractTextExtractor {
 
                     return new StringReader(sb.toString());
                 } else {
-                    return new CharArrayReader(writer.toCharArray());
+                    return new StringReader(writer.toString());
                 }
             } finally {
                 try {
-                    final PDDocument doc = parser.getPDDocument();
+                    PDDocument doc = parser.getPDDocument();
                     if (doc != null) {
                         doc.close();
                     }
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     // ignore
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // it may happen that PDFParser throws a runtime
             // exception when parsing certain pdf documents
             log.warn("Failed to extract PDF text content", e);
-            return new StringReader("");
+            throw new IOException(e.getMessage(), e);
         } finally {
             stream.close();
         }
@@ -144,17 +176,14 @@ public class PdfTextExtractor extends AbstractTextExtractor {
     /**
      * Guess the active OCR engine and use it to extract text from image.
      */
-    private String doOcr(final File pdfImg) throws Exception {
+    private String doOcr(File pdfImg) throws Exception {
         String text = "";
 
-        if (RegisteredExtractors.isRegistered(CuneiformTextExtractor.class
-                .getCanonicalName())) {
+        if (RegisteredExtractors.isRegistered(CuneiformTextExtractor.class.getCanonicalName())) {
             text = new CuneiformTextExtractor().doOcr(pdfImg);
-        } else if (RegisteredExtractors
-                .isRegistered(Tesseract3TextExtractor.class.getCanonicalName())) {
+        } else if (RegisteredExtractors.isRegistered(Tesseract3TextExtractor.class.getCanonicalName())) {
             text = new Tesseract3TextExtractor().doOcr(pdfImg);
-        } else if (RegisteredExtractors.isRegistered(AbbyTextExtractor.class
-                .getCanonicalName())) {
+        } else if (RegisteredExtractors.isRegistered(AbbyTextExtractor.class.getCanonicalName())) {
             text = new AbbyTextExtractor().doOcr(pdfImg);
         } else {
             log.warn("No OCR engine configured");

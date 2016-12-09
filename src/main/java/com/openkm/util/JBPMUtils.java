@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,7 +34,6 @@ import com.openkm.core.Config;
 
 public class JBPMUtils {
     private static Logger log = LoggerFactory.getLogger(JBPMUtils.class);
-
     private static JbpmConfiguration jbpmConfig = null;
 
     /**
@@ -42,15 +41,14 @@ public class JBPMUtils {
      */
     public static synchronized JbpmConfiguration getConfig() {
         if (jbpmConfig == null) {
-            final File jbpmCfg = new File(Config.JBPM_CONFIG);
+            File jbpmCfg = new File(Config.JBPM_CONFIG);
             FileInputStream fisJbpmCfg = null;
 
             try {
                 fisJbpmCfg = new FileInputStream(jbpmCfg);
-                log.info("Creating JBPM configuration from {}",
-                        jbpmCfg.getPath());
+                log.info("Creating JBPM configuration from {}", jbpmCfg.getPath());
                 jbpmConfig = JbpmConfiguration.parseInputStream(fisJbpmCfg);
-            } catch (final FileNotFoundException e) {
+            } catch (FileNotFoundException e) {
                 log.info("Creating JBPM default configuration");
                 jbpmConfig = JbpmConfiguration.getInstance();
             } finally {

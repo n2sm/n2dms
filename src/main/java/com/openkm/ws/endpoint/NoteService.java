@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -44,62 +44,52 @@ public class NoteService {
     private static Logger log = LoggerFactory.getLogger(NoteService.class);
 
     @WebMethod
-    public Note add(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "text") final String text) throws LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
+    public Note add(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "text") String text) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
             DatabaseException {
         log.debug("add({}, {}, {})", new Object[] { token, nodePath, text });
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final Note ret = nm.add(token, nodePath, text);
+        NoteModule nm = ModuleManager.getNoteModule();
+        Note ret = nm.add(token, nodePath, text);
         log.debug("addNote: {}", ret);
         return ret;
     }
 
     @WebMethod
-    public Note get(@WebParam(name = "token") final String token,
-            @WebParam(name = "notePath") final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public Note get(@WebParam(name = "token") String token, @WebParam(name = "notePath") String notePath) throws LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("get({}, {})", token, notePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final Note ret = nm.get(token, notePath);
+        NoteModule nm = ModuleManager.getNoteModule();
+        Note ret = nm.get(token, notePath);
         log.debug("get: {}", ret);
         return ret;
     }
 
     @WebMethod
-    public void delete(@WebParam(name = "token") final String token,
-            @WebParam(name = "notePath") final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void delete(@WebParam(name = "token") String token, @WebParam(name = "notePath") String notePath) throws LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("remove({}, {})", token, notePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
+        NoteModule nm = ModuleManager.getNoteModule();
         nm.delete(token, notePath);
         log.debug("remove: void");
     }
 
     @WebMethod
-    public void set(@WebParam(name = "token") final String token,
-            @WebParam(name = "notePath") final String notePath,
-            @WebParam(name = "text") final String text) throws LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
+    public void set(@WebParam(name = "token") String token, @WebParam(name = "notePath") String notePath,
+            @WebParam(name = "text") String text) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
             DatabaseException {
         log.debug("set({}, {}, {})", new Object[] { token, notePath, text });
-        final NoteModule nm = ModuleManager.getNoteModule();
+        NoteModule nm = ModuleManager.getNoteModule();
         nm.set(token, notePath, text);
         log.debug("set: void");
     }
 
     @WebMethod
-    public Note[] list(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public Note[] list(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath) throws LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("list({}, {})", token, nodePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final List<Note> col = nm.list(token, nodePath);
-        final Note[] result = col.toArray(new Note[col.size()]);
+        NoteModule nm = ModuleManager.getNoteModule();
+        List<Note> col = nm.list(token, nodePath);
+        Note[] result = (Note[]) col.toArray(new Note[col.size()]);
         log.debug("list: {}", result);
         return result;
     }

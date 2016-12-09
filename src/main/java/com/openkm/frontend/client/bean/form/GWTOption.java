@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,16 +25,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTOption implements IsSerializable {
     private String label = "";
-
     private String value = "";
-
     private boolean selected = false;
+    private boolean suggested = false;
 
     public boolean isSelected() {
         return selected;
     }
 
-    public void setSelected(final boolean selected) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
@@ -42,7 +41,7 @@ public class GWTOption implements IsSerializable {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -50,20 +49,29 @@ public class GWTOption implements IsSerializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    @Override
+    public boolean isSuggested() {
+        return suggested;
+    }
+
+    public void setSuggested(boolean suggested) {
+        this.suggested = suggested;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);
         sb.append(", value=");
         sb.append(value);
-        sb.append(", seected=");
+        sb.append(", selected=");
         sb.append(selected);
+        sb.append(", suggested=");
+        sb.append(suggested);
         sb.append("}");
         return sb.toString();
     }

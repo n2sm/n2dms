@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,79 +36,67 @@ import com.openkm.frontend.client.service.OKMGeneralServiceAsync;
  *
  */
 public class ConversionStatus {
-    private final OKMGeneralServiceAsync generalService = (OKMGeneralServiceAsync) GWT
-            .create(OKMGeneralService.class);
-
+    private final OKMGeneralServiceAsync generalService = (OKMGeneralServiceAsync) GWT.create(OKMGeneralService.class);
     private static final int REFRESH_STATUS_DELAY = 500;
 
     /**
      * getStatus
      */
     public void getStatus() {
-        generalService
-                .getConversionStatus(new AsyncCallback<GWTConverterStatus>() {
-                    @Override
-                    public void onSuccess(final GWTConverterStatus result) {
-                        if (result.getError() != null) {
-                            Main.get().showError("Conversion",
-                                    new Throwable(result.getError()));
-                            Main.get().mainPanel.bottomPanel.setStatus("");
-                        } else {
-                            if (!result.isConversionFinish()) {
-                                switch (result.getStatus()) {
-                                case GWTConverterStatus.STATUS_LOADING:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.loading"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_DXF:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.todxf"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_DXF_FINISHED:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.todxf.finished"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_PDF:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.topdf"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_PDF_FINISHED:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.topdf.finished"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_SWF:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.toswf"));
-                                    break;
-                                case GWTConverterStatus.STATUS_CONVERTING_TO_SWF_FINISHED:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.toswf.finished"));
-                                    break;
-                                case GWTConverterStatus.STATUS_SENDING_FILE:
-                                    Main.get().mainPanel.bottomPanel.setStatus(Main
-                                            .i18n("status.converter.sending.file"));
-                                    break;
-                                }
-                                refreshStatus();
-                            } else {
-                                Main.get().mainPanel.bottomPanel.setStatus("");
-                            }
+        generalService.getConversionStatus(new AsyncCallback<GWTConverterStatus>() {
+            @Override
+            public void onSuccess(GWTConverterStatus result) {
+                if (result.getError() != null) {
+                    Main.get().showError("Conversion", new Throwable(result.getError()));
+                    Main.get().mainPanel.bottomPanel.setStatus("");
+                } else {
+                    if (!result.isConversionFinish()) {
+                        switch (result.getStatus()) {
+                        case GWTConverterStatus.STATUS_LOADING:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.loading"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_DXF:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.todxf"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_DXF_FINISHED:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.todxf.finished"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_PDF:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.topdf"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_PDF_FINISHED:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.topdf.finished"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_SWF:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.toswf"));
+                            break;
+                        case GWTConverterStatus.STATUS_CONVERTING_TO_SWF_FINISHED:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.toswf.finished"));
+                            break;
+                        case GWTConverterStatus.STATUS_SENDING_FILE:
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("status.converter.sending.file"));
+                            break;
                         }
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        // Not show any error here
                         refreshStatus();
+                    } else {
+                        Main.get().mainPanel.bottomPanel.setStatus("");
                     }
-                });
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // Not show any error here
+                refreshStatus();
+            }
+        });
     }
 
     /**
      * refreshStatus
      */
     private void refreshStatus() {
-        final Timer refreshStatus = new Timer() {
+        Timer refreshStatus = new Timer() {
             @Override
             public void run() {
                 getStatus();

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,8 +30,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
 import com.openkm.frontend.client.extension.comunicator.TabDocumentComunicator;
 import com.openkm.frontend.client.extension.event.HasDocumentEvent;
-import com.openkm.frontend.client.extension.event.HasDocumentEvent.DocumentEventConstant;
 import com.openkm.frontend.client.extension.event.HasLanguageEvent;
+import com.openkm.frontend.client.extension.event.HasDocumentEvent.DocumentEventConstant;
 import com.openkm.frontend.client.extension.event.HasLanguageEvent.LanguageEventConstant;
 import com.openkm.frontend.client.extension.event.handler.DocumentHandlerExtension;
 import com.openkm.frontend.client.extension.event.handler.LanguageHandlerExtension;
@@ -43,18 +43,16 @@ import com.openkm.frontend.client.extension.widget.tabdocument.TabDocumentExtens
  * @author jllort
  * 
  */
-public class HelloWorld extends TabDocumentExtension implements
-        DocumentHandlerExtension, LanguageHandlerExtension {
+public class HelloWorld extends TabDocumentExtension implements DocumentHandlerExtension, LanguageHandlerExtension {
     Button refresh;
-
     VerticalPanel vPanel;
 
     public HelloWorld() {
-        final HTML html = new HTML("Hello Word");
+        HTML html = new HTML("Hello Word");
         refresh = new Button("refresh UI");
         refresh.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 GeneralComunicator.refreshUI();
             }
         });
@@ -74,7 +72,7 @@ public class HelloWorld extends TabDocumentExtension implements
     }
 
     @Override
-    public void onChange(final DocumentEventConstant event) {
+    public void onChange(DocumentEventConstant event) {
         if (event.equals(HasDocumentEvent.DOCUMENT_CHANGED)) {
             Window.alert("document changed - " + event.getType());
         } else if (event.equals(HasDocumentEvent.KEYWORD_ADDED)) {
@@ -86,8 +84,7 @@ public class HelloWorld extends TabDocumentExtension implements
         } else if (event.equals(HasDocumentEvent.CATEGORY_REMOVED)) {
             Window.alert("category removed - " + event.getType());
         } else if (event.equals(HasDocumentEvent.TAB_CHANGED)) {
-            Window.alert("tab changed - " + event.getType() + " - actual tab "
-                    + TabDocumentComunicator.getSelectedTab());
+            Window.alert("tab changed - " + event.getType() + " - actual tab " + TabDocumentComunicator.getSelectedTab());
         } else if (event.equals(HasDocumentEvent.PANEL_RESIZED)) {
             Window.alert("panel resized - " + event.getType());
         } else if (event.equals(HasDocumentEvent.SECURITY_CHANGED)) {
@@ -98,7 +95,7 @@ public class HelloWorld extends TabDocumentExtension implements
     }
 
     @Override
-    public void onChange(final LanguageEventConstant event) {
+    public void onChange(LanguageEventConstant event) {
         if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
             Window.alert("language changed");
         }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,30 +32,21 @@ public class Token implements Serializable {
     private static final long serialVersionUID = 9113136516768190724L;
 
     private long id;
-
     private String name;
-
     private boolean suspended;
-
     private Token parent;
-
     private String node;
-
     private Calendar start;
-
     private Calendar end;
-
     private List<Transition> availableTransitions;
-
     private List<Comment> comments;
-
     private ProcessInstance processInstance;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -63,7 +54,7 @@ public class Token implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -71,7 +62,7 @@ public class Token implements Serializable {
         return suspended;
     }
 
-    public void setSuspended(final boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 
@@ -79,7 +70,7 @@ public class Token implements Serializable {
         return comments;
     }
 
-    public void setComments(final List<Comment> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 
@@ -87,7 +78,7 @@ public class Token implements Serializable {
         return parent;
     }
 
-    public void setParent(final Token parent) {
+    public void setParent(Token parent) {
         this.parent = parent;
     }
 
@@ -95,7 +86,7 @@ public class Token implements Serializable {
         return node;
     }
 
-    public void setNode(final String node) {
+    public void setNode(String node) {
         this.node = node;
     }
 
@@ -103,7 +94,7 @@ public class Token implements Serializable {
         return start;
     }
 
-    public void setStart(final Calendar start) {
+    public void setStart(Calendar start) {
         this.start = start;
     }
 
@@ -111,7 +102,7 @@ public class Token implements Serializable {
         return end;
     }
 
-    public void setEnd(final Calendar end) {
+    public void setEnd(Calendar end) {
         this.end = end;
     }
 
@@ -119,8 +110,7 @@ public class Token implements Serializable {
         return availableTransitions;
     }
 
-    public void setAvailableTransitions(
-            final List<Transition> availableTransitions) {
+    public void setAvailableTransitions(List<Transition> availableTransitions) {
         this.availableTransitions = availableTransitions;
     }
 
@@ -128,13 +118,12 @@ public class Token implements Serializable {
         return processInstance;
     }
 
-    public void setProcessInstance(final ProcessInstance processInstance) {
+    public void setProcessInstance(ProcessInstance processInstance) {
         this.processInstance = processInstance;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("id=");
         sb.append(id);

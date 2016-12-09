@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -52,8 +52,7 @@ public class LoginModule extends AbstractLoginModule {
 
     @Override
     @SuppressWarnings("rawtypes")
-    protected void doInit(final CallbackHandler callbackHandler,
-            final Session session, final Map options) throws LoginException {
+    protected void doInit(CallbackHandler callbackHandler, Session session, Map options) throws LoginException {
         log.info("CallbackHandler: {}", callbackHandler);
         log.info("Session: {}", session);
         log.info("Options: {}", options);
@@ -61,20 +60,17 @@ public class LoginModule extends AbstractLoginModule {
     }
 
     @Override
-    protected boolean impersonate(final Principal principal,
-            final Credentials credentials) throws RepositoryException,
-            LoginException {
+    protected boolean impersonate(Principal principal, Credentials credentials) throws RepositoryException, LoginException {
         if (principal instanceof Group) {
             return false;
         }
 
-        final Subject impersSubject = getImpersonatorSubject(credentials);
+        Subject impersSubject = getImpersonatorSubject(credentials);
         return impersSubject != null;
     }
 
     @Override
-    protected Authentication getAuthentication(final Principal principal,
-            final Credentials creds) throws RepositoryException {
+    protected Authentication getAuthentication(Principal principal, Credentials creds) throws RepositoryException {
         if (principal instanceof Group) {
             return null;
         }
@@ -83,9 +79,9 @@ public class LoginModule extends AbstractLoginModule {
     }
 
     @Override
-    protected Principal getPrincipal(final Credentials credentials) {
-        final String userId = getUserID(credentials);
-        final Principal principal = principalProvider.getPrincipal(userId);
+    protected Principal getPrincipal(Credentials credentials) {
+        String userId = getUserID(credentials);
+        Principal principal = principalProvider.getPrincipal(userId);
 
         if (principal == null || principal instanceof Group) {
             // no matching user principal
@@ -100,23 +96,20 @@ public class LoginModule extends AbstractLoginModule {
      */
     class OKMAuthentication implements Authentication {
         @Override
-        public boolean canHandle(final Credentials credentials) {
-            log.info("Credentials: {}", credentials.getClass()
-                    .getCanonicalName());
+        public boolean canHandle(Credentials credentials) {
+            log.info("Credentials: {}", credentials.getClass().getCanonicalName());
             return true;
         }
 
         @Override
-        public boolean authenticate(final Credentials credentials)
-                throws RepositoryException {
+        public boolean authenticate(Credentials credentials) throws RepositoryException {
             if (credentials instanceof SimpleCredentials) {
-                final SimpleCredentials sc = (SimpleCredentials) credentials;
+                SimpleCredentials sc = (SimpleCredentials) credentials;
                 log.info("User: {}", sc.getUserID());
                 log.info("Password: {}", sc.getPassword());
                 return true;
             } else {
-                throw new RepositoryException("Unexpected credentials: "
-                        + credentials.getClass().getCanonicalName());
+                throw new RepositoryException("Unexpected credentials: " + credentials.getClass().getCanonicalName());
             }
         }
     }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,13 +33,10 @@ import com.openkm.module.jcr.stuff.JcrSessionManager;
 
 public class RepositoryInfo extends TimerTask {
     private static Logger log = LoggerFactory.getLogger(RepositoryInfo.class);
-
     private static StatsInfo documentsByContext = new StatsInfo();
-
+    private static StatsInfo mailsByContext = new StatsInfo();
     private static StatsInfo foldersByContext = new StatsInfo();
-
     private static StatsInfo documentsSizeByContext = new StatsInfo();
-
     private static volatile boolean running = false;
 
     @Override
@@ -55,7 +52,7 @@ public class RepositoryInfo extends TimerTask {
         runAs(systemToken);
     }
 
-    public void runAs(final String token) {
+    public void runAs(String token) {
         if (running) {
             log.warn("*** Repository info already running ***");
         } else {
@@ -63,16 +60,16 @@ public class RepositoryInfo extends TimerTask {
             log.debug("*** Begin repository info ***");
 
             try {
-                final OKMStats okmStats = OKMStats.getInstance();
+                OKMStats okmStats = OKMStats.getInstance();
 
                 try {
-                    documentsByContext = okmStats.getDocumentsByContext(token);
+                    mailsByContext = okmStats.getMailsByContext(token);
                     foldersByContext = okmStats.getFoldersByContext(token);
-                    documentsSizeByContext = okmStats
-                            .getDocumentsSizeByContext(token);
-                } catch (final RepositoryException e) {
+                    documentsByContext = okmStats.getDocumentsByContext(token);
+                    documentsSizeByContext = okmStats.getDocumentsSizeByContext(token);
+                } catch (RepositoryException e) {
                     log.error(e.getMessage(), e);
-                } catch (final DatabaseException e) {
+                } catch (DatabaseException e) {
                     log.error(e.getMessage(), e);
                 }
             } finally {
@@ -84,21 +81,28 @@ public class RepositoryInfo extends TimerTask {
     }
 
     /**
-     * @return
+     * @return Documents grouped by context.
      */
     public static StatsInfo getDocumentsByContext() {
         return documentsByContext;
     }
 
     /**
-     * @return
+     * @return Folders grouped by context.
      */
     public static StatsInfo getFoldersByContext() {
         return foldersByContext;
     }
 
     /**
-     * @return
+     * @return Mails grouped by context.
+     */
+    public static StatsInfo getMailsByContext() {
+        return mailsByContext;
+    }
+
+    /**
+     * @return Documents size by context.
      */
     public static StatsInfo getDocumentsSizeByContext() {
         return documentsSizeByContext;

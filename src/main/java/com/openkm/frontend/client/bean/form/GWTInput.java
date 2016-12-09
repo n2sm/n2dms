@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,34 +36,23 @@ import com.openkm.frontend.client.bean.GWTFolder;
  */
 public class GWTInput extends GWTFormElement implements IsSerializable {
     public static final String TYPE_TEXT = "text";
-
     public static final String TYPE_DATE = "date";
-
     public static final String TYPE_LINK = "link";
-
     public static final String TYPE_FOLDER = "folder";
-
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private String type = TYPE_TEXT;
-
     private String value = "";
-
     private Date date;
-
     private Date dateTo; // Used only for search
-
     private boolean readonly = false;
-
     private String data = "";
-
     private GWTFolder folder = new GWTFolder();
 
     public Date getDate() {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -71,7 +60,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -79,7 +68,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -87,7 +76,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -95,7 +84,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
@@ -103,7 +92,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
@@ -111,7 +100,7 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return folder;
     }
 
-    public void setFolder(final GWTFolder folder) {
+    public void setFolder(GWTFolder folder) {
         this.folder = folder;
     }
 
@@ -119,13 +108,12 @@ public class GWTInput extends GWTFormElement implements IsSerializable {
         return dateTo;
     }
 
-    public void setDateTo(final Date dateTo) {
+    public void setDateTo(Date dateTo) {
         this.dateTo = dateTo;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

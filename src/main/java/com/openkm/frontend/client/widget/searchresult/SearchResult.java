@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,8 @@
 
 package com.openkm.frontend.client.widget.searchresult;
 
+import java.util.Iterator;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -38,19 +40,13 @@ import com.openkm.frontend.client.widget.searchin.SearchControl;
  *
  */
 public class SearchResult extends Composite {
-    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT
-            .create(OKMSearchService.class);
+    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT.create(OKMSearchService.class);
 
     SimplePanel sp;
-
     public SearchCompactResult searchCompactResult;
-
-    private SearchFullResult searchFullResult;
-
+    public SearchFullResult searchFullResult;
     public Status status;
-
     private GWTResultSet resultSet = new GWTResultSet();
-
     private int resultsViewMode = SearchControl.RESULTS_VIEW_NORMAL;
 
     public SearchResult() {
@@ -68,8 +64,7 @@ public class SearchResult extends Composite {
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.UIObject#setPixelSize(int, int)
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         sp.setPixelSize(width, height);
         searchFullResult.setPixelSize(width, height);
         searchCompactResult.setPixelSize(width, height);
@@ -91,9 +86,8 @@ public class SearchResult extends Composite {
      * 
      * @param params
      */
-    public void getSearch(final GWTQueryParams params) {
-        Main.get().mainPanel.search.searchBrowser.searchIn
-                .setSavedSearch(params);
+    public void getSearch(GWTQueryParams params) {
+        Main.get().mainPanel.search.searchBrowser.searchIn.setSavedSearch(params);
         searchCompactResult.removeAllRows();
     }
 
@@ -116,15 +110,13 @@ public class SearchResult extends Composite {
      * Call Back find paginated
      */
     final AsyncCallback<GWTResultSet> callbackFindPaginated = new AsyncCallback<GWTResultSet>() {
-        @Override
-        public void onSuccess(final GWTResultSet result) {
+        public void onSuccess(GWTResultSet result) {
             resultSet = result;
             drawResults();
             status.unsetFlag_findPaginated();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             status.unsetFlag_findPaginated();
             Main.get().showError("FindPaginated", caught);
         }
@@ -134,11 +126,12 @@ public class SearchResult extends Composite {
      * drawResults
      */
     private void drawResults() {
-        Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.controlSearch
-                .refreshControl(resultSet.getTotal());
+        Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.controlSearch.refreshControl(resultSet.getTotal());
         removeAllRows();
 
-        for (final GWTQueryResult gwtQueryResult : resultSet.getResults()) {
+        for (Iterator<GWTQueryResult> it = resultSet.getResults().iterator(); it.hasNext();) {
+            GWTQueryResult gwtQueryResult = it.next();
+
             switch (resultsViewMode) {
             case SearchControl.RESULTS_VIEW_COMPACT:
                 searchCompactResult.addRow(gwtQueryResult);
@@ -150,8 +143,7 @@ public class SearchResult extends Composite {
             }
         }
 
-        if (resultsViewMode == SearchControl.RESULTS_VIEW_COMPACT
-                && searchCompactResult.isSorted()) {
+        if (resultsViewMode == SearchControl.RESULTS_VIEW_COMPACT && searchCompactResult.isSorted()) {
             searchCompactResult.refreshSort();
         }
     }
@@ -161,11 +153,9 @@ public class SearchResult extends Composite {
      * 
      * @param words The path id
      */
-    public void findPaginated(final GWTQueryParams params, final int offset,
-            final int limit) {
+    public void findPaginated(GWTQueryParams params, int offset, int limit) {
         status.setFlag_findPaginated();
-        searchService.findPaginated(params, offset, limit,
-                callbackFindPaginated);
+        searchService.findPaginated(params, offset, limit, callbackFindPaginated);
     }
 
     /**
@@ -173,11 +163,9 @@ public class SearchResult extends Composite {
      * 
      * @param words The path id
      */
-    public void findSimpleQueryPaginated(final String statement,
-            final int offset, final int limit) {
+    public void findSimpleQueryPaginated(String statement, int offset, int limit) {
         status.setFlag_findPaginated();
-        searchService.findSimpleQueryPaginated(statement, offset, limit,
-                callbackFindPaginated);
+        searchService.findSimpleQueryPaginated(statement, offset, limit, callbackFindPaginated);
     }
 
     /**
@@ -185,7 +173,7 @@ public class SearchResult extends Composite {
      * 
      * @param selected The select panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
         searchCompactResult.setSelectedPanel(selected);
     }
 
@@ -194,7 +182,7 @@ public class SearchResult extends Composite {
      * 
      * @param mode
      */
-    public void switchResultsViewMode(final int mode) {
+    public void switchResultsViewMode(int mode) {
         resultsViewMode = mode;
         switch (resultsViewMode) {
         case SearchControl.RESULTS_VIEW_COMPACT:

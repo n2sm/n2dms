@@ -13,13 +13,12 @@ public class VirusDetection {
     /**
      * Check for viruses in file
      */
-    public static String detect(final File tmpFile) {
+    public static String detect(File tmpFile) {
         try {
             // Performs virus check
             log.debug("CMD: " + Config.SYSTEM_ANTIVIR + " " + tmpFile.getPath());
-            final ProcessBuilder pb = new ProcessBuilder(Config.SYSTEM_ANTIVIR,
-                    "--no-summary", tmpFile.getPath());
-            final Process process = pb.start();
+            ProcessBuilder pb = new ProcessBuilder(Config.SYSTEM_ANTIVIR, "--no-summary", tmpFile.getPath());
+            Process process = pb.start();
             process.waitFor();
             String info = IOUtils.toString(process.getInputStream());
             process.destroy();
@@ -32,9 +31,9 @@ public class VirusDetection {
             } else {
                 return null;
             }
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             log.warn("Failed to check for viruses", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.warn("Failed to check for viruses", e);
         }
 

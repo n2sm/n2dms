@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,36 +45,22 @@ import org.slf4j.LoggerFactory;
  * @author Aaditeshwar Seth
  */
 public class ImageManipulation {
-    private static Logger log = LoggerFactory
-            .getLogger(ImageManipulation.class);
-
+    private static Logger log = LoggerFactory.getLogger(ImageManipulation.class);
     Gray8Image grayimage, scaledImage;
-
     int height, width;
-
     ConcentricCircle topleftpos, bottomrightpos;
-
     int topleftX, topleftY, bottomrightX, bottomrightY;
-
     double currAngle, currDiag, realAngle, realDiag;
-
     int scaleFactor;
-
     int markLocations[], realMarkLocations[]; // x * 10000 + y
-
     int ascTemplateLocations[]; // same order as markLocations: x * 1000 + y
-
     int[][] ascTemplate;
-
     int nummarks, realNummarks;
-
     int numfields;
-
     Hashtable<Character, Field> fields;
-
     Field[] ascTemplateFields;
 
-    public ImageManipulation(final Gray8Image grayimage) {
+    public ImageManipulation(Gray8Image grayimage) {
         this.grayimage = grayimage;
 
         height = grayimage.getHeight();
@@ -87,21 +73,16 @@ public class ImageManipulation {
     }
 
     public void locateConcentricCircles() {
-        final int[] topleft = new int[(height / 4 + 1) * (width / 4 + 1)];
-        final int[] bottomright = new int[(height / 4 + 1) * (width / 4 + 1)];
-        grayimage
-                .getSamples(0, 0, 0, width / 4 + 1, height / 4 + 1, topleft, 0);
-        grayimage.getSamples(0, width - width / 4 - 1, height - height / 4 - 1,
-                width / 4 + 1, height / 4 + 1, bottomright, 0);
+        int[] topleft = new int[((int) (height / 4) + 1) * ((int) (width / 4) + 1)];
+        int[] bottomright = new int[((int) (height / 4) + 1) * ((int) (width / 4) + 1)];
+        grayimage.getSamples(0, 0, 0, (int) (width / 4) + 1, (int) (height / 4) + 1, topleft, 0);
+        grayimage.getSamples(0, width - (int) (width / 4) - 1, height - (int) (height / 4) - 1, (int) (width / 4) + 1,
+                (int) (height / 4) + 1, bottomright, 0);
 
-        final Gray8Image topleftimg = new MemoryGray8Image(width / 4 + 1,
-                height / 4 + 1);
-        topleftimg.putSamples(0, 0, 0, width / 4 + 1, height / 4 + 1, topleft,
-                0);
-        final Gray8Image bottomrightimg = new MemoryGray8Image(width / 4 + 1,
-                height / 4 + 1);
-        bottomrightimg.putSamples(0, 0, 0, width / 4 + 1, height / 4 + 1,
-                bottomright, 0);
+        Gray8Image topleftimg = new MemoryGray8Image((int) (width / 4) + 1, (int) (height / 4) + 1);
+        topleftimg.putSamples(0, 0, 0, (int) (width / 4) + 1, (int) (height / 4) + 1, topleft, 0);
+        Gray8Image bottomrightimg = new MemoryGray8Image((int) (width / 4) + 1, (int) (height / 4) + 1);
+        bottomrightimg.putSamples(0, 0, 0, (int) (width / 4) + 1, (int) (height / 4) + 1, bottomright, 0);
 
         topleftpos = new ConcentricCircle(topleftimg, width, height);
         topleftpos.process();
@@ -112,31 +93,22 @@ public class ImageManipulation {
         // ImageUtil.saveImage(bottomrightpos.getImg(), "bottomright.png");
         // ImageUtil.saveImage(topleftpos.getBestFit().getTemplate(), "template.png");
 
-        bottomrightpos.getBestFit().setX(
-                width - width / 4 - 1 + bottomrightpos.getBestFit().getX());
-        bottomrightpos.getBestFit().setY(
-                height - height / 4 - 1 + bottomrightpos.getBestFit().getY());
+        bottomrightpos.getBestFit().setX(width - (int) (width / 4) - 1 + bottomrightpos.getBestFit().getX());
+        bottomrightpos.getBestFit().setY(height - (int) (height / 4) - 1 + bottomrightpos.getBestFit().getY());
 
-        topleftX = topleftpos.getBestFit().getX()
-                + topleftpos.getBestFit().getTemplate().getWidth() / 2;
-        topleftY = topleftpos.getBestFit().getY()
-                + topleftpos.getBestFit().getTemplate().getHeight() / 2;
+        topleftX = topleftpos.getBestFit().getX() + topleftpos.getBestFit().getTemplate().getWidth() / 2;
+        topleftY = topleftpos.getBestFit().getY() + topleftpos.getBestFit().getTemplate().getHeight() / 2;
         ImageUtil.putMark(grayimage, topleftX, topleftY, true);
 
-        bottomrightX = bottomrightpos.getBestFit().getX()
-                + bottomrightpos.getBestFit().getTemplate().getWidth() / 2;
-        bottomrightY = bottomrightpos.getBestFit().getY()
-                + bottomrightpos.getBestFit().getTemplate().getHeight() / 2;
+        bottomrightX = bottomrightpos.getBestFit().getX() + bottomrightpos.getBestFit().getTemplate().getWidth() / 2;
+        bottomrightY = bottomrightpos.getBestFit().getY() + bottomrightpos.getBestFit().getTemplate().getHeight() / 2;
         ImageUtil.putMark(grayimage, bottomrightX, bottomrightY, true);
 
-        log.debug(topleftX + ":" + topleftY + ":" + bottomrightX + ":"
-                + bottomrightY);
+        log.debug(topleftX + ":" + topleftY + ":" + bottomrightX + ":" + bottomrightY);
         // ImageUtil.saveImage(grayimage, "grayimage.png");
 
-        currAngle = Math.toDegrees(Math.atan2(bottomrightX - topleftX,
-                bottomrightY - topleftY));
-        currDiag = Math.sqrt(Math.pow(bottomrightY - topleftY, 2)
-                + Math.pow(bottomrightX - topleftX, 2));
+        currAngle = Math.toDegrees(Math.atan2((bottomrightX - topleftX), (bottomrightY - topleftY)));
+        currDiag = Math.sqrt(Math.pow((bottomrightY - topleftY), 2) + Math.pow((bottomrightX - topleftX), 2));
         log.debug("curr angle = " + currAngle);
         log.debug("curr diag = " + currDiag);
     }
@@ -145,10 +117,10 @@ public class ImageManipulation {
         rescale();
 
         // Gray8Image scaledImage = ImageUtil.readImage("scaled.png"); // XXX do not read from file
-        final int scaledtopleftX = topleftX / scaleFactor;
-        final int scaledtopleftY = topleftY / scaleFactor;
-        final int scaledbottomrightX = bottomrightX / scaleFactor;
-        final int scaledbottomrightY = bottomrightY / scaleFactor;
+        int scaledtopleftX = topleftX / scaleFactor;
+        int scaledtopleftY = topleftY / scaleFactor;
+        int scaledbottomrightX = bottomrightX / scaleFactor;
+        int scaledbottomrightY = bottomrightY / scaleFactor;
 
         log.debug("scaledtop: " + scaledtopleftX + ":" + scaledtopleftY);
         log.debug("scaledbot: " + scaledbottomrightX + ":" + scaledbottomrightY);
@@ -157,15 +129,11 @@ public class ImageManipulation {
         int nummarks = 0;
         for (int i = scaledtopleftX; i <= scaledbottomrightX; i++) {
             for (int j = scaledtopleftY + 20; j <= scaledbottomrightY - 20; j++) {
-                final int val = (scaledImage.getSample(i, j)
-                        + scaledImage.getSample(i - 1, j)
-                        + scaledImage.getSample(i + 1, j)
-                        + scaledImage.getSample(i, j - 1)
-                        + scaledImage.getSample(i, j + 1)
-                        + scaledImage.getSample(i - 1, j - 1)
-                        + scaledImage.getSample(i + 1, j + 1)
-                        + scaledImage.getSample(i + 1, j - 1) + scaledImage
-                        .getSample(i - 1, j + 1)) / 9;
+                int val =
+                        (scaledImage.getSample(i, j) + scaledImage.getSample(i - 1, j) + scaledImage.getSample(i + 1, j)
+                                + scaledImage.getSample(i, j - 1) + scaledImage.getSample(i, j + 1) + scaledImage.getSample(i - 1, j - 1)
+                                + scaledImage.getSample(i + 1, j + 1) + scaledImage.getSample(i + 1, j - 1) + scaledImage.getSample(i - 1,
+                                j + 1)) / 9;
                 if (val < 200) { // XXX
                     marks[nummarks++] = i * 1000 + j;
                 }
@@ -174,50 +142,46 @@ public class ImageManipulation {
 
         log.debug("nummarks = " + nummarks);
 
-        final int[] dupmarks = new int[100 * 100 * 10];
+        int[] dupmarks = new int[100 * 100 * 10];
         nummarks = filter(marks, dupmarks, nummarks);
         marks = dupmarks;
 
         log.debug("nummarks = " + nummarks);
 
         int t;
-        final Gray8Image markedImage = (Gray8Image) grayimage.createCopy();
-        final double approxXscale = width / ConcentricCircle.a4width; // 80.95 pixel/cm
-        final double approxYscale = height / ConcentricCircle.a4height; // 78.75 pixel/cm
-        final int markdispX = (int) (ConcentricCircle.markDiam * approxXscale / 4);
-        final int markdispY = (int) (ConcentricCircle.markDiam * approxYscale / 4);
+        Gray8Image markedImage = (Gray8Image) (grayimage.createCopy());
+        double approxXscale = width / ConcentricCircle.a4width; // 80.95 pixel/cm
+        double approxYscale = height / ConcentricCircle.a4height; // 78.75 pixel/cm
+        int markdispX = (int) (ConcentricCircle.markDiam * approxXscale / 4);
+        int markdispY = (int) (ConcentricCircle.markDiam * approxYscale / 4);
 
         for (int i = 0; i < nummarks; i++) {
             log.debug("{}", marks[i]);
-            ImageUtil.putMark(scaledImage, marks[i] / 1000, marks[i] % 1000,
-                    true);
+            ImageUtil.putMark(scaledImage, marks[i] / 1000, marks[i] % 1000, true);
             t = marks[i];
-            marks[i] = (t / 1000 * scaleFactor + markdispX) * 10000 + t % 1000
-                    * scaleFactor + markdispY; // XXX
-            ImageUtil.putMark(markedImage, marks[i] / 10000, marks[i] % 10000,
-                    false);
+            marks[i] = ((t / 1000) * scaleFactor + markdispX) * 10000 + (t % 1000) * scaleFactor + markdispY; // XXX
+            ImageUtil.putMark(markedImage, marks[i] / 10000, marks[i] % 10000, false);
         }
 
         // ImageUtil.saveImage(scaledImage, "markedscaled.png");
         // ImageUtil.saveImage(markedImage, "marked.png");
 
-        markLocations = marks;
+        this.markLocations = marks;
         this.nummarks = nummarks;
     }
 
-    public void writeAscTemplate(final String filename) {
-        final int[] dupmarks = new int[nummarks];
-        final int scaleFactor = this.scaleFactor * 3;
-        final int width = (bottomrightX - topleftX) / scaleFactor;
+    public void writeAscTemplate(String filename) {
+        int[] dupmarks = new int[nummarks];
+        int scaleFactor = this.scaleFactor * 3;
+        int width = (bottomrightX - topleftX) / scaleFactor;
         int height = (bottomrightY - topleftY) / scaleFactor;
         ascTemplate = new int[height][width];
         boolean linesOccupied[] = new boolean[height];
         ascTemplateLocations = new int[nummarks];
 
         for (int i = 0; i < nummarks; i++) {
-            dupmarks[i] = (markLocations[i] / 10000 - topleftY) / scaleFactor
-                    + (markLocations[i] % 10000 - topleftX) / scaleFactor
-                    * 10000;
+            dupmarks[i] =
+                    (markLocations[i] / 10000 - topleftY) / scaleFactor + ((markLocations[i] % 10000 - topleftX) / scaleFactor) * 10000;
             ascTemplateLocations[i] = i;
         }
         sort(dupmarks, ascTemplateLocations, nummarks);
@@ -231,7 +195,7 @@ public class ImageManipulation {
             int prevrow = 0;
             int i = 0;
             while (i < nummarks) {
-                for (int j = prevrow; j < dupmarks[i] / 10000; j++) {
+                for (int j = prevrow; j < (dupmarks[i] / 10000); j++) {
                     linesOccupied[j] = false;
                     for (int k = 0; k < width; k++) {
                         ascTemplate[j][k] = -1;
@@ -240,16 +204,16 @@ public class ImageManipulation {
 
                 int prevcol = 0;
                 int j = i;
-                prevrow = dupmarks[i] / 10000;
+                prevrow = (dupmarks[i] / 10000);
 
-                for (; j < nummarks && dupmarks[j] / 10000 == prevrow; j++) {
-                    for (int k = prevcol; k < dupmarks[j] % 10000; k++) {
+                for (; j < nummarks && (dupmarks[j] / 10000) == prevrow; j++) {
+                    for (int k = prevcol; k < (dupmarks[j] % 10000); k++) {
                         ascTemplate[prevrow][k] = -1;
                     }
 
                     ascTemplate[prevrow][dupmarks[j] % 10000] = j;
                     linesOccupied[prevrow] = true;
-                    prevcol = dupmarks[j] % 10000 + 1;
+                    prevcol = (dupmarks[j] % 10000) + 1;
                 }
 
                 for (int k = prevcol; k < width; k++) {
@@ -278,8 +242,8 @@ public class ImageManipulation {
                 }
             }
 
-            final int[][] ascTemplateDup = new int[height][width];
-            final boolean[] linesOccupiedDup = new boolean[height];
+            int[][] ascTemplateDup = new int[height][width];
+            boolean[] linesOccupiedDup = new boolean[height];
             int heightdup = height;
             boolean skip = false;
 
@@ -308,19 +272,14 @@ public class ImageManipulation {
 
             dumpAscTemplate(ascTemplate, width, height, linesOccupied);
 
-            final PrintWriter out = new PrintWriter(new FileOutputStream(
-                    filename));
-            final int[] ascTemplateLocationsDup = new int[nummarks];
+            PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+            int[] ascTemplateLocationsDup = new int[nummarks];
             for (int m = 0; m < height; m++) {
                 for (int n = 0; n < width; n++) {
                     if (ascTemplate[m][n] > -1) {
-                        ascTemplateLocationsDup[ascTemplateLocations[ascTemplate[m][n]]] = m
-                                * 1000 + n;
-                        log.debug(markLocations[ascTemplateLocations[ascTemplate[m][n]]]
-                                % 10000
-                                + ":"
-                                + markLocations[ascTemplateLocations[ascTemplate[m][n]]]
-                                / 10000);
+                        ascTemplateLocationsDup[ascTemplateLocations[ascTemplate[m][n]]] = m * 1000 + n;
+                        log.debug((markLocations[ascTemplateLocations[ascTemplate[m][n]]] % 10000) + ":"
+                                + (markLocations[ascTemplateLocations[ascTemplate[m][n]]] / 10000));
                         out.print("0");
                     } else {
                         out.print("-");
@@ -336,13 +295,12 @@ public class ImageManipulation {
             for (int q = 0; q < nummarks; q++) {
                 log.debug(ascTemplateLocations[q] + " ");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void dumpAscTemplate(final int[][] ascTemplate, final int width,
-            final int height, final boolean[] linesOccupied) {
+    private void dumpAscTemplate(int[][] ascTemplate, int width, int height, boolean[] linesOccupied) {
         for (int i = 0; i < height; i++) {
             log.debug(linesOccupied[i] + " ");
 
@@ -356,8 +314,7 @@ public class ImageManipulation {
         }
     }
 
-    private void sort(final int[] marks, final int[] ascTemplateLocations,
-            final int nummarks) {
+    private void sort(int[] marks, int[] ascTemplateLocations, int nummarks) {
         int t;
         for (int i = 0; i < nummarks; i++) {
             for (int j = i + 1; j < nummarks; j++) {
@@ -373,10 +330,9 @@ public class ImageManipulation {
         }
     }
 
-    private int filter(final int[] marks, final int[] dupmarks,
-            final int nummarks) {
+    private int filter(int[] marks, int[] dupmarks, int nummarks) {
         int numdupmarks = 0;
-        final int[] cluster = new int[50];
+        int[] cluster = new int[50];
         int numin;
         int i = 0;
 
@@ -391,8 +347,7 @@ public class ImageManipulation {
                 if (marks[j] != -1) {
                     int k = 0;
                     while (k < numin) {
-                        if (Math.abs(marks[j] / 1000 - cluster[k] / 1000) < 2
-                                && Math.abs(marks[j] % 1000 - cluster[k] % 1000) < 2) {
+                        if (Math.abs(marks[j] / 1000 - cluster[k] / 1000) < 2 && Math.abs(marks[j] % 1000 - cluster[k] % 1000) < 2) {
                             cluster[numin++] = marks[j];
                             log.debug("Found j->" + marks[j] + ":");
                             marks[j] = -1;
@@ -409,8 +364,8 @@ public class ImageManipulation {
 
             int sumx = 0, sumy = 0;
             for (int l = 0; l < numin; l++) {
-                sumx += cluster[l] / 1000;
-                sumy += cluster[l] % 1000;
+                sumx += (cluster[l] / 1000);
+                sumy += (cluster[l] % 1000);
             }
             sumx /= numin;
             sumy /= numin;
@@ -428,41 +383,37 @@ public class ImageManipulation {
 
     private void rescale() {
         try {
-            final MedianFilter filter = new MedianFilter();
-            filter.setArea(width / 1700 * 25 / 2 * 2 + 1, height / 2339 * 25
-                    / 2 * 2 + 1);
+            MedianFilter filter = new MedianFilter();
+            filter.setArea((int) ((width / 1700 * 25) / 2) * 2 + 1, (int) (height / 2339 * 25 / 2) * 2 + 1);
             filter.setInputImage(grayimage);
             filter.process();
-            final Gray8Image medianimage = (Gray8Image) filter.getOutputImage();
+            Gray8Image medianimage = (Gray8Image) (filter.getOutputImage());
             // ImageUtil.saveImage(medianimage, "median.png");
 
-            final ScaleReplication scale = new ScaleReplication();
+            ScaleReplication scale = new ScaleReplication();
             scale.setInputImage(medianimage);
             scale.setSize(width / scaleFactor, height / scaleFactor);
             scale.process();
-            final PixelImage scaledImage = scale.getOutputImage();
+            PixelImage scaledImage = scale.getOutputImage();
 
-            final int scaledtopleftX = topleftX / scaleFactor;
-            final int scaledtopleftY = topleftY / scaleFactor;
-            final int scaledbottomrightX = bottomrightX / scaleFactor;
-            final int scaledbottomrightY = bottomrightY / scaleFactor;
+            int scaledtopleftX = topleftX / scaleFactor;
+            int scaledtopleftY = topleftY / scaleFactor;
+            int scaledbottomrightX = bottomrightX / scaleFactor;
+            int scaledbottomrightY = bottomrightY / scaleFactor;
 
-            ImageUtil.putMark((Gray8Image) scaledImage, scaledtopleftX,
-                    scaledtopleftY, true);
-            ImageUtil.putMark((Gray8Image) scaledImage, scaledbottomrightX,
-                    scaledbottomrightY, true);
+            ImageUtil.putMark((Gray8Image) scaledImage, scaledtopleftX, scaledtopleftY, true);
+            ImageUtil.putMark((Gray8Image) scaledImage, scaledbottomrightX, scaledbottomrightY, true);
 
             // ImageUtil.saveImage(scaledImage, "scaled.png");
             this.scaledImage = (Gray8Image) scaledImage;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public void writeConfig(final String filename) {
+    public void writeConfig(String filename) {
         try {
-            final PrintWriter out = new PrintWriter(new FileOutputStream(
-                    filename));
+            PrintWriter out = new PrintWriter(new FileOutputStream(filename));
             out.println("#top left");
             out.println(topleftX + " " + topleftY);
             out.println("#bottom right");
@@ -480,43 +431,34 @@ public class ImageManipulation {
             for (int i = 0; i < nummarks; i++) {
                 x = markLocations[i] / 10000;
                 y = markLocations[i] % 10000;
-                r1 = Math.sqrt((x - topleftX) * (x - topleftX) + (y - topleftY)
-                        * (y - topleftY));
-                r2 = Math.sqrt((x - bottomrightX) * (x - bottomrightX)
-                        + (y - bottomrightY) * (y - bottomrightY));
+                r1 = Math.sqrt((x - topleftX) * (x - topleftX) + (y - topleftY) * (y - topleftY));
+                r2 = Math.sqrt((x - bottomrightX) * (x - bottomrightX) + (y - bottomrightY) * (y - bottomrightY));
                 theta1 = Math.toDegrees(Math.atan2(x - topleftX, y - topleftY));
-                theta2 = Math.toDegrees(Math.atan2(bottomrightX - x,
-                        bottomrightY - y));
-                out.println(r1 + " " + theta1 + " " + r2 + " " + theta2 + " "
-                        + ascTemplateLocations[i] / 1000 + " "
-                        + ascTemplateLocations[i] % 1000);
+                theta2 = Math.toDegrees(Math.atan2(bottomrightX - x, bottomrightY - y));
+                out.println(r1 + " " + theta1 + " " + r2 + " " + theta2 + " " + (ascTemplateLocations[i] / 1000) + " "
+                        + (ascTemplateLocations[i] % 1000));
             }
             out.close();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public void readConfig(final InputStream is) {
-        final int scaleFactor = this.scaleFactor * 3;
+    public void readConfig(InputStream is) {
+        int scaleFactor = this.scaleFactor * 3;
 
         try {
-            final BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
             in.readLine();
-            final String topleft = in.readLine();
+            String topleft = in.readLine();
             int index = topleft.indexOf(" ");
-            final int realTopleftX = Integer.parseInt(topleft.substring(0,
-                    index));
-            final int realTopleftY = Integer.parseInt(topleft
-                    .substring(index + 1));
+            int realTopleftX = Integer.parseInt(topleft.substring(0, index));
+            int realTopleftY = Integer.parseInt(topleft.substring(index + 1));
             in.readLine();
-            final String bottomright = in.readLine();
+            String bottomright = in.readLine();
             index = bottomright.indexOf(" ");
-            final int realBottomrightX = Integer.parseInt(bottomright
-                    .substring(0, index));
-            final int realBottomrightY = Integer.parseInt(bottomright
-                    .substring(index + 1));
+            int realBottomrightX = Integer.parseInt(bottomright.substring(0, index));
+            int realBottomrightY = Integer.parseInt(bottomright.substring(index + 1));
             in.readLine();
             realAngle = Double.parseDouble(in.readLine());
             in.readLine();
@@ -527,93 +469,81 @@ public class ImageManipulation {
             String line;
             realMarkLocations = new int[realNummarks];
 
-            ascTemplate = new int[(realBottomrightY - realTopleftY)
-                    / scaleFactor][(realBottomrightX - realTopleftX)
-                    / scaleFactor];
+            ascTemplate = new int[(realBottomrightY - realTopleftY) / scaleFactor][(realBottomrightX - realTopleftX) / scaleFactor];
             for (int i = 0; i < (realBottomrightY - realTopleftY) / scaleFactor; i++) {
-                for (int j = 0; j < (realBottomrightX - realTopleftX)
-                        / scaleFactor; j++) {
+                for (int j = 0; j < (realBottomrightX - realTopleftX) / scaleFactor; j++) {
                     ascTemplate[i][j] = -1;
                 }
             }
 
-            final Gray8Image markedImage = (Gray8Image) grayimage.createCopy();
+            Gray8Image markedImage = (Gray8Image) (grayimage.createCopy());
 
             int i = 0;
             while ((line = in.readLine()) != null && !line.equals("")) {
-                final StringTokenizer st = new StringTokenizer(line, " ");
+                StringTokenizer st = new StringTokenizer(line, " ");
                 double r1 = Double.parseDouble(st.nextToken());
                 double theta1 = Double.parseDouble(st.nextToken());
                 double r2 = Double.parseDouble(st.nextToken());
                 double theta2 = Double.parseDouble(st.nextToken());
-                final int m = Integer.parseInt(st.nextToken());
-                final int n = Integer.parseInt(st.nextToken());
-                theta1 += currAngle - realAngle;
-                theta2 += currAngle - realAngle;
-                r1 *= currDiag / realDiag;
-                r2 *= currDiag / realDiag;
-                final int x1 = (int) (topleftX + r1
-                        * Math.sin(Math.toRadians(theta1)));
-                final int y1 = (int) (topleftY + r1
-                        * Math.cos(Math.toRadians(theta1)));
-                final int x2 = (int) (bottomrightX - r2
-                        * Math.sin(Math.toRadians(theta2)));
-                final int y2 = (int) (bottomrightY - r2
-                        * Math.cos(Math.toRadians(theta2)));
-                realMarkLocations[i++] = (x1 + x2) / 2 * 10000 + (y1 + y2) / 2;
+                int m = Integer.parseInt(st.nextToken());
+                int n = Integer.parseInt(st.nextToken());
+                theta1 += (currAngle - realAngle);
+                theta2 += (currAngle - realAngle);
+                r1 *= (currDiag / realDiag);
+                r2 *= (currDiag / realDiag);
+                int x1 = (int) (topleftX + r1 * Math.sin(Math.toRadians(theta1)));
+                int y1 = (int) (topleftY + r1 * Math.cos(Math.toRadians(theta1)));
+                int x2 = (int) (bottomrightX - r2 * Math.sin(Math.toRadians(theta2)));
+                int y2 = (int) (bottomrightY - r2 * Math.cos(Math.toRadians(theta2)));
+                realMarkLocations[i++] = ((x1 + x2) / 2) * 10000 + ((y1 + y2) / 2);
                 ascTemplate[m][n] = i - 1;
-                ImageUtil.putMark(markedImage, (x1 + x2) / 2, (y1 + y2) / 2,
-                        true);
+                ImageUtil.putMark(markedImage, (x1 + x2) / 2, (y1 + y2) / 2, true);
             }
 
             in.close();
             // ImageUtil.saveImage(markedImage, "markedform.png");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public void readFields(final InputStream is) {
+    public void readFields(InputStream is) {
         String line;
         fields = new Hashtable<Character, Field>();
 
         try {
-            final BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
             while ((line = in.readLine()) != null && !line.equals("")) {
-                final Field field = new Field(line);
+                Field field = new Field(line);
                 fields.put(new Character(field.getCh()), field);
             }
 
             in.close();
             numfields = fields.size();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public void readAscTemplate(final InputStream is) {
+    public void readAscTemplate(InputStream is) {
         ascTemplateLocations = new int[realNummarks];
         ascTemplateFields = new Field[realNummarks];
         int m = 0, n;
 
         try {
-            final BufferedReader in = new BufferedReader(new InputStreamReader(
-                    is));
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = in.readLine()) != null && !line.equals("")) {
                 n = 0;
                 for (int i = 0; i < line.length(); i++) {
-                    final char ch = line.charAt(i);
+                    char ch = line.charAt(i);
                     if (ch != '-' && ch != '0') {
                         ascTemplateLocations[ascTemplate[m][n]] = ch;
-                        final Field field = fields.get(new Character(ch));
+                        Field field = (Field) (fields.get(new Character(ch)));
                         ascTemplateFields[ascTemplate[m][n]] = field;
                         field.addPos(ascTemplate[m][n]); // always added in row, column order
-                        log.debug("added " + m + ":" + n + ":"
-                                + ascTemplate[m][n] + ":"
-                                + realMarkLocations[ascTemplate[m][n]] + ":"
-                                + ch);
+                        log.debug("added " + m + ":" + n + ":" + ascTemplate[m][n] + ":" + realMarkLocations[ascTemplate[m][n]] + ":"
+                                + (char) (ch));
                     }
 
                     // else {
@@ -626,7 +556,7 @@ public class ImageManipulation {
             }
 
             in.close();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -637,72 +567,62 @@ public class ImageManipulation {
         }
 
         int x, y;
-        final SolidMark mark = new SolidMark(grayimage, width
-                / ConcentricCircle.a4width, height / ConcentricCircle.a4height);
-        final Gray8Image markedImage = (Gray8Image) grayimage.createCopy();
+        SolidMark mark = new SolidMark(grayimage, width / ConcentricCircle.a4width, height / ConcentricCircle.a4height);
+        Gray8Image markedImage = (Gray8Image) (grayimage.createCopy());
         for (int i = 0; i < realNummarks; i++) {
             x = realMarkLocations[i] / 10000;
             y = realMarkLocations[i] % 10000;
 
             if (mark.isMark(x, y)) {
-                final Field field = fields.get(new Character(
-                        (char) ascTemplateLocations[i]));
-                log.debug("*** " + i + ":" + (char) ascTemplateLocations[i]
-                        + ":" + field);
-                field.putValue(i);
-                log.debug("Found mark at " + x + "," + y + ":"
-                        + (char) ascTemplateLocations[i] + ":"
-                        + field.getName() + "=" + field.getValue(i));
-                mark.putMarkOnImage(markedImage);
+                Field field = (Field) (fields.get(new Character((char) (ascTemplateLocations[i]))));
+                log.debug("*** " + i + ":" + (char) (ascTemplateLocations[i]) + ":" + field);
+
+                if (field != null) {
+                    field.putValue(i);
+                    log.debug("Found mark at ({}, {}) : {} : {} = {}",
+                            new Object[] { x, y, (char) (ascTemplateLocations[i]), field.getName(), field.getValue(i) });
+                    mark.putMarkOnImage(markedImage);
+                }
             }
         }
 
         // ImageUtil.saveImage(markedImage, "marksfoundform.png");
     }
 
-    public void saveData(final String filename) {
+    public void saveData(String filename) {
         try {
-            final PrintWriter out = new PrintWriter(new FileOutputStream(
-                    filename));
-            final Enumeration<Character> e = fields.keys();
+            PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+            Enumeration<Character> e = fields.keys();
 
             while (e.hasMoreElements()) {
-                final Field field = fields.get(e.nextElement());
+                Field field = (Field) (fields.get(e.nextElement()));
                 log.debug(field.getName() + "=" + field.getFieldValues());
                 out.println(field.getName() + "=" + field.getFieldValues());
             }
 
             out.close();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     int ROW_CHOICE = 0, COLUMN_CHOICE = 1, GRID_CHOICE = 2;
-
     int SINGLE = 0, MULTIPLE = 1, COLUMN = 2, ROW = 3;
 
     class Field {
         char ch;
-
         int type, subtype;
-
         String name;
-
         String[] choices;
-
         Hashtable<Integer, Integer> positions;
-
         String[] values;
-
         int numValues = 0;
-
         boolean[] singleDone;
 
-        public Field(final String line) {
-            final StringTokenizer st = new StringTokenizer(line, " ");
+        public Field(String line) {
+            StringTokenizer st = new StringTokenizer(line, " ");
             ch = st.nextToken().charAt(0);
-            final String typestr = st.nextToken();
+            String typestr = st.nextToken();
 
             if (typestr.equalsIgnoreCase("row")) {
                 type = ROW_CHOICE;
@@ -712,7 +632,7 @@ public class ImageManipulation {
                 type = GRID_CHOICE;
             }
 
-            final String subtypestr = st.nextToken();
+            String subtypestr = st.nextToken();
             if (subtypestr.equalsIgnoreCase("single")) {
                 subtype = SINGLE;
             } else if (subtypestr.equalsIgnoreCase("multiple")) {
@@ -724,7 +644,7 @@ public class ImageManipulation {
             }
 
             name = st.nextToken();
-            final ArrayList<String> choicearr = new ArrayList<String>();
+            ArrayList<String> choicearr = new ArrayList<String>();
 
             while (st.hasMoreTokens()) {
                 choicearr.add(st.nextToken());
@@ -732,7 +652,7 @@ public class ImageManipulation {
 
             choices = new String[choicearr.size()];
             for (int i = 0; i < choicearr.size(); i++) {
-                choices[i] = choicearr.get(i);
+                choices[i] = (String) (choicearr.get(i));
             }
 
             if (type != GRID_CHOICE) {
@@ -768,14 +688,13 @@ public class ImageManipulation {
 
         int currpos = 0;
 
-        public void addPos(final int i) {
+        public void addPos(int i) {
             if (type == ROW_CHOICE) {
                 positions.put(new Integer(i), new Integer(currpos++));
             } else if (type == COLUMN_CHOICE) {
                 positions.put(new Integer(i), new Integer(currpos++));
             } else if (type == GRID_CHOICE && subtype == ROW) {
-                positions.put(new Integer(i), new Integer(currpos
-                        % choices.length));
+                positions.put(new Integer(i), new Integer(currpos % choices.length));
                 currpos++;
             } else if (type == GRID_CHOICE && subtype == COLUMN) {
                 log.debug("addpos -- " + i + ":" + currpos);
@@ -783,28 +702,26 @@ public class ImageManipulation {
             }
         }
 
-        public String getValue(final int i) {
+        public String getValue(int i) {
             if (type == GRID_CHOICE && subtype == COLUMN) {
-                final int mod = currpos / choices.length;
-                return choices[positions.get(new Integer(i)).intValue() / mod];
+                int mod = currpos / choices.length;
+                return choices[((Integer) (positions.get(new Integer(i)))).intValue() / mod];
             } else {
-                return choices[positions.get(new Integer(i)).intValue()];
+                return choices[((Integer) (positions.get(new Integer(i)))).intValue()];
             }
         }
 
-        public void putValue(final int i) {
+        public void putValue(int i) {
             if (type == GRID_CHOICE && subtype == COLUMN) {
-                final int posi = positions.get(new Integer(i)).intValue();
-                log.debug("currpos = " + currpos + ":" + choices.length + ":"
-                        + i + ":" + posi + ":" + posi
-                        % (currpos / choices.length) + ":"
-                        + singleDone[posi % (currpos / choices.length)]);
+                int posi = ((Integer) (positions.get(new Integer(i)))).intValue();
+                log.debug("currpos = " + currpos + ":" + choices.length + ":" + i + ":" + posi + ":" + (posi % (currpos / choices.length))
+                        + ":" + singleDone[posi % (currpos / choices.length)]);
                 if (!singleDone[posi % (currpos / choices.length)]) {
                     values[numValues++] = getValue(i);
                     singleDone[posi % (currpos / choices.length)] = true;
                 }
             } else if (type == GRID_CHOICE && subtype == ROW) {
-                final int posi = positions.get(new Integer(i)).intValue();
+                int posi = ((Integer) (positions.get(new Integer(i)))).intValue();
                 if (!singleDone[posi / choices.length]) {
                     values[numValues++] = getValue(i);
                     singleDone[posi / choices.length] = true;

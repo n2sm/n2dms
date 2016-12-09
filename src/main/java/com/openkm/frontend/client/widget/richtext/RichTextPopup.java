@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -42,29 +42,21 @@ import com.openkm.frontend.client.Main;
 public class RichTextPopup extends DialogBox {
 
     public static final int NO_ACTION = 0;
-
     public static final int ACTION_ENTER_URL = 1;
-
     public static final int ACTION_ENTER_IMAGE_URL = 2;
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private TextBox url;
-
     private Button cancelButton;
-
     private Button addButton;
-
     private int action = NO_ACTION;
-
     RichTextAction richTextAction;
 
     /**
      * RichTextPopup
      */
-    public RichTextPopup(final RichTextAction richTextAction) {
+    public RichTextPopup(RichTextAction richTextAction) {
         // Establishes auto-close when click outside
         super(false, true);
         this.richTextAction = richTextAction;
@@ -72,52 +64,50 @@ public class RichTextPopup extends DialogBox {
 
         vPanel = new VerticalPanel();
         hPanel = new HorizontalPanel();
-        final HTML space3 = new HTML("");
+        HTML space3 = new HTML("");
         hPanel.add(space3);
         hPanel.add(vPanel);
-        final HTML space4 = new HTML("");
+        HTML space4 = new HTML("");
         hPanel.add(space4);
 
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         vPanel.add(space);
 
         url = new TextBox();
-        url.setWidth("290");
+        url.setWidth("290px");
         vPanel.add(url);
-        final HTML space2 = new HTML("");
+        HTML space2 = new HTML("");
         vPanel.add(space2);
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
         addButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 execute();
                 hide();
             }
         });
-        final HorizontalPanel hPanel2 = new HorizontalPanel();
+        HorizontalPanel hPanel2 = new HorizontalPanel();
         hPanel2.add(cancelButton);
         hPanel2.add(new HTML("&nbsp;"));
         hPanel2.add(addButton);
         vPanel.add(hPanel2);
-        final HTML space5 = new HTML("");
+        HTML space5 = new HTML("");
         vPanel.add(space5);
 
-        vPanel.setCellHorizontalAlignment(hPanel2,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(space, "5");
-        vPanel.setCellHeight(space2, "5");
-        vPanel.setCellHeight(space5, "5");
+        vPanel.setCellHorizontalAlignment(hPanel2, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(space, "5px");
+        vPanel.setCellHeight(space2, "5px");
+        vPanel.setCellHeight(space5, "5px");
 
-        hPanel.setCellWidth(space3, "5");
-        hPanel.setCellWidth(space4, "5");
+        hPanel.setCellWidth(space3, "5px");
+        hPanel.setCellWidth(space4, "5px");
 
         url.setStyleName("okm-Input");
         cancelButton.setStyleName("okm-NoButton");
@@ -140,7 +130,7 @@ public class RichTextPopup extends DialogBox {
      * 
      * @param action
      */
-    public void setAction(final int action) {
+    public void setAction(int action) {
         this.action = action;
         switch (action) {
         case ACTION_ENTER_URL:
@@ -173,11 +163,10 @@ public class RichTextPopup extends DialogBox {
     /**
      * Shows de popup
      */
-    @Override
     public void show() {
         url.setText("http://");
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 125) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 125) / 2;
         setPopupPosition(left, top);
         super.show();
     }

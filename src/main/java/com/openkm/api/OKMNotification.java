@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.api;
@@ -38,11 +38,10 @@ import com.openkm.principal.PrincipalAdapterException;
 
 /**
  * @author pavila
- *
+ * 
  */
 public class OKMNotification implements NotificationModule {
     private static Logger log = LoggerFactory.getLogger(OKMNotification.class);
-
     private static OKMNotification instance = new OKMNotification();
 
     private OKMNotification() {
@@ -53,46 +52,40 @@ public class OKMNotification implements NotificationModule {
     }
 
     @Override
-    public void subscribe(final String token, final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void subscribe(String token, String nodePath) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("subscribe({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
+        NotificationModule nm = ModuleManager.getNotificationModule();
         nm.subscribe(token, nodePath);
         log.debug("subscribe: void");
     }
 
     @Override
-    public void unsubscribe(final String token, final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void unsubscribe(String token, String nodePath) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("unsubscribe({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
+        NotificationModule nm = ModuleManager.getNotificationModule();
         nm.unsubscribe(token, nodePath);
         log.debug("unsubscribe: void");
     }
 
     @Override
-    public Set<String> getSubscriptors(final String token, final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
+    public Set<String> getSubscriptors(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("getSubscriptors({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
-        final Set<String> users = nm.getSubscriptors(token, nodePath);
+        NotificationModule nm = ModuleManager.getNotificationModule();
+        Set<String> users = nm.getSubscriptors(token, nodePath);
         log.debug("getSubscriptors: {}", users);
         return users;
     }
 
     @Override
-    public void notify(final String token, final String nodePath,
-            final List<String> users, final String message,
-            final boolean attachment) throws PathNotFoundException,
-            AccessDeniedException, PrincipalAdapterException,
-            RepositoryException, DatabaseException, IOException {
-        log.debug("notify({}, {}, {}, {}, {})", new Object[] { token, nodePath,
-                users, message, attachment });
-        final NotificationModule nm = ModuleManager.getNotificationModule();
-        nm.notify(token, nodePath, users, message, attachment);
+    public void notify(String token, String nodeId, List<String> users, List<String> mails, String message, boolean attachment)
+            throws PathNotFoundException, AccessDeniedException, PrincipalAdapterException, RepositoryException, DatabaseException,
+            IOException {
+        log.debug("notify({}, {}, {}, {}, {})", new Object[] { token, nodeId, users, mails, message, attachment });
+        NotificationModule nm = ModuleManager.getNotificationModule();
+        nm.notify(token, nodeId, users, mails, message, attachment);
         log.debug("notify: void");
     }
 }

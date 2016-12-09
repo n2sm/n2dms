@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,16 +32,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTKeyword implements IsSerializable {
 
     private String keyword = "";
-
     private int frequency;
-
     private boolean top10 = false;
 
     public String getKeyword() {
         return keyword;
     }
 
-    public void setKeyword(final String keyword) {
+    public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
 
@@ -49,7 +47,7 @@ public class GWTKeyword implements IsSerializable {
         return frequency;
     }
 
-    public void setFrequency(final int frequency) {
+    public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
 
@@ -57,7 +55,7 @@ public class GWTKeyword implements IsSerializable {
         return top10;
     }
 
-    public void setTop10(final boolean top10) {
+    public void setTop10(boolean top10) {
         this.top10 = top10;
     }
 }

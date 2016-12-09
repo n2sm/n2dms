@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,27 +34,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private String value = "";
-
     private String text = ""; // text Value
-
     private String data = "";
-
     private boolean readonly = false;
-
     private String table = "";
-
     private String dialogTitle = "";
-
     private String filterQuery = "";
-
     private String valueQuery = "";
-
     private int filterMinLen = 0;
 
     public GWTSuggestBox clone() {
-        final GWTSuggestBox newSuggestBox = new GWTSuggestBox();
+        GWTSuggestBox newSuggestBox = new GWTSuggestBox();
         newSuggestBox.setData(data);
         newSuggestBox.setDialogTitle(dialogTitle);
         newSuggestBox.setFilterMinLen(filterMinLen);
@@ -75,7 +66,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -83,7 +74,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -91,7 +82,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -99,7 +90,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
@@ -107,7 +98,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return filterQuery;
     }
 
-    public void setFilterQuery(final String filterQuery) {
+    public void setFilterQuery(String filterQuery) {
         this.filterQuery = filterQuery;
     }
 
@@ -115,7 +106,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return valueQuery;
     }
 
-    public void setValueQuery(final String valueQuery) {
+    public void setValueQuery(String valueQuery) {
         this.valueQuery = valueQuery;
     }
 
@@ -123,7 +114,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return table;
     }
 
-    public void setTable(final String table) {
+    public void setTable(String table) {
         this.table = table;
     }
 
@@ -131,7 +122,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return dialogTitle;
     }
 
-    public void setDialogTitle(final String dialogTitle) {
+    public void setDialogTitle(String dialogTitle) {
         this.dialogTitle = dialogTitle;
     }
 
@@ -139,7 +130,7 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
@@ -147,13 +138,12 @@ public class GWTSuggestBox extends GWTFormElement implements IsSerializable {
         return filterMinLen;
     }
 
-    public void setFilterMinLen(final int filterMinLen) {
+    public void setFilterMinLen(int filterMinLen) {
         this.filterMinLen = filterMinLen;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

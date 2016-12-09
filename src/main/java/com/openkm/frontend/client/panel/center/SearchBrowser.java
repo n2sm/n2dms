@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,16 +21,7 @@
 
 package com.openkm.frontend.client.panel.center;
 
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.openkm.frontend.client.Main;
-import com.openkm.frontend.client.constants.ui.UIDockPanelConstants;
-import com.openkm.frontend.client.util.TimeHelper;
 import com.openkm.frontend.client.util.Util;
 import com.openkm.frontend.client.widget.searchin.SearchIn;
 import com.openkm.frontend.client.widget.searchresult.SearchResult;
@@ -42,88 +33,40 @@ import com.openkm.frontend.client.widget.searchresult.SearchResult;
  *
  */
 public class SearchBrowser extends Composite {
-    private final static int PANEL_TOP_HEIGHT = 210;
-
+    private final static int PANEL_TOP_HEIGHT = 230;
     public final static int SPLITTER_HEIGHT = 10;
 
-    private final static int REFRESH_WAITING_TIME = 100;
-
-    private final static String TIME_HELPER_KEY = "SPLIT_VERTICAL_SEARCH";
-
-    private VerticalSplitPanelExtended verticalSplitPanel;
+    private VerticalSplitLayoutExtended verticalSplitLayoutPanel;
 
     public SearchIn searchIn;
-
     public SearchResult searchResult;
 
-    private boolean isResizeInProgress = false;
-
-    private boolean finalResizeInProgess = false;
-
     public int width = 0;
-
     public int height = 0;
-
     public int topHeight = 0;
-
     public int bottomHeight = 0;
-
     private boolean loadFinish = false;
 
     /**
      * SearchBrowser
      */
-    @SuppressWarnings("deprecation")
     public SearchBrowser() {
-        verticalSplitPanel = new VerticalSplitPanelExtended();
+        verticalSplitLayoutPanel = new VerticalSplitLayoutExtended(new VerticalResizeHandler() {
+            @Override
+            public void onResize(int topHeight, int bottomHeight) {
+                // loadFinish prevent resizing (leftWidht,rightWidth) = (0,0) at startup
+                if (loadFinish) {
+                    resizePanels();
+                }
+            }
+        });
         searchIn = new SearchIn();
         searchResult = new SearchResult();
-        verticalSplitPanel.getSplitPanel().setTopWidget(searchIn);
-        verticalSplitPanel.getSplitPanel().setBottomWidget(searchResult);
-
-        verticalSplitPanel.addMouseMoveHandler(new MouseMoveHandler() {
-            @Override
-            public void onMouseMove(final MouseMoveEvent event) {
-                if (verticalSplitPanel.getSplitPanel().isResizing()) {
-                    if (!isResizeInProgress) {
-                        isResizeInProgress = true;
-                        onSplitResize();
-                    }
-                }
-            }
-        });
-
-        verticalSplitPanel.addMouseUpHandler(new MouseUpHandler() {
-            @Override
-            public void onMouseUp(final MouseUpEvent event) {
-                if (isResizeInProgress) {
-                    isResizeInProgress = false;
-                }
-            }
-        });
+        verticalSplitLayoutPanel.getSplitPanel().addNorth(searchIn, 100);
+        verticalSplitLayoutPanel.getSplitPanel().add(searchResult);
 
         searchIn.setStyleName("okm-Input");
-        initWidget(verticalSplitPanel);
-    }
-
-    /**
-     * onSplitResize
-     */
-    public void onSplitResize() {
-        final int resizeUpdatePeriod = 20; // ms ( Internally splitter is refreshing each 20 ms )
-        if (isResizeInProgress) {
-            new Timer() {
-                @Override
-                public void run() {
-                    resizePanels(); // Always making resize
-                    if (isResizeInProgress) {
-                        onSplitResize();
-                    } else if (Util.getUserAgent().equals("chrome")) {
-                        resizePanels();
-                    }
-                }
-            }.schedule(resizeUpdatePeriod);
-        }
+        initWidget(verticalSplitLayoutPanel);
     }
 
     /**
@@ -140,36 +83,30 @@ public class SearchBrowser extends Composite {
      * @param width The max width of the widget
      * @param height The max height of the widget
      */
-    @SuppressWarnings("deprecation")
-    public void setSize(final int width, final int height) {
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
         topHeight = PANEL_TOP_HEIGHT;
         bottomHeight = height - (topHeight + SPLITTER_HEIGHT);
-        verticalSplitPanel.setSize("" + width, "" + height);
-        verticalSplitPanel.getSplitPanel().setSplitPosition("" + topHeight);
-        resize();
-
-        // Solve some problems with chrome
-        if (loadFinish
-                && Util.getUserAgent().equals("chrome")
-                && Main.get().mainPanel.topPanel.tabWorkspace
-                        .getSelectedWorkspace() == UIDockPanelConstants.SEARCH) {
-            resizePanels();
+        verticalSplitLayoutPanel.setSize("" + width + "px", "" + height + "px");
+        verticalSplitLayoutPanel.setSplitPosition(searchIn, topHeight, false);
+        // Solve minor ui defect on loading bottomHeight is +2 than should be while move splitter
+        if (!loadFinish) {
+            bottomHeight = bottomHeight + 2;
         }
+        resize();
     }
 
     /**
      * resize
      */
     private void resize() {
-        verticalSplitPanel.setWidth("" + width);
+        verticalSplitLayoutPanel.setWidth("" + width + "px");
 
-        // We substract 2 pixels for width and heigh generated by border line
         searchIn.setPixelSize(width, topHeight);
 
         // Resize the scroll panel on tab properties 
-        // We substract 2 pixels for width and heigh generated by border line
+        // We substract 2 pixels for width and height generated by border line
         int searchResultWidth = width - 2;
         int searchResultHeight = bottomHeight - 2;
         if (searchResultWidth < 0) {
@@ -190,118 +127,17 @@ public class SearchBrowser extends Composite {
      * Sets the panel width on resizing
      */
     private void resizePanels() {
-        final int total = verticalSplitPanel.getOffsetHeight();
-
-        String valHeight = DOM.getStyleAttribute(DOM.getChild(DOM.getChild(
-                verticalSplitPanel.getSplitPanel().getElement(), 0), 0),
-                "height");
-        if (valHeight.contains("px")) {
-            valHeight = valHeight.substring(0, valHeight.indexOf("px"));
-        }
-        topHeight = Integer.parseInt(valHeight);
-
-        String valTop = DOM.getStyleAttribute(DOM.getChild(DOM.getChild(
-                verticalSplitPanel.getSplitPanel().getElement(), 0), 2), "top");
-        if (valTop.contains("px")) {
-            valTop = valTop.substring(0, valTop.indexOf("px"));
-        }
-        bottomHeight = total - Integer.parseInt(valTop);
-
+        topHeight = verticalSplitLayoutPanel.getTopHeight();
+        bottomHeight = verticalSplitLayoutPanel.getBottomHeight();
         resize();
-
-        if (Util.getUserAgent().equals("chrome")) {
-            if (!TimeHelper.hasControlTime(TIME_HELPER_KEY)) {
-                TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY,
-                        REFRESH_WAITING_TIME);
-                timeControl();
-            } else {
-                TimeHelper.changeControlTime(TIME_HELPER_KEY);
-            }
-        }
-    }
-
-    /**
-     * timeControl
-     */
-    private void timeControl() {
-        if (TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY,
-                REFRESH_WAITING_TIME)) {
-            if (!finalResizeInProgess) {
-                finalResizeInProgess = true;
-                final int tmpHeight = topHeight;
-                final int tmpbBottomHeight = bottomHeight;
-                final int tmpWidth = width;
-
-                // Solve some problems with chrome
-                if (Util.getUserAgent().equals("chrome")) {
-                    if (topHeight - 20 > 0) {
-                        topHeight -= 20;
-                    } else {
-                        topHeight = 0;
-                    }
-                    if (bottomHeight - 20 > 0) {
-                        bottomHeight -= 20;
-                    } else {
-                        bottomHeight = 0;
-                    }
-                    if (width - 20 > 0) {
-                        width -= 20;
-                    } else {
-                        width = 0;
-                    }
-                    resize();
-                }
-
-                new Timer() {
-                    @Override
-                    public void run() {
-                        topHeight = tmpHeight;
-                        bottomHeight = tmpbBottomHeight;
-                        width = tmpWidth;
-                        resize();
-                        TimeHelper.removeControlTime(TIME_HELPER_KEY);
-                        finalResizeInProgess = false;
-                    }
-                }.schedule(50);
-            }
-        } else {
-            new Timer() {
-                @Override
-                public void run() {
-                    timeControl();
-                }
-            }.schedule(50);
-        }
     }
 
     /**
      * setWidth
      */
-    public void setWidth(final int width) {
+    public void setWidth(int width) {
         this.width = width;
-
         resize();
-
-        // Solve some problems with chrome
-        if (loadFinish
-                && Util.getUserAgent().equals("chrome")
-                && Main.get().mainPanel.topPanel.tabWorkspace
-                        .getSelectedWorkspace() == UIDockPanelConstants.SEARCH) {
-            resizePanels();
-        }
-    }
-
-    /**
-     * refreshSpliterAfterAdded
-     * 
-     */
-    @SuppressWarnings("deprecation")
-    public void refreshSpliterAfterAdded() {
-        verticalSplitPanel.getSplitPanel().setSplitPosition("" + topHeight);
-        if (Util.getUserAgent().equals("chrome")
-                || Util.getUserAgent().startsWith("ie")) {
-            resizePanels();
-        }
     }
 
     /**

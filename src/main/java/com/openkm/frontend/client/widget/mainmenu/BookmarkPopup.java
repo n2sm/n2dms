@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,12 +29,12 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -45,21 +45,13 @@ import com.openkm.frontend.client.Main;
  */
 public class BookmarkPopup extends DialogBox {
     private VerticalPanel vPanel;
-
     private Label name;
-
     private HorizontalPanel hPanel;
-
     private VerticalPanel valuesPanel;
-
     private TextBox textBox;
-
     private Button acceptButton;
-
     private Button cancelButton;
-
     private String nodePath = "";
-
     private ScrollPanel scrollPanel;
 
     /**
@@ -77,16 +69,15 @@ public class BookmarkPopup extends DialogBox {
 
         textBox = new TextBox();
         textBox.setStyleName("okm-Input");
-        textBox.setVisibleLength(40);
         textBox.setMaxLength(90);
+        textBox.setWidth("300px");
 
         textBox.addKeyPressHandler(new KeyPressHandler() {
             @Override
-            public void onKeyPress(final KeyPressEvent event) {
+            public void onKeyPress(KeyPressEvent event) {
                 if ((char) KeyCodes.KEY_ENTER == event.getCharCode()) {
                     if (!nodePath.equals("") && !textBox.getText().equals("")) {
-                        Main.get().mainPanel.topPanel.mainMenu.bookmark.add(
-                                nodePath, textBox.getText());
+                        Main.get().mainPanel.topPanel.mainMenu.bookmark.add(nodePath, textBox.getText());
                     }
                     reset();
                     hide();
@@ -94,29 +85,25 @@ public class BookmarkPopup extends DialogBox {
             }
         });
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        reset();
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                reset();
+                hide();
+            }
+        });
         cancelButton.setStyleName("okm-NoButton");
 
-        acceptButton = new Button(Main.i18n("button.accept"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (!nodePath.equals("")
-                                && !textBox.getText().equals("")) {
-                            Main.get().mainPanel.topPanel.mainMenu.bookmark
-                                    .add(nodePath, textBox.getText());
-                        }
-                        reset();
-                        hide();
-                    }
-                });
+        acceptButton = new Button(Main.i18n("button.accept"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!nodePath.equals("") && !textBox.getText().equals("")) {
+                    Main.get().mainPanel.topPanel.mainMenu.bookmark.add(nodePath, textBox.getText());
+                }
+                reset();
+                hide();
+            }
+        });
         acceptButton.setStyleName("okm-AddButton ");
 
         hPanel.add(cancelButton);
@@ -132,11 +119,9 @@ public class BookmarkPopup extends DialogBox {
 
         valuesPanel.add(name);
         valuesPanel.add(scrollPanel);
-        valuesPanel.setCellHorizontalAlignment(name,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        valuesPanel.setCellHorizontalAlignment(scrollPanel,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        valuesPanel.setWidth("300");
+        valuesPanel.setCellHorizontalAlignment(name, HorizontalPanel.ALIGN_LEFT);
+        valuesPanel.setCellHorizontalAlignment(scrollPanel, HorizontalPanel.ALIGN_LEFT);
+        valuesPanel.setWidth("300px");
 
         vPanel.setWidth("310px");
         vPanel.setHeight("100px");
@@ -147,12 +132,9 @@ public class BookmarkPopup extends DialogBox {
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(name,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        vPanel.setCellHorizontalAlignment(valuesPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(name, VerticalPanel.ALIGN_LEFT);
+        vPanel.setCellHorizontalAlignment(valuesPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
         vPanel.removeStyleDependentName("okm-DisableSelect");
 
         center();
@@ -174,7 +156,7 @@ public class BookmarkPopup extends DialogBox {
      * Show the popup bookmark
      * 
      */
-    public void show(final String nodePath, final String name) {
+    public void show(String nodePath, String name) {
         setText(Main.i18n("bookmark.label"));
         this.nodePath = nodePath;
         textBox.setText(name);

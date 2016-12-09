@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -52,7 +52,7 @@ import com.openkm.module.db.stuff.SetFieldBridge;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NodeMail extends NodeBase {
     private static final long serialVersionUID = 1L;
-
+    private static final int MAX_SUBJECT = 256;
     public static final String CONTENT_FIELD = "content";
 
     @Column(name = "NML_SIZE")
@@ -100,7 +100,7 @@ public class NodeMail extends NodeBase {
     @CalendarBridge(resolution = Resolution.DAY)
     private Calendar receivedDate;
 
-    @Column(name = "NML_SUBJECT", length = 256)
+    @Column(name = "NML_SUBJECT", length = MAX_SUBJECT)
     @Field(index = Index.TOKENIZED, store = Store.YES)
     private String subject;
 
@@ -118,7 +118,7 @@ public class NodeMail extends NodeBase {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -126,7 +126,7 @@ public class NodeMail extends NodeBase {
         return from;
     }
 
-    public void setFrom(final String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
@@ -134,7 +134,7 @@ public class NodeMail extends NodeBase {
         return reply;
     }
 
-    public void setReply(final Set<String> reply) {
+    public void setReply(Set<String> reply) {
         this.reply = reply;
     }
 
@@ -142,7 +142,7 @@ public class NodeMail extends NodeBase {
         return to;
     }
 
-    public void setTo(final Set<String> to) {
+    public void setTo(Set<String> to) {
         this.to = to;
     }
 
@@ -150,7 +150,7 @@ public class NodeMail extends NodeBase {
         return cc;
     }
 
-    public void setCc(final Set<String> cc) {
+    public void setCc(Set<String> cc) {
         this.cc = cc;
     }
 
@@ -158,7 +158,7 @@ public class NodeMail extends NodeBase {
         return bcc;
     }
 
-    public void setBcc(final Set<String> bcc) {
+    public void setBcc(Set<String> bcc) {
         this.bcc = bcc;
     }
 
@@ -166,7 +166,7 @@ public class NodeMail extends NodeBase {
         return sentDate;
     }
 
-    public void setSentDate(final Calendar sentDate) {
+    public void setSentDate(Calendar sentDate) {
         this.sentDate = sentDate;
     }
 
@@ -174,7 +174,7 @@ public class NodeMail extends NodeBase {
         return receivedDate;
     }
 
-    public void setReceivedDate(final Calendar receivedDate) {
+    public void setReceivedDate(Calendar receivedDate) {
         this.receivedDate = receivedDate;
     }
 
@@ -182,15 +182,19 @@ public class NodeMail extends NodeBase {
         return subject;
     }
 
-    public void setSubject(final String subject) {
-        this.subject = subject;
+    public void setSubject(String subject) {
+        if (subject != null && subject.length() > MAX_SUBJECT) {
+            this.subject = subject.substring(0, MAX_SUBJECT);
+        } else {
+            this.subject = subject;
+        }
     }
 
     public String getContent() {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -198,16 +202,16 @@ public class NodeMail extends NodeBase {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", context=").append(context);
+        sb.append(", path=").append(path);
         sb.append(", parent=").append(parent);
         sb.append(", author=").append(author);
         sb.append(", name=").append(name);

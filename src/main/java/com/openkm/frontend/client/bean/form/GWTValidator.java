@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTValidator implements IsSerializable {
     private String type = "";
-
     private String parameter = "";
 
     public String getType() {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -46,13 +45,12 @@ public class GWTValidator implements IsSerializable {
         return parameter;
     }
 
-    public void setParameter(final String parameter) {
+    public void setParameter(String parameter) {
         this.parameter = parameter;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("type=");
         sb.append(type);

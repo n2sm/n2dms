@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.widget.foldertree;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -48,17 +49,10 @@ import com.openkm.frontend.client.util.Util;
  */
 public class FolderSelectTree extends Composite {
     private Tree tree;
-
     private TreeItem actualItem;
-
-    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT
-            .create(OKMFolderService.class);
-
-    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
-
-    TreeItem rootItem = new TreeItem(Util.imageItemHTML(
-            "img/menuitem_childs.gif", "root_schema", "top"));
+    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT.create(OKMFolderService.class);
+    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
+    TreeItem rootItem = new TreeItem(Util.imageItemHTML("img/menuitem_childs.gif", "root_schema", "top"));
 
     /**
      * Folder Tree
@@ -74,9 +68,9 @@ public class FolderSelectTree extends Composite {
         tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
 
             @Override
-            public void onSelection(final SelectionEvent<TreeItem> event) {
+            public void onSelection(SelectionEvent<TreeItem> event) {
                 boolean refresh = true;
-                final TreeItem item = event.getSelectedItem();
+                TreeItem item = event.getSelectedItem();
 
                 // Enables or disables move button ( evalues security to move to folder with permissions )
                 evaluateSecurityToAction(item);
@@ -114,8 +108,7 @@ public class FolderSelectTree extends Composite {
             actualItem.getChild(0).remove();
         }
 
-        final int mainPanelView = Main.get().mainPanel.desktop.navigator
-                .getStackIndex();
+        int mainPanelView = Main.get().mainPanel.desktop.navigator.getStackIndex();
 
         switch (mainPanelView) {
         case UIDesktopConstants.NAVIGATOR_TAXONOMY:
@@ -161,7 +154,7 @@ public class FolderSelectTree extends Composite {
      * 
      * @param view New view to see
      */
-    public void changeView(final int view) {
+    public void changeView(int view) {
         actualItem = rootItem;
         while (actualItem.getChildCount() > 0) {
             actualItem.getChild(0).remove();
@@ -200,8 +193,7 @@ public class FolderSelectTree extends Composite {
      * Refresh asyncronous subtree branch
      */
     final AsyncCallback<List<GWTFolder>> callbackGetChilds = new AsyncCallback<List<GWTFolder>>() {
-        @Override
-        public void onSuccess(final List<GWTFolder> result) {
+        public void onSuccess(List<GWTFolder> result) {
             boolean directAdd = true;
 
             // If has no childs directly add values is permited
@@ -221,8 +213,9 @@ public class FolderSelectTree extends Composite {
             }
 
             // Ads folders childs if exists
-            for (final GWTFolder folder : result) {
-                final TreeItem folderItem = new TreeItem(folder.getName());
+            for (Iterator<GWTFolder> it = result.iterator(); it.hasNext();) {
+                GWTFolder folder = it.next();
+                TreeItem folderItem = new TreeItem(folder.getName());
                 folderItem.setUserObject(folder);
                 folderItem.setStyleName("okm-TreeItem");
 
@@ -241,8 +234,7 @@ public class FolderSelectTree extends Composite {
             evaluesFolderIcon(actualItem);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetChilds", caught);
         }
     };
@@ -251,8 +243,7 @@ public class FolderSelectTree extends Composite {
      * Gets asyncronous root node
      */
     final AsyncCallback<GWTFolder> callbackGetRootFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             // Only executes on initalization and the actualItem is root 
             // element on initialization
             //We put the id on root			
@@ -268,8 +259,7 @@ public class FolderSelectTree extends Composite {
 
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetRoot", caught);
         }
     };
@@ -279,8 +269,8 @@ public class FolderSelectTree extends Composite {
      * 
      * @param path The folder path selected to list items
      */
-    public void getChilds(final String path) {
-        folderService.getChilds(path, false, callbackGetChilds);
+    public void getChilds(String path) {
+        folderService.getChilds(path, false, null, callbackGetChilds);
     }
 
     /**
@@ -294,12 +284,11 @@ public class FolderSelectTree extends Composite {
      * Gets asyncronous root node
      */
     final AsyncCallback<GWTFolder> callbackGetTemplatesFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             // Only executes on initalization and the actualItem is root 
             // element on initialization
             //We put the id on root
-            final GWTFolder folderItem = result;
+            GWTFolder folderItem = result;
 
             actualItem.setUserObject(folderItem);
             evaluesFolderIcon(actualItem);
@@ -309,11 +298,10 @@ public class FolderSelectTree extends Composite {
             // Enables or disables move button ( evalues security to move to folder with permissions )
             evaluateSecurityToAction(actualItem);
 
-            getChilds(result.getPath());
+            getChilds(((GWTFolder) result).getPath());
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetTemplate", caught);
         }
     };
@@ -322,12 +310,11 @@ public class FolderSelectTree extends Composite {
      * Gets asyncronous root node
      */
     final AsyncCallback<GWTFolder> callbackGetMailFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             // Only executes on initalization and the actualItem is root 
             // element on initialization
             //We put the id on root
-            final GWTFolder folderItem = result;
+            GWTFolder folderItem = result;
 
             actualItem.setUserObject(folderItem);
             evaluesFolderIcon(actualItem);
@@ -337,11 +324,10 @@ public class FolderSelectTree extends Composite {
             // Enables or disables move button ( evalues security to move to folder with permissions )
             evaluateSecurityToAction(actualItem);
 
-            getChilds(result.getPath());
+            getChilds(((GWTFolder) result).getPath());
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getMail", caught);
         }
     };
@@ -350,12 +336,11 @@ public class FolderSelectTree extends Composite {
      * Gets asyncronous personal documents node
      */
     final AsyncCallback<GWTFolder> callbackGetPersonalFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             // Only executes on initalization and the actualItem is root 
             // element on initialization
             //We put the id on root
-            final GWTFolder folderItem = result;
+            GWTFolder folderItem = result;
 
             actualItem.setUserObject(folderItem);
             evaluesFolderIcon(actualItem);
@@ -365,11 +350,10 @@ public class FolderSelectTree extends Composite {
             // Enables or disables move button ( evalues security to move to folder with permissions )
             evaluateSecurityToAction(actualItem);
 
-            getChilds(result.getPath());
+            getChilds(((GWTFolder) result).getPath());
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetPersonal", caught);
         }
     };
@@ -378,12 +362,11 @@ public class FolderSelectTree extends Composite {
      * Gets asyncronous gategories documents node
      */
     final AsyncCallback<GWTFolder> callbackGetCategoriesFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             // Only executes on initalization and the actualItem is root 
             // element on initialization
             //We put the id on root
-            final GWTFolder folderItem = result;
+            GWTFolder folderItem = result;
 
             actualItem.setUserObject(folderItem);
             evaluesFolderIcon(actualItem);
@@ -393,11 +376,10 @@ public class FolderSelectTree extends Composite {
             // Enables or disables move button ( evalues security to move to folder with permissions )
             evaluateSecurityToAction(actualItem);
 
-            getChilds(result.getPath());
+            getChilds(((GWTFolder) result).getPath());
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetCategories", caught);
         }
     };
@@ -433,8 +415,8 @@ public class FolderSelectTree extends Composite {
     /**
      * Refresh the tree node
      */
-    public void refresh(final boolean reset) {
-        final String path = ((GWTFolder) actualItem.getUserObject()).getPath();
+    public void refresh(boolean reset) {
+        String path = ((GWTFolder) actualItem.getUserObject()).getPath();
         getChilds(path);
     }
 
@@ -443,9 +425,9 @@ public class FolderSelectTree extends Composite {
      * 
      * @param actualItem The actual item active
      */
-    public void hideAllBranch(final TreeItem actualItem) {
+    public void hideAllBranch(TreeItem actualItem) {
         int i = 0;
-        final int count = actualItem.getChildCount();
+        int count = actualItem.getChildCount();
 
         for (i = 0; i < count; i++) {
             actualItem.getChild(i).setVisible(false);
@@ -458,18 +440,18 @@ public class FolderSelectTree extends Composite {
      * @param actualItem The actual item active
      * @param newItem New item to be added, or refreshed
      */
-    public void addFolder(final TreeItem actualItem, final TreeItem newItem) {
+    public void addFolder(TreeItem actualItem, TreeItem newItem) {
         int i = 0;
         boolean found = false;
-        final int count = actualItem.getChildCount();
+        int count = actualItem.getChildCount();
         GWTFolder folder;
-        final GWTFolder newFolder = (GWTFolder) newItem.getUserObject();
-        final String folderPath = newFolder.getPath();
+        GWTFolder newFolder = (GWTFolder) newItem.getUserObject();
+        String folderPath = newFolder.getPath();
 
         for (i = 0; i < count; i++) {
             folder = (GWTFolder) actualItem.getChild(i).getUserObject();
             // If item is found actualizate values
-            if (folder.getPath().equals(folderPath)) {
+            if ((folder).getPath().equals(folderPath)) {
                 found = true;
                 actualItem.getChild(i).setVisible(true);
                 actualItem.getChild(i).setUserObject(newFolder);
@@ -496,26 +478,22 @@ public class FolderSelectTree extends Composite {
      * Evalues actual folder icon to prevent other user interaction with the same folder
      * this ensures icon and object hasChildsValue are consistent
      */
-    public void evaluesFolderIcon(final TreeItem item) {
-        final GWTFolder folderItem = (GWTFolder) item.getUserObject();
+    public void evaluesFolderIcon(TreeItem item) {
+        GWTFolder folderItem = (GWTFolder) item.getUserObject();
         preventFolderInconsitences(item);
 
         // Looks if must change icon on parent if now has no childs and properties with user security atention
         if ((folderItem.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
             if (folderItem.isHasChildren()) {
-                item.setHTML(Util.imageItemHTML("img/menuitem_childs.gif",
-                        folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", folderItem.getName(), "top"));
             } else {
-                item.setHTML(Util.imageItemHTML("img/menuitem_empty.gif",
-                        folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", folderItem.getName(), "top"));
             }
         } else {
             if (folderItem.isHasChildren()) {
-                item.setHTML(Util.imageItemHTML("img/menuitem_childs_ro.gif",
-                        folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_childs_ro.gif", folderItem.getName(), "top"));
             } else {
-                item.setHTML(Util.imageItemHTML("img/menuitem_empty_ro.gif",
-                        folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_empty_ro.gif", folderItem.getName(), "top"));
             }
         }
     }
@@ -526,8 +504,8 @@ public class FolderSelectTree extends Composite {
      * 
      * @param item The tree node
      */
-    public void preventFolderInconsitences(final TreeItem item) {
-        final GWTFolder folderItem = (GWTFolder) item.getUserObject();
+    public void preventFolderInconsitences(TreeItem item) {
+        GWTFolder folderItem = (GWTFolder) item.getUserObject();
 
         // Case that must remove all items node
         if (item.getChildCount() > 0 && !folderItem.isHasChildren()) {
@@ -546,7 +524,7 @@ public class FolderSelectTree extends Composite {
      * 
      * @param item The tree item
      */
-    public void evaluateSecurityToAction(final TreeItem item) {
+    public void evaluateSecurityToAction(TreeItem item) {
         // Enables or disables move button
         if ((((GWTFolder) item.getUserObject()).getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
             Main.get().activeFolderTree.folderSelectPopup.enable(true);

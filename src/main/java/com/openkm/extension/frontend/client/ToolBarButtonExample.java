@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,20 +45,16 @@ import com.openkm.frontend.client.extension.widget.toolbar.ToolBarButtonExtensio
  */
 public class ToolBarButtonExample {
     ToolBarButton button;
-
     String title = "title";
-
     String lang = "en-GB";
 
     public ToolBarButtonExample() {
-        button = new ToolBarButton(new Image(
-                OKMExtensionBundleExampleResources.INSTANCE.box()), title,
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        Window.alert("make some operation");
-                    }
-                });
+        button = new ToolBarButton(new Image(OKMExtensionBundleExampleResources.INSTANCE.box()), title, new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Window.alert("make some operation");
+            }
+        });
     }
 
     /**
@@ -74,30 +70,26 @@ public class ToolBarButtonExample {
      * @author jllort
      * 
      */
-    private class ToolBarButton extends ToolBarButtonExtension implements
-            ToolBarHandlerExtension, LanguageHandlerExtension {
+    private class ToolBarButton extends ToolBarButtonExtension implements ToolBarHandlerExtension, LanguageHandlerExtension {
 
-        public ToolBarButton(final Image image, final String title,
-                final ClickHandler handler) {
+        public ToolBarButton(Image image, String title, ClickHandler handler) {
             super(image, title, handler);
         }
 
         @Override
-        public void checkPermissions(final GWTFolder folder,
-                final GWTFolder folderParent, final int originPanel) {
+        public void checkPermissions(GWTFolder folder, GWTFolder folderParent, int originPanel) {
         }
 
         @Override
-        public void checkPermissions(final GWTDocument doc,
-                final GWTFolder folder) {
+        public void checkPermissions(GWTDocument doc, GWTFolder folder) {
         }
 
         @Override
-        public void checkPermissions(final GWTMail mail, final GWTFolder folder) {
+        public void checkPermissions(GWTMail mail, GWTFolder folder) {
         }
 
         @Override
-        public void enable(final boolean enable) {
+        public void enable(boolean enable) {
         }
 
         @Override
@@ -106,14 +98,14 @@ public class ToolBarButtonExample {
         }
 
         @Override
-        public void onChange(final ToolBarEventConstant event) {
+        public void onChange(ToolBarEventConstant event) {
             if (event.equals(HasToolBarEvent.EXECUTE_ADD_DOCUMENT)) {
                 Window.alert("executed add document - " + event.getType());
             }
         }
 
         @Override
-        public void onChange(final LanguageEventConstant event) {
+        public void onChange(LanguageEventConstant event) {
             if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
                 Window.alert("language changed");
             }

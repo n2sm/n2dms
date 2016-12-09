@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,37 +36,40 @@ import com.openkm.frontend.client.util.Util;
  * Search result menu
  * 
  * @author jllort
+ *
  */
 public class Menu extends Composite {
 
     private boolean downloadOption = false;
-
     private boolean goOption = false;
+    private boolean findSimilarDocumentOption = false;
 
     private MenuBar searchMenu;
-
     private MenuItem download;
-
     private MenuItem go;
+    private MenuItem findSimilarDocument;
 
     /**
      * Browser menu
      */
     public Menu() {
-        // The item selected must be called on style.css : .okm-MenuBar
-        // .gwt-MenuItem-selected
+        // The item selected must be called on style.css : .okm-MenuBar .gwt-MenuItem-selected
 
         // First initialize language values
         searchMenu = new MenuBar(true);
-        download = new MenuItem(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("search.result.menu.download")), true, downloadFile);
+        download =
+                new MenuItem(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("search.result.menu.download")), true, downloadFile);
         download.addStyleName("okm-MenuItem");
-        go = new MenuItem(Util.menuHTML("img/icon/actions/goto_folder.gif",
-                Main.i18n("search.result.menu.go.folder")), true, goDirectory);
+        go = new MenuItem(Util.menuHTML("img/icon/actions/goto_folder.gif", Main.i18n("search.result.menu.go.folder")), true, goDirectory);
         go.addStyleName("okm-MenuItem");
+        findSimilarDocument =
+                new MenuItem(Util.menuHTML("img/icon/actions/similar_find.png", Main.i18n("general.menu.file.find.similar.document")),
+                        true, findSimilarOKM);
+        findSimilarDocument.addStyleName("okm-MenuItem");
 
         searchMenu.addItem(download);
         searchMenu.addItem(go);
+        searchMenu.addItem(findSimilarDocument);
         searchMenu.setStyleName("okm-MenuBar");
 
         initWidget(searchMenu);
@@ -74,11 +77,9 @@ public class Menu extends Composite {
 
     // Command menu to download file
     Command downloadFile = new Command() {
-        @Override
         public void execute() {
             if (downloadOption) {
-                Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult
-                        .downloadDocument();
+                Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.downloadDocument();
             }
             hide();
         }
@@ -86,32 +87,39 @@ public class Menu extends Composite {
 
     // Command menu to go directory file
     Command goDirectory = new Command() {
-        @Override
         public void execute() {
             if (goOption) {
-                Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult
-                        .openAllFolderPath();
+                Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.openAllFolderPath();
             }
             hide();
         }
     };
 
+    // Command menu to find similardocument
+    Command findSimilarOKM = new Command() {
+        public void execute() {
+            if (findSimilarDocumentOption) {
+                Main.get().mainPanel.topPanel.toolBar.executeFindSimilarDocument();
+                hide();
+            }
+        }
+    };
+
     /**
-     * Refresh language values
+     *  Refresh language values
      */
     public void langRefresh() {
-        download.setHTML(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("search.result.menu.download")));
-        go.setHTML(Util.menuHTML("img/icon/actions/goto_folder.gif",
-                Main.i18n("search.result.menu.go.folder")));
+        download.setHTML(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("search.result.menu.download")));
+        go.setHTML(Util.menuHTML("img/icon/actions/goto_folder.gif", Main.i18n("search.result.menu.go.folder")));
+        findSimilarDocument
+                .setHTML(Util.menuHTML("img/icon/actions/similar_find.png", Main.i18n("general.menu.file.find.similar.document")));
     }
 
     /**
      * Hide popup menu
      */
     public void hide() {
-        Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.menuPopup
-                .hide();
+        Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.menuPopup.hide();
     }
 
     /**
@@ -119,9 +127,10 @@ public class Menu extends Composite {
      * 
      * @param folder
      */
-    public void checkMenuOptionPermissions(final GWTFolder folder) {
+    public void checkMenuOptionPermissions(GWTFolder folder) {
         downloadOption = false;
         goOption = true;
+        findSimilarDocumentOption = false;
     }
 
     /**
@@ -129,9 +138,10 @@ public class Menu extends Composite {
      * 
      * @param doc
      */
-    public void checkMenuOptionPermissions(final GWTDocument doc) {
+    public void checkMenuOptionPermissions(GWTDocument doc) {
         downloadOption = true;
         goOption = true;
+        findSimilarDocumentOption = true;
     }
 
     /**
@@ -139,9 +149,10 @@ public class Menu extends Composite {
      * 
      * @param mail
      */
-    public void checkMenuOptionPermissions(final GWTMail mail) {
+    public void checkMenuOptionPermissions(GWTMail mail) {
         downloadOption = true;
         goOption = true;
+        findSimilarDocumentOption = false;
     }
 
     /**
@@ -158,13 +169,15 @@ public class Menu extends Composite {
         } else {
             disable(go);
         }
-        if (Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.table
-                .isFolderSelected()) {
-            go.setHTML(Util.menuHTML("img/icon/actions/goto_folder.gif",
-                    Main.i18n("search.result.menu.go.folder")));
+        if (findSimilarDocumentOption) {
+            enable(findSimilarDocument);
         } else {
-            go.setHTML(Util.menuHTML("img/icon/actions/goto_document.gif",
-                    Main.i18n("search.result.menu.go.document")));
+            disable(findSimilarDocument);
+        }
+        if (Main.get().mainPanel.search.searchBrowser.searchResult.searchCompactResult.table.isFolderSelected()) {
+            go.setHTML(Util.menuHTML("img/icon/actions/goto_folder.gif", Main.i18n("search.result.menu.go.folder")));
+        } else {
+            go.setHTML(Util.menuHTML("img/icon/actions/goto_document.gif", Main.i18n("search.result.menu.go.document")));
         }
     }
 
@@ -173,7 +186,7 @@ public class Menu extends Composite {
      * 
      * @param menuItem The menu item
      */
-    public void enable(final MenuItem menuItem) {
+    public void enable(MenuItem menuItem) {
         menuItem.addStyleName("okm-MenuItem");
         menuItem.removeStyleName("okm-MenuItem-strike");
     }
@@ -183,7 +196,7 @@ public class Menu extends Composite {
      * 
      * @param menuItem The menu item
      */
-    public void disable(final MenuItem menuItem) {
+    public void disable(MenuItem menuItem) {
         menuItem.removeStyleName("okm-MenuItem");
         menuItem.addStyleName("okm-MenuItem-strike");
     }
@@ -193,12 +206,15 @@ public class Menu extends Composite {
      * 
      * @param option
      */
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
         if (!option.isDownloadOption()) {
             searchMenu.removeItem(download);
         }
         if (!option.isGotoFolderOption()) {
             searchMenu.removeItem(go);
+        }
+        if (!option.isSimilarDocumentVisible()) {
+            searchMenu.removeItem(findSimilarDocument);
         }
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,22 +25,19 @@ import java.io.Serializable;
 
 public class ProfileMenuTool implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean languagesVisible;
-
     private boolean skinVisible;
-
     private boolean debugVisible;
-
     private boolean administrationVisible;
-
     private boolean preferencesVisible;
+    private boolean omrVisible;
+    private boolean convertVisible;
 
     public boolean isLanguagesVisible() {
         return languagesVisible;
     }
 
-    public void setLanguagesVisible(final boolean languagesVisible) {
+    public void setLanguagesVisible(boolean languagesVisible) {
         this.languagesVisible = languagesVisible;
     }
 
@@ -48,7 +45,7 @@ public class ProfileMenuTool implements Serializable {
         return skinVisible;
     }
 
-    public void setSkinVisible(final boolean skinVisible) {
+    public void setSkinVisible(boolean skinVisible) {
         this.skinVisible = skinVisible;
     }
 
@@ -56,7 +53,7 @@ public class ProfileMenuTool implements Serializable {
         return debugVisible;
     }
 
-    public void setDebugVisible(final boolean debugVisible) {
+    public void setDebugVisible(boolean debugVisible) {
         this.debugVisible = debugVisible;
     }
 
@@ -64,7 +61,7 @@ public class ProfileMenuTool implements Serializable {
         return administrationVisible;
     }
 
-    public void setAdministrationVisible(final boolean administrationVisible) {
+    public void setAdministrationVisible(boolean administrationVisible) {
         this.administrationVisible = administrationVisible;
     }
 
@@ -72,13 +69,28 @@ public class ProfileMenuTool implements Serializable {
         return preferencesVisible;
     }
 
-    public void setPreferencesVisible(final boolean preferencesVisible) {
+    public void setPreferencesVisible(boolean preferencesVisible) {
         this.preferencesVisible = preferencesVisible;
     }
 
-    @Override
+    public boolean isOmrVisible() {
+        return omrVisible;
+    }
+
+    public void setOmrVisible(boolean omrVisible) {
+        this.omrVisible = omrVisible;
+    }
+
+    public boolean isConvertVisible() {
+        return convertVisible;
+    }
+
+    public void setConvertVisible(boolean convertVisible) {
+        this.convertVisible = convertVisible;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("languagesVisible=");
         sb.append(languagesVisible);
@@ -90,6 +102,10 @@ public class ProfileMenuTool implements Serializable {
         sb.append(administrationVisible);
         sb.append(", preferencesVisible=");
         sb.append(preferencesVisible);
+        sb.append(", omrVisible=");
+        sb.append(omrVisible);
+        sb.append(", convertVisible=");
+        sb.append(convertVisible);
         sb.append("}");
         return sb.toString();
     }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,6 +25,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
+
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.util.Util;
 
@@ -37,9 +38,7 @@ import com.openkm.frontend.client.util.Util;
 public class Menu extends Composite {
 
     private MenuBar attachMenu;
-
     private MenuItem download;
-
     private MenuItem copy;
 
     /**
@@ -50,12 +49,10 @@ public class Menu extends Composite {
 
         // First initialize language values
         attachMenu = new MenuBar(true);
-        download = new MenuItem(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("filebrowser.menu.download")), true, downloadFile);
+        download = new MenuItem(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("filebrowser.menu.download")), true, downloadFile);
         download.addStyleName("okm-MenuItem");
         attachMenu.addItem(download);
-        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")), true, copyAttachment);
+        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")), true, copyAttachment);
         copy.addStyleName("okm-MenuItem");
         attachMenu.addItem(copy);
         attachMenu.addStyleName("okm-MenuBar");
@@ -64,20 +61,16 @@ public class Menu extends Composite {
 
     // Command menu to download attachement file
     Command downloadFile = new Command() {
-        @Override
         public void execute() {
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer
-                    .downloadAttachment();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer.downloadAttachment();
             hide();
         }
     };
 
     // Command menu to refresh actual Directory
     Command copyAttachment = new Command() {
-        @Override
         public void execute() {
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer
-                    .copyAttachment();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer.copyAttachment();
             hide();
         }
     };
@@ -86,17 +79,14 @@ public class Menu extends Composite {
      *  Refresh language values
      */
     public void langRefresh() {
-        download.setHTML(Util.menuHTML("img/icon/actions/download.gif",
-                Main.i18n("filebrowser.menu.download")));
-        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")));
+        download.setHTML(Util.menuHTML("img/icon/actions/download.gif", Main.i18n("filebrowser.menu.download")));
+        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")));
     }
 
     /**
      * Hide popup menu
      */
     public void hide() {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer.menuPopup
-                .hide();
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mailViewer.menuPopup.hide();
     }
 }

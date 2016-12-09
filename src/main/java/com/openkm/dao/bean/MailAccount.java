@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,42 +29,28 @@ public class MailAccount implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String PROTOCOL_POP3 = "pop3";
-
     public static final String PROTOCOL_POP3S = "pop3s";
-
     public static final String PROTOCOL_IMAP = "imap";
-
     public static final String PROTOCOL_IMAPS = "imaps";
 
     private long id = -1;
-
     private String user = "";
-
     private String mailProtocol = PROTOCOL_IMAP;
-
     private String mailHost = "";
-
     private String mailFolder = "";
-
     private String mailUser = "";
-
     private String mailPassword = "";
-
     private boolean mailMarkSeen = true;
-
     private boolean mailMarkDeleted = false;
-
     private long mailLastUid = 0;
-
     private Set<MailFilter> mailFilters = new HashSet<MailFilter>();
-
     private boolean active = false;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -72,7 +58,7 @@ public class MailAccount implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -80,7 +66,7 @@ public class MailAccount implements Serializable {
         return mailProtocol;
     }
 
-    public void setMailProtocol(final String mailProtocol) {
+    public void setMailProtocol(String mailProtocol) {
         this.mailProtocol = mailProtocol;
     }
 
@@ -88,7 +74,7 @@ public class MailAccount implements Serializable {
         return mailHost;
     }
 
-    public void setMailHost(final String mailHost) {
+    public void setMailHost(String mailHost) {
         this.mailHost = mailHost;
     }
 
@@ -96,7 +82,7 @@ public class MailAccount implements Serializable {
         return mailFolder;
     }
 
-    public void setMailFolder(final String mailFolder) {
+    public void setMailFolder(String mailFolder) {
         this.mailFolder = mailFolder;
     }
 
@@ -104,7 +90,7 @@ public class MailAccount implements Serializable {
         return mailUser;
     }
 
-    public void setMailUser(final String mailUser) {
+    public void setMailUser(String mailUser) {
         this.mailUser = mailUser;
     }
 
@@ -112,7 +98,7 @@ public class MailAccount implements Serializable {
         return mailPassword;
     }
 
-    public void setMailPassword(final String mailPassword) {
+    public void setMailPassword(String mailPassword) {
         this.mailPassword = mailPassword;
     }
 
@@ -120,7 +106,7 @@ public class MailAccount implements Serializable {
         return mailMarkSeen;
     }
 
-    public void setMailMarkSeen(final boolean mailMarkSeen) {
+    public void setMailMarkSeen(boolean mailMarkSeen) {
         this.mailMarkSeen = mailMarkSeen;
     }
 
@@ -128,7 +114,7 @@ public class MailAccount implements Serializable {
         return mailMarkDeleted;
     }
 
-    public void setMailMarkDeleted(final boolean mailMarkDeleted) {
+    public void setMailMarkDeleted(boolean mailMarkDeleted) {
         this.mailMarkDeleted = mailMarkDeleted;
     }
 
@@ -136,7 +122,7 @@ public class MailAccount implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -144,7 +130,7 @@ public class MailAccount implements Serializable {
         return mailFilters;
     }
 
-    public void setMailFilters(final Set<MailFilter> mailFilters) {
+    public void setMailFilters(Set<MailFilter> mailFilters) {
         this.mailFilters = mailFilters;
     }
 
@@ -152,13 +138,12 @@ public class MailAccount implements Serializable {
         return mailLastUid;
     }
 
-    public void setMailLastUid(final long mailLastUid) {
+    public void setMailLastUid(long mailLastUid) {
         this.mailLastUid = mailLastUid;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

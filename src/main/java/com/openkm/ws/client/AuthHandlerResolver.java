@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,19 +30,17 @@ import javax.xml.ws.handler.PortInfo;
 
 public class AuthHandlerResolver implements HandlerResolver {
     private String username = "";
-
     private String password = "";
 
-    public AuthHandlerResolver(final String username, final String password) {
+    public AuthHandlerResolver(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    @Override
     @SuppressWarnings("rawtypes")
-    public List<Handler> getHandlerChain(final PortInfo portInfo) {
-        final List<Handler> handlerChain = new ArrayList<Handler>();
-        final HeaderHandler hh = new HeaderHandler(username, password);
+    public List<Handler> getHandlerChain(PortInfo portInfo) {
+        List<Handler> handlerChain = new ArrayList<Handler>();
+        HeaderHandler hh = new HeaderHandler(username, password);
         handlerChain.add(hh);
         return handlerChain;
     }

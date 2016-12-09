@@ -35,6 +35,5 @@ public interface CredentialsProvider {
      * @throws LoginException if the credentials are invalid
      * @throws ServletException if an error occurrs
      */
-    public Credentials getCredentials(HttpServletRequest request)
-            throws LoginException, ServletException;
+    public Credentials getCredentials(HttpServletRequest request) throws LoginException, ServletException;
 }

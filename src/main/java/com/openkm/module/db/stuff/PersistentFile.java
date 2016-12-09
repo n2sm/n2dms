@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -37,7 +37,7 @@ public class PersistentFile {
         return file;
     }
 
-    public void setFile(final File file) {
+    public void setFile(File file) {
         this.file = file;
     }
 
@@ -48,7 +48,7 @@ public class PersistentFile {
     public InputStream getInputStream() {
         try {
             return new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

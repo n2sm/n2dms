@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,19 +44,14 @@ import com.openkm.util.WebUtils;
  */
 public class LoggedUsersServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(LoggedUsersServlet.class);
 
-    private static Logger log = LoggerFactory
-            .getLogger(LoggedUsersServlet.class);
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         updateSessionManager(request);
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
 
         if (action.equals("messageCreate")) {
             create(userId, request, response);
@@ -75,102 +70,83 @@ public class LoggedUsersServlet extends BaseServlet {
         }
     }
 
-    public void list(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
-        final ServletContext sc = getServletContext();
-        final List<HttpSessionInfo> sessions = HttpSessionManager.getInstance()
-                .getSessions();
+    public void list(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ServletContext sc = getServletContext();
+        List<HttpSessionInfo> sessions = HttpSessionManager.getInstance().getSessions();
         sc.setAttribute("sessions", sessions);
-        sc.getRequestDispatcher("/admin/logged_users.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/logged_users.jsp").forward(request, response);
 
         // Activity log
         UserActivity.log(userId, "ADMIN_LOGGED_USERS", null, null, null);
     }
 
-    public void messageList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException {
-        final ServletContext sc = getServletContext();
+    public void messageList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        ServletContext sc = getServletContext();
         sc.setAttribute("messages", UINotificationServlet.getAll());
-        sc.getRequestDispatcher("/admin/message_list.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/message_list.jsp").forward(request, response);
 
         // Activity log
         UserActivity.log(userId, "ADMIN_GET_MESSAGES", null, null, null);
     }
 
-    public void create(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    public void create(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (WebUtils.getBoolean(request, "persist")) {
-            final int action = WebUtils.getInt(request, "me_action");
-            final String message = WebUtils.getString(request, "me_message");
-            final int type = WebUtils.getInt(request, "me_type");
-            final boolean show = WebUtils.getBoolean(request, "me_show");
+            int action = WebUtils.getInt(request, "me_action");
+            String message = WebUtils.getString(request, "me_message");
+            int type = WebUtils.getInt(request, "me_type");
+            boolean show = WebUtils.getBoolean(request, "me_show");
             UINotificationServlet.add(action, message, type, show);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_ADD_MESSAGE",
-                    String.valueOf(action), null, message);
+            UserActivity.log(userId, "ADMIN_ADD_MESSAGE", String.valueOf(action), null, message);
         } else {
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("me", new GWTUINotification());
-            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request, response);
         }
     }
 
-    public void edit(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    public void edit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (WebUtils.getBoolean(request, "persist")) {
-            final int id = WebUtils.getInt(request, "me_id");
-            final int action = WebUtils.getInt(request, "me_action");
-            final String message = WebUtils.getString(request, "me_message");
-            final int type = WebUtils.getInt(request, "me_type");
-            final boolean show = WebUtils.getBoolean(request, "me_show");
-            final GWTUINotification uin = UINotificationServlet.findById(id);
+            int id = WebUtils.getInt(request, "me_id");
+            int action = WebUtils.getInt(request, "me_action");
+            String message = WebUtils.getString(request, "me_message");
+            int type = WebUtils.getInt(request, "me_type");
+            boolean show = WebUtils.getBoolean(request, "me_show");
+            GWTUINotification uin = UINotificationServlet.findById(id);
             uin.setAction(action);
             uin.setMessage(message);
             uin.setShow(show);
             uin.setType(type);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_EDIT_MESSAGE",
-                    String.valueOf(action), null, message);
+            UserActivity.log(userId, "ADMIN_EDIT_MESSAGE", String.valueOf(action), null, message);
         } else {
-            final int id = WebUtils.getInt(request, "me_id");
-            final ServletContext sc = getServletContext();
+            int id = WebUtils.getInt(request, "me_id");
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("me", UINotificationServlet.findById(id));
-            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request, response);
         }
     }
 
-    public void delete(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    public void delete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (WebUtils.getBoolean(request, "persist")) {
-            final int id = WebUtils.getInt(request, "me_id");
+            int id = WebUtils.getInt(request, "me_id");
             UINotificationServlet.delete(id);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_DELETE_MESSAGE",
-                    String.valueOf(id), null, null);
+            UserActivity.log(userId, "ADMIN_DELETE_MESSAGE", String.valueOf(id), null, null);
         } else {
-            final int id = WebUtils.getInt(request, "me_id");
-            final ServletContext sc = getServletContext();
+            int id = WebUtils.getInt(request, "me_id");
+            ServletContext sc = getServletContext();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("me", UINotificationServlet.findById(id));
-            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/message_edit.jsp").forward(request, response);
         }
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,9 +33,7 @@ import com.openkm.core.Config;
  */
 public class WorkspaceHelper {
     // The files path
-    public static final String RDF_SKOS_VOVABULARY_PATH = Config.HOME_DIR
-            + File.separator + Config.KEA_THESAURUS_SKOS_FILE;
+    public static final String RDF_SKOS_VOVABULARY_PATH = Config.HOME_DIR + File.separator + Config.KEA_THESAURUS_SKOS_FILE;
 
-    public static final String RDF_OWL_VOVABULARY_PATH = Config.HOME_DIR
-            + File.separator + Config.KEA_THESAURUS_OWL_FILE;
+    public static final String RDF_OWL_VOVABULARY_PATH = Config.HOME_DIR + File.separator + Config.KEA_THESAURUS_OWL_FILE;
 }

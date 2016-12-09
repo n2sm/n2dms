@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,8 +34,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -54,54 +53,34 @@ import com.openkm.frontend.client.widget.dashboard.Status;
 public class WorkflowWidget extends Composite {
 
     private static final int TYPE_PENDING_TASK = 1;
-
     private static final int TYPE_POOLED_TASK = 2;
 
     private static int HEADER_SQUARE = 24;
-
     private static int SEPARATOR_HEIGHT = 20;
-
     private static int SEPARATOR_WIDTH = 20;
 
     private VerticalPanel vPanel;
-
     private SimplePanel spTop;
-
     private HorizontalPanel hPanel;
-
     private SimplePanel spLeft;
-
     private VerticalPanel vCenterPanel;
-
     private SimplePanel spRight;
-
     private Header header;
-
     private SimplePanel panelData;
-
     private FlexTable table;
-
     private Image zoomImage;
-
     private boolean zoom = false;
-
     private boolean flagZoom = true;
-
     public Status status;
-
     private String headerTextKey;
-
     private int widgetType = TYPE_PENDING_TASK;
-
     private GWTTaskInstance taskInstancePooled = null;
-
     private double processToExecuteNextTask = -1;
 
     /**
      * WorkflowWidget
      */
-    public WorkflowWidget(final String headerTextKey, final String iconUrl,
-            final boolean zoom) {
+    public WorkflowWidget(String headerTextKey, String iconUrl, boolean zoom) {
         status = new Status();
         status.setStyleName("okm-StatusPopup");
 
@@ -133,9 +112,9 @@ public class WorkflowWidget extends Composite {
         vPanel.add(spTop);
         vPanel.add(hPanel);
 
-        spTop.setHeight("" + SEPARATOR_HEIGHT);
-        spLeft.setWidth("" + SEPARATOR_WIDTH);
-        spRight.setWidth("" + SEPARATOR_WIDTH);
+        spTop.setHeight("" + SEPARATOR_HEIGHT + "px");
+        spLeft.setWidth("" + SEPARATOR_WIDTH + "px");
+        spRight.setWidth("" + SEPARATOR_WIDTH + "px");
 
         vPanel.setStyleName("okm-DashboardWidget ");
         panelData.setStyleName("data");
@@ -157,7 +136,7 @@ public class WorkflowWidget extends Composite {
      * 
      * @param text
      */
-    public void setHeaderText(final String text) {
+    public void setHeaderText(String text) {
         header.setHeaderText(text);
     }
 
@@ -166,7 +145,7 @@ public class WorkflowWidget extends Composite {
      * 
      * @param value
      */
-    public void setHeaderResults(final int value) {
+    public void setHeaderResults(int value) {
         header.setHeaderResults(value);
     }
 
@@ -175,8 +154,8 @@ public class WorkflowWidget extends Composite {
      * 
      * @param width
      */
-    public void setWidth(final int width) {
-        vCenterPanel.setWidth("" + (width - 2 * SEPARATOR_WIDTH));
+    public void setWidth(int width) {
+        vCenterPanel.setWidth("" + (width - 2 * SEPARATOR_WIDTH) + "px");
     }
 
     /**
@@ -193,33 +172,29 @@ public class WorkflowWidget extends Composite {
      * 
      * @param docList document list
      */
-    public void setTasks(final List<GWTTaskInstance> taskIntanceList) {
+    public void setTasks(List<GWTTaskInstance> taskIntanceList) {
         int tasksNotViewed = 0;
         removeAllRows();
 
-        for (final ListIterator<GWTTaskInstance> it = taskIntanceList
-                .listIterator(); it.hasNext();) {
-            final int row = table.getRowCount();
+        for (ListIterator<GWTTaskInstance> it = taskIntanceList.listIterator(); it.hasNext();) {
+            int row = table.getRowCount();
             final GWTTaskInstance taskInstanceResult = it.next();
 
             if (taskInstanceResult.getProcessInstance().getId() == processToExecuteNextTask) {
                 processToExecuteNextTask = -1;
-                Main.get().mainPanel.dashboard.workflowDashboard.workflowFormPanel
-                        .setTaskInstance(taskInstanceResult);
+                Main.get().mainPanel.dashboard.workflowDashboard.workflowFormPanel.setTaskInstance(taskInstanceResult);
             }
 
-            final Anchor taskName = new Anchor();
+            Anchor taskName = new Anchor();
             taskName.setText(taskInstanceResult.getName());
-            taskName.setTitle(taskInstanceResult.getProcessInstance()
-                    .getProcessDefinition().getName());
+            taskName.setTitle(taskInstanceResult.getProcessInstance().getProcessDefinition().getName());
 
             switch (widgetType) {
             case TYPE_PENDING_TASK:
                 taskName.addClickHandler(new ClickHandler() {
                     @Override
-                    public void onClick(final ClickEvent event) {
-                        Main.get().mainPanel.dashboard.workflowDashboard.workflowFormPanel
-                                .setTaskInstance(taskInstanceResult);
+                    public void onClick(ClickEvent event) {
+                        Main.get().mainPanel.dashboard.workflowDashboard.workflowFormPanel.setTaskInstance(taskInstanceResult);
                     }
                 });
                 break;
@@ -227,9 +202,8 @@ public class WorkflowWidget extends Composite {
             case TYPE_POOLED_TASK:
                 taskName.addClickHandler(new ClickHandler() {
                     @Override
-                    public void onClick(final ClickEvent event) {
-                        Main.get().confirmPopup
-                                .setConfirm(ConfirmPopup.CONFIRM_GET_POOLED_WORKFLOW_TASK);
+                    public void onClick(ClickEvent event) {
+                        Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_GET_POOLED_WORKFLOW_TASK);
                         Main.get().confirmPopup.show();
                         taskInstancePooled = taskInstanceResult;
                     }
@@ -241,13 +215,11 @@ public class WorkflowWidget extends Composite {
 
             table.setHTML(row, 0, "");
             table.setWidget(row, 1, taskName);
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.date.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
             table.setHTML(row, 2, dtf.format(taskInstanceResult.getCreate()));
-            table.getCellFormatter().setWidth(row, 0, "20");
+            table.getCellFormatter().setWidth(row, 0, "20px");
             table.getCellFormatter().setWidth(row, 1, "100%"); // Table sets de 100% of space
-            table.getCellFormatter().setHorizontalAlignment(row, 2,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
+            table.getCellFormatter().setHorizontalAlignment(row, 2, HasAlignment.ALIGN_RIGHT);
 
             tasksNotViewed++;
             table.getRowFormatter().setStyleName(row, "okm-NotViewed");
@@ -282,29 +254,20 @@ public class WorkflowWidget extends Composite {
     private class Header extends HorizontalPanel implements HasClickHandlers {
 
         private SimplePanel spLeft;
-
         private SimplePanel spRight;
-
         private SimplePanel iconImagePanel;
-
         private HorizontalPanel center;
-
         private HorizontalPanel titlePanel;
-
         private HTML headerText;
-
         private HTML headerResults;
-
         private HTML headerNotViewedResults;
-
         private int notViewed = 0;
-
         private Image iconImage;
 
         /**
          * Header
          */
-        public Header(final String iconUrl, final boolean visible) {
+        public Header(String iconUrl, boolean visible) {
             super();
             sinkEvents(Event.ONCLICK);
 
@@ -320,7 +283,7 @@ public class WorkflowWidget extends Composite {
 
             addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     if (flagZoom) {
                         zoom = !zoom;
                         table.setVisible(zoom);
@@ -356,36 +319,25 @@ public class WorkflowWidget extends Composite {
             center.add(headerNotViewedResults);
             center.add(zoomImage);
 
-            spLeft.setSize("" + HEADER_SQUARE, "" + HEADER_SQUARE);
+            spLeft.setSize("" + HEADER_SQUARE + "px", "" + HEADER_SQUARE + "px");
             center.setWidth("100%");
-            center.setCellVerticalAlignment(iconImagePanel,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            center.setCellHorizontalAlignment(iconImagePanel,
-                    HasHorizontalAlignment.ALIGN_LEFT);
-            center.setCellHorizontalAlignment(zoomImage,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
-            center.setCellVerticalAlignment(titlePanel,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            center.setCellVerticalAlignment(headerNotViewedResults,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            center.setCellHorizontalAlignment(headerNotViewedResults,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
+            center.setCellVerticalAlignment(iconImagePanel, HasAlignment.ALIGN_MIDDLE);
+            center.setCellHorizontalAlignment(iconImagePanel, HasAlignment.ALIGN_LEFT);
+            center.setCellHorizontalAlignment(zoomImage, HasAlignment.ALIGN_RIGHT);
+            center.setCellVerticalAlignment(titlePanel, HasAlignment.ALIGN_MIDDLE);
+            center.setCellVerticalAlignment(headerNotViewedResults, HasAlignment.ALIGN_MIDDLE);
+            center.setCellHorizontalAlignment(headerNotViewedResults, HasAlignment.ALIGN_RIGHT);
 
-            center.setCellVerticalAlignment(zoomImage,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            center.setCellWidth(iconImagePanel, "22");
-            center.setCellWidth(zoomImage, "16");
-            center.setHeight("" + HEADER_SQUARE);
-            spRight.setSize("" + HEADER_SQUARE, "" + HEADER_SQUARE);
+            center.setCellVerticalAlignment(zoomImage, HasAlignment.ALIGN_MIDDLE);
+            center.setCellWidth(iconImagePanel, "22px");
+            center.setCellWidth(zoomImage, "16px");
+            center.setHeight("" + HEADER_SQUARE + "px");
+            spRight.setSize("" + HEADER_SQUARE + "px", "" + HEADER_SQUARE + "px");
 
-            titlePanel.setCellVerticalAlignment(headerResults,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            titlePanel.setCellVerticalAlignment(headerNotViewedResults,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            titlePanel.setCellHorizontalAlignment(headerResults,
-                    HasHorizontalAlignment.ALIGN_LEFT);
-            titlePanel.setCellHorizontalAlignment(headerNotViewedResults,
-                    HasHorizontalAlignment.ALIGN_LEFT);
+            titlePanel.setCellVerticalAlignment(headerResults, HasAlignment.ALIGN_MIDDLE);
+            titlePanel.setCellVerticalAlignment(headerNotViewedResults, HasAlignment.ALIGN_MIDDLE);
+            titlePanel.setCellHorizontalAlignment(headerResults, HasAlignment.ALIGN_LEFT);
+            titlePanel.setCellHorizontalAlignment(headerNotViewedResults, HasAlignment.ALIGN_LEFT);
 
             add(spLeft);
             add(center);
@@ -397,7 +349,7 @@ public class WorkflowWidget extends Composite {
 
             setCellWidth(spLeft, "" + HEADER_SQUARE);
             setCellWidth(spRight, "" + HEADER_SQUARE);
-            setCellVerticalAlignment(center, HasVerticalAlignment.ALIGN_MIDDLE);
+            setCellVerticalAlignment(center, HasAlignment.ALIGN_MIDDLE);
         }
 
         /**
@@ -405,7 +357,7 @@ public class WorkflowWidget extends Composite {
          * 
          * @param text
          */
-        public void setHeaderText(final String text) {
+        public void setHeaderText(String text) {
             headerText.setHTML(text);
         }
 
@@ -414,7 +366,7 @@ public class WorkflowWidget extends Composite {
          * 
          * @param value
          */
-        public void setHeaderResults(final int value) {
+        public void setHeaderResults(int value) {
             headerResults.setHTML("&nbsp;&nbsp;(" + value + ")&nbsp;&nbsp;");
         }
 
@@ -423,11 +375,10 @@ public class WorkflowWidget extends Composite {
          * 
          * @param value
          */
-        public void setHeaderNotViewedResults(final int value) {
+        public void setHeaderNotViewedResults(int value) {
             notViewed = value;
             if (value > 0) {
-                headerNotViewedResults.setHTML("&nbsp;" + value
-                        + "&nbsp;&nbsp;");
+                headerNotViewedResults.setHTML("&nbsp;" + value + "&nbsp;&nbsp;");
                 titlePanel.setStyleName("okm-NotViewed");
                 headerNotViewedResults.setStyleName("okm-NotViewed");
 
@@ -451,7 +402,7 @@ public class WorkflowWidget extends Composite {
          * @see com.google.gwt.event.dom.client.HasClickHandlers#addClickHandler(com.google.gwt.event.dom.client.ClickHandler)
          */
         @Override
-        public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addHandler(handler, ClickEvent.getType());
         }
     }
@@ -460,10 +411,8 @@ public class WorkflowWidget extends Composite {
      * Sets the refreshing
      */
     public void setRefreshing() {
-        final int left = getAbsoluteLeft()
-                + (getOffsetWidth() - status.getOffsetWidth()) / 2;
-        final int top = getAbsoluteTop()
-                + (getOffsetHeight() - status.getOffsetHeight()) / 2;
+        int left = getAbsoluteLeft() + ((getOffsetWidth() - status.getOffsetWidth()) / 2);
+        int top = getAbsoluteTop() + ((getOffsetHeight() - status.getOffsetHeight()) / 2);
         status.setFlag_getDashboard();
         if (zoom) {
             status.refresh(left, top);
@@ -508,8 +457,7 @@ public class WorkflowWidget extends Composite {
     /**
      * @param processToExecuteNextTask
      */
-    public void setProcessToExecuteNextTask(
-            final double processToExecuteNextTask) {
+    public void setProcessToExecuteNextTask(double processToExecuteNextTask) {
         this.processToExecuteNextTask = processToExecuteNextTask;
     }
 }

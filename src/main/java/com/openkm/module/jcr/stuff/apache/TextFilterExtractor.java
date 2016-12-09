@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import org.apache.jackrabbit.core.state.PropertyState;
+import org.apache.jackrabbit.core.value.InternalValue;
 import org.apache.jackrabbit.extractor.TextExtractor;
 
 /**
@@ -39,6 +40,12 @@ public class TextFilterExtractor implements TextExtractor {
     private final String[] types;
 
     /**
+     * The adapted text filter.
+     */
+    @SuppressWarnings({ "deprecation", "unused" })
+    private final TextFilter filter;
+
+    /**
      * Creates a text extractor adapter that supports the given content
      * types using the given text filter.
      *
@@ -46,8 +53,9 @@ public class TextFilterExtractor implements TextExtractor {
      * @param filter text filter to be adapted
      */
     @SuppressWarnings("deprecation")
-    public TextFilterExtractor(final String[] types, final TextFilter filter) {
+    public TextFilterExtractor(String[] types, TextFilter filter) {
         this.types = types;
+        this.filter = filter;
     }
 
     /**
@@ -58,7 +66,7 @@ public class TextFilterExtractor implements TextExtractor {
      * @param filter text filter to be adapted
      */
     @SuppressWarnings("deprecation")
-    public TextFilterExtractor(final String type, final TextFilter filter) {
+    public TextFilterExtractor(String type, TextFilter filter) {
         this(new String[] { type }, filter);
     }
 
@@ -67,7 +75,6 @@ public class TextFilterExtractor implements TextExtractor {
      *
      * @return supported content types
      */
-    @Override
     public String[] getContentTypes() {
         return types;
     }
@@ -84,10 +91,9 @@ public class TextFilterExtractor implements TextExtractor {
      * @return reader reader for the extracted text content
      * @throws IOException if the adapted call fails
      */
-    @Override
     @SuppressWarnings("unused")
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
+        InternalValue v = null;
         //try {
         //v = InternalValue.createTemporary(stream);
         //final InternalValue value = v;

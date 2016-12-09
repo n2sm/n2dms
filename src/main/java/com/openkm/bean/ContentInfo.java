@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,18 +31,15 @@ public class ContentInfo implements Serializable {
     private static final long serialVersionUID = -6946496467746910033L;
 
     private long folders;
-
     private long documents;
-
     private long mails;
-
     private long size;
 
     public long getMails() {
         return mails;
     }
 
-    public void setMails(final long mails) {
+    public void setMails(long mails) {
         this.mails = mails;
     }
 
@@ -50,7 +47,7 @@ public class ContentInfo implements Serializable {
         return documents;
     }
 
-    public void setDocuments(final long documents) {
+    public void setDocuments(long documents) {
         this.documents = documents;
     }
 
@@ -58,7 +55,7 @@ public class ContentInfo implements Serializable {
         return folders;
     }
 
-    public void setFolders(final long folders) {
+    public void setFolders(long folders) {
         this.folders = folders;
     }
 
@@ -66,13 +63,12 @@ public class ContentInfo implements Serializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("size=");
         sb.append(size);

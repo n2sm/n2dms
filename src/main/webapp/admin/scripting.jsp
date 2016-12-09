@@ -1,16 +1,19 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
-<%@ page import="com.openkm.util.UserActivity"%>
-<%@ page import="com.openkm.util.SecureStore"%>
-<%@ page import="com.openkm.util.WebUtils"%>
-<%@ page import="org.apache.commons.io.IOUtils"%>
-<%@ page import="bsh.Interpreter"%>
-<%@ page import="java.io.File"%>
-<%@ page import="java.io.ByteArrayOutputStream"%>
-<%@ page import="java.io.FileOutputStream"%>
-<%@ page import="java.io.FileInputStream"%>
-<%@ page import="java.io.PrintStream"%>
-<%@ page import="java.util.UUID"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.openkm.util.UserActivity" %>
+<%@ page import="com.openkm.util.SecureStore" %>
+<%@ page import="com.openkm.util.FormatUtil" %>
+<%@ page import="com.openkm.util.WebUtils" %>
+<%@ page import="com.openkm.core.Config" %>
+<%@ page import="java.util.concurrent.TimeUnit" %>
+<%@ page import="org.apache.commons.io.IOUtils" %>
+<%@ page import="bsh.Interpreter" %>
+<%@ page import="java.io.File" %>
+<%@ page import="java.io.ByteArrayOutputStream" %>
+<%@ page import="java.io.FileOutputStream" %>
+<%@ page import="java.io.FileInputStream" %>
+<%@ page import="java.io.PrintStream" %>
+<%@ page import="java.util.UUID" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -48,7 +51,7 @@
 	    $('.CodeMirror').css({"height": height});
 		
 		$dm = $('.ds').openDOMWindow({
-			height:200, width:300,
+			height:300, width:400,
 			eventType:'click',
 			overlayOpacity: '57',
 			windowSource:'iframe', windowPadding:0
@@ -58,12 +61,18 @@
     function dialogClose() {
 		$dm.closeDOMWindow();
     }
+    
+    function keepSessionAlive() {
+    	$.ajax({ type:'GET', url:'../SessionKeepAlive', cache:false, async:false });
+    }
+    
+	window.setInterval('keepSessionAlive()', <%=TimeUnit.MINUTES.toMillis(Config.KEEP_SESSION_ALIVE_INTERVAL)%>);
   </script>
   <title>Scripting</title>
 </head>
 <body>
 <%
-	if (BaseServlet.isAdmin(request)) {
+	if (BaseServlet.isMultipleInstancesAdmin(request)) {
 		String action = WebUtils.getString(request, "action");
 		String script = WebUtils.getString(request, "script");
 		String fsPath = WebUtils.getString(request, "fsPath");
@@ -72,6 +81,7 @@
 		StringBuffer scriptOutput = new StringBuffer();
 		Object scriptResult = null;
 		Exception scriptError = null;
+		long begin = System.currentTimeMillis();
 		
 		if (action.equals("Load") && !fsPath.equals("")) {
 			if (reqCsrft.equals(sesCsrft)) {
@@ -140,12 +150,18 @@
 		out.println("<a class=\"ds\" href=\"../extension/DataBrowser?action=fs&dst=fsPath\"><img src=\"img/action/browse_fs.png\"/></a>");
 		out.println("</td>");
 		out.println("<td align=\"left\">");
-		out.println("<input type=\"submit\" name=\"action\" value=\"Load\">");
-		out.println("<input type=\"submit\" name=\"action\" value=\"Save\">");
+		out.println("<input type=\"submit\" name=\"action\" value=\"Load\" class=\"loadButton\">");
+		out.println("<input type=\"submit\" name=\"action\" value=\"Save\" class=\"saveButton\">");
 		out.println("</td>");
-		out.println("<td align=\"right\"><input type=\"submit\" name=\"action\" value=\"Evaluate\"></td>");
+		out.println("<td align=\"right\"><input type=\"submit\" name=\"action\" value=\"Evaluate\" class=\"executeButton\"></td>");
 		out.println("</tr>");
 		out.println("</table>");
+		out.println("<br/>");
+		out.println("<div class=\"ok\">");
+		out.println("<center>");
+		out.println("Time: " + FormatUtil.formatMiliSeconds(System.currentTimeMillis() - begin));
+		out.println("</center>");
+		out.println("</div>");
 		out.println("<br/>");
 		out.println("<table class=\"results\" width=\"95%\">");
 		out.println("<tr><th>Script error</th></tr><tr class=\"odd\"><td>"+(scriptError==null?"":scriptError)+"</td></tr>");

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,8 +47,7 @@ public class Administration extends Composite {
         DOM.setElementProperty(iframe.getElement(), "scrolling", "no");
 
         // Commented because on IE show clear if allowtransparency=true
-        DOM.setElementProperty(iframe.getElement(), "allowtransparency",
-                "false");
+        DOM.setElementProperty(iframe.getElement(), "allowtransparency", "false");
 
         iframe.setUrl(Main.CONTEXT + "/admin/index.jsp");
         iframe.setStyleName("okm-Iframe");
@@ -62,7 +61,7 @@ public class Administration extends Composite {
      * @param width The max width of the widget
      * @param height The max height of the widget
      */
-    public void setSize(final int width, final int height) {
+    public void setSize(int width, int height) {
         iframe.setPixelSize(width - 2, height - 2);
     }
 }

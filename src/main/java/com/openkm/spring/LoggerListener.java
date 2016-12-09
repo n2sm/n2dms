@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,32 +32,28 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import com.openkm.util.GenericHolder;
 import com.openkm.util.UserActivity;
 
-public class LoggerListener implements
-        ApplicationListener<AbstractAuthenticationEvent> {
+public class LoggerListener implements ApplicationListener<AbstractAuthenticationEvent> {
     private static Logger log = LoggerFactory.getLogger(LoggerListener.class);
 
     @Override
-    public void onApplicationEvent(final AbstractAuthenticationEvent event) {
+    public void onApplicationEvent(AbstractAuthenticationEvent event) {
         if (event instanceof AuthenticationSuccessEvent) {
-            log.debug("Authentication OK: {}", event.getAuthentication()
-                    .getName());
+            log.debug("Authentication OK: {}", event.getAuthentication().getName());
 
             // Activity log
-            final Object details = event.getAuthentication().getDetails();
+            Object details = event.getAuthentication().getDetails();
             String params = null;
 
             if (details instanceof WebAuthenticationDetails) {
-                final WebAuthenticationDetails wad = (WebAuthenticationDetails) details;
+                WebAuthenticationDetails wad = (WebAuthenticationDetails) details;
                 params = wad.getRemoteAddress();
             } else if (GenericHolder.get() != null) {
                 params = (String) GenericHolder.get();
             }
 
-            UserActivity.log(event.getAuthentication().getName(), "LOGIN",
-                    null, null, params);
+            UserActivity.log(event.getAuthentication().getName(), "LOGIN", null, null, params);
         } else if (event instanceof AuthenticationFailureBadCredentialsEvent) {
-            log.info("Authentication ERROR: {}", event.getAuthentication()
-                    .getName());
+            log.info("Authentication ERROR: {}", event.getAuthentication().getName());
         }
     }
 }

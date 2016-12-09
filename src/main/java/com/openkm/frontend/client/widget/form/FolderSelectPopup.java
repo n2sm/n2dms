@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTWorkspace;
 import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
-import com.openkm.frontend.client.widget.searchin.HasSearch;
+import com.openkm.frontend.client.widget.searchin.HasPropertyHandler;
 
 /**
  * FolderSelectPopup
@@ -50,39 +50,22 @@ import com.openkm.frontend.client.widget.searchin.HasSearch;
 public class FolderSelectPopup extends DialogBox {
 
     private ListBox contextListBox;
-
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private HorizontalPanel hListPanel;
-
     private HorizontalPanel hContextPanel;
-
     private HTML contextTxt;
-
     private ScrollPanel scrollDirectoryPanel;
-
     private VerticalPanel verticalDirectoryPanel;
-
     private FolderSelectTree folderSelectTree;
-
     private Button cancelButton;
-
     private Button actionButton;
-
     private TextBox textBox;
-
-    private HasSearch search;
-
+    private HasPropertyHandler propertyHandler;
     private boolean categoriesVisible = false;
-
     private boolean thesaurusVisible = false;
-
     private boolean templatesVisible = false;
-
     private boolean personalVisible = false;
-
     private boolean mailVisible = false;
 
     /**
@@ -93,8 +76,8 @@ public class FolderSelectPopup extends DialogBox {
         super(false, true);
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("300");
-        vPanel.setHeight("200");
+        vPanel.setWidth("300px");
+        vPanel.setHeight("200px");
         hPanel = new HorizontalPanel();
         hListPanel = new HorizontalPanel();
         hContextPanel = new HorizontalPanel();
@@ -105,24 +88,22 @@ public class FolderSelectPopup extends DialogBox {
 
         contextListBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
-                folderSelectTree.changeView(Integer.parseInt(contextListBox
-                        .getValue(contextListBox.getSelectedIndex())));
+            public void onChange(ChangeEvent event) {
+                folderSelectTree.changeView(Integer.parseInt(contextListBox.getValue(contextListBox.getSelectedIndex())));
             }
         });
         hContextPanel.add(contextTxt);
         hContextPanel.add(new HTML("&nbsp;&nbsp;"));
         hContextPanel.add(contextListBox);
-        hContextPanel.setCellVerticalAlignment(contextTxt,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        hContextPanel.setCellVerticalAlignment(contextTxt, HasVerticalAlignment.ALIGN_MIDDLE);
 
         hListPanel.add(hContextPanel);
-        hListPanel.setWidth("290");
+        hListPanel.setWidth("290px");
 
         setText(Main.i18n("search.folder.filter"));
 
         scrollDirectoryPanel = new ScrollPanel();
-        scrollDirectoryPanel.setSize("290", "150");
+        scrollDirectoryPanel.setSize("290px", "150px");
         scrollDirectoryPanel.setStyleName("okm-Popup-text");
         verticalDirectoryPanel = new VerticalPanel();
         verticalDirectoryPanel.setSize("100%", "100%");
@@ -132,25 +113,23 @@ public class FolderSelectPopup extends DialogBox {
         verticalDirectoryPanel.add(folderSelectTree);
         scrollDirectoryPanel.add(verticalDirectoryPanel);
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
-        actionButton = new Button(Main.i18n("button.select"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        textBox.setValue(folderSelectTree.getActualPath());
-                        if (search != null) {
-                            search.metadataValueChanged();
-                        }
-                        hide();
-                    }
-                });
+        actionButton = new Button(Main.i18n("button.select"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                textBox.setValue(folderSelectTree.getActualPath());
+                if (propertyHandler != null) {
+                    propertyHandler.metadataValueChanged();
+                }
+                hide();
+            }
+        });
 
         vPanel.add(new HTML("<br>"));
         vPanel.add(hListPanel);
@@ -158,20 +137,17 @@ public class FolderSelectPopup extends DialogBox {
         vPanel.add(scrollDirectoryPanel);
         vPanel.add(new HTML("<br>"));
         hPanel.add(cancelButton);
-        final HTML space = new HTML();
-        space.setWidth("50");
+        HTML space = new HTML();
+        space.setWidth("50px");
         hPanel.add(space);
         hPanel.add(actionButton);
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(hListPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(scrollDirectoryPanel, "150");
+        vPanel.setCellHorizontalAlignment(hListPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(scrollDirectoryPanel, "150px");
 
         cancelButton.setStyleName("okm-Input");
         actionButton.setStyleName("okm-Input");
@@ -191,45 +167,38 @@ public class FolderSelectPopup extends DialogBox {
 
         removeAllContextListItems();
         int count = 0;
-        contextListBox.setItemText(count++,
-                Main.i18n("leftpanel.label.taxonomy"));
+        contextListBox.setItemText(count++, Main.i18n("leftpanel.label.taxonomy"));
         if (categoriesVisible) {
-            contextListBox.setItemText(count++,
-                    Main.i18n("leftpanel.label.categories"));
+            contextListBox.setItemText(count++, Main.i18n("leftpanel.label.categories"));
         }
         if (thesaurusVisible) {
-            contextListBox.setItemText(count++,
-                    Main.i18n("leftpanel.label.thesaurus"));
+            contextListBox.setItemText(count++, Main.i18n("leftpanel.label.thesaurus"));
         }
         if (templatesVisible) {
-            contextListBox.setItemText(count++,
-                    Main.i18n("leftpanel.label.templates"));
+            contextListBox.setItemText(count++, Main.i18n("leftpanel.label.templates"));
         }
         if (personalVisible) {
-            contextListBox.setItemText(count++,
-                    Main.i18n("leftpanel.label.my.documents"));
+            contextListBox.setItemText(count++, Main.i18n("leftpanel.label.my.documents"));
         }
         if (mailVisible) {
-            contextListBox.setItemText(count++,
-                    Main.i18n("leftpanel.label.mail"));
+            contextListBox.setItemText(count++, Main.i18n("leftpanel.label.mail"));
         }
     }
 
     /**
      * Shows the popup 
      */
-    public void show(final TextBox textBox, final HasSearch search) {
+    public void show(TextBox textBox, HasPropertyHandler propertyHandler) {
         this.textBox = textBox;
-        this.search = search;
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 200) / 2;
+        this.propertyHandler = propertyHandler;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 200) / 2;
         setPopupPosition(left, top);
 
         // Resets to initial tree value
         folderSelectTree.reset();
 
-        final GWTWorkspace workspace = Main.get().workspaceUserProperties
-                .getWorkspace();
+        GWTWorkspace workspace = Main.get().workspaceUserProperties.getWorkspace();
         categoriesVisible = workspace.isStackCategoriesVisible();
         thesaurusVisible = workspace.isStackThesaurusVisible();
         templatesVisible = workspace.isStackTemplatesVisible();
@@ -237,27 +206,21 @@ public class FolderSelectPopup extends DialogBox {
         mailVisible = workspace.isStackMailVisible();
 
         removeAllContextListItems();
-        contextListBox.addItem(Main.i18n("leftpanel.label.taxonomy"), ""
-                + UIDesktopConstants.NAVIGATOR_TAXONOMY);
+        contextListBox.addItem(Main.i18n("leftpanel.label.taxonomy"), "" + UIDesktopConstants.NAVIGATOR_TAXONOMY);
         if (categoriesVisible) {
-            contextListBox.addItem(Main.i18n("leftpanel.label.categories"), ""
-                    + UIDesktopConstants.NAVIGATOR_CATEGORIES);
+            contextListBox.addItem(Main.i18n("leftpanel.label.categories"), "" + UIDesktopConstants.NAVIGATOR_CATEGORIES);
         }
         if (thesaurusVisible) {
-            contextListBox.addItem(Main.i18n("leftpanel.label.thesaurus"), ""
-                    + UIDesktopConstants.NAVIGATOR_THESAURUS);
+            contextListBox.addItem(Main.i18n("leftpanel.label.thesaurus"), "" + UIDesktopConstants.NAVIGATOR_THESAURUS);
         }
         if (templatesVisible) {
-            contextListBox.addItem(Main.i18n("leftpanel.label.templates"), ""
-                    + UIDesktopConstants.NAVIGATOR_TEMPLATES);
+            contextListBox.addItem(Main.i18n("leftpanel.label.templates"), "" + UIDesktopConstants.NAVIGATOR_TEMPLATES);
         }
         if (personalVisible) {
-            contextListBox.addItem(Main.i18n("leftpanel.label.my.documents"),
-                    "" + UIDesktopConstants.NAVIGATOR_PERSONAL);
+            contextListBox.addItem(Main.i18n("leftpanel.label.my.documents"), "" + UIDesktopConstants.NAVIGATOR_PERSONAL);
         }
         if (mailVisible) {
-            contextListBox.addItem(Main.i18n("leftpanel.label.mail"), ""
-                    + UIDesktopConstants.NAVIGATOR_MAIL);
+            contextListBox.addItem(Main.i18n("leftpanel.label.mail"), "" + UIDesktopConstants.NAVIGATOR_MAIL);
         }
 
         super.show();
@@ -268,7 +231,7 @@ public class FolderSelectPopup extends DialogBox {
      * 
      * @param enable
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 

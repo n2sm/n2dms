@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -28,10 +28,10 @@
         </li>
       </ul>
       <br/>
-      <table class="results" width="70%">
+      <table class="results" width="80%">
         <thead>
           <tr>
-            <th>Name</th><th>Image</th><th>Extensions</th>
+            <th>Name</th><th>Description</th><th>Image</th><th>Extensions</th><th>Search</th>
             <th width="50px">
               <c:url value="MimeType" var="urlCreate">
                 <c:param name="action" value="create"/>
@@ -40,7 +40,7 @@
                 <c:param name="action" value="export"/>
               </c:url>
               <a href="${urlCreate}"><img src="img/action/new.png" alt="New mime type" title="New mime type"/></a>
-              <a href="${urlExport}"><img src="img/action/export.png" alt="Export mime types" title="Export mime types"/></a>
+              <a href="${urlExport}"><img src="img/action/export_sql.png" alt="SQL export" title="SQL export"/></a>
             </th>
           </tr>
         </thead>
@@ -58,8 +58,19 @@
             </c:url>
             <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
               <td>${mt.name}</td>
+              <td>${mt.description}</td>
               <td align="center"><img src="${urlIcon}"/></td>
               <td>${mt.extensions}</td>
+              <td align="center">
+                <c:choose>
+                  <c:when test="${mt.search}">
+                    <img src="img/true.png" alt="Search" title="Search"/>
+                  </c:when>
+                  <c:otherwise>
+                    <img src="img/false.png" alt="No Search" title="No Search"/>
+                  </c:otherwise>
+                </c:choose>
+              </td>
               <td align="center">
                 <a href="${urlEdit}"><img src="img/action/edit.png" alt="Edit" title="Edit"/></a>
                 &nbsp;
@@ -69,13 +80,13 @@
           </c:forEach>
         </tbody>
         <tr class="fuzzy">
-          <td colspan="4" align="right">
+          <td colspan="6" align="right">
             <form action="MimeType" method="post" enctype="multipart/form-data">
               <input type="hidden" name="action" value="import"/>
               <table>
                 <tr>
                   <td><input class=":required :only_on_blur" type="file" name="sql-file"/></td>
-                  <td><input type="submit" value="Import mime types"/></td>
+                  <td><input type="submit" value="Import mime types" class="addButton"/></td>
                 </tr>
               </table>
             </form>

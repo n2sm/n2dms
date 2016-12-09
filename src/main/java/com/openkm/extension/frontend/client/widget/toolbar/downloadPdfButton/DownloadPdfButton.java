@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -48,27 +48,23 @@ import com.openkm.frontend.client.extension.widget.toolbar.ToolBarButtonExtensio
 public class DownloadPdfButton {
 
     public static final String NO_RESTRICTION_ROLE = "NoDownloadingRestrictionRole";
-
     public static final String UUID = "df5eb783-fb06-4b4b-bc89-4fdaa244e888";
 
     private ToolBarButton button;
-
     private boolean enabled = false;
 
-    public DownloadPdfButton(final List<String> uuidList) {
+    public DownloadPdfButton(List<String> uuidList) {
         if (isRegistered(uuidList)) {
-            button = new ToolBarButton(new Image(
-                    OKMBundleResources.INSTANCE.downloadPdfDisabled()),
-                    GeneralComunicator
-                            .i18nExtension("download.pdf.button.title"),
-                    new ClickHandler() {
-                        @Override
-                        public void onClick(final ClickEvent event) {
-                            if (enabled) {
-                                GeneralComunicator.downloadDocumentPdf();
-                            }
-                        }
-                    });
+            button =
+                    new ToolBarButton(new Image(OKMBundleResources.INSTANCE.downloadPdfDisabled()),
+                            GeneralComunicator.i18nExtension("download.pdf.button.title"), new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    if (enabled) {
+                                        GeneralComunicator.downloadDocumentPdf();
+                                    }
+                                }
+                            });
         }
     }
 
@@ -87,33 +83,29 @@ public class DownloadPdfButton {
      * @author jllort
      *
      */
-    private class ToolBarButton extends ToolBarButtonExtension implements
-            LanguageHandlerExtension, WorkspaceHandlerExtension {
+    private class ToolBarButton extends ToolBarButtonExtension implements LanguageHandlerExtension, WorkspaceHandlerExtension {
 
-        public ToolBarButton(final Image image, final String title,
-                final ClickHandler handler) {
+        public ToolBarButton(Image image, String title, ClickHandler handler) {
             super(image, title, handler);
         }
 
         @Override
-        public void checkPermissions(final GWTFolder folder,
-                final GWTFolder folderParent, final int originPanel) {
+        public void checkPermissions(GWTFolder folder, GWTFolder folderParent, int originPanel) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void checkPermissions(final GWTDocument doc,
-                final GWTFolder folder) {
+        public void checkPermissions(GWTDocument doc, GWTFolder folder) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void checkPermissions(final GWTMail mail, final GWTFolder folder) {
+        public void checkPermissions(GWTMail mail, GWTFolder folder) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void enable(final boolean enable) {
+        public void enable(boolean enable) {
             enabled = enable;
             evaluateShowIcon();
         }
@@ -124,15 +116,14 @@ public class DownloadPdfButton {
         }
 
         @Override
-        public void onChange(final LanguageEventConstant event) {
+        public void onChange(LanguageEventConstant event) {
             if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
-                setTitle(GeneralComunicator
-                        .i18nExtension("download.pdf.button.title"));
+                setTitle(GeneralComunicator.i18nExtension("download.pdf.button.title"));
             }
         }
 
         @Override
-        public void onChange(final WorkspaceEventConstant event) {
+        public void onChange(WorkspaceEventConstant event) {
             if (event.equals(HasWorkspaceEvent.STACK_CHANGED)) {
                 refreshButtonPermissions();
             }
@@ -144,9 +135,7 @@ public class DownloadPdfButton {
         private void refreshButtonPermissions() {
             // Button permissions are the same as download 
             enabled = GeneralComunicator.getToolBarOption().downloadPdfOption;
-            if (enabled
-                    && !GeneralComunicator.getUserRoleList().contains(
-                            NO_RESTRICTION_ROLE)) {
+            if (enabled && !GeneralComunicator.getUserRoleList().contains(NO_RESTRICTION_ROLE)) {
                 enabled = false;
             }
             evaluateShowIcon();
@@ -169,8 +158,7 @@ public class DownloadPdfButton {
         private void enableDownload() {
             setStyleName("okm-ToolBar-button");
             setResource(OKMBundleResources.INSTANCE.downloadPdf());
-            setTitle(GeneralComunicator
-                    .i18nExtension("download.pdf.button.title"));
+            setTitle(GeneralComunicator.i18nExtension("download.pdf.button.title"));
         }
 
         /**
@@ -179,8 +167,7 @@ public class DownloadPdfButton {
         private void disableDownload() {
             setStyleName("okm-ToolBar-button-disabled");
             setResource(OKMBundleResources.INSTANCE.downloadPdfDisabled());
-            setTitle(GeneralComunicator
-                    .i18nExtension("download.pdf.button.title"));
+            setTitle(GeneralComunicator.i18nExtension("download.pdf.button.title"));
         }
     }
 
@@ -190,7 +177,7 @@ public class DownloadPdfButton {
      * @param uuidList
      * @return
      */
-    public static boolean isRegistered(final List<String> uuidList) {
+    public static boolean isRegistered(List<String> uuidList) {
         return uuidList.contains(UUID);
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.widget.searchresult;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -34,8 +35,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -69,7 +69,6 @@ public class SearchFullResult extends Composite {
             .create(OKMPropertyGroupService.class);
 
     private ScrollPanel scrollPanel;
-
     private FlexTable table;
 
     /**
@@ -87,8 +86,7 @@ public class SearchFullResult extends Composite {
     /* (non-Javadoc)
     * @see com.google.gwt.user.client.ui.UIObject#setPixelSize(int, int)
     */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         table.setWidth("100%");
         scrollPanel.setPixelSize(width, height);
     }
@@ -98,9 +96,8 @@ public class SearchFullResult extends Composite {
      * 
      * @param doc The doc to add
      */
-    public void addRow(final GWTQueryResult gwtQueryResult) {
-        if (gwtQueryResult.getDocument() != null
-                || gwtQueryResult.getAttachment() != null) {
+    public void addRow(GWTQueryResult gwtQueryResult) {
+        if (gwtQueryResult.getDocument() != null || gwtQueryResult.getAttachment() != null) {
             addDocumentRow(gwtQueryResult, new Score(gwtQueryResult.getScore()));
         } else if (gwtQueryResult.getFolder() != null) {
             addFolderRow(gwtQueryResult, new Score(gwtQueryResult.getScore()));
@@ -115,8 +112,7 @@ public class SearchFullResult extends Composite {
      * @param gwtQueryResult Query result
      * @param score Document score
      */
-    private void addDocumentRow(final GWTQueryResult gwtQueryResult,
-            final Score score) {
+    private void addDocumentRow(GWTQueryResult gwtQueryResult, Score score) {
         int rows = table.getRowCount();
         final GWTDocument doc;
 
@@ -129,278 +125,254 @@ public class SearchFullResult extends Composite {
         }
 
         // Document row
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setStyleName("okm-NoWrap");
         hPanel.add(new HTML(score.getHTML()));
-        hPanel.add(Util.hSpace("5"));
-        if (doc.isAttachment()) {
-            hPanel.add(new HTML(Util.imageItemHTML("img/email_attach.gif")));
-            hPanel.add(Util.hSpace("5"));
-        }
+        hPanel.add(Util.hSpace("5px"));
+
         hPanel.add(new HTML(Util.mimeImageHTML(doc.getMimeType())));
-        hPanel.add(Util.hSpace("5"));
-        final Anchor anchor = new Anchor();
+        hPanel.add(Util.hSpace("5px"));
+        Anchor anchor = new Anchor();
         anchor.setHTML(doc.getName());
         anchor.setStyleName("okm-Hyperlink");
         String path = "";
-        // On attachemt case must remove last folder path, because it's internal usage not for visualization
+
+        // On attachment case must remove last folder path, because it's internal usage not for visualization
         if (doc.isAttachment()) {
-            anchor.setTitle(doc.getParent().substring(0,
-                    doc.getParent().lastIndexOf("/")));
-            path = doc.getParent();
+            anchor.setTitle(Util.getParent(doc.getParentPath()));
+            path = doc.getParentPath(); // path will contains mail path
         } else {
-            anchor.setTitle(doc.getParent());
+            anchor.setTitle(doc.getParentPath());
             path = doc.getPath();
         }
+
         final String docPath = path;
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                CommonUI.openPath(
-                        docPath.substring(0, docPath.lastIndexOf("/")), docPath);
+            public void onClick(ClickEvent event) {
+                CommonUI.openPath(Util.getParent(docPath), docPath);
             }
         });
+
         hPanel.add(anchor);
-        hPanel.add(Util.hSpace("5"));
+        hPanel.add(Util.hSpace("5px"));
         hPanel.add(new HTML(doc.getActualVersion().getName()));
-        hPanel.add(Util.hSpace("5"));
+        hPanel.add(Util.hSpace("5px"));
+
+        // Search similar documents
+        if (Main.get().workspaceUserProperties.getWorkspace().getAvailableOption().isSimilarDocumentVisible()) {
+            final String uuid = doc.getUuid();
+            Image findSimilarDocument = new Image(OKMBundleResources.INSTANCE.findSimilarDocument());
+            findSimilarDocument.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    Main.get().findSimilarDocumentSelectPopup.show();
+                    Main.get().findSimilarDocumentSelectPopup.find(uuid);
+                }
+            });
+
+            findSimilarDocument.setTitle(Main.i18n("general.menu.file.find.similar.document"));
+            findSimilarDocument.setStyleName("okm-KeyMap-ImageHover");
+            hPanel.add(findSimilarDocument);
+            hPanel.add(Util.hSpace("5px"));
+        }
+
         // Download
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .getAvailableOption().isDownloadOption()) {
-            final Image downloadDocument = new Image(
-                    OKMBundleResources.INSTANCE.download());
+        if (Main.get().workspaceUserProperties.getWorkspace().getAvailableOption().isDownloadOption()) {
+            Image downloadDocument = new Image(OKMBundleResources.INSTANCE.download());
             downloadDocument.addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     Util.downloadFileByUUID(doc.getUuid(), "");
                 }
-
             });
-            downloadDocument.setTitle(Main
-                    .i18n("general.menu.file.download.document"));
+
+            downloadDocument.setTitle(Main.i18n("general.menu.file.download.document"));
             downloadDocument.setStyleName("okm-KeyMap-ImageHover");
             hPanel.add(downloadDocument);
         }
+
         table.setWidget(rows++, 0, hPanel);
 
         // Excerpt row
-        if ((Main.get().mainPanel.search.searchBrowser.searchIn.searchControl
-                .getSearchMode() == SearchControl.SEARCH_MODE_SIMPLE || !Main
-                .get().mainPanel.search.searchBrowser.searchIn.searchNormal.content
-                .getText().equals(""))
+        if ((Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.getSearchMode() == SearchControl.SEARCH_MODE_SIMPLE || !Main
+                .get().mainPanel.search.searchBrowser.searchIn.searchNormal.content.getText().equals(""))
                 && gwtQueryResult.getExcerpt() != null) {
-            table.setHTML(
-                    rows++,
-                    0,
-                    ""
-                            + gwtQueryResult.getExcerpt()
-                            + (gwtQueryResult.getExcerpt().length() > 256 ? " ..."
-                                    : ""));
-            final HTML space = new HTML();
+            table.setHTML(rows++, 0, "" + gwtQueryResult.getExcerpt() + (gwtQueryResult.getExcerpt().length() > 256 ? " ..." : ""));
+            HTML space = new HTML();
             table.setWidget(rows, 0, space);
-            table.getFlexCellFormatter().setHeight(rows++, 0, "5");
+            table.getFlexCellFormatter().setHeight(rows++, 0, "5px");
         }
 
         // Folder row
-        final HorizontalPanel hPanel2 = new HorizontalPanel();
+        HorizontalPanel hPanel2 = new HorizontalPanel();
         hPanel2.setStyleName("okm-NoWrap");
-        hPanel2.add(new HTML("<b>" + Main.i18n("document.folder")
-                + ":</b>&nbsp;"));
-        hPanel2.add(drawFolder(doc.getParentPath()));
+        hPanel2.add(new HTML("<b>" + Main.i18n("document.folder") + ":</b>&nbsp;"));
+        if (doc.isAttachment()) {
+            String convertedPath = doc.getParentPath();
+            convertedPath = Util.getParent(convertedPath) + "/" + Util.getName(convertedPath).substring(37);
+            hPanel2.add(drawMailWithAttachment(convertedPath, path));
+        } else {
+            hPanel2.add(drawFolder(doc.getParentPath()));
+        }
         table.setWidget(rows++, 0, hPanel2);
 
         // Document detail
-        final HorizontalPanel hPanel4 = new HorizontalPanel();
+        HorizontalPanel hPanel4 = new HorizontalPanel();
         hPanel4.setStyleName("okm-NoWrap");
-        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.author")
-                + ":</b>&nbsp;"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.author") + ":</b>&nbsp;"));
         hPanel4.add(new HTML(doc.getActualVersion().getUser().getUsername()));
-        hPanel4.add(Util.hSpace("33"));
-        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.size")
-                + ":</b>&nbsp;"));
+        hPanel4.add(Util.hSpace("33px"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.size") + ":</b>&nbsp;"));
         hPanel4.add(new HTML(Util.formatSize(doc.getActualVersion().getSize())));
-        hPanel4.add(Util.hSpace("33"));
-        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.version")
-                + ":</b>&nbsp;"));
+        hPanel4.add(Util.hSpace("33px"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.version") + ":</b>&nbsp;"));
         hPanel4.add(new HTML(doc.getActualVersion().getName()));
-        hPanel4.add(Util.hSpace("33"));
-        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.date.update")
-                + ":&nbsp;</b>"));
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
+        hPanel4.add(Util.hSpace("33px"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.date.update") + ":&nbsp;</b>"));
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
         hPanel4.add(new HTML(dtf.format(doc.getLastModified())));
         table.setWidget(rows++, 0, hPanel4);
 
         // Categories and tagcloud
-        rows = addCategoriesKeywords(doc.getCategories(), doc.getKeywords(),
-                table);
+        rows = addCategoriesKeywords(doc.getCategories(), doc.getKeywords(), table);
 
         // PropertyGroups
         rows = addPropertyGroups(doc.getPath(), table);
 
         // Separator end line
-        final Image horizontalLine = new Image("img/transparent_pixel.gif");
+        Image horizontalLine = new Image("img/transparent_pixel.gif");
         horizontalLine.setStyleName("okm-TopPanel-Line-Border");
         horizontalLine.setSize("100%", "2px");
         table.setWidget(rows, 0, horizontalLine);
-        table.getFlexCellFormatter().setVerticalAlignment(rows, 0,
-                HasVerticalAlignment.ALIGN_BOTTOM);
-        table.getFlexCellFormatter().setHeight(rows, 0, "30");
+        table.getFlexCellFormatter().setVerticalAlignment(rows, 0, HasAlignment.ALIGN_BOTTOM);
+        table.getFlexCellFormatter().setHeight(rows, 0, "30px");
     }
 
     /**
      * addPropertyGroups
-     * 
-     * @param path
-     * @param table
-     * @return
      */
-    private int addPropertyGroups(final String path, final FlexTable table) {
+    private int addPropertyGroups(final String path, FlexTable table) {
         int rows = table.getRowCount();
-        if (Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.showPropertyGroups
-                .getValue()) {
+        if (Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.showPropertyGroups.getValue()) {
             final HorizontalPanel propertyGroupsPanel = new HorizontalPanel();
             table.setWidget(rows++, 0, propertyGroupsPanel);
-            propertyGroupService.getGroups(path,
-                    new AsyncCallback<List<GWTPropertyGroup>>() {
-                        @Override
-                        public void onSuccess(
-                                final List<GWTPropertyGroup> result) {
-                            drawPropertyGroups(path, result,
-                                    propertyGroupsPanel);
-                        }
+            propertyGroupService.getGroups(path, new AsyncCallback<List<GWTPropertyGroup>>() {
+                @Override
+                public void onSuccess(List<GWTPropertyGroup> result) {
+                    drawPropertyGroups(path, result, propertyGroupsPanel);
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("getGroups", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getGroups", caught);
+                }
+            });
         }
         return rows;
     }
 
     /**
      * drawCategoriesKeywords
-     * 
-     * @param categories
-     * @param keywords
-     * @param table
-     * @return
      */
-    private int addCategoriesKeywords(final Set<GWTFolder> categories,
-            final Set<String> keywords, final FlexTable table) {
+    private int addCategoriesKeywords(Set<GWTFolder> categories, Set<String> keywords, FlexTable table) {
         int rows = table.getRowCount();
+
         // Categories and tagcloud
         if (categories.size() > 0 || keywords.size() > 0) {
-            final HorizontalPanel hPanel = new HorizontalPanel();
+            HorizontalPanel hPanel = new HorizontalPanel();
             hPanel.setStyleName("okm-NoWrap");
+
             if (categories.size() > 0) {
-                final FlexTable tableSubscribedCategories = new FlexTable();
+                FlexTable tableSubscribedCategories = new FlexTable();
                 tableSubscribedCategories.setStyleName("okm-DisableSelect");
+
                 // Sets the document categories
-                for (final GWTFolder gwtFolder : categories) {
-                    drawCategory(tableSubscribedCategories, gwtFolder);
+                for (Iterator<GWTFolder> it = categories.iterator(); it.hasNext();) {
+                    drawCategory(tableSubscribedCategories, it.next());
                 }
-                hPanel.add(new HTML("<b>" + Main.i18n("document.categories")
-                        + "</b>"));
-                hPanel.add(Util.hSpace("5"));
+
+                hPanel.add(new HTML("<b>" + Main.i18n("document.categories") + "</b>"));
+                hPanel.add(Util.hSpace("5px"));
                 hPanel.add(tableSubscribedCategories);
-                hPanel.add(Util.hSpace("33"));
+                hPanel.add(Util.hSpace("33px"));
             }
+
             if (keywords.size() > 0) {
                 // Tag cloud
-                final TagCloud keywordsCloud = new TagCloud();
-                keywordsCloud.setWidth("350");
+                TagCloud keywordsCloud = new TagCloud();
+                keywordsCloud.setWidth("350px");
                 WidgetUtil.drawTagCloud(keywordsCloud, keywords);
-                hPanel.add(new HTML("<b>"
-                        + Main.i18n("document.keywords.cloud") + "</b>"));
-                hPanel.add(Util.hSpace("5"));
+                hPanel.add(new HTML("<b>" + Main.i18n("document.keywords.cloud") + "</b>"));
+                hPanel.add(Util.hSpace("5px"));
                 hPanel.add(keywordsCloud);
             }
+
             table.setWidget(rows++, 0, hPanel);
         }
+
         return rows;
     }
 
     /**
      * drawPropertyGroups
-     * 
-     * @param docPath
-     * @param propertyGroups
-     * @param propertyGroupsPanel
      */
-    private void drawPropertyGroups(final String docPath,
-            final List<GWTPropertyGroup> propertyGroups,
+    private void drawPropertyGroups(final String docPath, final List<GWTPropertyGroup> propertyGroups,
             final HorizontalPanel propertyGroupsPanel) {
         if (propertyGroups.size() > 0) {
-            final Status status = Main.get().mainPanel.search.searchBrowser.searchResult.status;
+            Status status = Main.get().mainPanel.search.searchBrowser.searchResult.status;
             status.setFlag_refreshPropertyGroups();
             final GWTPropertyGroup propertyGroup = propertyGroups.remove(0);
-            propertyGroupService.getProperties(docPath,
-                    propertyGroup.getName(),
-                    new AsyncCallback<List<GWTFormElement>>() {
-                        @Override
-                        public void onSuccess(final List<GWTFormElement> result) {
-                            if (propertyGroupsPanel.getWidgetCount() == 0) {
-                                final HTML label = new HTML("");
-                                label.setStyleName("okm-Security-Title");
-                                label.setHeight("15");
-                                final Image verticalLine = new Image(
-                                        "img/transparent_pixel.gif");
-                                verticalLine
-                                        .setStyleName("okm-Vertical-Line-Border");
-                                verticalLine.setSize("2", "100%");
-                                final VerticalPanel vlPanel = new VerticalPanel();
-                                vlPanel.add(label);
-                                vlPanel.add(verticalLine);
-                                vlPanel.setCellWidth(verticalLine, "7");
-                                vlPanel.setCellHeight(verticalLine, "100%");
-                                vlPanel.setHeight("100%");
-                                propertyGroupsPanel.add(vlPanel);
-                                propertyGroupsPanel.setCellHorizontalAlignment(
-                                        vlPanel,
-                                        HasHorizontalAlignment.ALIGN_LEFT);
-                                propertyGroupsPanel.setCellWidth(vlPanel, "7");
-                                propertyGroupsPanel.setCellHeight(vlPanel,
-                                        "100%");
-                            }
-                            final Image verticalLine = new Image(
-                                    "img/transparent_pixel.gif");
-                            verticalLine
-                                    .setStyleName("okm-Vertical-Line-Border");
-                            verticalLine.setSize("2", "100%");
-                            final FormManager manager = new FormManager();
-                            manager.setFormElements(result);
-                            manager.draw(true); // read only !
-                            final VerticalPanel vPanel = new VerticalPanel();
-                            final HTML label = new HTML(propertyGroup
-                                    .getLabel());
-                            label.setStyleName("okm-Security-Title");
-                            label.setHeight("15");
-                            vPanel.add(label);
-                            vPanel.add(manager.getTable());
-                            propertyGroupsPanel.add(vPanel);
-                            propertyGroupsPanel.add(verticalLine);
-                            propertyGroupsPanel.setCellVerticalAlignment(
-                                    vPanel, HasVerticalAlignment.ALIGN_TOP);
-                            propertyGroupsPanel.setCellHorizontalAlignment(
-                                    verticalLine,
-                                    HasHorizontalAlignment.ALIGN_CENTER);
-                            propertyGroupsPanel
-                                    .setCellWidth(verticalLine, "12");
-                            propertyGroupsPanel.setCellHeight(verticalLine,
-                                    "100%");
-                            drawPropertyGroups(docPath, propertyGroups,
-                                    propertyGroupsPanel);
-                        }
+            propertyGroupService.getProperties(docPath, propertyGroup.getName(), false, new AsyncCallback<List<GWTFormElement>>() {
+                @Override
+                public void onSuccess(List<GWTFormElement> result) {
+                    if (propertyGroupsPanel.getWidgetCount() == 0) {
+                        HTML label = new HTML("");
+                        label.setStyleName("okm-Security-Title");
+                        label.setHeight("15px");
+                        Image verticalLine = new Image("img/transparent_pixel.gif");
+                        verticalLine.setStyleName("okm-Vertical-Line-Border");
+                        verticalLine.setSize("2px", "100%");
+                        VerticalPanel vlPanel = new VerticalPanel();
+                        vlPanel.add(label);
+                        vlPanel.add(verticalLine);
+                        vlPanel.setCellWidth(verticalLine, "7px");
+                        vlPanel.setCellHeight(verticalLine, "100%");
+                        vlPanel.setHeight("100%");
+                        propertyGroupsPanel.add(vlPanel);
+                        propertyGroupsPanel.setCellHorizontalAlignment(vlPanel, HasAlignment.ALIGN_LEFT);
+                        propertyGroupsPanel.setCellWidth(vlPanel, "7px");
+                        propertyGroupsPanel.setCellHeight(vlPanel, "100%");
+                    }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("drawPropertyGroups", caught);
-                        }
-                    });
+                    Image verticalLine = new Image("img/transparent_pixel.gif");
+                    verticalLine.setStyleName("okm-Vertical-Line-Border");
+                    verticalLine.setSize("2px", "100%");
+                    FormManager manager = new FormManager();
+                    manager.setFormElements(result);
+                    manager.draw(true); // read only !
+                    VerticalPanel vPanel = new VerticalPanel();
+                    HTML label = new HTML(propertyGroup.getLabel());
+                    label.setStyleName("okm-Security-Title");
+                    label.setHeight("15px");
+                    vPanel.add(label);
+                    vPanel.add(manager.getTable());
+                    propertyGroupsPanel.add(vPanel);
+                    propertyGroupsPanel.add(verticalLine);
+                    propertyGroupsPanel.setCellVerticalAlignment(vPanel, HasAlignment.ALIGN_TOP);
+                    propertyGroupsPanel.setCellHorizontalAlignment(verticalLine, HasAlignment.ALIGN_CENTER);
+                    propertyGroupsPanel.setCellWidth(verticalLine, "12px");
+                    propertyGroupsPanel.setCellHeight(verticalLine, "100%");
+                    drawPropertyGroups(docPath, propertyGroups, propertyGroupsPanel);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("drawPropertyGroups", caught);
+                }
+            });
         } else {
-            final Status status = Main.get().mainPanel.search.searchBrowser.searchResult.status;
+            Status status = Main.get().mainPanel.search.searchBrowser.searchResult.status;
             status.unsetFlag_refreshPropertyGroups();
         }
     }
@@ -411,42 +383,37 @@ public class SearchFullResult extends Composite {
      * @param gwtQueryResult Query result
      * @param score The folder score
      */
-    private void addFolderRow(final GWTQueryResult gwtQueryResult,
-            final Score score) {
+    private void addFolderRow(GWTQueryResult gwtQueryResult, Score score) {
         int rows = table.getRowCount();
         final GWTFolder folder = gwtQueryResult.getFolder();
 
         // Folder row
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setStyleName("okm-NoWrap");
         hPanel.add(new HTML(score.getHTML()));
-        hPanel.add(Util.hSpace("5"));
+        hPanel.add(Util.hSpace("5px"));
 
         // Looks if must change icon on parent if now has no childs and properties with user security atention
         if ((folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
             if (folder.isHasChildren()) {
-                hPanel.add(new HTML(Util
-                        .imageItemHTML("img/menuitem_childs.gif")));
+                hPanel.add(new HTML(Util.imageItemHTML("img/menuitem_childs.gif")));
             } else {
-                hPanel.add(new HTML(Util
-                        .imageItemHTML("img/menuitem_empty.gif")));
+                hPanel.add(new HTML(Util.imageItemHTML("img/menuitem_empty.gif")));
             }
         } else {
             if (folder.isHasChildren()) {
-                hPanel.add(new HTML(Util
-                        .imageItemHTML("img/menuitem_childs_ro.gif")));
+                hPanel.add(new HTML(Util.imageItemHTML("img/menuitem_childs_ro.gif")));
             } else {
-                hPanel.add(new HTML(Util
-                        .imageItemHTML("img/menuitem_empty_ro.gif")));
+                hPanel.add(new HTML(Util.imageItemHTML("img/menuitem_empty_ro.gif")));
             }
         }
 
-        final Anchor anchor = new Anchor();
+        Anchor anchor = new Anchor();
         anchor.setHTML(folder.getName());
         anchor.setTitle(folder.getParentPath());
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 CommonUI.openPath(folder.getPath(), "");
             }
         });
@@ -455,34 +422,36 @@ public class SearchFullResult extends Composite {
         table.setWidget(rows++, 0, hPanel);
 
         // Folder row
-        final HorizontalPanel hPanel2 = new HorizontalPanel();
+        HorizontalPanel hPanel2 = new HorizontalPanel();
         hPanel2.setStyleName("okm-NoWrap");
         hPanel2.add(new HTML("<b>" + Main.i18n("folder.parent") + ":</b>&nbsp;"));
         hPanel2.add(drawFolder(folder.getParentPath()));
         table.setWidget(rows++, 0, hPanel2);
 
         // Folder detail
-        final HorizontalPanel hPanel3 = new HorizontalPanel();
+        HorizontalPanel hPanel3 = new HorizontalPanel();
         hPanel3.setStyleName("okm-NoWrap");
-        hPanel3.add(new HTML("<b>" + Main.i18n("search.result.author")
-                + ":</b>&nbsp;"));
+        hPanel3.add(new HTML("<b>" + Main.i18n("search.result.author") + ":</b>&nbsp;"));
         hPanel3.add(new HTML(folder.getUser().getUsername()));
-        hPanel3.add(Util.hSpace("33"));
-        hPanel3.add(new HTML("<b>" + Main.i18n("folder.created")
-                + ":&nbsp;</b>"));
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
+        hPanel3.add(Util.hSpace("33px"));
+        hPanel3.add(new HTML("<b>" + Main.i18n("folder.created") + ":&nbsp;</b>"));
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
         hPanel3.add(new HTML(dtf.format(folder.getCreated())));
         table.setWidget(rows++, 0, hPanel3);
 
+        // Categories and tagcloud
+        rows = addCategoriesKeywords(folder.getCategories(), folder.getKeywords(), table);
+
+        // PropertyGroups
+        rows = addPropertyGroups(folder.getPath(), table);
+
         // Separator end line
-        final Image horizontalLine = new Image("img/transparent_pixel.gif");
+        Image horizontalLine = new Image("img/transparent_pixel.gif");
         horizontalLine.setStyleName("okm-TopPanel-Line-Border");
         horizontalLine.setSize("100%", "2px");
         table.setWidget(rows, 0, horizontalLine);
-        table.getFlexCellFormatter().setVerticalAlignment(rows, 0,
-                HasVerticalAlignment.ALIGN_BOTTOM);
-        table.getFlexCellFormatter().setHeight(rows, 0, "30");
+        table.getFlexCellFormatter().setVerticalAlignment(rows, 0, HasAlignment.ALIGN_BOTTOM);
+        table.getFlexCellFormatter().setHeight(rows, 0, "30px");
     }
 
     /**
@@ -491,16 +460,15 @@ public class SearchFullResult extends Composite {
      * @param gwtQueryResult Query result
      * @param score The mail score
      */
-    private void addMailRow(final GWTQueryResult gwtQueryResult,
-            final Score score) {
+    private void addMailRow(GWTQueryResult gwtQueryResult, Score score) {
         int rows = table.getRowCount();
         final GWTMail mail = gwtQueryResult.getMail();
 
         // Mail row
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.setStyleName("okm-NoWrap");
         hPanel.add(new HTML(score.getHTML()));
-        hPanel.add(Util.hSpace("5"));
+        hPanel.add(Util.hSpace("5px"));
 
         if (mail.getAttachments().size() > 0) {
             hPanel.add(new HTML(Util.imageItemHTML("img/email_attach.gif")));
@@ -508,16 +476,14 @@ public class SearchFullResult extends Composite {
             hPanel.add(new HTML(Util.imageItemHTML("img/email.gif")));
         }
 
-        final Anchor anchor = new Anchor();
+        Anchor anchor = new Anchor();
         anchor.setHTML(mail.getSubject());
         anchor.setTitle(mail.getParentPath());
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final String docPath = mail.getPath();
-                final String path = docPath.substring(0,
-                        docPath.lastIndexOf("/"));
-                CommonUI.openPath(path, docPath);
+            public void onClick(ClickEvent event) {
+                String docPath = mail.getPath();
+                CommonUI.openPath(Util.getParent(docPath), docPath);
             }
         });
         anchor.setStyleName("okm-Hyperlink");
@@ -525,138 +491,138 @@ public class SearchFullResult extends Composite {
         table.setWidget(rows++, 0, hPanel);
 
         // Mail Subject
-        final HorizontalPanel hPanel2 = new HorizontalPanel();
+        HorizontalPanel hPanel2 = new HorizontalPanel();
         hPanel2.setStyleName("okm-NoWrap");
         hPanel2.add(new HTML("<b>" + Main.i18n("mail.subject") + ":</b>&nbsp;"));
         hPanel2.add(new HTML(mail.getSubject()));
 
-        // mail detail
-        final HorizontalPanel hPanel3 = new HorizontalPanel();
+        // Excerpt row
+        if ((Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.getSearchMode() == SearchControl.SEARCH_MODE_SIMPLE || !Main
+                .get().mainPanel.search.searchBrowser.searchIn.searchNormal.content.getText().equals(""))
+                && gwtQueryResult.getExcerpt() != null) {
+            table.setHTML(rows++, 0, "" + gwtQueryResult.getExcerpt() + (gwtQueryResult.getExcerpt().length() > 256 ? " ..." : ""));
+            HTML space = new HTML();
+            table.setWidget(rows, 0, space);
+            table.getFlexCellFormatter().setHeight(rows++, 0, "5px");
+        }
+
+        // Folder row
+        HorizontalPanel hPanel3 = new HorizontalPanel();
         hPanel3.setStyleName("okm-NoWrap");
-        hPanel3.add(new HTML("<b>" + Main.i18n("search.result.author")
-                + ":</b>&nbsp;"));
-        hPanel3.add(new HTML(mail.getAuthor()));
-        hPanel3.add(Util.hSpace("33"));
-        hPanel3.add(new HTML("<b>" + Main.i18n("search.result.size")
-                + ":</b>&nbsp;"));
-        hPanel3.add(new HTML(Util.formatSize(mail.getSize())));
-        hPanel3.add(Util.hSpace("33"));
-        hPanel3.add(new HTML("<b>" + Main.i18n("search.result.date.create")
-                + ":&nbsp;</b>"));
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
-        hPanel3.add(new HTML(dtf.format(mail.getCreated())));
+        hPanel3.add(new HTML("<b>" + Main.i18n("document.folder") + ":</b>&nbsp;"));
+        hPanel3.add(drawFolder(mail.getParentPath()));
         table.setWidget(rows++, 0, hPanel3);
 
+        // mail details
+        HorizontalPanel hPanel4 = new HorizontalPanel();
+        hPanel4.setStyleName("okm-NoWrap");
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.author") + ":</b>&nbsp;"));
+        hPanel4.add(new HTML(mail.getAuthor()));
+        hPanel4.add(Util.hSpace("33px"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.size") + ":</b>&nbsp;"));
+        hPanel4.add(new HTML(Util.formatSize(mail.getSize())));
+        hPanel4.add(Util.hSpace("33px"));
+        hPanel4.add(new HTML("<b>" + Main.i18n("search.result.date.create") + ":&nbsp;</b>"));
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
+        hPanel4.add(new HTML(dtf.format(mail.getCreated())));
+        table.setWidget(rows++, 0, hPanel4);
+
         // Categories and tagcloud
-        rows = addCategoriesKeywords(mail.getCategories(), mail.getKeywords(),
-                table);
+        rows = addCategoriesKeywords(mail.getCategories(), mail.getKeywords(), table);
 
         // PropertyGroups
         rows = addPropertyGroups(mail.getPath(), table);
 
-        // From panel
-        final HorizontalPanel hPanel4 = new HorizontalPanel();
-        hPanel4.setStyleName("okm-NoWrap");
-        hPanel4.add(new HTML("<b>" + Main.i18n("mail.from") + ":</b>&nbsp;"));
-        hPanel4.add(new HTML(mail.getFrom()));
-        table.setWidget(rows++, 0, hPanel4);
+        // From, To and Reply panel
+        HorizontalPanel hPanel5 = new HorizontalPanel();
+        hPanel5.setStyleName("okm-NoWrap");
+        hPanel5.add(new HTML("<b>" + Main.i18n("mail.from") + ":</b>&nbsp;"));
+        hPanel5.add(new HTML(mail.getFrom()));
 
-        // To panel
         if (mail.getTo().length > 0) {
-            final HorizontalPanel hPanel5 = new HorizontalPanel();
-            hPanel5.setStyleName("okm-NoWrap");
-            final VerticalPanel toPanel = new VerticalPanel();
+            VerticalPanel toPanel = new VerticalPanel();
 
             for (int i = 0; i < mail.getTo().length; i++) {
-                final Anchor hTo = new Anchor();
-                final String mailTo = mail.getTo()[i].contains("<") ? mail
-                        .getTo()[i].substring(mail.getTo()[i].indexOf("<") + 1,
-                        mail.getTo()[i].indexOf(">")) : mail.getTo()[i];
-                hTo.setHTML(mail.getTo()[i].replace("<", "&lt;").replace(">",
-                        "&gt;"));
+                Anchor hTo = new Anchor();
+                final String mailTo =
+                        mail.getTo()[i].contains("<") ? mail.getTo()[i].substring(mail.getTo()[i].indexOf("<") + 1,
+                                mail.getTo()[i].indexOf(">")) : mail.getTo()[i];
+                hTo.setHTML(mail.getTo()[i].replace("<", "&lt;").replace(">", "&gt;"));
                 hTo.setTitle("mailto:" + mailTo);
                 hTo.setStyleName("okm-Mail-Link");
                 hTo.addStyleName("okm-NoWrap");
                 hTo.addClickHandler(new ClickHandler() {
                     @Override
-                    public void onClick(final ClickEvent event) {
+                    public void onClick(ClickEvent event) {
                         Window.open("mailto:" + mailTo, "_self", "");
                     }
                 });
+
                 toPanel.add(hTo);
             }
 
+            hPanel5.add(Util.hSpace("33px"));
+            hPanel5.add((new HTML("<b>" + Main.i18n("mail.to") + ":</b>&nbsp;")));
             hPanel5.add(toPanel);
-            table.setWidget(rows++, 0, hPanel5);
         }
 
-        // Reply panel
         if (mail.getReply().length > 0) {
-            final HorizontalPanel hPanel6 = new HorizontalPanel();
-            hPanel6.setStyleName("okm-NoWrap");
-            hPanel6.add(new HTML("<b>" + Main.i18n("mail.reply")
-                    + ":</b>&nbsp;"));
-            final VerticalPanel replyPanel = new VerticalPanel();
+            VerticalPanel replyPanel = new VerticalPanel();
 
             for (int i = 0; i < mail.getReply().length; i++) {
-                final Anchor hReply = new Anchor();
-                final String mailReply = mail.getReply()[i].contains("<") ? mail
-                        .getReply()[i].substring(
-                        mail.getReply()[i].indexOf("<") + 1,
-                        mail.getReply()[i].indexOf(">")) : mail.getReply()[i];
-                hReply.setHTML(mail.getReply()[i].replace("<", "&lt;").replace(
-                        ">", "&gt;"));
+                Anchor hReply = new Anchor();
+                final String mailReply =
+                        mail.getReply()[i].contains("<") ? mail.getReply()[i].substring(mail.getReply()[i].indexOf("<") + 1,
+                                mail.getReply()[i].indexOf(">")) : mail.getReply()[i];
+                hReply.setHTML(mail.getReply()[i].replace("<", "&lt;").replace(">", "&gt;"));
                 hReply.setTitle("mailto:" + mailReply);
                 hReply.setStyleName("okm-Mail-Link");
                 hReply.addStyleName("okm-NoWrap");
                 hReply.addClickHandler(new ClickHandler() {
                     @Override
-                    public void onClick(final ClickEvent event) {
+                    public void onClick(ClickEvent event) {
                         Window.open("mailto:" + mailReply, "_self", "");
                     }
                 });
+
                 replyPanel.add(hReply);
             }
 
-            hPanel6.add(replyPanel);
-            table.setWidget(rows++, 0, hPanel6);
+            hPanel5.add(Util.hSpace("33px"));
+            hPanel5.add(new HTML("<b>" + Main.i18n("mail.reply") + ":</b>&nbsp;"));
+            hPanel5.add(replyPanel);
         }
 
+        table.setWidget(rows++, 0, hPanel5);
+
         // Separator end line
-        final Image horizontalLine = new Image("img/transparent_pixel.gif");
+        Image horizontalLine = new Image("img/transparent_pixel.gif");
         horizontalLine.setStyleName("okm-TopPanel-Line-Border");
         horizontalLine.setSize("100%", "2px");
         table.setWidget(rows, 0, horizontalLine);
-        table.getFlexCellFormatter().setVerticalAlignment(rows, 0,
-                HasVerticalAlignment.ALIGN_BOTTOM);
-        table.getFlexCellFormatter().setHeight(rows, 0, "30");
+        table.getFlexCellFormatter().setVerticalAlignment(rows, 0, HasAlignment.ALIGN_BOTTOM);
+        table.getFlexCellFormatter().setHeight(rows, 0, "30px");
     }
 
     /**
      * drawCategory
-     * 
-     * @param category
      */
-    private void drawCategory(final FlexTable tableSubscribedCategories,
-            final GWTFolder category) {
-        final int row = tableSubscribedCategories.getRowCount();
-        final Anchor anchor = new Anchor();
+    private void drawCategory(final FlexTable tableSubscribedCategories, final GWTFolder category) {
+        int row = tableSubscribedCategories.getRowCount();
+        Anchor anchor = new Anchor();
 
         // Looks if must change icon on parent if now has no childs and properties with user security atention
-        final String path = category.getPath().substring(16); // Removes /okm:categories
+        String path = category.getPath().substring(16); // Removes /okm:categories
 
         if (category.isHasChildren()) {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path, "top"));
         } else {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path, "top"));
         }
 
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent arg0) {
+            public void onClick(ClickEvent arg0) {
                 CommonUI.openPath(category.getPath(), null);
             }
         });
@@ -667,18 +633,30 @@ public class SearchFullResult extends Composite {
 
     /**
      * drawFolder
-     * 
-     * @param folder
-     * @return
      */
     private Anchor drawFolder(final String path) {
-        final Anchor anchor = new Anchor();
-        anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path,
-                "top"));
+        Anchor anchor = new Anchor();
+        anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path, "top"));
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent arg0) {
+            public void onClick(ClickEvent arg0) {
                 CommonUI.openPath(path, null);
+            }
+        });
+        anchor.setStyleName("okm-KeyMap-ImageHover");
+        return anchor;
+    }
+
+    /**
+     * drawMailWithAttachment
+     */
+    private Anchor drawMailWithAttachment(String convertedPath, final String path) {
+        Anchor anchor = new Anchor();
+        anchor.setHTML(Util.imageItemHTML("img/email_attach.gif", convertedPath, "top"));
+        anchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+                CommonUI.openPath(Util.getParent(path), path);
             }
         });
         anchor.setStyleName("okm-KeyMap-ImageHover");

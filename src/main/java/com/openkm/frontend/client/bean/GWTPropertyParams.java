@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,18 +33,15 @@ import com.openkm.frontend.client.bean.form.GWTFormElement;
 public class GWTPropertyParams implements IsSerializable {
 
     private String grpName;
-
     private String grpLabel;
-
     private GWTFormElement formElement;
-
     private String value;
 
     public String getGrpName() {
         return grpName;
     }
 
-    public void setGrpName(final String grpName) {
+    public void setGrpName(String grpName) {
         this.grpName = grpName;
     }
 
@@ -52,7 +49,7 @@ public class GWTPropertyParams implements IsSerializable {
         return formElement;
     }
 
-    public void setFormElement(final GWTFormElement formElement) {
+    public void setFormElement(GWTFormElement formElement) {
         this.formElement = formElement;
     }
 
@@ -60,7 +57,7 @@ public class GWTPropertyParams implements IsSerializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -68,7 +65,7 @@ public class GWTPropertyParams implements IsSerializable {
         return grpLabel;
     }
 
-    public void setGrpLabel(final String grpLabel) {
+    public void setGrpLabel(String grpLabel) {
         this.grpLabel = grpLabel;
     }
 }

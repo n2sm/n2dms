@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,10 +40,9 @@ public class BaseNoteModule {
     /**
      * Create a new note
      */
-    public static NodeNote create(final String parentUuid, final String user,
-            final String text) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
-        final NodeNote nNote = new NodeNote();
+    public static NodeNote create(String parentUuid, String user, String text) throws PathNotFoundException, AccessDeniedException,
+            DatabaseException {
+        NodeNote nNote = new NodeNote();
         nNote.setUuid(UUID.randomUUID().toString());
         nNote.setParent(parentUuid);
         nNote.setAuthor(user);
@@ -56,9 +55,9 @@ public class BaseNoteModule {
     /**
      * Get properties
      */
-    public static Note getProperties(final NodeNote nNote, final String notePath) {
+    public static Note getProperties(NodeNote nNote, String notePath) {
         log.debug("getProperties({})", nNote);
-        final Note note = new Note();
+        Note note = new Note();
 
         // Properties
         note.setDate(nNote.getCreated());

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,18 +26,15 @@ import java.util.Calendar;
 public class NoteMetadata {
     // okm:note
     private String user;
-
     private Calendar date;
-
     private String text;
-
     private String path;
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -45,7 +42,7 @@ public class NoteMetadata {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
@@ -53,7 +50,7 @@ public class NoteMetadata {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -61,13 +58,12 @@ public class NoteMetadata {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("user=");
         sb.append(user);

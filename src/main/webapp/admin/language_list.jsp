@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri='http://java.sun.com/jsp/jstl/functions' prefix='fn' %>
@@ -12,7 +12,7 @@
   <title>Language List</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -75,7 +75,7 @@
                 &nbsp;
                 <a href="${urlTranslate}"><img src="img/action/translate.png" alt="Edit translations" title="Edit translations"/></a>
                 &nbsp;
-                <a href="${urlExport}"><img src="img/action/export.png" alt="Export translations" title="Export translations"/></a>
+                <a href="${urlExport}"><img src="img/action/export_sql.png" alt="SQL export" title="SQL export"/></a>
               </td>
             </tr>
           </c:forEach>
@@ -86,7 +86,7 @@
                 <table>
                   <tr>
                     <td><input class=":required :only_on_blur" type="file" name="sql-file"/></td>
-                    <td><input type="submit" value="Add new translation"/></td>
+                    <td><input type="submit" value="Add new translation" class="addButton"/></td>
                   </tr>
                 </table>
               </form>

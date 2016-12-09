@@ -15,17 +15,15 @@ import com.openkm.module.jcr.stuff.apache.CredentialsProvider;
 
 public class BasicSecuredServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-
     private CredentialsProvider cp = new BasicCredentialsProvider(null);
 
     /**
      * Get JCR session
      */
-    public synchronized Session getSession(final HttpServletRequest request)
-            throws LoginException, javax.jcr.RepositoryException,
+    public synchronized Session getSession(HttpServletRequest request) throws LoginException, javax.jcr.RepositoryException,
             ServletException {
-        final Credentials creds = cp.getCredentials(request);
-        final Repository rep = JcrRepositoryModule.getRepository();
+        Credentials creds = cp.getCredentials(request);
+        Repository rep = JcrRepositoryModule.getRepository();
 
         if (creds == null) {
             return rep.login();
@@ -37,12 +35,10 @@ public class BasicSecuredServlet extends HttpServlet {
     /**
      * Get JCR session
      */
-    public synchronized Session getSession(final String user,
-            final String password) throws LoginException,
-            javax.jcr.RepositoryException, ServletException {
-        final Credentials creds = new SimpleCredentials(user,
-                password.toCharArray());
-        final Repository rep = JcrRepositoryModule.getRepository();
+    public synchronized Session getSession(String user, String password) throws LoginException, javax.jcr.RepositoryException,
+            ServletException {
+        Credentials creds = new SimpleCredentials(user, password.toCharArray());
+        Repository rep = JcrRepositoryModule.getRepository();
         return rep.login(creds);
     }
 }

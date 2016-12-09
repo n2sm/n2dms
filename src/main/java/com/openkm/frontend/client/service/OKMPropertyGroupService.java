@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -45,14 +45,13 @@ public interface OKMPropertyGroupService extends RemoteService {
 
     public List<GWTPropertyGroup> getGroups(String path) throws OKMException;
 
-    public List<GWTFormElement> getProperties(String path, String grpName)
-            throws OKMException;
+    public List<GWTFormElement> getProperties(String path, String grpName, boolean suggestion) throws OKMException;
 
-    public void setProperties(String path, String grpName,
-            List<GWTFormElement> formProperties) throws OKMException;
+    public void setProperties(String path, String grpName, List<GWTFormElement> formProperties) throws OKMException;
 
     public void removeGroup(String path, String grpName) throws OKMException;
 
-    public List<GWTFormElement> getPropertyGroupForm(String grpName)
-            throws OKMException;
+    public List<GWTFormElement> getPropertyGroupForm(String grpName) throws OKMException;
+
+    public List<GWTFormElement> getPropertyGroupForm(String grpName, String path, boolean suggestion) throws OKMException;
 }

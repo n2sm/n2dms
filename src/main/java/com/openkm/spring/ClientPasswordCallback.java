@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,29 +37,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class ClientPasswordCallback implements CallbackHandler {
-    private static Logger log = LoggerFactory
-            .getLogger(ClientPasswordCallback.class);
+    private static Logger log = LoggerFactory.getLogger(ClientPasswordCallback.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Override
-    public void handle(final Callback[] callbacks) throws IOException,
-            UnsupportedCallbackException {
+    public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
         log.info("handle({})", callbacks);
-        final WSPasswordCallback pwdCallback = (WSPasswordCallback) callbacks[0];
+        WSPasswordCallback pwdCallback = (WSPasswordCallback) callbacks[0];
 
         log.debug("identifier: " + pwdCallback.getIdentifier());
         log.debug("usage: " + pwdCallback.getUsage());
-        final int usage = pwdCallback.getUsage();
+        int usage = pwdCallback.getUsage();
 
         if (usage == WSPasswordCallback.USERNAME_TOKEN) {
-            final String password = pwdCallback.getPassword();
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    pwdCallback.getIdentifier(), password);
+            String password = pwdCallback.getPassword();
+            Authentication authentication = new UsernamePasswordAuthenticationToken(pwdCallback.getIdentifier(), password);
             authentication = authenticationManager.authenticate(authentication);
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Return the password to the caller
             pwdCallback.setPassword(password);

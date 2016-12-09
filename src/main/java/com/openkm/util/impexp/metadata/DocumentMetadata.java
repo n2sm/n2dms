@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,25 +32,15 @@ import java.util.Set;
 public class DocumentMetadata {
     // okm:document
     private String uuid;
-
     private String author;
-
     private String name;
-
     private String path;
-
     private Calendar created;
-
     private Calendar lastModified;
-
     private String language;
-
     private String title;
-
     private String description;
-
     private Set<String> keywords = new HashSet<String>();
-
     private Set<CategoryMetadata> categories = new HashSet<CategoryMetadata>();
 
     // mix:notification
@@ -58,9 +48,6 @@ public class DocumentMetadata {
 
     // mix:scripting
     private String scripting;
-
-    // mix:encryption
-    private String cipherName;
 
     // okm:notes
     private List<NoteMetadata> notes = new ArrayList<NoteMetadata>();
@@ -73,14 +60,13 @@ public class DocumentMetadata {
 
     // mix:accessControlled
     private Map<String, Integer> grantedUsers = new HashMap<String, Integer>();
-
     private Map<String, Integer> grantedRoles = new HashMap<String, Integer>();
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -88,7 +74,7 @@ public class DocumentMetadata {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -96,7 +82,7 @@ public class DocumentMetadata {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -104,7 +90,7 @@ public class DocumentMetadata {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -112,7 +98,7 @@ public class DocumentMetadata {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -120,7 +106,7 @@ public class DocumentMetadata {
         return lastModified;
     }
 
-    public void setLastModified(final Calendar lastModified) {
+    public void setLastModified(Calendar lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -128,7 +114,7 @@ public class DocumentMetadata {
         return language;
     }
 
-    public void setLanguage(final String language) {
+    public void setLanguage(String language) {
         this.language = language;
     }
 
@@ -136,7 +122,7 @@ public class DocumentMetadata {
         return title;
     }
 
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -144,7 +130,7 @@ public class DocumentMetadata {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -152,7 +138,7 @@ public class DocumentMetadata {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -160,7 +146,7 @@ public class DocumentMetadata {
         return categories;
     }
 
-    public void setCategories(final Set<CategoryMetadata> categories) {
+    public void setCategories(Set<CategoryMetadata> categories) {
         this.categories = categories;
     }
 
@@ -168,7 +154,7 @@ public class DocumentMetadata {
         return subscriptors;
     }
 
-    public void setSubscriptors(final Set<String> subscriptors) {
+    public void setSubscriptors(Set<String> subscriptors) {
         this.subscriptors = subscriptors;
     }
 
@@ -176,23 +162,15 @@ public class DocumentMetadata {
         return scripting;
     }
 
-    public void setScripting(final String scripting) {
+    public void setScripting(String scripting) {
         this.scripting = scripting;
-    }
-
-    public String getCipherName() {
-        return cipherName;
-    }
-
-    public void setCipherName(final String cipherName) {
-        this.cipherName = cipherName;
     }
 
     public List<NoteMetadata> getNotes() {
         return notes;
     }
 
-    public void setNotes(final List<NoteMetadata> notes) {
+    public void setNotes(List<NoteMetadata> notes) {
         this.notes = notes;
     }
 
@@ -200,8 +178,7 @@ public class DocumentMetadata {
         return propertyGroups;
     }
 
-    public void setPropertyGroups(
-            final List<PropertyGroupMetadata> propertyGroups) {
+    public void setPropertyGroups(List<PropertyGroupMetadata> propertyGroups) {
         this.propertyGroups = propertyGroups;
     }
 
@@ -209,7 +186,7 @@ public class DocumentMetadata {
         return version;
     }
 
-    public void setVersion(final VersionMetadata version) {
+    public void setVersion(VersionMetadata version) {
         this.version = version;
     }
 
@@ -217,7 +194,7 @@ public class DocumentMetadata {
         return grantedUsers;
     }
 
-    public void setGrantedUsers(final Map<String, Integer> grantedUsers) {
+    public void setGrantedUsers(Map<String, Integer> grantedUsers) {
         this.grantedUsers = grantedUsers;
     }
 
@@ -225,13 +202,12 @@ public class DocumentMetadata {
         return grantedRoles;
     }
 
-    public void setGrantedRoles(final Map<String, Integer> grantedRoles) {
+    public void setGrantedRoles(Map<String, Integer> grantedRoles) {
         this.grantedRoles = grantedRoles;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=");
         sb.append(uuid);
@@ -259,8 +235,6 @@ public class DocumentMetadata {
         sb.append(subscriptors);
         sb.append(", scripting=");
         sb.append(scripting);
-        sb.append(", cipherName=");
-        sb.append(cipherName);
         sb.append(", notes=");
         sb.append(notes);
         sb.append(", propertyGroups=");

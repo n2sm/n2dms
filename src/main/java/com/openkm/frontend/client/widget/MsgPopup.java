@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -25,16 +25,18 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTUINotification;
+import com.openkm.frontend.client.util.Util;
 
 /**
  * Message popup
@@ -42,16 +44,13 @@ import com.openkm.frontend.client.bean.GWTUINotification;
  * @author jllort
  * 
  */
-public class MsgPopup extends DialogBox implements ClickHandler {
+public class MsgPopup extends DialogBox {
     // private PopupPanel panel;
     private VerticalPanel vPanel;
-
-    private Button button;
-
+    private Button buttonClean;
+    private Button buttonClose;
     private ScrollPanel sPanel;
-
     private FlexTable table;
-
     private int lastId = -1;
 
     /**
@@ -69,93 +68,106 @@ public class MsgPopup extends DialogBox implements ClickHandler {
         vPanel = new VerticalPanel();
         sPanel = new ScrollPanel();
 
-        button = new Button(Main.i18n("button.close"), this);
+        buttonClean = new Button(Main.i18n("button.clean"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                reset();
+                hide();
+            }
+        });
+        buttonClean.setStyleName("okm-CleanButton");
+        buttonClose = new Button(Main.i18n("button.close"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
+        buttonClose.setStyleName("okm-YesButton");
 
-        vPanel.setWidth("500px");
-        vPanel.setHeight("240px");
-        sPanel.setWidth("480px");
-        sPanel.setHeight("200px");
+        HorizontalPanel hPanel = new HorizontalPanel();
+        hPanel.add(buttonClean);
+        hPanel.add(Util.hSpace("5px"));
+        hPanel.add(buttonClose);
+
+        vPanel.setWidth("550px");
+        vPanel.setHeight("290px");
+        sPanel.setWidth("530px");
+        sPanel.setHeight("250px");
         sPanel.setStyleName("okm-Popup-text");
 
         vPanel.add(new HTML("<br>"));
         sPanel.add(table);
         vPanel.add(sPanel);
         vPanel.add(new HTML("<br>"));
-        vPanel.add(button);
+        vPanel.add(buttonClose);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(table,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(sPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
-
-        center();
-        button.setStyleName("okm-YesButton");
-        table.setStyleName("okm-NoWrap");
+        vPanel.setCellHorizontalAlignment(table, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(sPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(buttonClose, VerticalPanel.ALIGN_CENTER);
 
         hide();
         setWidget(vPanel);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
-     */
-    @Override
-    public void onClick(final ClickEvent event) {
-        hide();
     }
 
     /**
      * Language refresh
      */
     public void langRefresh() {
-        button.setText(Main.i18n("button.close"));
+        buttonClose.setText(Main.i18n("button.close"));
         setTitle(Main.i18n("msg.title"));
     }
 
     /**
      * reset
      */
-    public void reset() {
-        while (table.getRowCount() > 0) {
-            table.removeRow(0);
-        }
+    private void reset() {
+        table.removeAllRows();
+        evaluateButtons();
     }
 
     /**
      * Add message notification.
      */
-    public void add(final GWTUINotification uin) {
+    public void add(GWTUINotification uin) {
         int row = table.getRowCount();
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
         table.setHTML(row, 0, "<b>" + dtf.format(uin.getDate()) + "</b>");
         table.setHTML(row, 1, uin.getMessage());
         table.getCellFormatter().setWidth(row, 1, "100%");
-        table.getCellFormatter().setVerticalAlignment(row, 0,
-                HasVerticalAlignment.ALIGN_TOP);
-        table.getCellFormatter().setVerticalAlignment(row, 1,
-                HasVerticalAlignment.ALIGN_TOP);
+        table.getCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_TOP);
+        table.getCellFormatter().setVerticalAlignment(row, 1, HasAlignment.ALIGN_TOP);
+        table.getCellFormatter().setStyleName(row, 0, "okm-NoWrap");
         if (uin.getId() > lastId) {
             if (uin.getAction() == GWTUINotification.ACTION_LOGOUT) {
                 row++;
-                final int seconds = 240;
-                final HTML countDown = new HTML(Main.i18n("ui.logout") + " "
-                        + secondsToHTML(seconds));
+                int seconds = 240;
+                HTML countDown = new HTML(Main.i18n("ui.logout") + " " + secondsToHTML(seconds));
                 table.setWidget(row, 0, countDown);
                 table.getFlexCellFormatter().setColSpan(row, 0, 2);
-                table.getCellFormatter().setHorizontalAlignment(row, 0,
-                        HasHorizontalAlignment.ALIGN_CENTER);
+                table.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
                 logout(countDown, seconds);
-                center();
+                show();
             }
             if (uin.isShow()) {
-                center();
+                show();
             }
         }
+        evaluateButtons();
+    }
+
+    @Override
+    public void show() {
+        setPopupPosition(Window.getClientWidth() - (550 + 20), Window.getClientHeight() - (290 + 80));
+        evaluateButtons();
+        super.show();
+    }
+
+    /**
+     * evaluateButtons
+     */
+    private void evaluateButtons() {
+        buttonClean.setEnabled(table.getRowCount() > 0);
     }
 
     /**
@@ -163,19 +175,18 @@ public class MsgPopup extends DialogBox implements ClickHandler {
      * 
      * @param id
      */
-    public void setLastUIId(final int id) {
-        lastId = id;
+    public void setLastUIId(int id) {
+        this.lastId = id;
     }
 
     /**
      * logout
      */
     private void logout(final HTML countDown, final int seconds) {
-        final Timer timer = new Timer() {
+        Timer timer = new Timer() {
             @Override
             public void run() {
-                countDown.setHTML(Main.i18n("ui.logout") + " "
-                        + secondsToHTML(seconds));
+                countDown.setHTML(Main.i18n("ui.logout") + " " + secondsToHTML(seconds));
 
                 if (seconds > 1) {
                     logout(countDown, seconds - 1);
@@ -192,8 +203,7 @@ public class MsgPopup extends DialogBox implements ClickHandler {
     /**
      * secondsToHTML
      */
-    private String secondsToHTML(final int seconds) {
-        return "0" + seconds / 60 + ":"
-                + (seconds % 60 > 9 ? seconds % 60 : "0" + seconds % 60);
+    private String secondsToHTML(int seconds) {
+        return "0" + (seconds / 60) + ":" + ((seconds % 60 > 9) ? (seconds % 60) : "0" + (seconds % 60));
     }
 }

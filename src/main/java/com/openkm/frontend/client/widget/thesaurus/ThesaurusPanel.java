@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.widget.thesaurus;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -34,8 +35,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -51,37 +51,23 @@ import com.openkm.frontend.client.service.OKMThesaurusServiceAsync;
  *
  */
 public class ThesaurusPanel extends Composite {
-    private final OKMThesaurusServiceAsync thesaurusService = (OKMThesaurusServiceAsync) GWT
-            .create(OKMThesaurusService.class);
+    private final OKMThesaurusServiceAsync thesaurusService = (OKMThesaurusServiceAsync) GWT.create(OKMThesaurusService.class);
 
     private static final int TAB_HEIGHT = 20;
-
     private final int TAB_TREE = 0;
-
     private final int TAB_KEYWORDS = 1;
 
     private TabLayoutPanel tabPanel;
-
     private VerticalPanel vPanel;
-
     private FolderSelectTree folderSelectTree;
-
     private VerticalPanel verticalDirectoryPanel;
-
     public ScrollPanel scrollDirectoryPanel;
-
     public ScrollPanel scrollKeywordPanel;
-
     private TextBox keyword;
-
     private FlexTable keywordTable;
-
     private VerticalPanel vPanelKeyword;
-
     private int selectedRow = -1;
-
     private int selectedTab = TAB_TREE;
-
     public Status status;
 
     /**
@@ -97,14 +83,13 @@ public class ThesaurusPanel extends Composite {
         verticalDirectoryPanel = new VerticalPanel();
         verticalDirectoryPanel.setSize("100%", "100%");
         scrollDirectoryPanel = new ScrollPanel();
-        scrollDirectoryPanel.setSize("490", "275");
+        scrollDirectoryPanel.setSize("490px", "275px");
         scrollDirectoryPanel.addStyleName("okm-Background-White");
         scrollDirectoryPanel.addStyleName("okm-Border-Left");
         scrollDirectoryPanel.addStyleName("okm-Border-Right");
         scrollDirectoryPanel.addStyleName("okm-Border-Bottom");
         verticalDirectoryPanel.add(folderSelectTree);
-        verticalDirectoryPanel.setCellHorizontalAlignment(folderSelectTree,
-                HasHorizontalAlignment.ALIGN_LEFT);
+        verticalDirectoryPanel.setCellHorizontalAlignment(folderSelectTree, HasAlignment.ALIGN_LEFT);
         scrollDirectoryPanel.add(verticalDirectoryPanel);
 
         // Keywords
@@ -112,9 +97,8 @@ public class ThesaurusPanel extends Composite {
         keywordTable.setWidth("100%");
         keywordTable.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                markSelectedRow(keywordTable.getCellForEvent(event)
-                        .getRowIndex());
+            public void onClick(ClickEvent event) {
+                markSelectedRow(keywordTable.getCellForEvent(event).getRowIndex());
                 evaluateEnableAction();
             }
         });
@@ -123,10 +107,10 @@ public class ThesaurusPanel extends Composite {
         scrollKeywordPanel.setStyleName("okm-Popup-text");
 
         keyword = new TextBox();
-        keyword.setWidth("492");
+        keyword.setWidth("492px");
         keyword.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 if (keyword.getText().length() >= 3) {
                     getKeywords(keyword.getText().toLowerCase());
                 } else {
@@ -139,15 +123,14 @@ public class ThesaurusPanel extends Composite {
         vPanelKeyword.add(keyword);
         vPanelKeyword.add(scrollKeywordPanel);
 
-        vPanelKeyword.setCellHeight(keyword, "25");
-        vPanelKeyword.setCellVerticalAlignment(keyword,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        vPanelKeyword.setCellHeight(keyword, "25px");
+        vPanelKeyword.setCellVerticalAlignment(keyword, HasAlignment.ALIGN_MIDDLE);
 
         // Tab Panel
         vPanel = new VerticalPanel();
         tabPanel = new TabLayoutPanel(TAB_HEIGHT, Unit.PX);
-        tabPanel.setWidth("492");
-        tabPanel.setHeight("300");
+        tabPanel.setWidth("492px");
+        tabPanel.setHeight("300px");
 
         tabPanel.add(scrollDirectoryPanel, Main.i18n("thesaurus.tab.tree"));
         tabPanel.add(vPanelKeyword, Main.i18n("thesaurus.tab.keywords"));
@@ -157,7 +140,7 @@ public class ThesaurusPanel extends Composite {
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
+            public void onSelection(SelectionEvent<Integer> event) {
                 selectedTab = event.getSelectedItem().intValue();
                 evaluateEnableAction();
             }
@@ -187,17 +170,15 @@ public class ThesaurusPanel extends Composite {
      * Gets asyncronous root node
      */
     final AsyncCallback<List<String>> callbackGetKeywords = new AsyncCallback<List<String>>() {
-        @Override
-        public void onSuccess(final List<String> result) {
+        public void onSuccess(List<String> result) {
             removeAllRows();
-            for (final String string : result) {
-                keywordTable.setHTML(keywordTable.getRowCount(), 0, string);
+            for (Iterator<String> it = result.iterator(); it.hasNext();) {
+                keywordTable.setHTML(keywordTable.getRowCount(), 0, it.next());
             }
             status.unsetFlagKeywords();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             status.unsetFlagKeywords();
             Main.get().showError("getKeywords", caught);
         }
@@ -206,7 +187,7 @@ public class ThesaurusPanel extends Composite {
     /**
      * Gets the root
      */
-    public void getKeywords(final String filter) {
+    public void getKeywords(String filter) {
         status.setFlagKeywords();
         thesaurusService.getKeywords(filter, callbackGetKeywords);
     }
@@ -244,7 +225,7 @@ public class ThesaurusPanel extends Composite {
      * 
      * @param row
      */
-    private void markSelectedRow(final int row) {
+    private void markSelectedRow(int row) {
         // And row must be other than the selected one
         if (row != selectedRow) {
             styleRow(selectedRow, false);
@@ -259,14 +240,12 @@ public class ThesaurusPanel extends Composite {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    private void styleRow(final int row, final boolean selected) {
+    private void styleRow(int row, boolean selected) {
         if (row >= 0) {
             if (selected) {
-                keywordTable.getRowFormatter().addStyleName(row,
-                        "okm-Table-SelectedRow");
+                keywordTable.getRowFormatter().addStyleName(row, "okm-Table-SelectedRow");
             } else {
-                keywordTable.getRowFormatter().removeStyleName(row,
-                        "okm-Table-SelectedRow");
+                keywordTable.getRowFormatter().removeStyleName(row, "okm-Table-SelectedRow");
             }
         }
     }
@@ -276,11 +255,9 @@ public class ThesaurusPanel extends Composite {
      */
     public void evaluateEnableAction() {
         if (isTabTreeSelected()) {
-            Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup
-                    .enable(folderSelectTree.evaluateEnableActionButton());
+            Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup.enable(folderSelectTree.evaluateEnableActionButton());
         } else if (isTabKeywordSelected()) {
-            Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup
-                    .enable(selectedRow >= 0);
+            Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup.enable(selectedRow >= 0);
         }
     }
 
@@ -288,7 +265,7 @@ public class ThesaurusPanel extends Composite {
      * isTabTreeSelected
      */
     public boolean isTabTreeSelected() {
-        return selectedTab == TAB_TREE;
+        return (selectedTab == TAB_TREE);
     }
 
     /**
@@ -297,7 +274,7 @@ public class ThesaurusPanel extends Composite {
      * @return
      */
     public boolean isTabKeywordSelected() {
-        return selectedTab == TAB_KEYWORDS;
+        return (selectedTab == TAB_KEYWORDS);
     }
 
     /**

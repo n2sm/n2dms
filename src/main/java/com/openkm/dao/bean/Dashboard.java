@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,22 +26,17 @@ import java.util.Calendar;
 
 public class Dashboard implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long id;
-
     private String user;
-
     private String source;
-
     private String node;
-
     private Calendar date;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -49,7 +44,7 @@ public class Dashboard implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -57,7 +52,7 @@ public class Dashboard implements Serializable {
         return source;
     }
 
-    public void setSource(final String source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
@@ -65,7 +60,7 @@ public class Dashboard implements Serializable {
         return node;
     }
 
-    public void setNode(final String node) {
+    public void setNode(String node) {
         this.node = node;
     }
 
@@ -73,13 +68,12 @@ public class Dashboard implements Serializable {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("user=");
         sb.append(user);

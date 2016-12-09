@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,24 +37,21 @@ public class FileBrowserComunicator {
      * isDocumentSelected
      */
     public static boolean isDocumentSelected() {
-        return Main.get().mainPanel.desktop.browser.fileBrowser
-                .isDocumentSelected();
+        return Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected();
     }
 
     /**
      * isFolderSelected
      */
     public static boolean isFolderSelected() {
-        return Main.get().mainPanel.desktop.browser.fileBrowser
-                .isFolderSelected();
+        return Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected();
     }
 
     /**
      * isMailSelected
      */
     public static boolean isMailSelected() {
-        return Main.get().mainPanel.desktop.browser.fileBrowser
-                .isMailSelected();
+        return Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected();
     }
 
     /**
@@ -90,16 +87,14 @@ public class FileBrowserComunicator {
      * @return
      */
     public static boolean isPanelSelected() {
-        return Main.get().mainPanel.desktop.browser.fileBrowser
-                .isPanelSelected();
+        return Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected();
     }
 
     /**
      * refreshOnlyFileBrowser
      */
     public static void refreshOnlyFileBrowser() {
-        Main.get().mainPanel.desktop.browser.fileBrowser
-                .refreshOnlyFileBrowser();
+        Main.get().mainPanel.desktop.browser.fileBrowser.refreshOnlyFileBrowser();
     }
 
 }

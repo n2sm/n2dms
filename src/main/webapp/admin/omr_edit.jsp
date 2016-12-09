@@ -8,17 +8,16 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="Shortcut icon" href="favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
-  <link rel="stylesheet" type="text/css" href="css/selectlist/style.css" />
-  <link rel="stylesheet" type="text/css" href="css/selectlist/selectlist.css" />
-  <script src="../js/jquery-1.7.1.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css?v=%{TIMESTAMP}%" />
+  <link rel="stylesheet" type="text/css" href="../css/chosen.css" />
+  <script src="../js/jquery-1.8.3.min.js" type="text/javascript"></script>
   <script src="../js/vanadium-min.js" type="text/javascript"></script>
-  <script type="text/javascript" src="js/jquery.selectlist.min.js"></script>
+  <script src="../js/chosen.jquery.js" type="text/javascript"></script>
   <title>OMR Template</title>
   <script type="text/javascript">
     $(document).ready(function() {
     	$('#alert').hide();
-    	$('select#om_properties').selectList();
+    	$('select#om_properties').chosen();
     	
     	$('#form').submit(function() {
     		$('#alert').show();
@@ -63,8 +62,8 @@
             <td><input class=":required :only_on_blur" name="om_name" value="${om.name}"/></td>
           </tr>
           <tr>
-            <td valign="top">Template</td>
-            <td valign="top">
+            <td>Template</td>
+            <td>
               <c:if test="${om.templateFileName != null && om.templateFileName ne ''}">
             	<a href="${urlDownload}&type=1">${om.templateFileName}</a><br/>
               </c:if>
@@ -79,16 +78,16 @@
             </td>
           </tr>
           <tr>
-          	<td valign="top">Properties</td>
+          	<td>Properties</td>
           	<td>
-          		<select id="om_properties" name="om_properties" title="Select property" multiple="multiple">
-	           	  <c:forEach var="property" items="${properties}" varStatus="row">
+          		<select id="om_properties" name="om_properties" data-placeholder="Select property" multiple="multiple" style="width: 250px">
+	           	  <c:forEach var="pgprop" items="${pgprops}" varStatus="row">
 	           	    <c:choose>
-	           	    	<c:when test="${u:contains(om.properties, property)}">
-	           	    		<option value="${property}" selected="selected">${property}</option>
+	           	    	<c:when test="${u:contains(om.properties, pgprop)}">
+	           	    		<option value="${pgprop}" selected="selected">${pgprop}</option>
 	           	    	</c:when>
 	           	    	<c:otherwise>
-	           	    		<option value="${property}">${property}</option>
+	           	    		<option value="${pgprop}">${pgprop}</option>
 	           	    	</c:otherwise>
 	           	    </c:choose>
 	           	  </c:forEach>
@@ -101,8 +100,8 @@
 	            <c:param name="om_id" value="${om.id}"/>
 	          </c:url>
 			  <tr>
-			  	<td valign="top">Asc</td>
-			  	<td valign="top">
+			  	<td>Asc</td>
+			  	<td>
 			  		<a href="${urlDownload}&type=2">${om.ascFileName}</a>
 			  		<c:if test="${action ne 'delete'}">
 			  			<a href="${urlEditAsc}"><img src="img/action/edit.png" alt="Edit" title="Edit"/></a>
@@ -112,8 +111,8 @@
           </c:if>
           <c:if test="${om.configFileName != null && om.configFileName ne ''}">
 			  <tr>
-			  	<td valign="top">Config</td>
-			  	<td valign="top">
+			  	<td>Config</td>
+			  	<td>
 			  		<a href="${urlDownload}&type=3">${om.configFileName}</a>
 			  	</td>
 			  </tr>
@@ -124,8 +123,8 @@
 	            <c:param name="om_id" value="${om.id}"/>
 	          </c:url>
 			  <tr>
-			  	<td valign="top">Fields</td>
-			  	<td valign="top">
+			  	<td>Fields</td>
+			  	<td>
 			  		<c:choose>
 					    <c:when test="${om.fieldsFileName != null && om.fieldsFileName ne ''}">
 					        <a href="${urlDownload}&type=4">${om.fieldsFileName}</a>
@@ -157,10 +156,15 @@
           </tr>
           <tr>
             <td colspan="2" align="right">
-              <div id="buttons">
-              	<input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              	<input type="submit" value="Send"/>
-              </div>
+              <c:url value="Omr" var="urlCancel">
+                <c:param name="action" value="userList"/>
+              </c:url>
+              <input type="button" onclick="javascript:window.location.href='${urlCancel}'" value="Cancel" class="noButton"/>
+              <c:choose>
+                <c:when test="${action == 'create'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                <c:when test="${action == 'edit'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                <c:when test="${action == 'delete'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+              </c:choose>
             </td>
           </tr>
         </table>

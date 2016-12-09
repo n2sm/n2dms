@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
@@ -41,21 +40,14 @@ import com.openkm.frontend.client.extension.comunicator.UtilComunicator;
  */
 public class ConfirmPopup extends DialogBox {
     public static final int NO_ACTION = 0;
-
     public static final int CONFIRM_EXPORT_DOCUMENT = 1;
-
     public static final int CONFIRM_EXPORT_FOLDER = 2;
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private HTML text;
-
     private Button cancelButton;
-
     private Button acceptButton;
-
     private int action = 0;
 
     /**
@@ -72,22 +64,20 @@ public class ConfirmPopup extends DialogBox {
         text = new HTML();
         text.setStyleName("okm-NoWrap");
 
-        cancelButton = new Button(GeneralComunicator.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(GeneralComunicator.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
-        acceptButton = new Button(GeneralComunicator.i18n("button.accept"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        execute();
-                        hide();
-                    }
-                });
+        acceptButton = new Button(GeneralComunicator.i18n("button.accept"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                execute();
+                hide();
+            }
+        });
 
         vPanel.setWidth("300px");
         vPanel.setHeight("50px");
@@ -97,19 +87,17 @@ public class ConfirmPopup extends DialogBox {
         text.setHTML("");
 
         hPanel.add(cancelButton);
-        hPanel.add(UtilComunicator.hSpace("5"));
+        hPanel.add(UtilComunicator.hSpace("5px"));
         hPanel.add(acceptButton);
 
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
         vPanel.add(text);
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
         vPanel.add(hPanel);
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
 
-        vPanel.setCellHorizontalAlignment(text,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(text, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
 
         super.hide();
         setWidget(vPanel);
@@ -133,16 +121,14 @@ public class ConfirmPopup extends DialogBox {
      * 
      * @param action The action to be confirmed
      */
-    public void setConfirm(final int action) {
+    public void setConfirm(int action) {
         this.action = action;
         switch (action) {
         case CONFIRM_EXPORT_DOCUMENT:
-            text.setHTML(GeneralComunicator
-                    .i18nExtension("dropbox.confirm.export.document"));
+            text.setHTML(GeneralComunicator.i18nExtension("dropbox.confirm.export.document"));
             break;
         case CONFIRM_EXPORT_FOLDER:
-            text.setHTML(GeneralComunicator
-                    .i18nExtension("dropbox.confirm.export.folder"));
+            text.setHTML(GeneralComunicator.i18nExtension("dropbox.confirm.export.folder"));
             break;
         }
     }
@@ -159,11 +145,10 @@ public class ConfirmPopup extends DialogBox {
     /**
      * Shows de popup
      */
-    @Override
     public void show() {
         setText(GeneralComunicator.i18n("confirm.label"));
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 125) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 125) / 2;
         setPopupPosition(left, top);
         super.show();
     }

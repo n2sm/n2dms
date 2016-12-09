@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.widget.notify;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -29,8 +30,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -47,19 +46,13 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  */
 public class NotifyRole extends Composite {
 
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     private HorizontalPanel hPanel;
-
     private RoleScrollTable notifyRolesTable;
-
     private RoleScrollTable rolesTable;
-
     private VerticalPanel buttonPanel;
-
     private Image addButton;
-
     private Image removeButton;
 
     /**
@@ -74,25 +67,25 @@ public class NotifyRole extends Composite {
         addButton = new Image(OKMBundleResources.INSTANCE.add());
         removeButton = new Image(OKMBundleResources.INSTANCE.remove());
 
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         buttonPanel.add(addButton);
         buttonPanel.add(space); // separator
         buttonPanel.add(removeButton);
 
-        buttonPanel.setCellHeight(space, "40");
+        buttonPanel.setCellHeight(space, "40px");
 
         addButton.addClickHandler(addButtonHandler);
         removeButton.addClickHandler(removeButtonHandler);
+        addButton.setStyleName("okm-Hyperlink");
+        removeButton.setStyleName("okm-Hyperlink");
 
-        hPanel.setSize("374", "140");
+        hPanel.setSize("374px", "140px");
         hPanel.add(rolesTable);
         hPanel.add(buttonPanel);
         hPanel.add(notifyRolesTable);
-        hPanel.setCellVerticalAlignment(buttonPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(buttonPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        hPanel.setCellWidth(buttonPanel, "20");
+        hPanel.setCellVerticalAlignment(buttonPanel, VerticalPanel.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(buttonPanel, HorizontalPanel.ALIGN_CENTER);
+        hPanel.setCellWidth(buttonPanel, "20px");
 
         notifyRolesTable.addStyleName("okm-Border-Left");
         notifyRolesTable.addStyleName("okm-Border-Right");
@@ -111,7 +104,7 @@ public class NotifyRole extends Composite {
      */
     public void correcIEBug() {
         // TODO:Solves minor bug with IE ( UI defect extra size needed )
-        hPanel.setCellWidth(buttonPanel, "25");
+        hPanel.setCellWidth(buttonPanel, "25px");
     }
 
     /**
@@ -142,7 +135,7 @@ public class NotifyRole extends Composite {
      */
     ClickHandler addButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (rolesTable.getRole() != null) {
                 notifyRolesTable.addRow(rolesTable.getRole());
                 notifyRolesTable.selectLastRow();
@@ -158,7 +151,7 @@ public class NotifyRole extends Composite {
      */
     ClickHandler removeButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (notifyRolesTable.getRole() != null) {
                 rolesTable.addRow(notifyRolesTable.getRole());
                 rolesTable.selectLastRow();
@@ -171,15 +164,13 @@ public class NotifyRole extends Composite {
      * Call back get all roles
      */
     final AsyncCallback<List<String>> callbackAllRoles = new AsyncCallback<List<String>>() {
-        @Override
-        public void onSuccess(final List<String> result) {
-            for (final String string : result) {
-                rolesTable.addRow(string);
+        public void onSuccess(List<String> result) {
+            for (Iterator<String> it = result.iterator(); it.hasNext();) {
+                rolesTable.addRow(it.next());
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetAllRoles", caught);
         }
     };
@@ -194,9 +185,8 @@ public class NotifyRole extends Composite {
     /**
      * Gets all roles
      */
-    public void getFilteredAllRoles(final String filter) {
-        authService.getFilteredAllRoles(filter,
-                notifyRolesTable.getRolesToNotifyList(), callbackAllRoles);
+    public void getFilteredAllRoles(String filter) {
+        authService.getFilteredAllRoles(filter, notifyRolesTable.getRolesToNotifyList(), callbackAllRoles);
     }
 
     /**

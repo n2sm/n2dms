@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,8 +25,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import bsh.EvalError;
 
 import com.openkm.bean.form.FormElement;
+import com.openkm.bean.form.Input;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.MimeTypeConfig;
 import com.openkm.core.ParseException;
@@ -67,48 +70,40 @@ import com.openkm.util.WebUtils;
  */
 public class ReportServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(ReportServlet.class);
-
     private static Map<String, String> types = new LinkedHashMap<String, String>();
 
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
             if (action.equals("create")) {
-                final ServletContext sc = getServletContext();
-                final Report rp = new Report();
+                ServletContext sc = getServletContext();
+                Report rp = new Report();
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("rp", rp);
-                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(request, response);
             } else if (action.equals("edit")) {
-                final ServletContext sc = getServletContext();
-                final int rpId = WebUtils.getInt(request, "rp_id");
-                final Report rp = ReportDAO.findByPk(rpId);
+                ServletContext sc = getServletContext();
+                int rpId = WebUtils.getInt(request, "rp_id");
+                Report rp = ReportDAO.findByPk(rpId);
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("rp", rp);
-                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(request, response);
             } else if (action.equals("delete")) {
-                final ServletContext sc = getServletContext();
-                final int rpId = WebUtils.getInt(request, "rp_id");
-                final Report rp = ReportDAO.findByPk(rpId);
+                ServletContext sc = getServletContext();
+                int rpId = WebUtils.getInt(request, "rp_id");
+                Report rp = ReportDAO.findByPk(rpId);
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("rp", rp);
-                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/report_edit.jsp").forward(request, response);
             } else if (action.equals("paramList")) {
                 paramList(userId, request, response);
             } else if (action.equals("getParams")) {
@@ -118,44 +113,43 @@ public class ReportServlet extends BaseServlet {
             } else {
                 list(userId, request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final JRException e) {
+        } catch (JRException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final EvalError e) {
+        } catch (EvalError e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doPost({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         String action = "";
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
             if (ServletFileUpload.isMultipartContent(request)) {
                 InputStream is = null;
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
-                final List<FileItem> items = upload.parseRequest(request);
-                final Report rp = new Report();
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> items = upload.parseRequest(request);
+                Report rp = new Report();
 
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (item.isFormField()) {
                         if (item.getFieldName().equals("action")) {
                             action = item.getString("UTF-8");
@@ -169,23 +163,20 @@ public class ReportServlet extends BaseServlet {
                     } else {
                         is = item.getInputStream();
                         rp.setFileName(FilenameUtils.getName(item.getName()));
-                        rp.setFileMime(MimeTypeConfig.mimeTypes
-                                .getContentType(item.getName()));
-                        rp.setFileContent(SecureStore.b64Encode(IOUtils
-                                .toByteArray(is)));
+                        rp.setFileMime(MimeTypeConfig.mimeTypes.getContentType(item.getName()));
+                        rp.setFileContent(SecureStore.b64Encode(IOUtils.toByteArray(is)));
                         is.close();
                     }
                 }
 
                 if (action.equals("create")) {
-                    final long id = ReportDAO.create(rp);
+                    long id = ReportDAO.create(rp);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_REPORT_CREATE",
-                            Long.toString(id), null, rp.toString());
+                    UserActivity.log(userId, "ADMIN_REPORT_CREATE", Long.toString(id), null, rp.toString());
                     list(userId, request, response);
                 } else if (action.equals("edit")) {
-                    final Report tmp = ReportDAO.findByPk(rp.getId());
+                    Report tmp = ReportDAO.findByPk(rp.getId());
                     tmp.setActive(rp.isActive());
                     tmp.setFileContent(rp.getFileContent());
                     tmp.setFileMime(rp.getFileMime());
@@ -194,22 +185,20 @@ public class ReportServlet extends BaseServlet {
                     ReportDAO.update(tmp);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_REPORT_EDIT",
-                            Long.toString(rp.getId()), null, rp.toString());
+                    UserActivity.log(userId, "ADMIN_REPORT_EDIT", Long.toString(rp.getId()), null, rp.toString());
                     list(userId, request, response);
                 } else if (action.equals("delete")) {
                     ReportDAO.delete(rp.getId());
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_REPORT_DELETE",
-                            Long.toString(rp.getId()), null, null);
+                    UserActivity.log(userId, "ADMIN_REPORT_DELETE", Long.toString(rp.getId()), null, null);
                     list(userId, request, response);
                 }
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -218,65 +207,64 @@ public class ReportServlet extends BaseServlet {
     /**
      * List registered reports
      */
-    private void list(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("list({}, {}, {})",
-                new Object[] { userId, request, response });
-        final ServletContext sc = getServletContext();
-        final List<Report> list = ReportDAO.findAll();
+    private void list(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("list({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        List<Report> list = ReportDAO.findAll();
         sc.setAttribute("reports", list);
-        sc.getRequestDispatcher("/admin/report_list.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/report_list.jsp").forward(request, response);
         log.debug("list: void");
     }
 
     /**
      * Show report parameters, previous step to execution
      */
-    private void getParams(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            ParseException {
-        log.debug("getParams({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
-        final int rpId = WebUtils.getInt(request, "rp_id");
-        final List<FormElement> params = ReportUtils.getReportParameters(rpId);
+    private void getParams(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, ParseException {
+        log.debug("getParams({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        int rpId = WebUtils.getInt(request, "rp_id");
+        List<FormElement> params = ReportUtils.getReportParameters(rpId);
 
         sc.setAttribute("rp_id", rpId);
         sc.setAttribute("params", params);
         sc.setAttribute("ReportUtil", new ReportUtils());
-        sc.getRequestDispatcher("/admin/report_get_params.jsp").forward(
-                request, response);
+        sc.getRequestDispatcher("/admin/report_get_params.jsp").forward(request, response);
         log.debug("getParams: void");
     }
 
     /**
      * Execute report
      */
-    private void execute(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            DatabaseException, JRException, EvalError, ParseException {
-        log.debug("execute({}, {}, {})", new Object[] { userId, request,
-                response });
-        final int rpId = WebUtils.getInt(request, "rp_id");
-        final int format = WebUtils.getInt(request, "format",
-                ReportUtils.OUTPUT_PDF);
-        final Report rp = ReportDAO.findByPk(rpId);
+    private void execute(String userId, HttpServletRequest request, HttpServletResponse response) throws IOException, DatabaseException,
+            JRException, EvalError, ParseException {
+        log.debug("execute({}, {}, {})", new Object[] { userId, request, response });
+        int rpId = WebUtils.getInt(request, "rp_id");
+        int format = WebUtils.getInt(request, "format", ReportUtils.OUTPUT_PDF);
+        Report rp = ReportDAO.findByPk(rpId);
 
         // Set file name
-        final String fileName = rp.getFileName().substring(0,
-                rp.getFileName().indexOf('.'))
-                + ReportUtils.FILE_EXTENSION[format];
+        String fileName = rp.getFileName().substring(0, rp.getFileName().indexOf('.')) + ReportUtils.FILE_EXTENSION[format];
 
         // Set default report parameters
-        final Map<String, Object> params = new HashMap<String, Object>();
-        final String host = com.openkm.core.Config.APPLICATION_URL;
+        Map<String, Object> params = new HashMap<String, Object>();
+        String host = com.openkm.core.Config.APPLICATION_URL;
         params.put("host", host.substring(0, host.lastIndexOf("/") + 1));
 
-        for (final FormElement fe : ReportUtils.getReportParameters(rpId)) {
-            params.put(fe.getName(), WebUtils.getString(request, fe.getName()));
+        for (FormElement fe : ReportUtils.getReportParameters(rpId)) {
+            String value = WebUtils.getString(request, fe.getName());
+
+            if (fe instanceof Input && ((Input) fe).getType().equals(Input.TYPE_DATE)) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    params.put(fe.getName(), sdf.parse(value));
+                } catch (java.text.ParseException e) {
+                    throw new ParseException(e.getMessage(), e);
+                }
+            } else {
+                params.put(fe.getName(), value);
+            }
         }
 
         ByteArrayOutputStream baos = null;
@@ -285,41 +273,35 @@ public class ReportServlet extends BaseServlet {
         try {
             baos = ReportUtils.execute(rp, params, format);
             bais = new ByteArrayInputStream(baos.toByteArray());
-            WebUtils.sendFile(request, response, fileName,
-                    ReportUtils.FILE_MIME[format], false, bais);
+            WebUtils.sendFile(request, response, fileName, ReportUtils.FILE_MIME[format], false, bais);
         } finally {
             IOUtils.closeQuietly(bais);
             IOUtils.closeQuietly(baos);
         }
 
         // Activity log
-        UserActivity.log(request.getRemoteUser(), "ADMIN_REPORT_EXECUTE",
-                Integer.toString(rpId), null, rp.toString());
+        UserActivity.log(request.getRemoteUser(), "ADMIN_REPORT_EXECUTE", Integer.toString(rpId), null, rp.toString());
         log.debug("execute: void");
     }
 
     /**
      * List reports parameters
      */
-    private void paramList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            ParseException {
-        log.debug("paramList({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
-        final int rpId = WebUtils.getInt(request, "rp_id");
-        final List<FormElement> params = ReportUtils.getReportParameters(rpId);
-        final List<Map<String, String>> fMaps = new ArrayList<Map<String, String>>();
+    private void paramList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, ParseException {
+        log.debug("paramList({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        int rpId = WebUtils.getInt(request, "rp_id");
+        List<FormElement> params = ReportUtils.getReportParameters(rpId);
+        List<Map<String, String>> fMaps = new ArrayList<Map<String, String>>();
 
-        for (final FormElement fe : params) {
+        for (FormElement fe : params) {
             fMaps.add(FormUtils.toString(fe));
         }
 
         sc.setAttribute("rp_id", rpId);
         sc.setAttribute("params", fMaps);
-        sc.getRequestDispatcher("/admin/report_param_list.jsp").forward(
-                request, response);
+        sc.getRequestDispatcher("/admin/report_param_list.jsp").forward(request, response);
         log.debug("paramList: void");
     }
 }

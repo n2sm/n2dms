@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,8 +22,7 @@
 package com.openkm.frontend.client.widget.foldertree;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.openkm.frontend.client.Main;
@@ -40,33 +39,19 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class Status extends ExtendedPopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private boolean flag_getChilds = false;
-
     private boolean flag_create = false;
-
     private boolean flag_delete = false;
-
     private boolean flag_rename = false;
-
     private boolean flag_purge = false;
-
     private boolean flag_purgeTrash = false;
-
     private boolean flag_get = false;
-
     private boolean flag_addSubscription = false;
-
     private boolean flag_removeSubscription = false;
-
     private boolean flag_root = false;
-
     private boolean flag_userHome = false;
 
     /**
@@ -83,11 +68,9 @@ public class Status extends ExtendedPopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -103,55 +86,43 @@ public class Status extends ExtendedPopupPanel {
      * Refreshing satus
      */
     public void refresh() {
-        if (flag_getChilds || flag_delete || flag_rename || flag_create
-                || flag_purge || flag_purgeTrash || flag_get
-                || flag_addSubscription || flag_removeSubscription || flag_root
-                || flag_userHome) {
-            final int left = (Main.get().mainPanel.desktop.getLeft() - 200) / 2
-                    + ExtendedDockPanel.VERTICAL_BORDER_PANEL_WIDTH;
-            final int top = (Main.get().mainPanel.desktop.getHeight() - 40) / 2
-                    + TopPanel.PANEL_HEIGHT;
-            final int stackIndex = Main.get().mainPanel.desktop.navigator
-                    .getStackIndex();
+        if (flag_getChilds || flag_delete || flag_rename || flag_create || flag_purge || flag_purgeTrash || flag_get
+                || flag_addSubscription || flag_removeSubscription || flag_root || flag_userHome) {
+            int left = ((Main.get().mainPanel.desktop.getLeft() - 200) / 2) + ExtendedDockPanel.VERTICAL_BORDER_PANEL_WIDTH;
+            int top = ((Main.get().mainPanel.desktop.getHeight() - 40) / 2) + TopPanel.PANEL_HEIGHT;
+            int stackIndex = Main.get().mainPanel.desktop.navigator.getStackIndex();
             setPopupPosition(left, top);
             switch (stackIndex) {
             case 0:
-                Main.get().activeFolderTree
-                        .removeStyleName("okm-PanelSelected");
+                Main.get().activeFolderTree.removeStyleName("okm-PanelSelected");
                 Main.get().activeFolderTree.setStyleName("okm-PanelRefreshing");
                 break;
             case 1:
-                Main.get().activeFolderTree
-                        .removeStyleName("okm-PanelSelected");
+                Main.get().activeFolderTree.removeStyleName("okm-PanelSelected");
                 Main.get().activeFolderTree.setStyleName("okm-PanelRefreshing");
                 break;
             }
             super.show();
         } else {
-            final int stackIndex = Main.get().mainPanel.desktop.navigator
-                    .getStackIndex();
+            int stackIndex = Main.get().mainPanel.desktop.navigator.getStackIndex();
             super.hide();
             switch (stackIndex) {
             case 0:
                 if (Main.get().activeFolderTree != null) {
                     Main.get().activeFolderTree.setStyleName("okm-Tree");
                     if (Main.get().activeFolderTree.isPanelSelected()) {
-                        Main.get().activeFolderTree
-                                .addStyleName("okm-PanelSelected");
+                        Main.get().activeFolderTree.addStyleName("okm-PanelSelected");
                     } else {
-                        Main.get().activeFolderTree
-                                .removeStyleName("okm-PanelSelected");
+                        Main.get().activeFolderTree.removeStyleName("okm-PanelSelected");
                     }
                 }
                 break;
             case 1:
                 Main.get().activeFolderTree.setStyleName("okm-Tree");
                 if (Main.get().activeFolderTree.isPanelSelected()) {
-                    Main.get().activeFolderTree
-                            .addStyleName("okm-PanelSelected");
+                    Main.get().activeFolderTree.addStyleName("okm-PanelSelected");
                 } else {
-                    Main.get().activeFolderTree
-                            .removeStyleName("okm-PanelSelected");
+                    Main.get().activeFolderTree.removeStyleName("okm-PanelSelected");
                 }
                 break;
             }

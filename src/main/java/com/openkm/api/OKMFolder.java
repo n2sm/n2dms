@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.api;
@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.automation.AutomationException;
 import com.openkm.bean.ContentInfo;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.Folder;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
@@ -46,7 +47,6 @@ import com.openkm.module.ModuleManager;
  */
 public class OKMFolder implements FolderModule {
     private static Logger log = LoggerFactory.getLogger(OKMFolder.class);
-
     private static OKMFolder instance = new OKMFolder();
 
     private OKMFolder() {
@@ -57,150 +57,155 @@ public class OKMFolder implements FolderModule {
     }
 
     @Override
-    public Folder create(final String token, final Folder fld)
-            throws PathNotFoundException, ItemExistsException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException, AutomationException {
+    public Folder create(String token, Folder fld) throws PathNotFoundException, ItemExistsException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException, AutomationException {
         log.debug("create({}, {})", token, fld);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final Folder newFld = fm.create(token, fld);
+        FolderModule fm = ModuleManager.getFolderModule();
+        Folder newFld = fm.create(token, fld);
         log.debug("create: {}", newFld);
         return newFld;
     }
 
-    public Folder createSimple(final String token, final String fldPath)
-            throws PathNotFoundException, ItemExistsException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException, AutomationException {
+    public Folder createSimple(String token, String fldPath) throws PathNotFoundException, ItemExistsException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException, AutomationException {
         log.debug("createSimple({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final Folder fld = new Folder();
+        FolderModule fm = ModuleManager.getFolderModule();
+        Folder fld = new Folder();
         fld.setPath(fldPath);
-        final Folder newFolder = fm.create(token, fld);
+        Folder newFolder = fm.create(token, fld);
         log.debug("createSimple: {}", newFolder);
         return newFolder;
     }
 
     @Override
-    public Folder getProperties(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getProperties(String token, String fldPath) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getProperties({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final Folder fld = fm.getProperties(token, fldPath);
+        FolderModule fm = ModuleManager.getFolderModule();
+        Folder fld = fm.getProperties(token, fldPath);
         log.debug("getProperties: {}", fld);
         return fld;
     }
 
     @Override
-    public void delete(final String token, final String fldPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void delete(String token, String fldPath) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("delete({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
+        FolderModule fm = ModuleManager.getFolderModule();
         fm.delete(token, fldPath);
         log.debug("delete: void");
     }
 
     @Override
-    public void purge(final String token, final String fldPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void purge(String token, String fldPath) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("purge({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
+        FolderModule fm = ModuleManager.getFolderModule();
         fm.purge(token, fldPath);
         log.debug("purge: void");
     }
 
     @Override
-    public Folder rename(final String token, final String fldPath,
-            final String newName) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException {
-        log.debug("rename({}, {}, {})",
-                new Object[] { token, fldPath, newName });
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final Folder renamedFolder = fm.rename(token, fldPath, newName);
+    public Folder rename(String token, String fldPath, String newName) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("rename({}, {}, {})", new Object[] { token, fldPath, newName });
+        FolderModule fm = ModuleManager.getFolderModule();
+        Folder renamedFolder = fm.rename(token, fldPath, newName);
         log.debug("rename: {}", renamedFolder);
         return renamedFolder;
     }
 
     @Override
-    public void move(final String token, final String fldPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void move(String token, String fldPath, String dstPath) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("move({}, {}, {})", new Object[] { token, fldPath, dstPath });
-        final FolderModule fm = ModuleManager.getFolderModule();
+        FolderModule fm = ModuleManager.getFolderModule();
         fm.move(token, fldPath, dstPath);
         log.debug("move: void");
     }
 
     @Override
-    public void copy(final String token, final String fldPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            IOException, AutomationException, DatabaseException,
-            UserQuotaExceededException {
+    public void copy(String token, String fldPath, String dstPath) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException, UserQuotaExceededException {
         log.debug("copy({}, {}, {})", new Object[] { token, fldPath, dstPath });
-        final FolderModule fm = ModuleManager.getFolderModule();
+        FolderModule fm = ModuleManager.getFolderModule();
         fm.copy(token, fldPath, dstPath);
         log.debug("copy: void");
     }
 
     @Override
+    public void extendedCopy(String token, String fldPath, String dstPath, ExtendedAttributes extAttr) throws PathNotFoundException,
+            ItemExistsException, AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException,
+            UserQuotaExceededException {
+        log.debug("extendedCopy({}, {}, {}, {})", new Object[] { token, fldPath, dstPath, extAttr });
+        FolderModule fm = ModuleManager.getFolderModule();
+        fm.extendedCopy(token, fldPath, dstPath, extAttr);
+        log.debug("extendedCopy: void");
+    }
+
+    @Override
     @Deprecated
-    public List<Folder> getChilds(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Folder> getChilds(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChilds({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final List<Folder> col = fm.getChilds(token, fldPath);
+        log.debug("getChilds({}, {})", token, fldId);
+        FolderModule fm = ModuleManager.getFolderModule();
+        List<Folder> col = fm.getChilds(token, fldId);
         log.debug("getChilds: {}", col);
         return col;
     }
 
     @Override
-    public List<Folder> getChildren(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Folder> getChildren(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChildren({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final List<Folder> col = fm.getChildren(token, fldPath);
+        log.debug("getChildren({}, {})", token, fldId);
+        FolderModule fm = ModuleManager.getFolderModule();
+        List<Folder> col = fm.getChildren(token, fldId);
         log.debug("getChildren: {}", col);
         return col;
     }
 
     @Override
-    public ContentInfo getContentInfo(final String token, final String fldPath)
-            throws AccessDeniedException, RepositoryException,
+    public ContentInfo getContentInfo(String token, String fldPath) throws AccessDeniedException, RepositoryException,
             PathNotFoundException, DatabaseException {
         log.debug("getContentInfo({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final ContentInfo contentInfo = fm.getContentInfo(token, fldPath);
+        FolderModule fm = ModuleManager.getFolderModule();
+        ContentInfo contentInfo = fm.getContentInfo(token, fldPath);
         log.debug("getContentInfo: {}", contentInfo);
         return contentInfo;
     }
 
     @Override
-    public boolean isValid(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public boolean isValid(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("isValid({}, {})", token, fldPath);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final boolean valid = fm.isValid(token, fldPath);
+        log.debug("isValid({}, {})", token, fldId);
+        FolderModule fm = ModuleManager.getFolderModule();
+        boolean valid = fm.isValid(token, fldId);
         log.debug("isValid: {}", valid);
         return valid;
     }
 
     @Override
-    public String getPath(final String token, final String uuid)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String getPath(String token, String uuid) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getPath({})", uuid);
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final String path = fm.getPath(token, uuid);
+        FolderModule fm = ModuleManager.getFolderModule();
+        String path = fm.getPath(token, uuid);
         log.debug("getPath: {}", path);
         return path;
+    }
+
+    /**
+     * Create missing folders.
+     */
+    public void createMissingFolders(String token, String fldPath) throws RepositoryException, DatabaseException, PathNotFoundException,
+            ItemExistsException, AccessDeniedException, ExtensionException, AutomationException {
+        String checkPath = "";
+
+        for (String elto : fldPath.substring(1).split("/")) {
+            checkPath = checkPath.concat("/").concat(elto);
+
+            if (!OKMRepository.getInstance().hasNode(token, checkPath)) {
+                createSimple(token, checkPath);
+            }
+        }
     }
 }

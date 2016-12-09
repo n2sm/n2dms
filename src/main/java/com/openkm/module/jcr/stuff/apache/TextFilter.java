@@ -17,11 +17,10 @@
 
 package com.openkm.module.jcr.stuff.apache;
 
-import java.util.Map;
+import org.apache.jackrabbit.core.state.PropertyState;
 
 import javax.jcr.RepositoryException;
-
-import org.apache.jackrabbit.core.state.PropertyState;
+import java.util.Map;
 
 /**
  * Defines an interface for extracting text out of binary properties according
@@ -35,7 +34,6 @@ import org.apache.jackrabbit.core.state.PropertyState;
  * @deprecated use the {@link org.apache.jackrabbit.extractor.TextExtractor}
  *             interface
  */
-@Deprecated
 public interface TextFilter {
 
     /**
@@ -64,6 +62,5 @@ public interface TextFilter {
      *                             node or if the data is malformed.
      */
     @SuppressWarnings("rawtypes")
-    Map doFilter(PropertyState data, String encoding)
-            throws RepositoryException;
+    Map doFilter(PropertyState data, String encoding) throws RepositoryException;
 }

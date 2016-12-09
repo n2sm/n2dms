@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,27 +43,21 @@ import com.openkm.util.SecureStore;
  */
 public class FlagIconServlet extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(MimeIconServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String lgId = request.getPathInfo();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String lgId = request.getPathInfo();
         OutputStream os = null;
 
         try {
             if (lgId.length() > 1) {
-                final Language language = LanguageDAO.findByPk(lgId
-                        .substring(1)); // The first character / must be removed
+                Language language = LanguageDAO.findByPk(lgId.substring(1)); // The first character / must be removed
 
                 if (language != null) {
-                    final byte[] img = SecureStore.b64Decode(new String(
-                            language.getImageContent()));
+                    byte[] img = SecureStore.b64Decode(new String(language.getImageContent()));
                     response.setContentType(language.getImageMime());
                     response.setContentLength(img.length);
                     os = response.getOutputStream();
@@ -71,7 +65,7 @@ public class FlagIconServlet extends HttpServlet {
                     os.flush();
                 }
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(os);

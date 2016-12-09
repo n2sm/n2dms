@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.findfolder;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -36,8 +37,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -53,28 +54,20 @@ import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
 import com.openkm.frontend.client.service.OKMSearchService;
 import com.openkm.frontend.client.service.OKMSearchServiceAsync;
 import com.openkm.frontend.client.util.CommonUI;
+import com.openkm.frontend.client.util.EventUtils;
 import com.openkm.frontend.client.util.Util;
 
 public class FindFolderSelectPopup extends DialogBox {
-    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT
-            .create(OKMSearchService.class);
+    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT.create(OKMSearchService.class);
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     public ScrollPanel scrollFolderPanel;
-
     private Button cancelButton;
-
     private Button actionButton;
-
     public Status status;
-
     private TextBox keyword;
-
     private FlexTable folderTable;
-
     private int selectedRow = -1;
 
     public FindFolderSelectPopup() {
@@ -85,53 +78,47 @@ public class FindFolderSelectPopup extends DialogBox {
         status.setStyleName("okm-StatusPopup");
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("700");
-        vPanel.setHeight("350");
+        vPanel.setWidth("700px");
+        vPanel.setHeight("350px");
         hPanel = new HorizontalPanel();
 
         scrollFolderPanel = new ScrollPanel();
         scrollFolderPanel.setStyleName("okm-Popup-text");
 
-        cancelButton = new Button(Main.i18n("button.close"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.close"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
-        actionButton = new Button(Main.i18n("search.result.menu.go.folder"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        CommonUI.openPath(folderTable.getText(selectedRow, 1),
-                                "");
-                        hide();
-                    }
-                });
+        actionButton = new Button(Main.i18n("search.result.menu.go.folder"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                CommonUI.openPath(folderTable.getText(selectedRow, 1), "");
+                hide();
+            }
+        });
 
         keyword = new TextBox();
-        keyword.setWidth("692");
+        keyword.setWidth("692px");
         keyword.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
-                if (keyword.getText().length() >= 3) {
-                    final GWTQueryParams gwtParams = new GWTQueryParams();
-                    final int actualView = Main.get().mainPanel.desktop.navigator.stackPanel
-                            .getStackIndex();
+            public void onKeyUp(KeyUpEvent event) {
+                if (keyword.getText().length() >= 3 && !EventUtils.isNavigationKey(event.getNativeKeyCode())
+                        && !EventUtils.isModifierKey(event.getNativeKeyCode())) {
+                    GWTQueryParams gwtParams = new GWTQueryParams();
+                    int actualView = Main.get().mainPanel.desktop.navigator.stackPanel.getStackIndex();
 
                     switch (actualView) {
                     case UIDesktopConstants.NAVIGATOR_TAXONOMY:
-                        gwtParams.setPath(Main.get().taxonomyRootFolder
-                                .getPath());
+                        gwtParams.setPath(Main.get().taxonomyRootFolder.getPath());
                         break;
                     case UIDesktopConstants.NAVIGATOR_TEMPLATES:
-                        gwtParams.setPath(Main.get().templatesRootFolder
-                                .getPath());
+                        gwtParams.setPath(Main.get().templatesRootFolder.getPath());
                         break;
                     case UIDesktopConstants.NAVIGATOR_PERSONAL:
-                        gwtParams.setPath(Main.get().personalRootFolder
-                                .getPath());
+                        gwtParams.setPath(Main.get().personalRootFolder.getPath());
                         break;
                     case UIDesktopConstants.NAVIGATOR_MAIL:
                         gwtParams.setPath(Main.get().mailRootFolder.getPath());
@@ -144,7 +131,7 @@ public class FindFolderSelectPopup extends DialogBox {
                     gwtParams.setMimeType("");
                     gwtParams.setKeywords("");
                     gwtParams.setMimeType("");
-                    gwtParams.setName(keyword.getText() + "*"); // add wildcard at ends
+                    gwtParams.setName(keyword.getText() + "*");
                     gwtParams.setAuthor("");
                     gwtParams.setMailFrom("");
                     gwtParams.setMailTo("");
@@ -153,8 +140,8 @@ public class FindFolderSelectPopup extends DialogBox {
                     gwtParams.setLastModifiedFrom(null);
                     gwtParams.setLastModifiedTo(null);
                     gwtParams.setDomain(GWTQueryParams.FOLDER);
-                    gwtParams
-                            .setProperties(new HashMap<String, GWTPropertyParams>());
+                    gwtParams.setProperties(new HashMap<String, GWTPropertyParams>());
+
                     find(gwtParams);
                 } else {
                     removeAllRows();
@@ -169,16 +156,15 @@ public class FindFolderSelectPopup extends DialogBox {
 
         folderTable.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                markSelectedRow(folderTable.getCellForEvent(event)
-                        .getRowIndex());
+            public void onClick(ClickEvent event) {
+                markSelectedRow(folderTable.getCellForEvent(event).getRowIndex());
                 evaluateEnableAction();
             }
         });
 
         folderTable.addDoubleClickHandler(new DoubleClickHandler() {
             @Override
-            public void onDoubleClick(final DoubleClickEvent event) {
+            public void onDoubleClick(DoubleClickEvent event) {
                 CommonUI.openPath(folderTable.getText(selectedRow, 1), "");
                 hide();
             }
@@ -191,23 +177,19 @@ public class FindFolderSelectPopup extends DialogBox {
         vPanel.add(scrollFolderPanel);
         vPanel.add(new HTML("<br>"));
         hPanel.add(cancelButton);
-        final HTML space = new HTML();
-        space.setWidth("50");
+        HTML space = new HTML();
+        space.setWidth("50px");
         hPanel.add(space);
         hPanel.add(actionButton);
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(keyword,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellVerticalAlignment(keyword,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        vPanel.setCellHorizontalAlignment(scrollFolderPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(keyword, "25");
-        vPanel.setCellHeight(scrollFolderPanel, "300");
+        vPanel.setCellHorizontalAlignment(keyword, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellVerticalAlignment(keyword, HasAlignment.ALIGN_MIDDLE);
+        vPanel.setCellHorizontalAlignment(scrollFolderPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(keyword, "25px");
+        vPanel.setCellHeight(scrollFolderPanel, "300px");
 
         cancelButton.setStyleName("okm-NoButton");
         actionButton.setStyleName("okm-YesButton");
@@ -231,11 +213,10 @@ public class FindFolderSelectPopup extends DialogBox {
     /**
      * Shows the popup 
      */
-    @Override
     public void show() {
         initButtons();
-        final int left = (Window.getClientWidth() - 700) / 2;
-        final int top = (Window.getClientHeight() - 350) / 2;
+        int left = (Window.getClientWidth() - 700) / 2;
+        int top = (Window.getClientHeight() - 350) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("search.folder.filter"));
 
@@ -252,7 +233,7 @@ public class FindFolderSelectPopup extends DialogBox {
      * 
      * @param enable
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 
@@ -280,7 +261,7 @@ public class FindFolderSelectPopup extends DialogBox {
      * 
      * @param row
      */
-    private void markSelectedRow(final int row) {
+    private void markSelectedRow(int row) {
         // And row must be other than the selected one
         if (row != selectedRow) {
             styleRow(selectedRow, false);
@@ -295,14 +276,12 @@ public class FindFolderSelectPopup extends DialogBox {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    private void styleRow(final int row, final boolean selected) {
+    private void styleRow(int row, boolean selected) {
         if (row >= 0) {
             if (selected) {
-                folderTable.getRowFormatter().addStyleName(row,
-                        "okm-Table-SelectedRow");
+                folderTable.getRowFormatter().addStyleName(row, "okm-Table-SelectedRow");
             } else {
-                folderTable.getRowFormatter().removeStyleName(row,
-                        "okm-Table-SelectedRow");
+                folderTable.getRowFormatter().removeStyleName(row, "okm-Table-SelectedRow");
             }
         }
     }
@@ -318,53 +297,42 @@ public class FindFolderSelectPopup extends DialogBox {
      * Call Back find
      */
     final AsyncCallback<GWTResultSet> callbackFind = new AsyncCallback<GWTResultSet>() {
-        @Override
-        public void onSuccess(final GWTResultSet result) {
-            final GWTResultSet resultSet = result;
+        public void onSuccess(GWTResultSet result) {
+            GWTResultSet resultSet = result;
             removeAllRows();
 
-            for (final GWTQueryResult gwtQueryResult : resultSet.getResults()) {
+            for (Iterator<GWTQueryResult> it = resultSet.getResults().iterator(); it.hasNext();) {
+                GWTQueryResult gwtQueryResult = it.next();
+
                 if (gwtQueryResult.getFolder() != null) {
-                    final GWTFolder folder = gwtQueryResult.getFolder();
-                    final int rows = folderTable.getRowCount();
+                    GWTFolder folder = gwtQueryResult.getFolder();
+                    int rows = folderTable.getRowCount();
 
                     // Looks if must change icon on parent if now has no childs and properties with user security atention
                     if ((folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
                         if (folder.isHasChildren()) {
-                            folderTable.setHTML(rows, 0, Util
-                                    .imageItemHTML("img/menuitem_childs.gif"));
+                            folderTable.setHTML(rows, 0, Util.imageItemHTML("img/menuitem_childs.gif"));
                         } else {
-                            folderTable.setHTML(rows, 0, Util
-                                    .imageItemHTML("img/menuitem_empty.gif"));
+                            folderTable.setHTML(rows, 0, Util.imageItemHTML("img/menuitem_empty.gif"));
                         }
                     } else {
                         if (folder.isHasChildren()) {
-                            folderTable
-                                    .setHTML(
-                                            rows,
-                                            0,
-                                            Util.imageItemHTML("img/menuitem_childs_ro.gif"));
+                            folderTable.setHTML(rows, 0, Util.imageItemHTML("img/menuitem_childs_ro.gif"));
                         } else {
-                            folderTable
-                                    .setHTML(
-                                            rows,
-                                            0,
-                                            Util.imageItemHTML("img/menuitem_empty_ro.gif"));
+                            folderTable.setHTML(rows, 0, Util.imageItemHTML("img/menuitem_empty_ro.gif"));
                         }
                     }
 
                     folderTable.setHTML(rows, 1, folder.getPath());
-                    folderTable.getCellFormatter().setWidth(rows, 0, "30");
-                    folderTable.getCellFormatter().setHorizontalAlignment(rows,
-                            0, HasHorizontalAlignment.ALIGN_CENTER);
+                    folderTable.getCellFormatter().setWidth(rows, 0, "30px");
+                    folderTable.getCellFormatter().setHorizontalAlignment(rows, 0, HasHorizontalAlignment.ALIGN_CENTER);
                 }
             }
 
             status.unsetFlagChilds();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             status.unsetFlagChilds();
             Main.get().showError("Find", caught);
         }
@@ -373,7 +341,7 @@ public class FindFolderSelectPopup extends DialogBox {
     /**
      * Find
      */
-    private void find(final GWTQueryParams params) {
+    private void find(GWTQueryParams params) {
         status.setFlagChilds();
         searchService.find(params, callbackFind);
     }

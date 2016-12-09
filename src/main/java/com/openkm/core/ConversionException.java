@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,15 +28,15 @@ public class ConversionException extends Exception {
         super();
     }
 
-    public ConversionException(final String arg0) {
+    public ConversionException(String arg0) {
         super(arg0);
     }
 
-    public ConversionException(final String arg0, final Throwable arg1) {
+    public ConversionException(String arg0, Throwable arg1) {
         super(arg0, arg1);
     }
 
-    public ConversionException(final Throwable arg0) {
+    public ConversionException(Throwable arg0) {
         super(arg0);
     }
 }

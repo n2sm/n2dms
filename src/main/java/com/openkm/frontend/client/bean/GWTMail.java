@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.openkm.frontend.client.bean.form.GWTFormElement;
 
 /**
  * GWTMail
@@ -37,56 +38,46 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  */
 public class GWTMail implements IsSerializable {
-
     private String path;
-
     private String uuid;
-
     private int permissions;
-
     private String from;
-
     private String[] reply = new String[] {};
-
     private String[] to;
-
     private String[] cc;
-
     private String[] bcc;
-
     private Date sentDate;
-
     private Date receivedDate;
-
     private String subject;
-
     private String content;
-
     private long size;
-
     private Collection<GWTDocument> attachments;
-
     private String parentPath;
-
     private String mimeType;
-
     private boolean hasNotes = false;
-
     private List<GWTNote> notes;
-
     private Set<GWTFolder> categories;
-
     private Set<String> keywords = new HashSet<String>();
-
     private String author;
-
     private Date created;
+
+    // Extra columns
+    private GWTFormElement column0;
+    private GWTFormElement column1;
+    private GWTFormElement column2;
+    private GWTFormElement column3;
+    private GWTFormElement column4;
+    private GWTFormElement column5;
+    private GWTFormElement column6;
+    private GWTFormElement column7;
+    private GWTFormElement column8;
+    private GWTFormElement column9;
 
     public String getMimeType() {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -94,7 +85,7 @@ public class GWTMail implements IsSerializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -102,7 +93,7 @@ public class GWTMail implements IsSerializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -110,7 +101,7 @@ public class GWTMail implements IsSerializable {
         return permissions;
     }
 
-    public void setPermissions(final int permissions) {
+    public void setPermissions(int permissions) {
         this.permissions = permissions;
     }
 
@@ -118,7 +109,7 @@ public class GWTMail implements IsSerializable {
         return from;
     }
 
-    public void setFrom(final String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
@@ -126,7 +117,7 @@ public class GWTMail implements IsSerializable {
         return reply;
     }
 
-    public void setReply(final String[] reply) {
+    public void setReply(String[] reply) {
         this.reply = reply;
     }
 
@@ -134,7 +125,7 @@ public class GWTMail implements IsSerializable {
         return to;
     }
 
-    public void setTo(final String[] to) {
+    public void setTo(String[] to) {
         this.to = to;
     }
 
@@ -142,7 +133,7 @@ public class GWTMail implements IsSerializable {
         return cc;
     }
 
-    public void setCc(final String[] cc) {
+    public void setCc(String[] cc) {
         this.cc = cc;
     }
 
@@ -150,7 +141,7 @@ public class GWTMail implements IsSerializable {
         return bcc;
     }
 
-    public void setBcc(final String[] bcc) {
+    public void setBcc(String[] bcc) {
         this.bcc = bcc;
     }
 
@@ -158,7 +149,7 @@ public class GWTMail implements IsSerializable {
         return sentDate;
     }
 
-    public void setSentDate(final Date sentDate) {
+    public void setSentDate(Date sentDate) {
         this.sentDate = sentDate;
     }
 
@@ -166,7 +157,7 @@ public class GWTMail implements IsSerializable {
         return receivedDate;
     }
 
-    public void setReceivedDate(final Date receivedDate) {
+    public void setReceivedDate(Date receivedDate) {
         this.receivedDate = receivedDate;
     }
 
@@ -174,7 +165,7 @@ public class GWTMail implements IsSerializable {
         return subject;
     }
 
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         this.subject = subject;
     }
 
@@ -182,7 +173,7 @@ public class GWTMail implements IsSerializable {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -190,7 +181,7 @@ public class GWTMail implements IsSerializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -198,7 +189,7 @@ public class GWTMail implements IsSerializable {
         return attachments;
     }
 
-    public void setAttachments(final Collection<GWTDocument> attachments) {
+    public void setAttachments(Collection<GWTDocument> attachments) {
         this.attachments = attachments;
     }
 
@@ -206,7 +197,7 @@ public class GWTMail implements IsSerializable {
         return parentPath;
     }
 
-    public void setParentPath(final String parentPath) {
+    public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
 
@@ -214,7 +205,7 @@ public class GWTMail implements IsSerializable {
         return notes;
     }
 
-    public void setNotes(final List<GWTNote> notes) {
+    public void setNotes(List<GWTNote> notes) {
         this.notes = notes;
     }
 
@@ -222,7 +213,7 @@ public class GWTMail implements IsSerializable {
         return hasNotes;
     }
 
-    public void setHasNotes(final boolean hasNotes) {
+    public void setHasNotes(boolean hasNotes) {
         this.hasNotes = hasNotes;
     }
 
@@ -230,7 +221,7 @@ public class GWTMail implements IsSerializable {
         return categories;
     }
 
-    public void setCategories(final Set<GWTFolder> categories) {
+    public void setCategories(Set<GWTFolder> categories) {
         this.categories = categories;
     }
 
@@ -238,7 +229,7 @@ public class GWTMail implements IsSerializable {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -246,7 +237,7 @@ public class GWTMail implements IsSerializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -254,13 +245,92 @@ public class GWTMail implements IsSerializable {
         return created;
     }
 
-    public void setCreated(final Date created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
-    @Override
+    public GWTFormElement getColumn0() {
+        return column0;
+    }
+
+    public void setColumn0(GWTFormElement column0) {
+        this.column0 = column0;
+    }
+
+    public GWTFormElement getColumn1() {
+        return column1;
+    }
+
+    public void setColumn1(GWTFormElement column1) {
+        this.column1 = column1;
+    }
+
+    public GWTFormElement getColumn2() {
+        return column2;
+    }
+
+    public void setColumn2(GWTFormElement column2) {
+        this.column2 = column2;
+    }
+
+    public GWTFormElement getColumn3() {
+        return column3;
+    }
+
+    public void setColumn3(GWTFormElement column3) {
+        this.column3 = column3;
+    }
+
+    public GWTFormElement getColumn4() {
+        return column4;
+    }
+
+    public void setColumn4(GWTFormElement column4) {
+        this.column4 = column4;
+    }
+
+    public GWTFormElement getColumn5() {
+        return column5;
+    }
+
+    public void setColumn5(GWTFormElement column5) {
+        this.column5 = column5;
+    }
+
+    public GWTFormElement getColumn6() {
+        return column6;
+    }
+
+    public void setColumn6(GWTFormElement column6) {
+        this.column6 = column6;
+    }
+
+    public GWTFormElement getColumn7() {
+        return column7;
+    }
+
+    public void setColumn7(GWTFormElement column7) {
+        this.column7 = column7;
+    }
+
+    public GWTFormElement getColumn8() {
+        return column8;
+    }
+
+    public void setColumn8(GWTFormElement column8) {
+        this.column8 = column8;
+    }
+
+    public GWTFormElement getColumn9() {
+        return column9;
+    }
+
+    public void setColumn9(GWTFormElement column9) {
+        this.column9 = column9;
+    }
+
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("path=").append(path);
         sb.append(", uuid=").append(uuid);
@@ -269,10 +339,8 @@ public class GWTMail implements IsSerializable {
         sb.append(", from=").append(from);
         sb.append(", reply=").append(Arrays.toString(reply));
         sb.append(", to=").append(Arrays.toString(to));
-        sb.append(", sentDate=").append(
-                sentDate == null ? null : sentDate.getTime());
-        sb.append(", receivedDate=").append(
-                receivedDate == null ? null : receivedDate.getTime());
+        sb.append(", sentDate=").append(sentDate == null ? null : sentDate.getTime());
+        sb.append(", receivedDate=").append(receivedDate == null ? null : receivedDate.getTime());
         sb.append(", subject=").append(subject);
         sb.append(", content=").append(content);
         sb.append(", attachments=").append(attachments);
@@ -280,8 +348,7 @@ public class GWTMail implements IsSerializable {
         sb.append(", categories=").append(categories);
         sb.append(", keywords=").append(keywords);
         sb.append(", author=").append(author);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
         sb.append("]");
         return sb.toString();
     }

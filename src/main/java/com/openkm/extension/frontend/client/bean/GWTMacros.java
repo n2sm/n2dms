@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTMacros implements IsSerializable {
     private String pathOrigin;
-
     private String pathDestination;
 
     public String getPathOrigin() {
         return pathOrigin;
     }
 
-    public void setPathOrigin(final String pathOrigin) {
+    public void setPathOrigin(String pathOrigin) {
         this.pathOrigin = pathOrigin;
     }
 
@@ -46,7 +45,7 @@ public class GWTMacros implements IsSerializable {
         return pathDestination;
     }
 
-    public void setPathDestination(final String pathDestination) {
+    public void setPathDestination(String pathDestination) {
         this.pathDestination = pathDestination;
     }
 

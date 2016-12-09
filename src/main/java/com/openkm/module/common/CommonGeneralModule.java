@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,18 +30,14 @@ import com.openkm.core.Config;
 
 public class CommonGeneralModule {
     @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory
-            .getLogger(CommonGeneralModule.class);
+    private static Logger log = LoggerFactory.getLogger(CommonGeneralModule.class);
 
     /**
      * Clean preview cache for this document
      */
-    public static void cleanPreviewCache(final String uuid) {
-        new File(Config.REPOSITORY_CACHE_DXF + File.separator + uuid + ".dxf")
-                .delete();
-        new File(Config.REPOSITORY_CACHE_PDF + File.separator + uuid + ".pdf")
-                .delete();
-        new File(Config.REPOSITORY_CACHE_SWF + File.separator + uuid + ".swf")
-                .delete();
+    public static void cleanPreviewCache(String uuid) {
+        new File(Config.REPOSITORY_CACHE_DXF + File.separator + uuid + ".dxf").delete();
+        new File(Config.REPOSITORY_CACHE_PDF + File.separator + uuid + ".pdf").delete();
+        new File(Config.REPOSITORY_CACHE_SWF + File.separator + uuid + ".swf").delete();
     }
 }

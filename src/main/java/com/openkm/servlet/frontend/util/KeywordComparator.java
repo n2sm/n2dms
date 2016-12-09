@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,29 +31,27 @@ import com.openkm.frontend.client.bean.GWTKeyword;
  */
 public class KeywordComparator extends CultureComparator<GWTKeyword> {
 
-    protected KeywordComparator(final String locale) {
+    protected KeywordComparator(String locale) {
         super(locale);
     }
 
-    public static KeywordComparator getInstance(final String locale) {
+    public static KeywordComparator getInstance(String locale) {
         try {
-            final KeywordComparator comparator = (KeywordComparator) CultureComparator
-                    .getInstance(KeywordComparator.class, locale);
+            KeywordComparator comparator = (KeywordComparator) CultureComparator.getInstance(KeywordComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new KeywordComparator(locale);
         }
     }
 
     public static KeywordComparator getInstance() {
-        final KeywordComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        KeywordComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTKeyword arg0, final GWTKeyword arg1) {
-        final GWTKeyword first = arg0;
-        final GWTKeyword second = arg1;
+    public int compare(GWTKeyword arg0, GWTKeyword arg1) {
+        GWTKeyword first = arg0;
+        GWTKeyword second = arg1;
 
         return collator.compare(first.getKeyword(), second.getKeyword());
     }

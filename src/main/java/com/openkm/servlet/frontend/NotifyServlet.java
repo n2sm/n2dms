@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,156 +39,108 @@ import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMNotifyService;
 import com.openkm.principal.PrincipalAdapterException;
+import com.openkm.util.MailUtils;
 
 /**
  * Servlet Class
- * 
- * @web.servlet              name="NotifyServlet"
- *                           display-name="Directory tree service"
- *                           description="Directory tree service"
- * @web.servlet-mapping      url-pattern="/NotifyServlet"
- * @web.servlet-init-param   name="A parameter"
- *                           value="A value"
  */
-public class NotifyServlet extends OKMRemoteServiceServlet implements
-        OKMNotifyService {
+public class NotifyServlet extends OKMRemoteServiceServlet implements OKMNotifyService {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(FolderServlet.class);
 
     @Override
-    public void subscribe(final String nodePath) throws OKMException {
+    public void subscribe(String nodePath) throws OKMException {
         log.debug("subscribe({})", nodePath);
         updateSessionManager();
 
         try {
             OKMNotification.getInstance().subscribe(null, nodePath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("subscribe: void");
     }
 
     @Override
-    public void unsubscribe(final String nodePath) throws OKMException {
+    public void unsubscribe(String nodePath) throws OKMException {
         log.debug("subscribe({})", nodePath);
         updateSessionManager();
 
         try {
             OKMNotification.getInstance().unsubscribe(null, nodePath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("subscribe: void");
     }
 
     @Override
-    public void notify(final String docPath, final String users,
-            final String roles, final String message, final boolean attachment)
-            throws OKMException {
-        log.debug("notify({}, {}, {}, {})", new Object[] { docPath, users,
-                roles, message, attachment });
+    public void notify(String docPath, String mails, String users, String roles, String message, boolean attachment) throws OKMException {
+        log.debug("notify({}, {}, {}, {}, {})", new Object[] { docPath, mails, users, roles, message, attachment });
         updateSessionManager();
 
         try {
-            final List<String> userNames = new ArrayList<String>(
-                    Arrays.asList(users.isEmpty() ? new String[0] : users
-                            .split(",")));
-            final List<String> roleNames = new ArrayList<String>(
-                    Arrays.asList(roles.isEmpty() ? new String[0] : roles
-                            .split(",")));
+            List<String> userNames = new ArrayList<String>(Arrays.asList(users.isEmpty() ? new String[0] : users.split(",")));
+            List<String> roleNames = new ArrayList<String>(Arrays.asList(roles.isEmpty() ? new String[0] : roles.split(",")));
 
-            for (final String role : roleNames) {
-                final List<String> usersInRole = OKMAuth.getInstance()
-                        .getUsersByRole(null, role);
+            for (String role : roleNames) {
+                List<String> usersInRole = OKMAuth.getInstance().getUsersByRole(null, role);
 
-                for (final String user : usersInRole) {
+                for (String user : usersInRole) {
                     if (!userNames.contains(user)) {
                         userNames.add(user);
                     }
                 }
             }
 
-            OKMNotification.getInstance().notify(null, docPath, userNames,
-                    message, attachment);
-        } catch (final PathNotFoundException e) {
+            List<String> mailList = MailUtils.parseMailList(mails);
+            OKMNotification.getInstance().notify(null, docPath, userNames, mailList, message, attachment);
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNotifyService, ErrorCode.CAUSE_IO), e.getMessage());
         }
 
         log.debug("notify: void");

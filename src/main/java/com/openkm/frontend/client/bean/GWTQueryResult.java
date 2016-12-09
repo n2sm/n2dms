@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,15 +30,10 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  */
 public class GWTQueryResult implements IsSerializable {
-
     private GWTDocument document;
-
     private GWTFolder folder;
-
     private GWTMail mail;
-
     private GWTDocument attachment;
-
     private String excerpt;
 
     private long score;
@@ -47,7 +42,7 @@ public class GWTQueryResult implements IsSerializable {
         return document;
     }
 
-    public void setDocument(final GWTDocument document) {
+    public void setDocument(GWTDocument document) {
         this.document = document;
     }
 
@@ -55,7 +50,7 @@ public class GWTQueryResult implements IsSerializable {
         return score;
     }
 
-    public void setScore(final long score) {
+    public void setScore(long score) {
         this.score = score;
     }
 
@@ -63,7 +58,7 @@ public class GWTQueryResult implements IsSerializable {
         return folder;
     }
 
-    public void setFolder(final GWTFolder folder) {
+    public void setFolder(GWTFolder folder) {
         this.folder = folder;
     }
 
@@ -71,7 +66,7 @@ public class GWTQueryResult implements IsSerializable {
         return mail;
     }
 
-    public void setMail(final GWTMail mail) {
+    public void setMail(GWTMail mail) {
         this.mail = mail;
     }
 
@@ -79,7 +74,7 @@ public class GWTQueryResult implements IsSerializable {
         return attachment;
     }
 
-    public void setAttachment(final GWTDocument attachment) {
+    public void setAttachment(GWTDocument attachment) {
         this.attachment = attachment;
     }
 
@@ -87,7 +82,7 @@ public class GWTQueryResult implements IsSerializable {
         return excerpt;
     }
 
-    public void setExcerpt(final String excerpt) {
+    public void setExcerpt(String excerpt) {
         this.excerpt = excerpt;
     }
 }

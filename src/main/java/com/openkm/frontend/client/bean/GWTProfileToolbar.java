@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,56 +31,35 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTProfileToolbar implements IsSerializable {
     private boolean createFolderVisible;
-
     private boolean findFolderVisible;
-
     private boolean findDocumentVisible;
-
     private boolean similarDocumentVisible;
-
     private boolean downloadVisible;
-
     private boolean downloadPdfVisible;
-
+    private boolean printVisible;
     private boolean lockVisible;
-
     private boolean unlockVisible;
-
     private boolean addDocumentVisible;
-
     private boolean checkoutVisible;
-
     private boolean checkinVisible;
-
     private boolean cancelCheckoutVisible;
-
     private boolean deleteVisible;
-
     private boolean addPropertyGroupVisible;
-
     private boolean removePropertyGroupVisible;
-
     private boolean startWorkflowVisible;
-
     private boolean addSubscriptionVisible;
-
     private boolean removeSubscriptionVisible;
-
     private boolean refreshVisible;
-
     private boolean homeVisible;
-
     private boolean scannerVisible;
-
     private boolean uploaderVisible;
-
-    private boolean omrVisible;
+    private boolean splitterResizeVisible;
 
     public boolean isCreateFolderVisible() {
         return createFolderVisible;
     }
 
-    public void setCreateFolderVisible(final boolean createFolderVisible) {
+    public void setCreateFolderVisible(boolean createFolderVisible) {
         this.createFolderVisible = createFolderVisible;
     }
 
@@ -88,7 +67,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return findFolderVisible;
     }
 
-    public void setFindFolderVisible(final boolean findFolderVisible) {
+    public void setFindFolderVisible(boolean findFolderVisible) {
         this.findFolderVisible = findFolderVisible;
     }
 
@@ -96,7 +75,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return findDocumentVisible;
     }
 
-    public void setFindDocumentVisible(final boolean findDocumentVisible) {
+    public void setFindDocumentVisible(boolean findDocumentVisible) {
         this.findDocumentVisible = findDocumentVisible;
     }
 
@@ -104,7 +83,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return similarDocumentVisible;
     }
 
-    public void setSimilarDocumentVisible(final boolean similarDocumentVisible) {
+    public void setSimilarDocumentVisible(boolean similarDocumentVisible) {
         this.similarDocumentVisible = similarDocumentVisible;
     }
 
@@ -112,7 +91,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return downloadVisible;
     }
 
-    public void setDownloadVisible(final boolean downloadVisible) {
+    public void setDownloadVisible(boolean downloadVisible) {
         this.downloadVisible = downloadVisible;
     }
 
@@ -120,15 +99,23 @@ public class GWTProfileToolbar implements IsSerializable {
         return downloadPdfVisible;
     }
 
-    public void setDownloadPdfVisible(final boolean downloadPdfVisible) {
+    public void setDownloadPdfVisible(boolean downloadPdfVisible) {
         this.downloadPdfVisible = downloadPdfVisible;
+    }
+
+    public boolean isPrintVisible() {
+        return printVisible;
+    }
+
+    public void setPrintVisible(boolean printVisible) {
+        this.printVisible = printVisible;
     }
 
     public boolean isLockVisible() {
         return lockVisible;
     }
 
-    public void setLockVisible(final boolean lockVisible) {
+    public void setLockVisible(boolean lockVisible) {
         this.lockVisible = lockVisible;
     }
 
@@ -136,7 +123,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return unlockVisible;
     }
 
-    public void setUnlockVisible(final boolean unlockVisible) {
+    public void setUnlockVisible(boolean unlockVisible) {
         this.unlockVisible = unlockVisible;
     }
 
@@ -144,7 +131,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return addDocumentVisible;
     }
 
-    public void setAddDocumentVisible(final boolean addDocumentVisible) {
+    public void setAddDocumentVisible(boolean addDocumentVisible) {
         this.addDocumentVisible = addDocumentVisible;
     }
 
@@ -152,7 +139,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return checkoutVisible;
     }
 
-    public void setCheckoutVisible(final boolean checkoutVisible) {
+    public void setCheckoutVisible(boolean checkoutVisible) {
         this.checkoutVisible = checkoutVisible;
     }
 
@@ -160,7 +147,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return checkinVisible;
     }
 
-    public void setCheckinVisible(final boolean checkinVisible) {
+    public void setCheckinVisible(boolean checkinVisible) {
         this.checkinVisible = checkinVisible;
     }
 
@@ -168,7 +155,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return cancelCheckoutVisible;
     }
 
-    public void setCancelCheckoutVisible(final boolean cancelCheckoutVisible) {
+    public void setCancelCheckoutVisible(boolean cancelCheckoutVisible) {
         this.cancelCheckoutVisible = cancelCheckoutVisible;
     }
 
@@ -176,7 +163,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return deleteVisible;
     }
 
-    public void setDeleteVisible(final boolean deleteVisible) {
+    public void setDeleteVisible(boolean deleteVisible) {
         this.deleteVisible = deleteVisible;
     }
 
@@ -184,7 +171,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return addPropertyGroupVisible;
     }
 
-    public void setAddPropertyGroupVisible(final boolean addPropertyGroupVisible) {
+    public void setAddPropertyGroupVisible(boolean addPropertyGroupVisible) {
         this.addPropertyGroupVisible = addPropertyGroupVisible;
     }
 
@@ -192,8 +179,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return removePropertyGroupVisible;
     }
 
-    public void setRemovePropertyGroupVisible(
-            final boolean removePropertyGroupVisible) {
+    public void setRemovePropertyGroupVisible(boolean removePropertyGroupVisible) {
         this.removePropertyGroupVisible = removePropertyGroupVisible;
     }
 
@@ -201,7 +187,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return startWorkflowVisible;
     }
 
-    public void setStartWorkflowVisible(final boolean startWorkflowVisible) {
+    public void setStartWorkflowVisible(boolean startWorkflowVisible) {
         this.startWorkflowVisible = startWorkflowVisible;
     }
 
@@ -209,7 +195,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return addSubscriptionVisible;
     }
 
-    public void setAddSubscriptionVisible(final boolean addSubscriptionVisible) {
+    public void setAddSubscriptionVisible(boolean addSubscriptionVisible) {
         this.addSubscriptionVisible = addSubscriptionVisible;
     }
 
@@ -217,8 +203,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return removeSubscriptionVisible;
     }
 
-    public void setRemoveSubscriptionVisible(
-            final boolean removeSubscriptionVisible) {
+    public void setRemoveSubscriptionVisible(boolean removeSubscriptionVisible) {
         this.removeSubscriptionVisible = removeSubscriptionVisible;
     }
 
@@ -226,7 +211,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return refreshVisible;
     }
 
-    public void setRefreshVisible(final boolean refreshVisible) {
+    public void setRefreshVisible(boolean refreshVisible) {
         this.refreshVisible = refreshVisible;
     }
 
@@ -234,7 +219,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return homeVisible;
     }
 
-    public void setHomeVisible(final boolean homeVisible) {
+    public void setHomeVisible(boolean homeVisible) {
         this.homeVisible = homeVisible;
     }
 
@@ -242,7 +227,7 @@ public class GWTProfileToolbar implements IsSerializable {
         return scannerVisible;
     }
 
-    public void setScannerVisible(final boolean scannerVisible) {
+    public void setScannerVisible(boolean scannerVisible) {
         this.scannerVisible = scannerVisible;
     }
 
@@ -250,21 +235,20 @@ public class GWTProfileToolbar implements IsSerializable {
         return uploaderVisible;
     }
 
-    public void setUploaderVisible(final boolean uploaderVisible) {
+    public void setUploaderVisible(boolean uploaderVisible) {
         this.uploaderVisible = uploaderVisible;
     }
 
-    public boolean isOmrVisible() {
-        return omrVisible;
+    public boolean isSplitterResizeVisible() {
+        return splitterResizeVisible;
     }
 
-    public void setOmrVisible(final boolean omrVisible) {
-        this.omrVisible = omrVisible;
+    public void setSplitterResizeVisible(boolean splitterResizeVisible) {
+        this.splitterResizeVisible = splitterResizeVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("createFolderVisible=");
         sb.append(createFolderVisible);
@@ -276,6 +260,8 @@ public class GWTProfileToolbar implements IsSerializable {
         sb.append(downloadVisible);
         sb.append(", downloadPdfVisible=");
         sb.append(downloadPdfVisible);
+        sb.append(", printVisible=");
+        sb.append(printVisible);
         sb.append(", addDocumentVisible=");
         sb.append(addDocumentVisible);
         sb.append(", lockVisible=");
@@ -308,8 +294,8 @@ public class GWTProfileToolbar implements IsSerializable {
         sb.append(scannerVisible);
         sb.append(", uploaderVisible=");
         sb.append(uploaderVisible);
-        sb.append(", omrVisible=");
-        sb.append(omrVisible);
+        sb.append(", splitterResizeVisible=");
+        sb.append(splitterResizeVisible);
         sb.append("}");
         return sb.toString();
     }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -41,59 +41,43 @@ import com.openkm.module.PropertyModule;
 public class PropertyService implements PropertyModule {
     private static Logger log = LoggerFactory.getLogger(PropertyService.class);
 
-    @Override
     @WebMethod
-    public void addCategory(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "catId") final String catId)
-            throws VersionException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("addCategory({}, {}, {})", new Object[] { token, nodePath,
-                catId });
-        final PropertyModule pm = ModuleManager.getPropertyModule();
+    public void addCategory(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "catId") String catId) throws VersionException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
+        log.debug("addCategory({}, {}, {})", new Object[] { token, nodePath, catId });
+        PropertyModule pm = ModuleManager.getPropertyModule();
         pm.addCategory(token, nodePath, catId);
         log.debug("addCategory: void");
     }
 
-    @Override
     @WebMethod
-    public void removeCategory(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "catId") final String catId)
-            throws VersionException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("removeCategory({}, {}, {})", new Object[] { token, nodePath,
-                catId });
-        final PropertyModule pm = ModuleManager.getPropertyModule();
+    public void removeCategory(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "catId") String catId) throws VersionException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
+        log.debug("removeCategory({}, {}, {})", new Object[] { token, nodePath, catId });
+        PropertyModule pm = ModuleManager.getPropertyModule();
         pm.removeCategory(token, nodePath, catId);
         log.debug("removeCategory: void");
     }
 
-    @Override
     @WebMethod
-    public String addKeyword(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "keyword") final String keyword)
-            throws VersionException, LockException, PathNotFoundException,
+    public String addKeyword(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "keyword") String keyword) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("addKeyword({}, {}, {})", new Object[] { token, nodePath,
-                keyword });
-        final PropertyModule pm = ModuleManager.getPropertyModule();
-        final String ret = pm.addKeyword(token, nodePath, keyword);
+        log.debug("addKeyword({}, {}, {})", new Object[] { token, nodePath, keyword });
+        PropertyModule pm = ModuleManager.getPropertyModule();
+        String ret = pm.addKeyword(token, nodePath, keyword);
         log.debug("addKeyword: {}", ret);
         return ret;
     }
 
-    @Override
     @WebMethod
-    public void removeKeyword(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "keyword") final String keyword)
-            throws VersionException, LockException, PathNotFoundException,
+    public void removeKeyword(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "keyword") String keyword) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("removeKeyword({}, {}, {})", new Object[] { token, nodePath,
-                keyword });
-        final PropertyModule pm = ModuleManager.getPropertyModule();
+        log.debug("removeKeyword({}, {}, {})", new Object[] { token, nodePath, keyword });
+        PropertyModule pm = ModuleManager.getPropertyModule();
         pm.removeKeyword(token, nodePath, keyword);
         log.debug("removeKeyword: void");
     }

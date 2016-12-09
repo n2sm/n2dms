@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.IndexReader;
@@ -42,11 +43,11 @@ import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.Directory;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
-import org.hibernate.search.ProjectionConstants;
 import org.hibernate.search.Search;
 import org.hibernate.search.SearchFactory;
 import org.hibernate.search.reader.ReaderProvider;
@@ -56,11 +57,11 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.core.Config;
 import com.openkm.dao.HibernateUtil;
-import com.openkm.dao.SearchDAO;
 import com.openkm.dao.bean.NodeBase;
 import com.openkm.dao.bean.NodeDocument;
 import com.openkm.dao.bean.NodeFolder;
 import com.openkm.dao.bean.NodeMail;
+import com.openkm.util.FormatUtil;
 import com.openkm.util.WebUtils;
 
 /**
@@ -68,17 +69,13 @@ import com.openkm.util.WebUtils;
  */
 public class ListIndexesServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(ListIndexesServlet.class);
+    private static Logger log = LoggerFactory.getLogger(ListIndexesServlet.class);
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (isAdmin(request)) {
+        if (checkMultipleInstancesAccess(request, response)) {
             if (method.equals(METHOD_GET)) {
                 doGet(request, response);
             } else if (method.equals(METHOD_POST)) {
@@ -88,12 +85,10 @@ public class ListIndexesServlet extends BaseServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
+        String action = WebUtils.getString(request, "action");
         updateSessionManager(request);
 
         try {
@@ -102,7 +97,7 @@ public class ListIndexesServlet extends BaseServlet {
             } else {
                 showLuceneDocument(request, response);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -112,34 +107,31 @@ public class ListIndexesServlet extends BaseServlet {
      * List Lucene indexes
      */
     @SuppressWarnings("unchecked")
-    private void showLuceneDocument(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
-        final boolean showTerms = WebUtils.getBoolean(request, "showTerms");
-        final int id = WebUtils.getInt(request, "id", 0);
+    private void showLuceneDocument(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        boolean showTerms = WebUtils.getBoolean(request, "showTerms");
+        int id = WebUtils.getInt(request, "id", 0);
         FullTextSession ftSession = null;
         ReaderProvider rProv = null;
         Session session = null;
         IndexReader idx = null;
-        final List<Map<String, String>> fields = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> fields = new ArrayList<Map<String, String>>();
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             ftSession = Search.getFullTextSession(session);
-            final SearchFactory sFactory = ftSession.getSearchFactory();
+            SearchFactory sFactory = ftSession.getSearchFactory();
             rProv = sFactory.getReaderProvider();
 
-            final DirectoryProvider<Directory>[] dirProv = sFactory
-                    .getDirectoryProviders(NodeDocument.class);
+            DirectoryProvider<Directory>[] dirProv = sFactory.getDirectoryProviders(NodeDocument.class);
             idx = rProv.openReader(dirProv[0]);
 
             // Print Lucene documents
             if (!idx.isDeleted(id)) {
-                final Document doc = idx.document(id);
+                Document doc = idx.document(id);
                 String hibClass = null;
 
-                for (final Fieldable fld : doc.getFields()) {
-                    final Map<String, String> field = new HashMap<String, String>();
+                for (Fieldable fld : doc.getFields()) {
+                    Map<String, String> field = new HashMap<String, String>();
                     field.put("name", fld.name());
                     field.put("value", fld.stringValue());
                     fields.add(field);
@@ -155,17 +147,14 @@ public class ListIndexesServlet extends BaseServlet {
                  * 3) Get all the docs using indexReader.termDocs(term);
                  * 4) So, we have the term-doc pairs at this point.
                  */
-                if (showTerms
-                        && NodeDocument.class.getCanonicalName().equals(
-                                hibClass)) {
-                    final List<String> terms = new ArrayList<String>();
+                if (showTerms && NodeDocument.class.getCanonicalName().equals(hibClass)) {
+                    List<String> terms = new ArrayList<String>();
 
-                    for (final TermEnum te = idx.terms(); te.next();) {
-                        final Term t = te.term();
+                    for (TermEnum te = idx.terms(); te.next();) {
+                        Term t = te.term();
 
                         if ("text".equals(t.field())) {
-                            for (final TermDocs tds = idx.termDocs(t); tds
-                                    .next();) {
+                            for (TermDocs tds = idx.termDocs(t); tds.next();) {
                                 if (id == tds.doc()) {
                                     terms.add(t.text());
                                 }
@@ -173,22 +162,21 @@ public class ListIndexesServlet extends BaseServlet {
                         }
                     }
 
-                    final Map<String, String> field = new HashMap<String, String>();
+                    Map<String, String> field = new HashMap<String, String>();
                     field.put("name", "terms");
                     field.put("value", terms.toString());
                     fields.add(field);
                 }
             }
 
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("fields", fields);
             sc.setAttribute("id", id);
             sc.setAttribute("max", idx.maxDoc() - 1);
             sc.setAttribute("prev", id > 0);
             sc.setAttribute("next", id < idx.maxDoc() - 1);
             sc.setAttribute("showTerms", showTerms);
-            sc.getRequestDispatcher("/admin/list_indexes.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/list_indexes.jsp").forward(request, response);
         } finally {
             if (rProv != null && idx != null) {
                 rProv.closeReader(idx);
@@ -203,38 +191,39 @@ public class ListIndexesServlet extends BaseServlet {
      * Search Lucene indexes
      */
     @SuppressWarnings("unchecked")
-    private void searchLuceneDocuments(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, ParseException {
-        final String exp = WebUtils.getString(request, "exp");
+    private void searchLuceneDocuments(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            ParseException {
+        String exp = WebUtils.getString(request, "exp");
         FullTextSession ftSession = null;
         Session session = null;
-        final List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             ftSession = Search.getFullTextSession(session);
 
             if (exp != null && !exp.isEmpty()) {
-                final QueryParser parser = new QueryParser(
-                        Config.LUCENE_VERSION, NodeDocument.TEXT_FIELD,
-                        SearchDAO.analyzer);
-                final Query query = parser.parse(exp);
-                log.info("Query: {}", query);
+                Analyzer analyzer = new org.apache.lucene.analysis.WhitespaceAnalyzer(Config.LUCENE_VERSION);
+                QueryParser parser = new QueryParser(Config.LUCENE_VERSION, NodeBase.UUID_FIELD, analyzer);
+                Query query = null;
 
-                final FullTextQuery ftq = ftSession.createFullTextQuery(query,
-                        NodeDocument.class, NodeFolder.class, NodeMail.class);
-                ftq.setProjection(ProjectionConstants.DOCUMENT_ID,
-                        ProjectionConstants.SCORE, ProjectionConstants.THIS);
+                if (FormatUtil.isValidUUID(exp)) {
+                    query = new TermQuery(new Term(NodeBase.UUID_FIELD, exp));
+                } else {
+                    query = parser.parse(exp);
+                }
 
-                for (final Iterator<Object[]> it = ftq.iterate(); it.hasNext();) {
-                    final Object[] qRes = it.next();
-                    final Integer docId = (Integer) qRes[0];
-                    final Float score = (Float) qRes[1];
-                    final NodeBase nBase = (NodeBase) qRes[2];
+                FullTextQuery ftq = ftSession.createFullTextQuery(query, NodeDocument.class, NodeFolder.class, NodeMail.class);
+                ftq.setProjection(FullTextQuery.DOCUMENT_ID, FullTextQuery.SCORE, FullTextQuery.THIS);
+
+                for (Iterator<Object[]> it = ftq.iterate(); it.hasNext();) {
+                    Object[] qRes = it.next();
+                    Integer docId = (Integer) qRes[0];
+                    Float score = (Float) qRes[1];
+                    NodeBase nBase = (NodeBase) qRes[2];
 
                     // Add result
-                    final Map<String, String> res = new HashMap<String, String>();
+                    Map<String, String> res = new HashMap<String, String>();
                     res.put("docId", String.valueOf(docId));
                     res.put("score", String.valueOf(score));
                     res.put("uuid", nBase.getUuid());
@@ -252,11 +241,10 @@ public class ListIndexesServlet extends BaseServlet {
                 }
             }
 
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("results", results);
-            sc.setAttribute("exp", exp);
-            sc.getRequestDispatcher("/admin/search_indexes.jsp").forward(
-                    request, response);
+            sc.setAttribute("exp", exp.replaceAll("\"", "&quot;"));
+            sc.getRequestDispatcher("/admin/search_indexes.jsp").forward(request, response);
         } finally {
             HibernateUtil.close(ftSession);
             HibernateUtil.close(session);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,8 +37,7 @@ public interface ScriptingModule {
      * @throws AccessDeniedException If the token authorization information is not valid.
      * @throws RepositoryException If there is any error accessing to the repository.
      */
-    public void setScript(String token, String nodePath, String code)
-            throws PathNotFoundException, AccessDeniedException,
+    public void setScript(String token, String nodePath, String code) throws PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException;
 
     /**
@@ -49,9 +48,8 @@ public interface ScriptingModule {
      * @throws AccessDeniedException If the token authorization information is not valid.
      * @throws RepositoryException If there is any error accessing to the repository.
      */
-    public void removeScript(String token, String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException;
+    public void removeScript(String token, String nodePath) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /** 
      * Get node script (document or folder).
@@ -62,7 +60,6 @@ public interface ScriptingModule {
      * @throws AccessDeniedException If the token authorization information is not valid.
      * @throws RepositoryException If there is any error accessing to the repository.
      */
-    public String getScript(String token, String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException;
+    public String getScript(String token, String nodePath) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException;
 }

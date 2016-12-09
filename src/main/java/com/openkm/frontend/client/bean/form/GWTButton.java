@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,18 +29,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTButton extends GWTFormElement implements IsSerializable {
     private String transition = "";
-
     private String confirmation = "";
-
     private String style = "";
-
     private boolean validate = true;
 
     public String getConfirmation() {
         return confirmation;
     }
 
-    public void setConfirmation(final String confirmation) {
+    public void setConfirmation(String confirmation) {
         this.confirmation = confirmation;
     }
 
@@ -48,7 +45,7 @@ public class GWTButton extends GWTFormElement implements IsSerializable {
         return transition;
     }
 
-    public void setTransition(final String transition) {
+    public void setTransition(String transition) {
         this.transition = transition;
     }
 
@@ -56,7 +53,7 @@ public class GWTButton extends GWTFormElement implements IsSerializable {
         return style;
     }
 
-    public void setStyle(final String style) {
+    public void setStyle(String style) {
         this.style = style;
     }
 
@@ -64,13 +61,12 @@ public class GWTButton extends GWTFormElement implements IsSerializable {
         return validate;
     }
 
-    public void setValidate(final boolean validate) {
+    public void setValidate(boolean validate) {
         this.validate = validate;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

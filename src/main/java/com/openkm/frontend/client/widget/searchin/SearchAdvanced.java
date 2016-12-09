@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,8 @@
 
 package com.openkm.frontend.client.widget.searchin;
 
+import java.util.List;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -29,14 +31,15 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.openkm.frontend.client.Main;
+import com.openkm.frontend.client.bean.GWTMimeType;
 import com.openkm.frontend.client.util.OKMBundleResources;
 
 /**
@@ -44,45 +47,27 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  *
  */
 public class SearchAdvanced extends Composite {
-
     private ScrollPanel scrollPanel;
-
     private FlexTable table;
-
     public HorizontalPanel pathExplorerPanel;
-
     public HorizontalPanel categoryExplorerPanel;
-
     public TextBox path;
-
     public Image pathExplorer;
-
+    public Image pathClean;
     public Image categoryExplorer;
-
+    public Image categoryClean;
     public FolderSelectPopup folderSelectPopup;
-
     public TextBox categoryPath;
-
     public String categoryUuid = "";
-
     public HorizontalPanel typePanel;
-
     public CheckBox typeDocument;
-
     public CheckBox typeFolder;
-
     public CheckBox typeMail;
-
     public FlexTable tableMail;
-
     public ListBox mimeTypes;
-
     public TextBox from;
-
     public TextBox to;
-
     public TextBox subject;
-
     public HTML mailText;
 
     /**
@@ -96,44 +81,65 @@ public class SearchAdvanced extends Composite {
         folderSelectPopup = new FolderSelectPopup();
         pathExplorerPanel = new HorizontalPanel();
         path = new TextBox();
+        path.setWidth("320px");
         path.setReadOnly(true);
         pathExplorer = new Image(OKMBundleResources.INSTANCE.folderExplorer());
+        pathClean = new Image(OKMBundleResources.INSTANCE.cleanIcon());
+        pathClean.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                path.setText("");
+            }
+        });
+        pathClean.setStyleName("okm-Hyperlink");
 
         pathExplorerPanel.add(path);
         pathExplorerPanel.add(new HTML("&nbsp;"));
         pathExplorerPanel.add(pathExplorer);
+        pathExplorerPanel.add(new HTML("&nbsp;"));
+        pathExplorerPanel.add(pathClean);
 
         pathExplorer.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 folderSelectPopup.show(false);
             }
         });
 
-        pathExplorerPanel.setCellVerticalAlignment(pathExplorer,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        pathExplorerPanel.setCellVerticalAlignment(pathExplorer, HasAlignment.ALIGN_MIDDLE);
 
         // Sets the category explorer
         categoryExplorerPanel = new HorizontalPanel();
-        categoryPath = new TextBox();
         categoryUuid = "";
+        categoryPath = new TextBox();
+        categoryPath.setWidth("320px");
         categoryPath.setReadOnly(true);
-        categoryExplorer = new Image(
-                OKMBundleResources.INSTANCE.folderExplorer());
+        categoryExplorer = new Image(OKMBundleResources.INSTANCE.folderExplorer());
+        categoryClean = new Image(OKMBundleResources.INSTANCE.cleanIcon());
+        categoryClean.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                categoryPath.setText("");
+                categoryUuid = "";
+            }
+
+        });
+        categoryClean.setStyleName("okm-Hyperlink");
 
         categoryExplorerPanel.add(categoryPath);
         categoryExplorerPanel.add(new HTML("&nbsp;"));
         categoryExplorerPanel.add(categoryExplorer);
+        categoryExplorerPanel.add(new HTML("&nbsp;"));
+        categoryExplorerPanel.add(categoryClean);
 
         categoryExplorer.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 folderSelectPopup.show(true);
             }
         });
 
-        categoryExplorerPanel.setCellVerticalAlignment(categoryExplorer,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        categoryExplorerPanel.setCellVerticalAlignment(categoryExplorer, HasAlignment.ALIGN_MIDDLE);
 
         // Sets type document
         tableMail = new FlexTable();
@@ -144,9 +150,10 @@ public class SearchAdvanced extends Composite {
         typeFolder.setValue(false);
         typeMail = new CheckBox(Main.i18n("search.type.mail"));
         typeMail.setValue(false);
+
         typeMail.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (typeMail.getValue()) {
                     mailText.setVisible(true);
                     tableMail.setVisible(true);
@@ -167,32 +174,14 @@ public class SearchAdvanced extends Composite {
         // Sets mime types values
         mimeTypes = new ListBox();
         mimeTypes.addItem(" ", "");
-        mimeTypes.addItem("HTML", "text/html");
-        mimeTypes.addItem("MS Excel", "application/vnd.ms-excel");
-        mimeTypes.addItem("MS PowerPoint", "application/vnd.ms-powerpoint");
-        mimeTypes.addItem("MS Word", "application/msword");
-        mimeTypes.addItem("OpenOffice.org Database",
-                "application/vnd.oasis.opendocument.database");
-        mimeTypes.addItem("OpenOffice.org Draw",
-                "application/vnd.oasis.opendocument.graphics");
-        mimeTypes.addItem("OpenOffice.org Presentation",
-                "application/vnd.oasis.opendocument.presentation");
-        mimeTypes.addItem("OpenOffice.org Spreadsheet",
-                "application/vnd.oasis.opendocument.spreadsheet");
-        mimeTypes.addItem("OpenOffice.org Word Processor",
-                "application/vnd.oasis.opendocument.text");
-        mimeTypes.addItem("PDF", "application/pdf");
-        mimeTypes.addItem("RTF", "application/rtf");
-        mimeTypes.addItem("TXT", "text/plain");
-        mimeTypes.addItem("XML", "text/xml");
 
         mimeTypes.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl
-                        .evaluateSearchButtonVisible();
+            public void onChange(ChangeEvent event) {
+                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.evaluateSearchButtonVisible();
             }
         });
+
         mailText = new HTML(Main.i18n("search.type.mail"));
         mailText.setVisible(false);
         table.setHTML(1, 0, Main.i18n("search.folder"));
@@ -205,8 +194,7 @@ public class SearchAdvanced extends Composite {
         table.setWidget(4, 1, mimeTypes);
         table.setWidget(5, 0, mailText);
         table.setWidget(5, 1, tableMail);
-        table.getCellFormatter().setVerticalAlignment(5, 0,
-                HasVerticalAlignment.ALIGN_TOP);
+        table.getCellFormatter().setVerticalAlignment(5, 0, HasAlignment.ALIGN_TOP);
 
         // Adding mail search params
         from = new TextBox();
@@ -259,9 +247,9 @@ public class SearchAdvanced extends Composite {
         tableMail.setHTML(1, 0, Main.i18n("mail.to"));
         tableMail.setHTML(2, 0, Main.i18n("mail.subject"));
 
-        typeDocument.setHTML(Main.i18n("search.type.document"));
-        typeFolder.setHTML(Main.i18n("search.type.folder"));
-        typeMail.setHTML(Main.i18n("search.type.mail"));
+        typeDocument.setText(Main.i18n("search.type.document"));
+        typeFolder.setText(Main.i18n("search.type.folder"));
+        typeMail.setText(Main.i18n("search.type.mail"));
 
         folderSelectPopup.langRefresh();
     }
@@ -273,11 +261,20 @@ public class SearchAdvanced extends Composite {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final FlexTable table, final int row,
-            final int columns, final boolean wrap) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(FlexTable table, int row, int columns, boolean wrap) {
+        CellFormatter cellFormatter = table.getCellFormatter();
+
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, wrap);
+        }
+    }
+
+    /**
+     * setMimeTypes
+     */
+    public void setMimeTypes(List<GWTMimeType> mimeTypesList) {
+        for (GWTMimeType mt : mimeTypesList) {
+            mimeTypes.addItem(mt.getDescription(), mt.getName());
         }
     }
 }

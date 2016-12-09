@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,23 +44,17 @@ public class AutomationRule implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String AT_PRE = AutomationMetadata.AT_PRE;
-
     public static final String AT_POST = AutomationMetadata.AT_POST;
 
     public static final String EVENT_DOCUMENT_CREATE = "doc_create";
-
+    public static final String EVENT_DOCUMENT_UPDATE = "doc_update";
     public static final String EVENT_DOCUMENT_MOVE = "doc_move";
-
     public static final String EVENT_FOLDER_CREATE = "fld_create";
-
+    public static final String EVENT_MAIL_CREATE = "mail_create";
     public static final String EVENT_TEXT_EXTRACTOR = "text_extractor";
-
     public static final String EVENT_CONVERSION_PDF = "convert_pdf";
-
     public static final String EVENT_CONVERSION_SWF = "convert_swf";
-
     public static final String EVENT_PROPERTY_GROUP_ADD = "prop_group_add";
-
     public static final String EVENT_PROPERTY_GROUP_SET = "prop_group_set";
 
     @Id
@@ -80,11 +74,11 @@ public class AutomationRule implements Serializable {
     @Column(name = "ARL_ORDER")
     private int order;
 
-    @Column(name = "ARL_EXCLUSIVE")
+    @Column(name = "ARL_EXCLUSIVE", nullable = false)
     @Type(type = "true_false")
     private boolean exclusive;
 
-    @Column(name = "ARL_ACTIVE")
+    @Column(name = "ARL_ACTIVE", nullable = false)
     @Type(type = "true_false")
     private boolean active;
 
@@ -102,7 +96,7 @@ public class AutomationRule implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -110,7 +104,7 @@ public class AutomationRule implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -118,7 +112,7 @@ public class AutomationRule implements Serializable {
         return event;
     }
 
-    public void setEvent(final String event) {
+    public void setEvent(String event) {
         this.event = event;
     }
 
@@ -126,7 +120,7 @@ public class AutomationRule implements Serializable {
         return at;
     }
 
-    public void setAt(final String at) {
+    public void setAt(String at) {
         this.at = at;
     }
 
@@ -134,7 +128,7 @@ public class AutomationRule implements Serializable {
         return order;
     }
 
-    public void setOrder(final int order) {
+    public void setOrder(int order) {
         this.order = order;
     }
 
@@ -142,7 +136,7 @@ public class AutomationRule implements Serializable {
         return exclusive;
     }
 
-    public void setExclusive(final boolean exclusive) {
+    public void setExclusive(boolean exclusive) {
         this.exclusive = exclusive;
     }
 
@@ -150,7 +144,7 @@ public class AutomationRule implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -158,7 +152,7 @@ public class AutomationRule implements Serializable {
         return validations;
     }
 
-    public void setValidations(final List<AutomationValidation> validations) {
+    public void setValidations(List<AutomationValidation> validations) {
         this.validations = validations;
     }
 
@@ -166,13 +160,12 @@ public class AutomationRule implements Serializable {
         return actions;
     }
 
-    public void setActions(final List<AutomationAction> actions) {
+    public void setActions(List<AutomationAction> actions) {
         this.actions = actions;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", name=").append(name);

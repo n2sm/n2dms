@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,7 +39,6 @@ public class TemplateTree extends FolderTree {
     /**
      * Inits on first load
      */
-    @Override
     public void init() {
         menuPopup = new MenuPopup(new TemplateMenu());
         menuPopup.setStyleName("okm-Tree-MenuPopup");
@@ -48,8 +47,7 @@ public class TemplateTree extends FolderTree {
 
         // Sets the context on list context search values
         Main.get().repositoryContext.setContextTemplates(folderRoot.getPath());
-        Main.get().mainPanel.search.searchBrowser.searchIn.setContextValue(
-                folderRoot.getPath(), UIDesktopConstants.NAVIGATOR_TEMPLATES);
+        Main.get().mainPanel.search.searchBrowser.searchIn.setContextValue(folderRoot.getPath(), UIDesktopConstants.NAVIGATOR_TEMPLATES);
 
         actualItem.setUserObject(folderRoot);
         evaluesFolderIcon(actualItem);
@@ -60,10 +58,8 @@ public class TemplateTree extends FolderTree {
     /**
      * Move folder on file browser ( only trash mode )
      */
-    @Override
     public void move() {
-        final GWTFolder folderToRestore = (GWTFolder) actualItem
-                .getUserObject();
+        GWTFolder folderToRestore = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TEMPLATES);
         folderSelectPopup.setToMove(folderToRestore);
         showDirectorySelectPopup();
@@ -73,9 +69,8 @@ public class TemplateTree extends FolderTree {
     /**
      * Copy folder on file browser ( only trash mode )
      */
-    @Override
     public void copy() {
-        final GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
+        GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TEMPLATES);
         folderSelectPopup.setToCopy(folderToCopy);
         showDirectorySelectPopup();

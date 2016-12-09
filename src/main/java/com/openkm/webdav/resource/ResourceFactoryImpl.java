@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,15 +42,13 @@ import com.openkm.core.RepositoryException;
  * @author pavila
  */
 public class ResourceFactoryImpl implements ResourceFactory {
-    private static final Logger log = LoggerFactory
-            .getLogger(ResourceFactoryImpl.class);
-
+    private static final Logger log = LoggerFactory.getLogger(ResourceFactoryImpl.class);
     public static final String REALM = "OpenKM";
 
     @Override
-    public Resource getResource(final String host, final String url) {
+    public Resource getResource(String host, String url) {
         log.debug("getResource({}, {})", host, url);
-        final Path srcPath = Path.path(url);
+        Path srcPath = Path.path(url);
         Path path = null;
 
         if (url.startsWith("/" + Config.CONTEXT + "/webdav")) {
@@ -67,13 +65,13 @@ public class ResourceFactoryImpl implements ResourceFactory {
             } else {
                 return ResourceUtils.getNode(srcPath, path.toPath());
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error("PathNotFoundException: " + e.getMessage());
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             log.error("AccessDeniedException: " + e.getMessage());
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error("RepositoryException: " + e.getMessage());
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error("DatabaseException: " + e.getMessage());
         }
 

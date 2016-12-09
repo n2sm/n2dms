@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,82 +29,50 @@ package com.openkm.frontend.client.bean;
  */
 public class ToolBarOption {
     public boolean createFolderOption;
-
     public boolean findOption;
-
     public boolean findFolderOption;
-
     public boolean findDocumentOption;
-
     public boolean downloadOption;
-
     public boolean downloadPdfOption;
-
+    public boolean printOption;
     public boolean lockOption;
-
     public boolean unLockOption;
-
     public boolean addDocumentOption;
-
     public boolean checkoutOption;
-
     public boolean checkinOption;
-
     public boolean cancelCheckoutOption;
-
     public boolean deleteOption;
-
     public boolean addPropertyGroupOption;
-
+    public boolean updatePropertyGroupOption;
     public boolean removePropertyGroupOption;
-
     public boolean firedRemovePropertyGroupOption;
-
     public boolean addSubscription;
-
     public boolean removeSubscription;
-
     public boolean homeOption;
-
     public boolean refreshOption;
-
     public boolean renameOption;
-
     public boolean copyOption;
-
     public boolean sendDocumentLinkOption;
-
     public boolean sendDocumentAttachmentOption;
-
+    public boolean mailForwardOption;
     public boolean moveOption;
-
     public boolean exportOption;
-
     public boolean workflowOption;
-
     public boolean addNoteOption;
-
     public boolean addCategoryOption;
-
     public boolean addKeywordOption;
-
     public boolean scannerOption;
-
     public boolean uploaderOption;
-
+    public boolean splitterResizeOption;
     public boolean bookmarkOption;
-
     public boolean goOption;
-
     public boolean createFromTemplateOption;
-
     public boolean restore;
-
     public boolean purge;
-
     public boolean purgeTrash;
-
-    public boolean omrOption;
+    public boolean mergePdfOption;
+    public boolean findSimilarDocumentOption;
+    public boolean convertOption;
 
     /**
      * ToolBarOption
@@ -116,6 +84,7 @@ public class ToolBarOption {
         findDocumentOption = false;
         downloadOption = false;
         downloadPdfOption = false;
+        printOption = false;
         lockOption = false;
         unLockOption = false;
         addDocumentOption = false;
@@ -124,6 +93,7 @@ public class ToolBarOption {
         cancelCheckoutOption = false;
         deleteOption = false;
         addPropertyGroupOption = false;
+        updatePropertyGroupOption = false;
         removePropertyGroupOption = false;
         firedRemovePropertyGroupOption = false;
         addSubscription = false;
@@ -134,6 +104,7 @@ public class ToolBarOption {
         copyOption = false;
         sendDocumentLinkOption = false;
         sendDocumentAttachmentOption = false;
+        mailForwardOption = false;
         moveOption = false;
         exportOption = false;
         workflowOption = false;
@@ -142,12 +113,15 @@ public class ToolBarOption {
         addKeywordOption = false;
         scannerOption = false;
         uploaderOption = false;
+        splitterResizeOption = false;
         bookmarkOption = false;
         goOption = false;
         createFromTemplateOption = false;
         restore = false;
         purge = false;
         purgeTrash = false;
-        omrOption = false;
+        mergePdfOption = false;
+        findSimilarDocumentOption = false;
+        convertOption = false;
     }
 }

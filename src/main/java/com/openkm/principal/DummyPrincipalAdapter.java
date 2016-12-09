@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.principal;
@@ -24,21 +24,20 @@ package com.openkm.principal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openkm.core.Config;
 
 public class DummyPrincipalAdapter implements PrincipalAdapter {
-    private static Logger log = LoggerFactory
-            .getLogger(DummyPrincipalAdapter.class);
-
+    private static Logger log = LoggerFactory.getLogger(DummyPrincipalAdapter.class);
     private static final String TEST_USER = "monkiki";
 
     @Override
     public List<String> getUsers() throws PrincipalAdapterException {
         log.debug("getUsers()");
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add(Config.ADMIN_USER);
         list.add(TEST_USER);
         log.debug("getUsers: {}", list);
@@ -48,7 +47,7 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     @Override
     public List<String> getRoles() throws PrincipalAdapterException {
         log.debug("getRoles()");
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
         list.add(Config.DEFAULT_ADMIN_ROLE);
         list.add(Config.DEFAULT_USER_ROLE);
         log.debug("getRoles: {}", list);
@@ -56,9 +55,8 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public List<String> getUsersByRole(final String role)
-            throws PrincipalAdapterException {
-        final List<String> list = new ArrayList<String>();
+    public List<String> getUsersByRole(String role) throws PrincipalAdapterException {
+        List<String> list = new ArrayList<String>();
 
         if (role.equals(Config.DEFAULT_ADMIN_ROLE)) {
             list.add(Config.ADMIN_USER);
@@ -71,9 +69,8 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public List<String> getRolesByUser(final String user)
-            throws PrincipalAdapterException {
-        final List<String> list = new ArrayList<String>();
+    public List<String> getRolesByUser(String user) throws PrincipalAdapterException {
+        List<String> list = new ArrayList<String>();
 
         if (user.equals(Config.ADMIN_USER)) {
             list.add(Config.DEFAULT_ADMIN_ROLE);
@@ -86,7 +83,7 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getMail(final String user) throws PrincipalAdapterException {
+    public String getMail(String user) throws PrincipalAdapterException {
         String mail = null;
 
         if (user.equals(Config.ADMIN_USER)) {
@@ -99,7 +96,7 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getName(final String user) throws PrincipalAdapterException {
+    public String getName(String user) throws PrincipalAdapterException {
         String name = null;
 
         if (user.equals(Config.ADMIN_USER)) {
@@ -112,8 +109,7 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
     }
 
     @Override
-    public String getPassword(final String user)
-            throws PrincipalAdapterException {
+    public String getPassword(String user) throws PrincipalAdapterException {
         String password = null;
 
         if (user.equals(Config.ADMIN_USER)) {
@@ -123,5 +119,45 @@ public class DummyPrincipalAdapter implements PrincipalAdapter {
         }
 
         return password;
+    }
+
+    @Override
+    public void createUser(String user, String password, String email, String name, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("createUser");
+    }
+
+    @Override
+    public void deleteUser(String user) throws PrincipalAdapterException {
+        throw new NotImplementedException("deleteUser");
+    }
+
+    @Override
+    public void updateUser(String user, String password, String email, String name, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("updateUser");
+    }
+
+    @Override
+    public void createRole(String role, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("createRole");
+    }
+
+    @Override
+    public void deleteRole(String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("deleteRole");
+    }
+
+    @Override
+    public void updateRole(String role, boolean active) throws PrincipalAdapterException {
+        throw new NotImplementedException("updateRole");
+    }
+
+    @Override
+    public void assignRole(String user, String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("assignRole");
+    }
+
+    @Override
+    public void removeRole(String user, String role) throws PrincipalAdapterException {
+        throw new NotImplementedException("removeRole");
     }
 }

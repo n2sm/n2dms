@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.dashboard;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,35 +50,26 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class HorizontalToolBar extends Composite {
 
     private HorizontalPanel hPanel;
-
     private ToolBarBox user;
-
     private ToolBarBox mail;
-
     private ToolBarBox news;
-
     private ToolBarBox general;
-
     private ToolBarBox workflow;
-
     private ToolBarBox keywordMap;
-
     private Widget enabledWidget;
-
     private List<ToolBarBoxExtension> widgetExtensionList;
 
     MouseOverHandler mouseOverHandler = new MouseOverHandler() {
         @Override
-        public void onMouseOver(final MouseOverEvent event) {
-            final Widget sender = (Widget) event.getSource();
+        public void onMouseOver(MouseOverEvent event) {
+            Widget sender = (Widget) event.getSource();
             sender.addStyleName("okm-ToolBar-BigTMP-selected");
         }
     };
-
     MouseOutHandler mouseOutHandler = new MouseOutHandler() {
         @Override
-        public void onMouseOut(final MouseOutEvent event) {
-            final Widget sender = (Widget) event.getSource();
+        public void onMouseOut(MouseOutEvent event) {
+            Widget sender = (Widget) event.getSource();
             sender.removeStyleName("okm-ToolBar-BigTMP-selected");
         }
     };
@@ -88,24 +80,12 @@ public class HorizontalToolBar extends Composite {
     public HorizontalToolBar() {
         widgetExtensionList = new ArrayList<ToolBarBoxExtension>();
         hPanel = new HorizontalPanel();
-        user = new ToolBarBox(
-                new Image(OKMBundleResources.INSTANCE.userIcon()),
-                Main.i18n("dashboard.tab.user"));
-        mail = new ToolBarBox(
-                new Image(OKMBundleResources.INSTANCE.mailIcon()),
-                Main.i18n("dashboard.tab.mail"));
-        news = new ToolBarBox(
-                new Image(OKMBundleResources.INSTANCE.newsIcon()),
-                Main.i18n("dashboard.tab.news"));
-        general = new ToolBarBox(new Image(
-                OKMBundleResources.INSTANCE.generalIcon()),
-                Main.i18n("dashboard.tab.general"));
-        workflow = new ToolBarBox(new Image(
-                OKMBundleResources.INSTANCE.workflowIcon()),
-                Main.i18n("dashboard.tab.workflow"));
-        keywordMap = new ToolBarBox(new Image(
-                OKMBundleResources.INSTANCE.keywordMapIcon()),
-                Main.i18n("dashboard.tab.keymap"));
+        user = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.userIcon()), Main.i18n("dashboard.tab.user"));
+        mail = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.mailIcon()), Main.i18n("dashboard.tab.mail"));
+        news = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.newsIcon()), Main.i18n("dashboard.tab.news"));
+        general = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.generalIcon()), Main.i18n("dashboard.tab.general"));
+        workflow = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.workflowIcon()), Main.i18n("dashboard.tab.workflow"));
+        keywordMap = new ToolBarBox(new Image(OKMBundleResources.INSTANCE.keywordMapIcon()), Main.i18n("dashboard.tab.keymap"));
 
         enabledWidget = user; // Setting the enabled widget
 
@@ -124,73 +104,67 @@ public class HorizontalToolBar extends Composite {
 
         user.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_USER);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_USER);
             }
         });
 
         mail.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_MAIL);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_MAIL);
             }
         });
 
         news.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_NEWS);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_NEWS);
             }
         });
 
         general.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_GENERAL);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_GENERAL);
             }
         });
 
         workflow.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_WORKFLOW);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_WORKFLOW);
             }
         });
 
         keywordMap.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final Widget sender = (Widget) event.getSource();
+            public void onClick(ClickEvent event) {
+                Widget sender = (Widget) event.getSource();
                 enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                 sender.setStyleName("okm-ToolBar-Big-selected");
                 enabledWidget = sender;
-                Main.get().mainPanel.dashboard
-                        .changeView(UIDashboardConstants.DASHBOARD_KEYMAP);
+                Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_KEYMAP);
             }
         });
 
@@ -221,8 +195,7 @@ public class HorizontalToolBar extends Composite {
         enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
         user.setStyleName("okm-ToolBar-Big-selected");
         enabledWidget = user;
-        Main.get().mainPanel.dashboard
-                .changeView(UIDashboardConstants.DASHBOARD_USER);
+        Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_USER);
     }
 
     /**
@@ -232,8 +205,7 @@ public class HorizontalToolBar extends Composite {
         enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
         news.setStyleName("okm-ToolBar-Big-selected");
         enabledWidget = news;
-        Main.get().mainPanel.dashboard
-                .changeView(UIDashboardConstants.DASHBOARD_NEWS);
+        Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_NEWS);
     }
 
     /**
@@ -243,8 +215,7 @@ public class HorizontalToolBar extends Composite {
         enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
         workflow.setStyleName("okm-ToolBar-Big-selected");
         enabledWidget = workflow;
-        Main.get().mainPanel.dashboard
-                .changeView(UIDashboardConstants.DASHBOARD_WORKFLOW);
+        Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_WORKFLOW);
     }
 
     /**
@@ -252,7 +223,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showUser() {
         hPanel.add(user);
-        hPanel.setCellWidth(user, "80");
+        hPanel.setCellWidth(user, "80px");
     }
 
     /**
@@ -260,7 +231,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showMail() {
         hPanel.add(mail);
-        hPanel.setCellWidth(mail, "80");
+        hPanel.setCellWidth(mail, "80px");
     }
 
     /**
@@ -268,7 +239,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showNews() {
         hPanel.add(news);
-        hPanel.setCellWidth(news, "80");
+        hPanel.setCellWidth(news, "80px");
     }
 
     /**
@@ -276,7 +247,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showGeneral() {
         hPanel.add(general);
-        hPanel.setCellWidth(general, "80");
+        hPanel.setCellWidth(general, "80px");
     }
 
     /**
@@ -284,7 +255,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showWorkflow() {
         hPanel.add(workflow);
-        hPanel.setCellWidth(workflow, "80");
+        hPanel.setCellWidth(workflow, "80px");
     }
 
     /**
@@ -292,7 +263,7 @@ public class HorizontalToolBar extends Composite {
      */
     public void showKeywords() {
         hPanel.add(keywordMap);
-        hPanel.setCellWidth(keywordMap, "80");
+        hPanel.setCellWidth(keywordMap, "80px");
     }
 
     /**
@@ -302,8 +273,8 @@ public class HorizontalToolBar extends Composite {
      */
     public int getSelectedExtension() {
         int count = 0;
-        for (final ToolBarBoxExtension toolBarBoxExtension : widgetExtensionList) {
-            if (toolBarBoxExtension.equals(enabledWidget)) {
+        for (Iterator<ToolBarBoxExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            if (it.next().equals(enabledWidget)) {
                 return count;
             }
             count++;
@@ -315,24 +286,24 @@ public class HorizontalToolBar extends Composite {
      * init
      */
     public void init() {
-        for (final ToolBarBoxExtension extension : widgetExtensionList) {
+        for (Iterator<ToolBarBoxExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            ToolBarBoxExtension extension = it.next();
             hPanel.add(extension);
-            hPanel.setCellWidth(extension, "80");
+            hPanel.setCellWidth(extension, "80px");
             extension.addMouseOverHandler(mouseOverHandler);
             extension.addMouseOutHandler(mouseOutHandler);
             extension.addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
-                    final Widget sender = (Widget) event.getSource();
+                public void onClick(ClickEvent event) {
+                    Widget sender = (Widget) event.getSource();
                     enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
                     sender.setStyleName("okm-ToolBar-Big-selected");
                     enabledWidget = sender;
-                    Main.get().mainPanel.dashboard
-                            .changeView(UIDashboardConstants.DASHBOARD_EXTENSION);
+                    Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_EXTENSION);
                 }
             });
         }
-        final HTML space = new HTML("&nbsp;");
+        HTML space = new HTML("&nbsp;");
         hPanel.add(space);
     }
 
@@ -341,7 +312,7 @@ public class HorizontalToolBar extends Composite {
      * 
      * @param extension
      */
-    public void addToolBarBoxExtension(final ToolBarBoxExtension extension) {
+    public void addToolBarBoxExtension(ToolBarBoxExtension extension) {
         widgetExtensionList.add(extension);
     }
 
@@ -350,11 +321,10 @@ public class HorizontalToolBar extends Composite {
      * 
      * @param widget
      */
-    public void showToolBoxExtension(final ToolBarBoxExtension extension) {
+    public void showToolBoxExtension(ToolBarBoxExtension extension) {
         enabledWidget.removeStyleName("okm-ToolBar-Big-selected");
         ((Widget) extension).setStyleName("okm-ToolBar-Big-selected");
-        enabledWidget = extension;
-        Main.get().mainPanel.dashboard
-                .changeView(UIDashboardConstants.DASHBOARD_EXTENSION);
+        enabledWidget = ((Widget) extension);
+        Main.get().mainPanel.dashboard.changeView(UIDashboardConstants.DASHBOARD_EXTENSION);
     }
 }

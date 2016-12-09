@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,21 +35,14 @@ import org.hibernate.annotations.Type;
 @Table(name = "OKM_CONFIG")
 public class Config implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String STRING = "string";
-
     public static final String TEXT = "text";
-
     public static final String BOOLEAN = "boolean";
-
     public static final String INTEGER = "integer";
-
     public static final String LONG = "long";
-
+    public static final String FILE = "file";
     public static final String SELECT = "select";
-
     public static final String HIDDEN = "hidden";
-
     public static final String LIST = "list";
 
     @Id
@@ -61,14 +54,14 @@ public class Config implements Serializable {
 
     @Column(name = "CFG_VALUE")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Type(type = "org.hibernate.type.StringClobType")
     private String value;
 
     public String getKey() {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -76,7 +69,7 @@ public class Config implements Serializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -84,13 +77,12 @@ public class Config implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("key=");
         sb.append(key);

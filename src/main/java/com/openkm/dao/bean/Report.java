@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,24 +25,18 @@ import java.io.Serializable;
 
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long id;
-
     private String name;
-
     private String fileContent;
-
     private String fileMime;
-
     private String fileName;
-
     private boolean active;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -50,7 +44,7 @@ public class Report implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -58,7 +52,7 @@ public class Report implements Serializable {
         return fileContent;
     }
 
-    public void setFileContent(final String fileContent) {
+    public void setFileContent(String fileContent) {
         this.fileContent = fileContent;
     }
 
@@ -66,7 +60,7 @@ public class Report implements Serializable {
         return fileMime;
     }
 
-    public void setFileMime(final String fileMime) {
+    public void setFileMime(String fileMime) {
         this.fileMime = fileMime;
     }
 
@@ -74,7 +68,7 @@ public class Report implements Serializable {
         return fileName;
     }
 
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
@@ -82,13 +76,12 @@ public class Report implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

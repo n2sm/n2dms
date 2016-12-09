@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,40 +41,34 @@ public class LanguageUtils {
      * getTranslations
      * @throws Exception 
      */
-    public static Map<String, String> getTranslations(final String lang,
-            final String module[]) throws DatabaseException {
-        final Map<String, String> translations = new HashMap<String, String>();
+    public static Map<String, String> getTranslations(String lang, String module[]) throws DatabaseException {
+        Map<String, String> translations = new HashMap<String, String>();
 
         // By default english is used to complete non defined translations
-        final Language baseLang = LanguageDAO.findByPk(Language.DEFAULT);
-        final Language language = LanguageDAO.findByPk(lang);
-        final Map<String, String> keys = new HashMap<String, String>();
+        Language baseLang = LanguageDAO.findByPk(Language.DEFAULT);
+        Language language = LanguageDAO.findByPk(lang);
+        Map<String, String> keys = new HashMap<String, String>();
 
         // Getting keys
         if (language != null) {
-            for (final Translation translation : language.getTranslations()) {
-                final String key = translation.getTranslationId().getModule()
-                        + "." + translation.getTranslationId().getKey();
+            for (Translation translation : language.getTranslations()) {
+                String key = translation.getTranslationId().getModule() + "." + translation.getTranslationId().getKey();
                 keys.put(key, translation.getText());
             }
         }
 
         if (baseLang != null) {
-            for (final Translation translation : baseLang.getTranslations()) {
+            for (Translation translation : baseLang.getTranslations()) {
                 boolean found = false;
-                for (final String element : module) {
-                    if (translation.getTranslationId().getModule()
-                            .equals(element)) {
+                for (int i = 0; i < module.length; i++) {
+                    if (translation.getTranslationId().getModule().equals(module[i])) {
                         found = true;
                         break;
                     }
                 }
                 if (found) {
                     // Module is added module name as starting translation key
-                    final String key = translation.getTranslationId()
-                            .getModule()
-                            + "."
-                            + translation.getTranslationId().getKey();
+                    String key = translation.getTranslationId().getModule() + "." + translation.getTranslationId().getKey();
 
                     if (keys.keySet().contains(key)) {
                         translations.put(key, keys.get(key));
@@ -85,8 +79,7 @@ public class LanguageUtils {
                 }
             }
         } else {
-            throw new DatabaseException(
-                    "English traslation is mandatory can not be deleted");
+            throw new DatabaseException("English traslation is mandatory can not be deleted");
         }
 
         return translations;

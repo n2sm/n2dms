@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.openkm.core.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,20 +43,17 @@ import com.openkm.core.RepositoryException;
  *
  */
 public class PropertyGroupUtils {
-    private static Logger log = LoggerFactory
-            .getLogger(PropertyGroupUtils.class);
+    private static Logger log = LoggerFactory.getLogger(PropertyGroupUtils.class);
 
     /**
      * getAllGroupsProperties
      */
-    public static List<String> getAllGroupsProperties() throws IOException,
-            ParseException, RepositoryException, DatabaseException {
+    public static List<String> getAllGroupsProperties() throws IOException, ParseException, AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getAllGroupsProperties()");
-        final List<String> pgProperties = new ArrayList<String>();
-        for (final PropertyGroup pgrp : OKMPropertyGroup.getInstance()
-                .getAllGroups(null)) {
-            for (final FormElement fe : OKMPropertyGroup.getInstance()
-                    .getPropertyGroupForm(null, pgrp.getName())) {
+        List<String> pgProperties = new ArrayList<String>();
+        for (PropertyGroup pgrp : OKMPropertyGroup.getInstance().getAllGroups(null)) {
+            for (FormElement fe : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, pgrp.getName())) {
                 pgProperties.add(fe.getName());
             }
         }
@@ -66,13 +64,11 @@ public class PropertyGroupUtils {
     /**
      * getRelatedGroupsFromProperties
      */
-    public static List<String> getRelatedGroupsFromProperties(
-            final List<String> properties) {
-        final List<String> groups = new ArrayList<String>();
-        for (final String property : properties) {
+    public static List<String> getRelatedGroupsFromProperties(List<String> properties) {
+        List<String> groups = new ArrayList<String>();
+        for (String property : properties) {
             if (isValidPropertyName(property)) {
-                final String group = property.replaceAll("okp:", "okg:")
-                        .substring(0, property.indexOf("."));
+                String group = property.replaceAll("okp:", "okg:").substring(0, property.indexOf("."));
                 if (!groups.contains(group)) {
                     groups.add(group);
                 }
@@ -85,16 +81,14 @@ public class PropertyGroupUtils {
     /**
      * isValidPropertyName
      */
-    public static boolean isValidPropertyName(final String property) {
-        return property.length() > 0 && property.startsWith("okp:")
-                && property.indexOf(".") > 0;
+    public static boolean isValidPropertyName(String property) {
+        return (property.length() > 0 && property.startsWith("okp:") && property.indexOf(".") > 0);
     }
 
     /**
      * propertyNameContainsGroup
      */
-    public static boolean propertyNameContainsGroup(final String grpName,
-            final String property) {
+    public static boolean propertyNameContainsGroup(String grpName, String property) {
         return property.startsWith(grpName.replaceAll("okg:", "okp:"));
     }
 }

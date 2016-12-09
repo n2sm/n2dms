@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -41,23 +41,21 @@ import javax.crypto.spec.DESKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.RandomStringUtils;
 
 public class SecureStore {
     /**
      * DES encoder
      */
-    public static byte[] desEncode(final String key, final byte[] src)
-            throws InvalidKeyException, UnsupportedEncodingException,
-            NoSuchAlgorithmException, InvalidKeySpecException,
-            NoSuchPaddingException, IllegalBlockSizeException,
-            BadPaddingException {
-        final DESKeySpec keySpec = new DESKeySpec(key.getBytes("UTF8"));
-        final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-        final SecretKey sKey = keyFactory.generateSecret(keySpec);
+    public static byte[] desEncode(String key, byte[] src) throws InvalidKeyException, UnsupportedEncodingException,
+            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        DESKeySpec keySpec = new DESKeySpec(key.getBytes("UTF8"));
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+        SecretKey sKey = keyFactory.generateSecret(keySpec);
 
-        final Cipher cipher = Cipher.getInstance("DES"); // cipher is not thread safe
+        Cipher cipher = Cipher.getInstance("DES"); // cipher is not thread safe
         cipher.init(Cipher.ENCRYPT_MODE, sKey);
-        final byte[] dst = cipher.doFinal(src);
+        byte[] dst = cipher.doFinal(src);
 
         return dst;
     }
@@ -65,48 +63,62 @@ public class SecureStore {
     /**
      * DES decoder
      */
-    public static byte[] desDecode(final String key, final byte[] src)
-            throws InvalidKeyException, UnsupportedEncodingException,
-            NoSuchAlgorithmException, InvalidKeySpecException,
-            NoSuchPaddingException, IllegalBlockSizeException,
-            BadPaddingException {
-        final DESKeySpec keySpec = new DESKeySpec(key.getBytes("UTF8"));
-        final SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
-        final SecretKey sKey = keyFactory.generateSecret(keySpec);
+    public static byte[] desDecode(String key, byte[] src) throws InvalidKeyException, UnsupportedEncodingException,
+            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        DESKeySpec keySpec = new DESKeySpec(key.getBytes("UTF8"));
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+        SecretKey sKey = keyFactory.generateSecret(keySpec);
 
-        final Cipher cipher = Cipher.getInstance("DES"); // cipher is not thread safe
+        Cipher cipher = Cipher.getInstance("DES"); // cipher is not thread safe
         cipher.init(Cipher.DECRYPT_MODE, sKey);
-        final byte[] dst = cipher.doFinal(src);
+        byte[] dst = cipher.doFinal(src);
 
         return dst;
     }
 
     /**
+     * DES encoder
+     */
+    @SuppressWarnings("restriction")
+    public static String desEncode(String key, String src) throws InvalidKeyException, UnsupportedEncodingException,
+            NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        return new sun.misc.BASE64Encoder().encode(desEncode(key, src.getBytes("UTF8")));
+    }
+
+    /**
+     * DES decoder
+     */
+    @SuppressWarnings("restriction")
+    public static String desDecode(String key, String src) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException,
+            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+        return new String(desDecode(key, new sun.misc.BASE64Decoder().decodeBuffer(src)), "UTF8");
+    }
+
+    /**
      * Base64 encoder
      */
-    public static String b64Encode(final byte[] src) {
+    public static String b64Encode(byte[] src) {
         return new String(Base64.encodeBase64(src));
     }
 
     /**
      * Base64 decoder
      */
-    public static byte[] b64Decode(final String src) {
+    public static byte[] b64Decode(String src) {
         return Base64.decodeBase64(src.getBytes());
     }
 
     /**
      * MD5 encoder
      */
-    public static String md5Encode(final byte[] src)
-            throws NoSuchAlgorithmException {
-        final StringBuilder sb = new StringBuilder();
-        final MessageDigest md = MessageDigest.getInstance("MD5");
-        final byte[] dst = md.digest(src);
+    public static String md5Encode(byte[] src) throws NoSuchAlgorithmException {
+        StringBuilder sb = new StringBuilder();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] dst = md.digest(src);
 
-        for (final byte element : dst) {
-            sb.append(Integer.toHexString(element >> 4 & 0xf));
-            sb.append(Integer.toHexString(element & 0xf));
+        for (int i = 0; i < dst.length; i++) {
+            sb.append(Integer.toHexString((dst[i] >> 4) & 0xf));
+            sb.append(Integer.toHexString(dst[i] & 0xf));
         }
 
         return sb.toString();
@@ -115,12 +127,11 @@ public class SecureStore {
     /**
      * MD5 encoder
      */
-    public static String md5Encode(final File file)
-            throws NoSuchAlgorithmException, IOException {
-        final StringBuilder sb = new StringBuilder();
-        final MessageDigest md = MessageDigest.getInstance("MD5");
-        final InputStream is = new FileInputStream(file);
-        final byte[] buffer = new byte[1024];
+    public static String md5Encode(File file) throws NoSuchAlgorithmException, IOException {
+        StringBuilder sb = new StringBuilder();
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        InputStream is = new FileInputStream(file);
+        byte[] buffer = new byte[1024];
         int numRead;
 
         try {
@@ -130,16 +141,23 @@ public class SecureStore {
                 }
             } while (numRead != -1);
 
-            final byte[] dst = md.digest();
+            byte[] dst = md.digest();
 
-            for (final byte element : dst) {
-                sb.append(Integer.toHexString(element >> 4 & 0xf));
-                sb.append(Integer.toHexString(element & 0xf));
+            for (int i = 0; i < dst.length; i++) {
+                sb.append(Integer.toHexString((dst[i] >> 4) & 0xf));
+                sb.append(Integer.toHexString(dst[i] & 0xf));
             }
         } finally {
             IOUtils.closeQuietly(is);
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Password generator.
+     */
+    public static String generatePassword(int lenght) {
+        return RandomStringUtils.randomAlphanumeric(lenght);
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,22 +49,19 @@ public class MsOffice2007TextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(MsOffice2007TextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(MsOffice2007TextExtractor.class);
 
     /**
      * Creates a new <code>MsOffice2007TextExtractor</code> instance.
      */
     public MsOffice2007TextExtractor() {
-        super(
-                new String[] {
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-                        "application/vnd.openxmlformats-officedocument.presentationml.template",
-                        "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.template" });
+        super(new String[] { "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+                "application/vnd.openxmlformats-officedocument.presentationml.template",
+                "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.template" });
     }
 
     //-------------------------------------------------------< TextExtractor >
@@ -72,35 +69,26 @@ public class MsOffice2007TextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         ZipInputStream zis = null;
 
         try {
-            final SAXParserFactory saxParserFactory = SAXParserFactory
-                    .newInstance();
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             saxParserFactory.setValidating(false);
-            final SAXParser saxParser = saxParserFactory.newSAXParser();
-            final XMLReader xmlReader = saxParser.getXMLReader();
-            xmlReader.setFeature("http://xml.org/sax/features/validation",
-                    false);
-            xmlReader
-                    .setFeature(
-                            "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-                            false);
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            XMLReader xmlReader = saxParser.getXMLReader();
+            xmlReader.setFeature("http://xml.org/sax/features/validation", false);
+            xmlReader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             MsOffice2007ContentHandler contentHandler = null;
 
             if (type.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                     || type.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.template")) {
                 contentHandler = new WordprocessingMLContentHandler();
-            } else if (type
-                    .equals("application/vnd.openxmlformats-officedocument.presentationml.template")
+            } else if (type.equals("application/vnd.openxmlformats-officedocument.presentationml.template")
                     || type.equals("application/vnd.openxmlformats-officedocument.presentationml.slideshow")
                     || type.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
                 contentHandler = new PresentationMLContentHandler();
-            } else if (type
-                    .equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            } else if (type.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     || type.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.template")) {
                 contentHandler = new SpreadsheetMLContentHandler();
             }
@@ -108,7 +96,7 @@ public class MsOffice2007TextExtractor extends AbstractTextExtractor {
             xmlReader.setContentHandler(contentHandler);
             zis = new ZipInputStream(stream);
             ZipEntry ze;
-            final StringBuffer sb = new StringBuffer();
+            StringBuffer sb = new StringBuffer();
 
             while ((ze = zis.getNextEntry()) != null) {
                 if (ze.getName().startsWith(contentHandler.getFilePattern())) {
@@ -116,12 +104,10 @@ public class MsOffice2007TextExtractor extends AbstractTextExtractor {
                     // done parsing. To ensure that the stream gets closed just once,
                     // we prevent the parser from closing it by catching the close()
                     // call and explicitly close the stream in a finally block.
-                    final InputSource is = new InputSource(
-                            new FilterInputStream(zis) {
-                                @Override
-                                public void close() {
-                                }
-                            });
+                    InputSource is = new InputSource(new FilterInputStream(zis) {
+                        public void close() {
+                        }
+                    });
 
                     log.debug("Parsing " + ze);
                     xmlReader.parse(is);
@@ -133,10 +119,10 @@ public class MsOffice2007TextExtractor extends AbstractTextExtractor {
 
             log.debug("TEXT: " + sb.toString());
             return new StringReader(sb.toString());
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             log.warn("Failed to extract Microsoft Office 2007 text content", e);
             return new StringReader("");
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             log.warn("Failed to extract Microsoft Office 2007 text content", e);
             return new StringReader("");
         } finally {

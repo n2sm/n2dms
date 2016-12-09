@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,33 +27,24 @@ public class FormField implements Serializable {
     private static final long serialVersionUID = -2161651681617136626L;
 
     public static final int CHECKBOX = 0;
-
     public static final int INPUT = 1;
-
     public static final int TEXT_AREA = 2;
-
     public static final int SELECT = 3;
-
     public static final int SELECT_MULTI = 4;
-
     public static final int TRANSITION = 6;
 
-    public static final String[] TYPE = { "CHECKBOX", "INPUT", "TEXT_AREA",
-            "SELECT", "SELECT_MULTI", "RESERVED", "TRANSITION" };
+    public static final String[] TYPE = { "CHECKBOX", "INPUT", "TEXT_AREA", "SELECT", "SELECT_MULTI", "RESERVED", "TRANSITION" };
 
     private int type;
-
     private String label;
-
     private String name;
-
     private String value;
 
     public int getType() {
         return type;
     }
 
-    public void setType(final int type) {
+    public void setType(int type) {
         this.type = type;
     }
 
@@ -61,7 +52,7 @@ public class FormField implements Serializable {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -69,7 +60,7 @@ public class FormField implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -77,13 +68,12 @@ public class FormField implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("type=");
         sb.append(type);

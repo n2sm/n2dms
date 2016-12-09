@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,17 +27,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTVersion implements IsSerializable {
     private String name;
-
     private Date created;
-
     private long size;
-
     private String author;
-
     private boolean actual;
-
     private String comment;
-
     private GWTUser user;
 
     /**
@@ -50,7 +44,7 @@ public class GWTVersion implements IsSerializable {
     /**
      * @param comment The comment to set.
      */
-    public void setComment(final String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
@@ -58,7 +52,7 @@ public class GWTVersion implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -66,7 +60,7 @@ public class GWTVersion implements IsSerializable {
         return created;
     }
 
-    public void setCreated(final Date created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
@@ -74,7 +68,7 @@ public class GWTVersion implements IsSerializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -82,7 +76,7 @@ public class GWTVersion implements IsSerializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -90,7 +84,7 @@ public class GWTVersion implements IsSerializable {
         return actual;
     }
 
-    public void setActual(final boolean actual) {
+    public void setActual(boolean actual) {
         this.actual = actual;
     }
 
@@ -98,13 +92,12 @@ public class GWTVersion implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("name=");
         sb.append(name);
@@ -118,10 +111,8 @@ public class GWTVersion implements IsSerializable {
         sb.append(created);
         sb.append(", comment=");
         sb.append(comment);
-        sb.append(", user=");
-        sb.append(user.getId());
-        sb.append(", username=");
-        sb.append(user.getUsername());
+        sb.append(", user=").append(user == null ? "" : user.getId());
+        sb.append(", username=").append(user == null ? "" : user.getUsername());
         sb.append("}");
         return sb.toString();
     }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.frontend.client.widget.searchin;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -36,7 +37,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -45,6 +45,7 @@ import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTPropertyGroup;
 import com.openkm.frontend.client.bean.GWTPropertyParams;
 import com.openkm.frontend.client.bean.form.GWTFormElement;
+import com.openkm.frontend.client.constants.ui.UIDockPanelConstants;
 import com.openkm.frontend.client.service.OKMPropertyGroupService;
 import com.openkm.frontend.client.service.OKMPropertyGroupServiceAsync;
 
@@ -55,31 +56,21 @@ import com.openkm.frontend.client.service.OKMPropertyGroupServiceAsync;
  *
  */
 public class GroupPopup extends DialogBox {
-
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private Button closeButton;
-
     private Button addButton;
-
     private ListBox groupListBox;
-
     private ListBox propertyListBox;
-
     private List<GWTFormElement> formElementList = new ArrayList<GWTFormElement>();
-
     private FlexTable table;
-
     private Label groupLabel;
-
     private Label propertyLabel;
-
     private int validate = -1;
+    private int origin = UIDockPanelConstants.SEARCH;
 
     /**
      * About popup
@@ -96,29 +87,33 @@ public class GroupPopup extends DialogBox {
 
         closeButton = new Button(Main.i18n("button.close"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
 
         addButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (propertyListBox.getSelectedIndex() > 0) {
-                    final String grpName = groupListBox.getValue(groupListBox
-                            .getSelectedIndex());
-                    final String grpLabel = groupListBox
-                            .getItemText(groupListBox.getSelectedIndex());
-                    final String propertyName = propertyListBox
-                            .getValue(propertyListBox.getSelectedIndex());
-                    for (final GWTFormElement formElement : formElementList) {
+                    String grpName = groupListBox.getValue(groupListBox.getSelectedIndex());
+                    String grpLabel = groupListBox.getItemText(groupListBox.getSelectedIndex());
+                    String propertyName = propertyListBox.getValue(propertyListBox.getSelectedIndex());
+                    for (Iterator<GWTFormElement> it = formElementList.iterator(); it.hasNext();) {
+                        GWTFormElement formElement = it.next();
                         if (formElement.getName().endsWith(propertyName)) {
-                            final GWTPropertyParams param = new GWTPropertyParams();
+                            GWTPropertyParams param = new GWTPropertyParams();
                             param.setGrpName(grpName);
                             param.setGrpLabel(grpLabel);
                             param.setFormElement(formElement);
-                            Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata
-                                    .addProperty(param);
+                            switch (origin) {
+                            case UIDockPanelConstants.SEARCH:
+                                Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata.addProperty(param);
+                                break;
+                            case UIDockPanelConstants.DESKTOP:
+                                Main.get().updatePropertyGroupPopup.addProperty(param);
+                                break;
+                            }
                         }
                     }
                 }
@@ -130,7 +125,7 @@ public class GroupPopup extends DialogBox {
         groupListBox = new ListBox();
         groupListBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
+            public void onChange(ChangeEvent event) {
                 if (groupListBox.getSelectedIndex() > 0) {
                     propertyListBox.clear();
                     getMetaData();
@@ -147,7 +142,7 @@ public class GroupPopup extends DialogBox {
         propertyListBox = new ListBox();
         propertyListBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
+            public void onChange(ChangeEvent event) {
                 if (propertyListBox.getSelectedIndex() > 0) {
                     addButton.setEnabled(true);
                 } else {
@@ -169,10 +164,8 @@ public class GroupPopup extends DialogBox {
         hPanel.add(new HTML("&nbsp;&nbsp;"));
         hPanel.add(addButton);
 
-        hPanel.setCellHorizontalAlignment(closeButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        hPanel.setCellHorizontalAlignment(addButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellHorizontalAlignment(closeButton, VerticalPanel.ALIGN_CENTER);
+        hPanel.setCellHorizontalAlignment(addButton, VerticalPanel.ALIGN_CENTER);
 
         table.setWidget(0, 0, groupLabel);
         table.setWidget(0, 1, groupListBox);
@@ -185,25 +178,28 @@ public class GroupPopup extends DialogBox {
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(table,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(table, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
 
         super.hide();
         setWidget(vPanel);
+    }
+
+    public void show(int origin) {
+        this.origin = origin;
+        show();
     }
 
     /**
      * Gets asynchronous to get all groups
      */
     final AsyncCallback<List<GWTPropertyGroup>> callbackGetAllGroups = new AsyncCallback<List<GWTPropertyGroup>>() {
-        @Override
-        public void onSuccess(final List<GWTPropertyGroup> result) {
+        public void onSuccess(List<GWTPropertyGroup> result) {
             groupListBox.clear();
             groupListBox.addItem("", ""); // Adds empty value
 
-            for (final GWTPropertyGroup group : result) {
+            for (Iterator<GWTPropertyGroup> it = result.iterator(); it.hasNext();) {
+                GWTPropertyGroup group = it.next();
                 groupListBox.addItem(group.getLabel(), group.getName());
             }
 
@@ -211,8 +207,7 @@ public class GroupPopup extends DialogBox {
             validateGroupsNoEmpty(); // Enables or disables add group button ( case exist some value to be added on list )
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetAllGroups", caught);
         }
     };
@@ -221,27 +216,32 @@ public class GroupPopup extends DialogBox {
      * Gets asynchronous to get property group form properties
      */
     final AsyncCallback<List<GWTFormElement>> callbackGetPropertyGroupForm = new AsyncCallback<List<GWTFormElement>>() {
-        @Override
-        public void onSuccess(final List<GWTFormElement> result) {
+        public void onSuccess(List<GWTFormElement> result) {
             formElementList = result;
             propertyListBox.clear();
             propertyListBox.setVisible(true);
             propertyLabel.setVisible(true);
             propertyListBox.addItem("", ""); // First item is always blank
 
-            final Collection<String> actualProperties = Main.get().mainPanel.search.searchBrowser.searchIn
-                    .getFormElementsKeys();
+            Collection<String> actualProperties = new ArrayList<String>();
+            switch (origin) {
+            case UIDockPanelConstants.SEARCH:
+                actualProperties = Main.get().mainPanel.search.searchBrowser.searchIn.getFormElementsKeys();
+                break;
+            case UIDockPanelConstants.DESKTOP:
+                actualProperties = Main.get().updatePropertyGroupPopup.getFormElementsKeys();
+                break;
+            }
 
-            for (final GWTFormElement formElement : result) {
+            for (Iterator<GWTFormElement> it = result.iterator(); it.hasNext();) {
+                GWTFormElement formElement = it.next();
                 if (!actualProperties.contains(formElement.getName())) { // Only appears properties not stil added
-                    propertyListBox.addItem(formElement.getLabel(),
-                            formElement.getName());
+                    propertyListBox.addItem(formElement.getLabel(), formElement.getName());
                 }
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getMetaData", caught);
         }
     };
@@ -250,16 +250,23 @@ public class GroupPopup extends DialogBox {
      * Gets asyncronous to get property group form properties and validate is there's one not assigned
      */
     final AsyncCallback<List<GWTFormElement>> callbackGetPropertyGroupFormDataToValidate = new AsyncCallback<List<GWTFormElement>>() {
-        @Override
-        public void onSuccess(final List<GWTFormElement> result) {
+        public void onSuccess(List<GWTFormElement> result) {
             formElementList = result;
 
-            final Collection<String> actualProperties = Main.get().mainPanel.search.searchBrowser.searchIn
-                    .getFormElementsKeys();
+            Collection<String> actualProperties = new ArrayList<String>();
+            switch (origin) {
+            case UIDockPanelConstants.SEARCH:
+                actualProperties = Main.get().mainPanel.search.searchBrowser.searchIn.getFormElementsKeys();
+                break;
+            case UIDockPanelConstants.DESKTOP:
+                actualProperties = Main.get().updatePropertyGroupPopup.getFormElementsKeys();
+                break;
+            }
             boolean found = false;
 
-            for (final GWTFormElement formElement : result) {
-                final String propertyName = formElement.getName();
+            for (Iterator<GWTFormElement> it = result.iterator(); it.hasNext();) {
+                GWTFormElement formElement = it.next();
+                String propertyName = formElement.getName();
                 if (!actualProperties.contains(propertyName)) { // Only appears properties not stil added
                     found = true;
                 }
@@ -274,8 +281,7 @@ public class GroupPopup extends DialogBox {
             validateGroupsNoEmpty();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getMetaData", caught);
         }
     };
@@ -304,10 +310,9 @@ public class GroupPopup extends DialogBox {
      * 
      * @param msg Error message
      */
-    @Override
     public void show() {
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 100) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 100) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("group.label"));
         validate = -1;
@@ -331,9 +336,7 @@ public class GroupPopup extends DialogBox {
      * Gets all metadata group properties 
      */
     private void getMetaData() {
-        propertyGroupService.getPropertyGroupForm(
-                groupListBox.getValue(groupListBox.getSelectedIndex()),
-                callbackGetPropertyGroupForm);
+        propertyGroupService.getPropertyGroupForm(groupListBox.getValue(groupListBox.getSelectedIndex()), callbackGetPropertyGroupForm);
     }
 
     /**
@@ -350,19 +353,30 @@ public class GroupPopup extends DialogBox {
      */
     private void validateGroupsNoEmpty() {
         if (groupListBox.getItemCount() > validate) {
-            final String value = groupListBox.getValue(validate);
-            propertyGroupService.getPropertyGroupForm(value,
-                    callbackGetPropertyGroupFormDataToValidate);
+            String value = groupListBox.getValue(validate);
+            propertyGroupService.getPropertyGroupForm(value, callbackGetPropertyGroupFormDataToValidate);
         } else {
-            // Validate button 
-            if (groupListBox.getItemCount() > 1) {
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata.addGroup
-                        .setEnabled(true);
-            } else {
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata.addGroup
-                        .setEnabled(false);
+            switch (origin) {
+            case UIDockPanelConstants.SEARCH:
+                // Validate button 
+                if (groupListBox.getItemCount() > 1) {
+                    Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata.addGroup.setEnabled(true);
+                } else {
+                    Main.get().mainPanel.search.searchBrowser.searchIn.searchMetadata.addGroup.setEnabled(false);
+                }
+                validate = -1; // Resets values
+                break;
+            case UIDockPanelConstants.DESKTOP:
+                // Validate button 
+                if (groupListBox.getItemCount() > 1) {
+                    Main.get().updatePropertyGroupPopup.addGroup.setEnabled(true);
+                } else {
+                    Main.get().updatePropertyGroupPopup.addGroup.setEnabled(false);
+                }
+                validate = -1; // Resets values
+                break;
             }
-            validate = -1; // Resets values
+
         }
     }
 }

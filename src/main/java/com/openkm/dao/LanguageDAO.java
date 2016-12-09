@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -52,17 +52,19 @@ public class LanguageDAO {
     /**
      * Find translations by pk
      */
-    public static Language findByPk(final String id) throws DatabaseException {
+    public static Language findByPk(String id) throws DatabaseException {
         log.debug("findByPk({})", id);
         Session session = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
-            final Language ret = (Language) session.load(Language.class, id);
+            Language ret = (Language) session.load(Language.class, id);
             Hibernate.initialize(ret);
+            log.trace("findByPk.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -89,21 +91,20 @@ public class LanguageDAO {
      * @param cacheMode Execute language query with the designed cache mode.
      */
     @SuppressWarnings("unchecked")
-    private static List<Language> findAll(final CacheMode cacheMode)
-            throws DatabaseException {
+    private static List<Language> findAll(CacheMode cacheMode) throws DatabaseException {
         log.debug("findAll({})", cacheMode);
-        final String qs = "from Language lg order by lg.name asc";
+        String qs = "from Language lg order by lg.name asc";
         Session session = null;
-        final Transaction tx = null;
+        Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             session.setCacheMode(cacheMode);
-            final Query q = session.createQuery(qs);
-            final List<Language> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<Language> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -114,7 +115,7 @@ public class LanguageDAO {
     /**
      * Delete
      */
-    public static void delete(final String id) throws DatabaseException {
+    public static void delete(String id) throws DatabaseException {
         log.debug("delete({})", id);
         Session session = null;
         Transaction tx = null;
@@ -122,10 +123,10 @@ public class LanguageDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Language lang = (Language) session.load(Language.class, id);
+            Language lang = (Language) session.load(Language.class, id);
             session.delete(lang);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -138,9 +139,9 @@ public class LanguageDAO {
     /**
      * Update language in database
      */
-    public static void update(final Language lang) throws DatabaseException {
+    public static void update(Language lang) throws DatabaseException {
         log.debug("update({})", lang);
-        final String qs = "select lg.imageContent, lg.imageMime from Language lg where lg.id=:id";
+        String qs = "select lg.imageContent, lg.imageMime from Language lg where lg.id=:id";
         Session session = null;
         Transaction tx = null;
 
@@ -148,19 +149,17 @@ public class LanguageDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            if (lang.getImageContent() == null
-                    || lang.getImageContent().length() == 0) {
-                final Query q = session.createQuery(qs);
+            if (lang.getImageContent() == null || lang.getImageContent().length() == 0) {
+                Query q = session.createQuery(qs);
                 q.setParameter("id", lang.getId());
-                final Object[] data = (Object[]) q.setMaxResults(1)
-                        .uniqueResult();
+                Object[] data = (Object[]) q.setMaxResults(1).uniqueResult();
                 lang.setImageContent((String) data[0]);
                 lang.setImageMime((String) data[1]);
             }
 
             session.update(lang);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -172,7 +171,7 @@ public class LanguageDAO {
     /**
      * Create language in database
      */
-    public static void create(final Language lang) throws DatabaseException {
+    public static void create(Language lang) throws DatabaseException {
         log.debug("create({})", lang);
         Session session = null;
         Transaction tx = null;
@@ -182,7 +181,7 @@ public class LanguageDAO {
             tx = session.beginTransaction();
             session.save(lang);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -194,19 +193,17 @@ public class LanguageDAO {
     /**
      * Get all language translations
      */
-    public static Set<Translation> findTransAll(final String langId)
-            throws DatabaseException {
+    public static Set<Translation> findTransAll(String langId) throws DatabaseException {
         log.debug("findTransAll({})", langId);
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Language lang = (Language) session.load(Language.class,
-                    langId);
-            final Set<Translation> trans = lang.getTranslations();
+            Language lang = (Language) session.load(Language.class, langId);
+            Set<Translation> trans = lang.getTranslations();
             log.debug("findTransAll: {}", trans);
             return trans;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -216,25 +213,24 @@ public class LanguageDAO {
     /**
      * Get translation
      */
-    public static String getTranslation(final String lang, final String module,
-            final String key) throws DatabaseException {
-        log.debug("getTranslation({}, {}, {})", new Object[] { module, lang,
-                key });
-        final String qs = "select tr.text from Translation tr where tr.translationId.key=:key "
-                + "and tr.translationId.language=:lang and tr.translationId.module=:module";
+    public static String getTranslation(String lang, String module, String key) throws DatabaseException {
+        log.debug("getTranslation({}, {}, {})", new Object[] { module, lang, key });
+        String qs =
+                "select tr.text from Translation tr where tr.translationId.key=:key "
+                        + "and tr.translationId.language=:lang and tr.translationId.module=:module";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("key", key);
             q.setString("module", module);
             q.setString("lang", lang);
-            final String ret = (String) q.setMaxResults(1).uniqueResult();
+            String ret = (String) q.setMaxResults(1).uniqueResult();
 
             log.debug("getTranslation: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

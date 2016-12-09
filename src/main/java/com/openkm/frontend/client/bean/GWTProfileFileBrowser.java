@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,26 +31,30 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTProfileFileBrowser implements IsSerializable {
     private boolean statusVisible;
-
     private boolean massiveVisible;
-
     private boolean iconVisible;
-
     private boolean nameVisible;
-
     private boolean sizeVisible;
-
     private boolean lastModifiedVisible;
-
     private boolean authorVisible;
-
     private boolean versionVisible;
+    private boolean extraColumns = false;
+
+    // width
+    private String statusWidth;
+    private String massiveWidth;
+    private String iconWidth;
+    private String nameWidth;
+    private String sizeWidth;
+    private String lastModifiedWidth;
+    private String authorWidth;
+    private String versionWidth;
 
     public boolean isStatusVisible() {
         return statusVisible;
     }
 
-    public void setStatusVisible(final boolean statusVisible) {
+    public void setStatusVisible(boolean statusVisible) {
         this.statusVisible = statusVisible;
     }
 
@@ -58,7 +62,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return massiveVisible;
     }
 
-    public void setMassiveVisible(final boolean massiveVisible) {
+    public void setMassiveVisible(boolean massiveVisible) {
         this.massiveVisible = massiveVisible;
     }
 
@@ -66,7 +70,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return iconVisible;
     }
 
-    public void setIconVisible(final boolean iconVisible) {
+    public void setIconVisible(boolean iconVisible) {
         this.iconVisible = iconVisible;
     }
 
@@ -74,7 +78,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return nameVisible;
     }
 
-    public void setNameVisible(final boolean nameVisible) {
+    public void setNameVisible(boolean nameVisible) {
         this.nameVisible = nameVisible;
     }
 
@@ -82,7 +86,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return sizeVisible;
     }
 
-    public void setSizeVisible(final boolean sizeVisible) {
+    public void setSizeVisible(boolean sizeVisible) {
         this.sizeVisible = sizeVisible;
     }
 
@@ -90,7 +94,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return lastModifiedVisible;
     }
 
-    public void setLastModifiedVisible(final boolean lastModifiedVisible) {
+    public void setLastModifiedVisible(boolean lastModifiedVisible) {
         this.lastModifiedVisible = lastModifiedVisible;
     }
 
@@ -98,7 +102,7 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return authorVisible;
     }
 
-    public void setAuthorVisible(final boolean authorVisible) {
+    public void setAuthorVisible(boolean authorVisible) {
         this.authorVisible = authorVisible;
     }
 
@@ -106,13 +110,84 @@ public class GWTProfileFileBrowser implements IsSerializable {
         return versionVisible;
     }
 
-    public void setVersionVisible(final boolean versionVisible) {
+    public void setVersionVisible(boolean versionVisible) {
         this.versionVisible = versionVisible;
     }
 
-    @Override
+    public boolean isExtraColumns() {
+        return extraColumns;
+    }
+
+    public void setExtraColumns(boolean extraColumns) {
+        this.extraColumns = extraColumns;
+    }
+
+    public String getStatusWidth() {
+        return statusWidth;
+    }
+
+    public void setStatusWidth(String statusWidth) {
+        this.statusWidth = statusWidth;
+    }
+
+    public String getMassiveWidth() {
+        return massiveWidth;
+    }
+
+    public void setMassiveWidth(String massiveWidth) {
+        this.massiveWidth = massiveWidth;
+    }
+
+    public String getIconWidth() {
+        return iconWidth;
+    }
+
+    public void setIconWidth(String iconWidth) {
+        this.iconWidth = iconWidth;
+    }
+
+    public String getNameWidth() {
+        return nameWidth;
+    }
+
+    public void setNameWidth(String nameWidth) {
+        this.nameWidth = nameWidth;
+    }
+
+    public String getSizeWidth() {
+        return sizeWidth;
+    }
+
+    public void setSizeWidth(String sizeWidth) {
+        this.sizeWidth = sizeWidth;
+    }
+
+    public String getLastModifiedWidth() {
+        return lastModifiedWidth;
+    }
+
+    public void setLastModifiedWidth(String lastModifiedWidth) {
+        this.lastModifiedWidth = lastModifiedWidth;
+    }
+
+    public String getAuthorWidth() {
+        return authorWidth;
+    }
+
+    public void setAuthorWidth(String authorWidth) {
+        this.authorWidth = authorWidth;
+    }
+
+    public String getVersionWidth() {
+        return versionWidth;
+    }
+
+    public void setVersionWidth(String versionWidth) {
+        this.versionWidth = versionWidth;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("statusVisible=");
         sb.append(statusVisible);

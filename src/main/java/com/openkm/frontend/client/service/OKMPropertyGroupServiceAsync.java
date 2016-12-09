@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,23 +34,19 @@ import com.openkm.frontend.client.bean.form.GWTFormElement;
 public interface OKMPropertyGroupServiceAsync {
     public void getAllGroups(AsyncCallback<List<GWTPropertyGroup>> callback);
 
-    public void getAllGroups(String path,
-            AsyncCallback<List<GWTPropertyGroup>> callback);
+    public void getAllGroups(String path, AsyncCallback<List<GWTPropertyGroup>> callback);
 
     public void addGroup(String path, String grpName, AsyncCallback<?> callback);
 
-    public void getGroups(String path,
-            AsyncCallback<List<GWTPropertyGroup>> callback);
+    public void getGroups(String path, AsyncCallback<List<GWTPropertyGroup>> callback);
 
-    public void getProperties(String path, String grpName,
-            AsyncCallback<List<GWTFormElement>> callback);
+    public void getProperties(String path, String grpName, boolean suggestion, AsyncCallback<List<GWTFormElement>> callback);
 
-    public void setProperties(String path, String grpName,
-            List<GWTFormElement> formProperties, AsyncCallback<?> callback);
+    public void setProperties(String path, String grpName, List<GWTFormElement> formProperties, AsyncCallback<?> callback);
 
-    public void removeGroup(String path, String grpName,
-            AsyncCallback<?> callback);
+    public void removeGroup(String path, String grpName, AsyncCallback<?> callback);
 
-    public void getPropertyGroupForm(String grpName,
-            AsyncCallback<List<GWTFormElement>> callback);
+    public void getPropertyGroupForm(String grpName, AsyncCallback<List<GWTFormElement>> callback);
+
+    public void getPropertyGroupForm(String grpName, String path, boolean suggestion, AsyncCallback<List<GWTFormElement>> callback);
 }

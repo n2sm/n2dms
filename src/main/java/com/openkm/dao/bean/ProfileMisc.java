@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,30 +27,24 @@ import java.util.Set;
 
 public class ProfileMisc implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean advancedFilters;
-
     private long userQuota;
-
     private String webSkin;
-
     private boolean printPreview;
-
     private boolean keywordsEnabled;
-
     private boolean uploadNotifyUsers;
-
+    private boolean notifyExternalUsers;
+    private boolean acrobatPluginPreview;
+    private boolean increaseVersion;
     private Set<String> extensions = new HashSet<String>();
-
     private Set<Long> reports = new HashSet<Long>();
-
     private Set<String> workflows = new HashSet<String>();
 
     public boolean isAdvancedFilters() {
         return advancedFilters;
     }
 
-    public void setAdvancedFilters(final boolean advancedFilters) {
+    public void setAdvancedFilters(boolean advancedFilters) {
         this.advancedFilters = advancedFilters;
     }
 
@@ -58,7 +52,7 @@ public class ProfileMisc implements Serializable {
         return userQuota;
     }
 
-    public void setUserQuota(final long userQuota) {
+    public void setUserQuota(long userQuota) {
         this.userQuota = userQuota;
     }
 
@@ -66,7 +60,7 @@ public class ProfileMisc implements Serializable {
         return webSkin;
     }
 
-    public void setWebSkin(final String webSkin) {
+    public void setWebSkin(String webSkin) {
         this.webSkin = webSkin;
     }
 
@@ -74,7 +68,7 @@ public class ProfileMisc implements Serializable {
         return printPreview;
     }
 
-    public void setPrintPreview(final boolean printPreview) {
+    public void setPrintPreview(boolean printPreview) {
         this.printPreview = printPreview;
     }
 
@@ -82,7 +76,7 @@ public class ProfileMisc implements Serializable {
         return keywordsEnabled;
     }
 
-    public void setKeywordsEnabled(final boolean keywordsEnabled) {
+    public void setKeywordsEnabled(boolean keywordsEnabled) {
         this.keywordsEnabled = keywordsEnabled;
     }
 
@@ -90,15 +84,39 @@ public class ProfileMisc implements Serializable {
         return uploadNotifyUsers;
     }
 
-    public void setUploadNotifyUsers(final boolean uploadNotifyUsers) {
+    public void setUploadNotifyUsers(boolean uploadNotifyUsers) {
         this.uploadNotifyUsers = uploadNotifyUsers;
+    }
+
+    public boolean isNotifyExternalUsers() {
+        return notifyExternalUsers;
+    }
+
+    public void setNotifyExternalUsers(boolean notifyExternalUsers) {
+        this.notifyExternalUsers = notifyExternalUsers;
+    }
+
+    public boolean isAcrobatPluginPreview() {
+        return acrobatPluginPreview;
+    }
+
+    public void setAcrobatPluginPreview(boolean acrobatPluginPreview) {
+        this.acrobatPluginPreview = acrobatPluginPreview;
+    }
+
+    public boolean isIncreaseVersion() {
+        return increaseVersion;
+    }
+
+    public void setIncreaseVersion(boolean increaseVersion) {
+        this.increaseVersion = increaseVersion;
     }
 
     public Set<String> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(final Set<String> extensions) {
+    public void setExtensions(Set<String> extensions) {
         this.extensions = extensions;
     }
 
@@ -106,7 +124,7 @@ public class ProfileMisc implements Serializable {
         return reports;
     }
 
-    public void setReports(final Set<Long> reports) {
+    public void setReports(Set<Long> reports) {
         this.reports = reports;
     }
 
@@ -114,13 +132,12 @@ public class ProfileMisc implements Serializable {
         return workflows;
     }
 
-    public void setWorkflows(final Set<String> workflows) {
+    public void setWorkflows(Set<String> workflows) {
         this.workflows = workflows;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("userQuota=");
         sb.append(userQuota);

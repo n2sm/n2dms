@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.analysis;
 
 import java.io.IOException;
 
+import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.tartarus.snowball.ext.SpanishStemmer;
@@ -31,7 +32,10 @@ public class SpanishStemFilter extends TokenFilter {
     @SuppressWarnings("unused")
     private SpanishStemmer stemmer;
 
-    public SpanishStemFilter(final TokenStream in) {
+    @SuppressWarnings("unused")
+    private Token token = null;
+
+    public SpanishStemFilter(TokenStream in) {
         super(in);
         stemmer = new SpanishStemmer();
     }
@@ -57,7 +61,7 @@ public class SpanishStemFilter extends TokenFilter {
     /**
      * Set a alternative/custom Stemmer for this filter.
      */
-    public void setStemmer(final SpanishStemmer stemmer) {
+    public void setStemmer(SpanishStemmer stemmer) {
         if (stemmer != null) {
             this.stemmer = stemmer;
         }

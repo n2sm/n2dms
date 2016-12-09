@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,8 +21,8 @@
 
 package com.openkm.dao;
 
-import java.util.List;
-
+import com.openkm.core.DatabaseException;
+import com.openkm.dao.bean.cache.UserItems;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -30,8 +30,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.openkm.core.DatabaseException;
-import com.openkm.dao.bean.cache.UserItems;
+import java.util.List;
 
 public class UserItemsDAO {
     private static Logger log = LoggerFactory.getLogger(UserItemsDAO.class);
@@ -42,7 +41,7 @@ public class UserItemsDAO {
     /**
      * Remove
      */
-    public static void remove(final String user) throws DatabaseException {
+    public static void remove(String user) throws DatabaseException {
         log.debug("remove({})", user);
         Session session = null;
         Transaction tx = null;
@@ -50,11 +49,10 @@ public class UserItemsDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final UserItems ui = (UserItems) session
-                    .load(UserItems.class, user);
+            UserItems ui = (UserItems) session.load(UserItems.class, user);
             session.delete(ui);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -67,7 +65,7 @@ public class UserItemsDAO {
     /**
      * Update user items
      */
-    public static void update(final UserItems ui) throws DatabaseException {
+    public static void update(UserItems ui) throws DatabaseException {
         log.debug("update({})", ui);
         Session session = null;
         Transaction tx = null;
@@ -77,7 +75,7 @@ public class UserItemsDAO {
             tx = session.beginTransaction();
             session.saveOrUpdate(ui);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -90,20 +88,19 @@ public class UserItemsDAO {
     /**
      * Find by user
      */
-    public static UserItems findByPk(final String user)
-            throws DatabaseException {
+    public static UserItems findByPk(String user) throws DatabaseException {
         log.debug("findByPk({})", user);
-        final String qs = "from UserItems ui where ui.user=:user";
+        String qs = "from UserItems ui where ui.user=:user";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
-            final UserItems ui = (UserItems) q.setMaxResults(1).uniqueResult();
+            UserItems ui = (UserItems) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ui);
             return ui;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -116,16 +113,16 @@ public class UserItemsDAO {
     @SuppressWarnings("unchecked")
     public static List<UserItems> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from UserItems";
+        String qs = "from UserItems";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<UserItems> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<UserItems> ret = q.list();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

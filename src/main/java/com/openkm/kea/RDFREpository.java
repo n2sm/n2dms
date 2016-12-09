@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -56,15 +56,10 @@ import com.openkm.kea.tree.TermComparator;
  */
 public class RDFREpository {
     private static Logger log = LoggerFactory.getLogger(RDFREpository.class);
-
     private static Repository SKOSRepository = null;
-
     private static Repository OWLRepository = null;
-
     private static RDFREpository instance;
-
     private static List<Term> terms = null;
-
     private static List<String> keywords = null;
 
     /**
@@ -73,9 +68,8 @@ public class RDFREpository {
     public RepositoryConnection getSKOSConnection() throws RepositoryException {
         if (SKOSRepository != null) {
             return SKOSRepository.getConnection();
-        } else {
+        } else
             throw new RepositoryException("SKOS Repository not started");
-        }
     }
 
     /**
@@ -84,9 +78,8 @@ public class RDFREpository {
     public RepositoryConnection getOWLConnection() throws RepositoryException {
         if (OWLRepository != null) {
             return OWLRepository.getConnection();
-        } else {
+        } else
             throw new RepositoryException("OWL Repository not started");
-        }
     }
 
     /**
@@ -150,29 +143,27 @@ public class RDFREpository {
         if (SKOSRepository != null) {
             try {
                 con = SKOSRepository.getConnection();
-                query = con.prepareTupleQuery(QueryLanguage.SERQL,
-                        Config.KEA_THESAURUS_VOCABULARY_SERQL);
+                query = con.prepareTupleQuery(QueryLanguage.SERQL, Config.KEA_THESAURUS_VOCABULARY_SERQL);
                 log.info("query:" + Config.KEA_THESAURUS_VOCABULARY_SERQL);
                 TupleQueryResult result;
                 result = query.evaluate();
 
                 while (result.hasNext()) {
-                    final BindingSet bindingSet = result.next();
-                    final Term term = new Term(bindingSet.getValue("UID")
-                            .stringValue(), "");
+                    BindingSet bindingSet = result.next();
+                    Term term = new Term(bindingSet.getValue("UID").stringValue(), "");
                     terms.add(term);
                     keywords.add(term.getUid());
                 }
-            } catch (final RepositoryException e) {
+            } catch (RepositoryException e) {
                 log.error("could not obtain connection to respository", e);
-            } catch (final MalformedQueryException e) {
+            } catch (MalformedQueryException e) {
                 log.error(e.getMessage(), e);
-            } catch (final QueryEvaluationException e) {
+            } catch (QueryEvaluationException e) {
                 log.error(e.getMessage(), e);
             } finally {
                 try {
                     con.close();
-                } catch (final Throwable e) {
+                } catch (Throwable e) {
                     log.error("Could not close connection....", e);
                 }
             }
@@ -190,7 +181,7 @@ public class RDFREpository {
     private Repository getSKOSMemStoreRepository() {
         InputStream is;
         Repository repository = null;
-        final String baseURL = Config.KEA_THESAURUS_BASE_URL;
+        String baseURL = Config.KEA_THESAURUS_BASE_URL;
 
         log.info("Loading skos file in memory");
 
@@ -199,19 +190,19 @@ public class RDFREpository {
             is = new FileInputStream(WorkspaceHelper.RDF_SKOS_VOVABULARY_PATH);
             repository = new SailRepository(new MemoryStore());
             repository.initialize();
-            final RepositoryConnection con = repository.getConnection();
+            RepositoryConnection con = repository.getConnection();
             con.add(is, baseURL, RDFFormat.RDFXML);
             con.close();
             log.info("New SAIL memstore created for SKOS RDF");
 
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error("Cannot make connection to RDF repository.", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error("cannot locate/read file", e);
             e.printStackTrace();
-        } catch (final RDFParseException e) {
+        } catch (RDFParseException e) {
             log.error("Cannot parse file", e);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             log.error("Unexpected exception loading repository", t);
         }
 
@@ -225,7 +216,7 @@ public class RDFREpository {
     private Repository getOWLMemStoreRepository() {
         InputStream is;
         Repository repository = null;
-        final String baseURL = Config.KEA_THESAURUS_BASE_URL;
+        String baseURL = Config.KEA_THESAURUS_BASE_URL;
 
         log.info("Loading owl file in memory");
 
@@ -234,18 +225,18 @@ public class RDFREpository {
             is = new FileInputStream(WorkspaceHelper.RDF_OWL_VOVABULARY_PATH);
             repository = new SailRepository(new MemoryStore());
             repository.initialize();
-            final RepositoryConnection con = repository.getConnection();
+            RepositoryConnection con = repository.getConnection();
             con.add(is, baseURL, RDFFormat.RDFXML);
             con.close();
             log.info("New SAIL memstore created for OWL RDF");
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error("Cannot make connection to RDF repository.", e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error("cannot locate/read file", e);
             e.printStackTrace();
-        } catch (final RDFParseException e) {
+        } catch (RDFParseException e) {
             log.error("Cannot parse file", e);
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             log.error("Unexpected exception loading repository", t);
         }
 

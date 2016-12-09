@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,24 +27,18 @@ import java.util.Set;
 
 public class MailFilter implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long id;
-
     private String path;
-
     private String node;
-
     private boolean grouping = true;
-
     private boolean active = false;
-
     private Set<MailFilterRule> filterRules = new HashSet<MailFilterRule>();
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -52,7 +46,7 @@ public class MailFilter implements Serializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -60,7 +54,7 @@ public class MailFilter implements Serializable {
         return node;
     }
 
-    public void setNode(final String node) {
+    public void setNode(String node) {
         this.node = node;
     }
 
@@ -68,7 +62,7 @@ public class MailFilter implements Serializable {
         return grouping;
     }
 
-    public void setGrouping(final boolean grouping) {
+    public void setGrouping(boolean grouping) {
         this.grouping = grouping;
     }
 
@@ -76,7 +70,7 @@ public class MailFilter implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -84,13 +78,12 @@ public class MailFilter implements Serializable {
         return filterRules;
     }
 
-    public void setFilterRules(final Set<MailFilterRule> filterRules) {
+    public void setFilterRules(Set<MailFilterRule> filterRules) {
         this.filterRules = filterRules;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,7 +22,6 @@
 package com.openkm.frontend.client.widget.properties;
 
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -34,21 +33,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class TabMultiple extends Composite {
 
     private final int TAB_FOLDER = 0;
-
     private final int TAB_DOCUMENT = 1;
-
     private final int TAB_MAIL = 2;
-
     private int actualTab = -1;
 
     private VerticalPanel panel;
-
     public TabFolder tabFolder;
-
     public TabDocument tabDocument;
-
     public TabMail tabMail;
-
     public Status status;
 
     /**
@@ -62,7 +54,7 @@ public class TabMultiple extends Composite {
         status = new Status();
         status.setStyleName("okm-StatusPopup");
 
-        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+        panel.setVerticalAlignment(VerticalPanel.ALIGN_TOP);
         panel.setSize("100%", "100%");
 
         initWidget(panel);
@@ -80,7 +72,7 @@ public class TabMultiple extends Composite {
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
+    public void setVisibleButtons(boolean visible) {
         tabFolder.setVisibleButtons(visible);
         tabDocument.setVisibleButtons(visible);
     }
@@ -166,21 +158,21 @@ public class TabMultiple extends Composite {
     /**
      * setNumberOfFolders
      */
-    public void setNumberOfFolders(final int num) {
+    public void setNumberOfFolders(int num) {
         tabFolder.setNumberOfFolders(num);
     }
 
     /**
      * setNumberOfDocuments
      */
-    public void setNumberOfDocuments(final int num) {
+    public void setNumberOfDocuments(int num) {
         tabFolder.setNumberOfDocuments(num);
     }
 
     /**
      * setNumberOfMails
      */
-    public void setNumberOfMails(final int num) {
+    public void setNumberOfMails(int num) {
         tabFolder.setNumberOfMails(num);
     }
 
@@ -190,8 +182,7 @@ public class TabMultiple extends Composite {
      * @param width int The width size
      * @param height int The height size
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         tabFolder.setPixelSize(width, height);
         tabDocument.setPixelSize(width, height);
         tabMail.setPixelSize(width, height);

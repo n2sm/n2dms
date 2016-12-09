@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,6 +32,8 @@ import bsh.Interpreter;
 import com.openkm.automation.Action;
 import com.openkm.automation.AutomationUtils;
 import com.openkm.dao.bean.NodeBase;
+import com.openkm.module.db.stuff.DbSessionManager;
+import com.openkm.spring.PrincipalUtils;
 
 /**
  * ExecuteScripting
@@ -43,14 +45,12 @@ public class ExecuteScripting implements Action {
     private static Logger log = LoggerFactory.getLogger(ExecuteScripting.class);
 
     @Override
-    public void executePre(final HashMap<String, Object> env,
-            final Object... params) {
+    public void executePre(HashMap<String, Object> env, Object... params) {
         execute(env, params);
     }
 
     @Override
-    public void executePost(final HashMap<String, Object> env,
-            final Object... params) {
+    public void executePost(HashMap<String, Object> env, Object... params) {
         execute(env, params);
     }
 
@@ -60,41 +60,40 @@ public class ExecuteScripting implements Action {
      * @param env OpenKM API internal environment data.
      * @param params Action configured parameters.
      */
-    private void execute(final HashMap<String, Object> env,
-            final Object... params) {
-        final String script = AutomationUtils.getString(0, params);
-        final NodeBase node = AutomationUtils.getNode(env);
-        final String uuid = AutomationUtils.getUuid(env);
-        final File file = AutomationUtils.getFile(env);
+    private void execute(HashMap<String, Object> env, Object... params) {
+        String script = AutomationUtils.getString(0, params);
+        NodeBase node = AutomationUtils.getNode(env);
+        String uuid = AutomationUtils.getUuid(env);
+        File file = AutomationUtils.getFile(env);
+        String systemToken = DbSessionManager.getInstance().getSystemToken();
+        String userId = PrincipalUtils.getUser();
 
         try {
-            final Interpreter i = new Interpreter();
+            Interpreter i = new Interpreter();
+            i.set("systemToken", systemToken);
             i.set("node", node);
             i.set("uuid", uuid);
             i.set("file", file);
+            i.set("userId", userId);
 
             if (env.get(AutomationUtils.NODE_UUID) != null) {
-                i.set(AutomationUtils.NODE_UUID,
-                        env.get(AutomationUtils.NODE_UUID));
+                i.set(AutomationUtils.NODE_UUID, env.get(AutomationUtils.NODE_UUID));
             }
 
             if (env.get(AutomationUtils.NODE_PATH) != null) {
-                i.set(AutomationUtils.NODE_PATH,
-                        env.get(AutomationUtils.NODE_PATH));
+                i.set(AutomationUtils.NODE_PATH, env.get(AutomationUtils.NODE_PATH));
             }
 
             if (env.get(AutomationUtils.PROPERTY_GROUP_NAME) != null) {
-                i.set(AutomationUtils.PROPERTY_GROUP_NAME,
-                        env.get(AutomationUtils.PROPERTY_GROUP_NAME));
+                i.set(AutomationUtils.PROPERTY_GROUP_NAME, env.get(AutomationUtils.PROPERTY_GROUP_NAME));
             }
 
             if (env.get(AutomationUtils.PROPERTY_GROUP_PROPERTIES) != null) {
-                i.set(AutomationUtils.PROPERTY_GROUP_PROPERTIES,
-                        env.get(AutomationUtils.PROPERTY_GROUP_PROPERTIES));
+                i.set(AutomationUtils.PROPERTY_GROUP_PROPERTIES, env.get(AutomationUtils.PROPERTY_GROUP_PROPERTIES));
             }
 
             i.eval(script);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }

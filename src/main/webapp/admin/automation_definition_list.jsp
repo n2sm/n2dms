@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -16,6 +16,7 @@
     }
   
     $(document).ready(function() {
+      $('#extra_info').hide();
       hideAll();
    	  $("#addValidation").click(function(event) {
        	var value = $("#ma_id_validation").val();
@@ -67,6 +68,16 @@
     		alert('Should select any action to be added');
     	}
       });
+    });
+    
+    jQuery(window).load(function() {
+    	$('#show_hide').click(function() {
+  			if ($('#extra_info').is(":visible")) {
+  				$('#extra_info').hide();
+  			} else {
+  				$('#extra_info').show();
+  			}
+  		});
     });
     
     function deleteAction(am_id, aa_id) {
@@ -139,10 +150,72 @@
         <li class="path">
           <a href="Automation">Automation rules</a>
         </li>
-        <li class="path">Automation definition: ${ar.name}</li>
+        <li class="path">Automation definition</li>
       </ul>
       <br/>
         <table class="results" width="70%">
+          <thead>
+          	<tr class="fuzzy">
+              <td colspan="7" align="left">
+	          	<table id="info" style="white-space: nowrap;" width="175px">
+	          	  <tr>
+	          	  	<td valign="top">
+	          	  	  <b>Automation rule</b> ${ar.name}
+	          	  	</td>
+	          		<td width="100%" align="right">
+	          		  <a id="show_hide" href="#"><img title="Show / Hide" alt="Show / Hide" src="img/action/examine.png"/></a>
+	          		</td>
+	          	  </tr>
+	          	  <tr>
+	          	  	<td>
+	          	  		<div id="extra_info">
+	          	  		<table cellpadding="2" cellspacing="0">
+	          	  		<tr>
+	          	  			<td>Order</td>
+	          	  			<td>${ar.order}</td>
+	          	  		</tr>
+	          	  		<tr>
+	          	  			<td>Event</td>
+	          	  			<td>${events.get(ar.event)}</td>
+	          	  		</tr>
+	          	  		<tr>
+	          	  			<td>At</td>
+	          	  			<td>${ar.at}</td>
+	          	  		</tr>
+	          	  		<tr>
+	          	  			<td>Exclusive</td>
+	          	  			<td>
+	          	  				<c:choose>
+				                  <c:when test="${ar.exclusive}">
+				                    <img src="img/true.png" alt="Active" title="Active"/>
+				                  </c:when>
+				                  <c:otherwise>
+				                    <img src="img/false.png" alt="Inactive" title="Inactive"/>
+				                  </c:otherwise>
+				                </c:choose>
+	          	  			</td>
+	          	  		</tr>
+	          	  		<tr>
+	          	  			<td>Active</td>
+	          	  			<td>
+	          	  				<c:choose>
+				                  <c:when test="${ar.active}">
+				                    <img src="img/true.png" alt="Active" title="Active"/>
+				                  </c:when>
+				                  <c:otherwise>
+				                    <img src="img/false.png" alt="Inactive" title="Inactive"/>
+				                  </c:otherwise>
+				                </c:choose>
+	          	  			</td>
+	          	  		</tr>
+	          	  		</table>
+	          	  		</div>
+	          	  	</td>
+	          	  </tr>
+	          	</table>
+              </td>
+            </tr>
+          </thead>
     	  <tr>
     	  	<td colspan="6">
     	  	  <table>
@@ -195,13 +268,13 @@
                 </c:choose>
               </td>
               <td>
-              	<c:if test="${validation.params.size() > 0}">
+              	<c:if test="${validation.params.size() > 0 && description00 !=null && description00 ne ''}">
               	  <c:set value="${validation.params.get(0)}" var="param00"></c:set>
               	  ${description00}:${param00}
               	</c:if>
               </td>
               <td>
-              	<c:if test="${validation.params.size() > 1}">
+              	<c:if test="${validation.params.size() > 1 && description01 !=null && description01 ne ''}">
               	  <c:set value="${validation.params.get(1)}" var="param01"></c:set>
               	  ${description01}: ${param01}
               	</c:if>
@@ -213,9 +286,6 @@
             </td>
             </tr>
     	  </c:forEach>
-		  <tr>
-		  	<td><br/></td>
-		  </tr>
     	  <tr>
     	  	<td colspan="6">
     	  	  <table>
@@ -272,13 +342,13 @@
                 </c:choose>
               </td>
               <td>
-              	<c:if test="${action.params.size() > 0}">
+              	<c:if test="${action.params.size() > 0 && description00 !=null && description00 ne ''}">
               	  <c:set value="${action.params.get(0)}" var="param00"></c:set>
               	  <c:if test="${showParam0}">${description00}:${param00}</c:if>
               	</c:if>
               </td>
               <td>
-              	<c:if test="${action.params.size() > 1}">
+              	<c:if test="${action.params.size() > 1 && description01 !=null && description01 ne ''}">
               	  <c:set value="${action.params.get(1)}" var="param01"></c:set>
               	  ${description01}: ${param01}
               	</c:if>

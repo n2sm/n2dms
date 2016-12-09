@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,18 +34,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTCheckBox extends GWTFormElement implements IsSerializable {
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private boolean value = false;
-
     private String data = "";
-
     private boolean readonly = false;
 
     public boolean getValue() {
         return value;
     }
 
-    public void setValue(final boolean value) {
+    public void setValue(boolean value) {
         this.value = value;
     }
 
@@ -53,7 +50,7 @@ public class GWTCheckBox extends GWTFormElement implements IsSerializable {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -61,7 +58,7 @@ public class GWTCheckBox extends GWTFormElement implements IsSerializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
@@ -69,13 +66,12 @@ public class GWTCheckBox extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,11 +29,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTUserConfig implements IsSerializable {
     private String user = "";
-
     private String homePath = "";
-
     private String homeType = "";
-
     private String homeNode = "";
 
     /**
@@ -46,7 +43,7 @@ public class GWTUserConfig implements IsSerializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -54,7 +51,7 @@ public class GWTUserConfig implements IsSerializable {
         return homePath;
     }
 
-    public void setHomePath(final String homePath) {
+    public void setHomePath(String homePath) {
         this.homePath = homePath;
     }
 
@@ -62,7 +59,7 @@ public class GWTUserConfig implements IsSerializable {
         return homeType;
     }
 
-    public void setHomeType(final String homeType) {
+    public void setHomeType(String homeType) {
         this.homeType = homeType;
     }
 
@@ -70,7 +67,7 @@ public class GWTUserConfig implements IsSerializable {
         return homeNode;
     }
 
-    public void setHomeNode(final String homeNode) {
+    public void setHomeNode(String homeNode) {
         this.homeNode = homeNode;
     }
 }

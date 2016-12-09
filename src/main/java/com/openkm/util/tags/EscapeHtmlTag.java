@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,20 +30,15 @@ import com.openkm.util.FormatUtil;
 
 @SuppressWarnings("serial")
 public class EscapeHtmlTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String string;
 
     @Override
     public int doStartTag() {
-        final String ret = FormatUtil.escapeHtml(string);
+        String ret = FormatUtil.escapeHtml(string);
 
         try {
             pageContext.getOut().write(ret);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -60,7 +55,7 @@ public class EscapeHtmlTag extends TagSupport {
         return string;
     }
 
-    public void setString(final String string) {
+    public void setString(String string) {
         this.string = string;
     }
 }

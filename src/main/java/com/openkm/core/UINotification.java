@@ -34,7 +34,6 @@ import com.openkm.servlet.frontend.UINotificationServlet;
 public class UINotification extends TimerTask {
     private static Logger log = LoggerFactory.getLogger(UINotification.class);
 
-    @Override
     public void run() {
         log.debug("*** Clean UI notification ***");
         UINotificationServlet.clean();

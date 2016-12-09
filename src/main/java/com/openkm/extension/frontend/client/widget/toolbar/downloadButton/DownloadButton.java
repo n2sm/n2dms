@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,8 +32,8 @@ import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTMail;
 import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
 import com.openkm.frontend.client.extension.event.HasLanguageEvent;
-import com.openkm.frontend.client.extension.event.HasLanguageEvent.LanguageEventConstant;
 import com.openkm.frontend.client.extension.event.HasWorkspaceEvent;
+import com.openkm.frontend.client.extension.event.HasLanguageEvent.LanguageEventConstant;
 import com.openkm.frontend.client.extension.event.HasWorkspaceEvent.WorkspaceEventConstant;
 import com.openkm.frontend.client.extension.event.handler.LanguageHandlerExtension;
 import com.openkm.frontend.client.extension.event.handler.WorkspaceHandlerExtension;
@@ -48,26 +48,23 @@ import com.openkm.frontend.client.extension.widget.toolbar.ToolBarButtonExtensio
 public class DownloadButton {
 
     public static final String NO_RESTRICTION_ROLE = "NoDownloadingRestrictionRole";
-
     public static final String UUID = "df5eb783-fb06-4b4b-bc89-4fdaa244e888";
 
     private ToolBarButton button;
-
     private boolean enabled = false;
 
-    public DownloadButton(final List<String> uuidList) {
+    public DownloadButton(List<String> uuidList) {
         if (isRegistered(uuidList)) {
-            button = new ToolBarButton(new Image(
-                    OKMBundleResources.INSTANCE.downloadDisabled()),
-                    GeneralComunicator.i18nExtension("download.button.title"),
-                    new ClickHandler() {
-                        @Override
-                        public void onClick(final ClickEvent event) {
-                            if (enabled) {
-                                GeneralComunicator.downloadDocument(false);
-                            }
-                        }
-                    });
+            button =
+                    new ToolBarButton(new Image(OKMBundleResources.INSTANCE.downloadDisabled()),
+                            GeneralComunicator.i18nExtension("download.button.title"), new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    if (enabled) {
+                                        GeneralComunicator.downloadDocument(false);
+                                    }
+                                }
+                            });
         }
     }
 
@@ -86,33 +83,29 @@ public class DownloadButton {
      * @author jllort
      *
      */
-    private class ToolBarButton extends ToolBarButtonExtension implements
-            LanguageHandlerExtension, WorkspaceHandlerExtension {
+    private class ToolBarButton extends ToolBarButtonExtension implements LanguageHandlerExtension, WorkspaceHandlerExtension {
 
-        public ToolBarButton(final Image image, final String title,
-                final ClickHandler handler) {
+        public ToolBarButton(Image image, String title, ClickHandler handler) {
             super(image, title, handler);
         }
 
         @Override
-        public void checkPermissions(final GWTFolder folder,
-                final GWTFolder folderParent, final int originPanel) {
+        public void checkPermissions(GWTFolder folder, GWTFolder folderParent, int originPanel) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void checkPermissions(final GWTDocument doc,
-                final GWTFolder folder) {
+        public void checkPermissions(GWTDocument doc, GWTFolder folder) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void checkPermissions(final GWTMail mail, final GWTFolder folder) {
+        public void checkPermissions(GWTMail mail, GWTFolder folder) {
             refreshButtonPermissions();
         }
 
         @Override
-        public void enable(final boolean enable) {
+        public void enable(boolean enable) {
             enabled = enable;
             evaluateShowIcon();
         }
@@ -123,15 +116,14 @@ public class DownloadButton {
         }
 
         @Override
-        public void onChange(final LanguageEventConstant event) {
+        public void onChange(LanguageEventConstant event) {
             if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
-                setTitle(GeneralComunicator
-                        .i18nExtension("download.button.title"));
+                setTitle(GeneralComunicator.i18nExtension("download.button.title"));
             }
         }
 
         @Override
-        public void onChange(final WorkspaceEventConstant event) {
+        public void onChange(WorkspaceEventConstant event) {
             if (event.equals(HasWorkspaceEvent.STACK_CHANGED)) {
                 refreshButtonPermissions();
             }
@@ -143,9 +135,7 @@ public class DownloadButton {
         private void refreshButtonPermissions() {
             // Button permissions are the same as download 
             enabled = GeneralComunicator.getToolBarOption().downloadOption;
-            if (enabled
-                    && !GeneralComunicator.getUserRoleList().contains(
-                            NO_RESTRICTION_ROLE)) {
+            if (enabled && !GeneralComunicator.getUserRoleList().contains(NO_RESTRICTION_ROLE)) {
                 enabled = false;
             }
             evaluateShowIcon();
@@ -187,7 +177,7 @@ public class DownloadButton {
      * @param uuidList
      * @return
      */
-    public static boolean isRegistered(final List<String> uuidList) {
+    public static boolean isRegistered(List<String> uuidList) {
         return uuidList.contains(UUID);
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,14 +38,13 @@ public class ThesaurusTree extends FolderTree {
     /**
      * Inits on first load
      */
-    @Override
     public void init() {
         menuPopup = new MenuPopup(new ThesaurusMenu());
         menuPopup.setStyleName("okm-Tree-MenuPopup");
 
         thesaurusSelectPopup = new ThesaurusSelectPopup();
-        thesaurusSelectPopup.setWidth("400");
-        thesaurusSelectPopup.setHeight("300");
+        thesaurusSelectPopup.setWidth("400px");
+        thesaurusSelectPopup.setHeight("300px");
         thesaurusSelectPopup.setStyleName("okm-Popup");
 
         folderRoot = Main.get().thesaurusRootFolder;
@@ -59,14 +58,12 @@ public class ThesaurusTree extends FolderTree {
     /**
      * Move folder on file browser ( only trash mode )
      */
-    @Override
     public void move() {
     }
 
     /**
      * Copy folder on file browser ( only trash mode )
      */
-    @Override
     public void copy() {
     }
 }

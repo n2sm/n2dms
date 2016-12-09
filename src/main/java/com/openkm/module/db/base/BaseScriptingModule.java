@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,8 +33,7 @@ import com.openkm.dao.NodeBaseDAO;
 import com.openkm.dao.bean.NodeBase;
 
 public class BaseScriptingModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BaseScriptingModule.class);
+    private static Logger log = LoggerFactory.getLogger(BaseScriptingModule.class);
 
     /**
      * Check for scripts and evaluate
@@ -43,17 +42,14 @@ public class BaseScriptingModule {
      * @param user User who generated the modification event
      * @param eventType Type of modification event
      */
-    public static void checkScripts(final String user,
-            final String scriptNodeUuid, final String eventNodeUuid,
-            final String eventType) {
-        log.debug("checkScripts({}, {}, {}, {})", new Object[] { user,
-                scriptNodeUuid, eventNodeUuid, eventType });
+    public static void checkScripts(String user, String scriptNodeUuid, String eventNodeUuid, String eventType) {
+        log.debug("checkScripts({}, {}, {}, {})", new Object[] { user, scriptNodeUuid, eventNodeUuid, eventType });
 
         try {
             checkScriptsHelper(user, scriptNodeUuid, eventNodeUuid, eventType);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -63,33 +59,28 @@ public class BaseScriptingModule {
     /**
      * Check script helper method for recursion.
      */
-    private static void checkScriptsHelper(final String user,
-            final String scriptNodeUuid, final String eventNodeUuid,
-            final String eventType) throws PathNotFoundException,
-            DatabaseException {
-        log.debug("checkScriptsHelper({}, {}, {}, {})", new Object[] { user,
-                scriptNodeUuid, eventNodeUuid, eventType });
-        final NodeBase scriptNode = NodeBaseDAO.getInstance().findByPk(
-                scriptNodeUuid);
+    private static void checkScriptsHelper(String user, String scriptNodeUuid, String eventNodeUuid, String eventType)
+            throws PathNotFoundException, DatabaseException {
+        log.debug("checkScriptsHelper({}, {}, {}, {})", new Object[] { user, scriptNodeUuid, eventNodeUuid, eventType });
+        NodeBase scriptNode = NodeBaseDAO.getInstance().findByPk(scriptNodeUuid);
 
         if (scriptNode.isScripting()) {
-            final String code = scriptNode.getScriptCode();
+            String code = scriptNode.getScriptCode();
 
             // Evaluate script
-            final Interpreter i = new Interpreter();
+            Interpreter i = new Interpreter();
             try {
                 i.set("session", user);
                 i.set("scriptNode", scriptNodeUuid);
                 i.set("eventNode", eventNodeUuid);
                 i.set("eventType", eventType);
                 i.eval(code);
-            } catch (final EvalError e) {
+            } catch (EvalError e) {
                 log.warn(e.getMessage(), e);
             }
 
             // Check for script in parent node
-            checkScriptsHelper(user, scriptNode.getParent(), eventNodeUuid,
-                    eventType);
+            checkScriptsHelper(user, scriptNode.getParent(), eventNodeUuid, eventType);
         }
 
         log.debug("checkScriptsHelper: void");

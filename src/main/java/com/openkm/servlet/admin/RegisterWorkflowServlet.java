@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -28,35 +29,32 @@ import com.openkm.util.UserActivity;
  * Register workflow Servlet
  */
 public class RegisterWorkflowServlet extends BaseServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(RegisterWorkflowServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(RegisterWorkflowServlet.class);
     private static final long serialVersionUID = 1L;
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String fileName = null;
         byte[] content = null;
         PrintWriter out = null;
         updateSessionManager(request);
 
         try {
-            final boolean isMultipart = ServletFileUpload
-                    .isMultipartContent(request);
+            boolean isMultipart = ServletFileUpload.isMultipartContent(request);
             out = response.getWriter();
 
             // Create a factory for disk-based file items
             if (isMultipart) {
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
                 upload.setHeaderEncoding("UTF-8");
-                final List<FileItem> items = upload.parseRequest(request);
+                List<FileItem> items = upload.parseRequest(request);
 
                 // Parse the request and get all parameters and the uploaded file
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (!item.isFormField()) {
                         fileName = item.getName();
                         content = item.get();
@@ -66,30 +64,28 @@ public class RegisterWorkflowServlet extends BaseServlet {
                 if (fileName != null && !fileName.equals("")) {
                     fileName = FilenameUtils.getName(fileName);
                     log.debug("Upload file: {}", fileName);
-                    final InputStream is = new ByteArrayInputStream(content);
-                    OKMWorkflow.getInstance().registerProcessDefinition(null,
-                            is);
+                    InputStream is = new ByteArrayInputStream(content);
+                    OKMWorkflow.getInstance().registerProcessDefinition(null, is);
                     is.close();
                 }
 
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_WORKFLOW_REGISTER", fileName, null, null);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_WORKFLOW_REGISTER", fileName, null, null);
                 response.sendRedirect("Workflow");
             }
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final WorkflowException e) {
+        } catch (WorkflowException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         } finally {

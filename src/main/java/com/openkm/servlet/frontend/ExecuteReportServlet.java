@@ -41,88 +41,65 @@ import com.openkm.util.WebUtils;
  */
 public class ExecuteReportServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(ExecuteReportServlet.class);
 
-    private static Logger log = LoggerFactory
-            .getLogger(ExecuteReportServlet.class);
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final int id = WebUtils.getInt(request, "id");
-        final int format = WebUtils.getInt(request, "format",
-                ReportUtils.OUTPUT_PDF);
+        int id = WebUtils.getInt(request, "id");
+        int format = WebUtils.getInt(request, "format", ReportUtils.OUTPUT_PDF);
         ByteArrayOutputStream baos = null;
         ByteArrayInputStream bais = null;
-        final String user = request.getRemoteUser();
+        String user = request.getRemoteUser();
 
         try {
-            final UserConfig uc = UserConfigDAO.findByPk(request
-                    .getRemoteUser());
-            final Profile up = uc.getProfile();
+            UserConfig uc = UserConfigDAO.findByPk(request.getRemoteUser());
+            Profile up = uc.getProfile();
 
             if (up.getPrfMisc().getReports().contains(new Long(id).longValue())) {
-                final Report rp = ReportDAO.findByPk(id);
+                Report rp = ReportDAO.findByPk(id);
 
                 // Set file name
-                final String fileName = rp.getFileName().substring(0,
-                        rp.getFileName().indexOf('.'))
-                        + ReportUtils.FILE_EXTENSION[format];
+                String fileName = rp.getFileName().substring(0, rp.getFileName().indexOf('.')) + ReportUtils.FILE_EXTENSION[format];
 
                 // Set default report parameters
-                final Map<String, Object> params = new HashMap<String, Object>();
-                final String host = com.openkm.core.Config.APPLICATION_URL;
+                Map<String, Object> params = new HashMap<String, Object>();
+                String host = com.openkm.core.Config.APPLICATION_URL;
                 params.put("host", host.substring(0, host.lastIndexOf("/") + 1));
 
-                for (final FormElement fe : ReportUtils.getReportParameters(id)) {
-                    if (fe instanceof Input
-                            && ((Input) fe).getType().equals(Input.TYPE_DATE)) {
-                        params.put(
-                                fe.getName(),
-                                ISO8601.parseBasic(
-                                        WebUtils.getString(request,
-                                                fe.getName())).getTime());
+                for (FormElement fe : ReportUtils.getReportParameters(id)) {
+                    if (fe instanceof Input && ((Input) fe).getType().equals(Input.TYPE_DATE)) {
+                        params.put(fe.getName(), ISO8601.parseBasic(WebUtils.getString(request, fe.getName())).getTime());
                     } else {
-                        params.put(fe.getName(),
-                                WebUtils.getString(request, fe.getName()));
+                        params.put(fe.getName(), WebUtils.getString(request, fe.getName()));
                     }
                 }
 
                 baos = ReportUtils.execute(rp, params, format);
                 bais = new ByteArrayInputStream(baos.toByteArray());
-                WebUtils.sendFile(request, response, fileName,
-                        ReportUtils.FILE_MIME[format], false, bais);
+                WebUtils.sendFile(request, response, fileName, ReportUtils.FILE_MIME[format], false, bais);
 
                 // Activity log
-                UserActivity.log(user, "EXECUTE_REPORT", Integer.toString(id),
-                        null, "OK");
+                UserActivity.log(user, "EXECUTE_REPORT", Integer.toString(id), null, "OK");
             } else {
                 // Activity log
-                UserActivity.log(user, "EXECUTE_REPORT", Integer.toString(id),
-                        null, "FAILURE");
+                UserActivity.log(user, "EXECUTE_REPORT", Integer.toString(id), null, "FAILURE");
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final ParseException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final JRException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (JRException e) {
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final EvalError e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (EvalError e) {
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             IOUtils.closeQuietly(bais);
             IOUtils.closeQuietly(baos);

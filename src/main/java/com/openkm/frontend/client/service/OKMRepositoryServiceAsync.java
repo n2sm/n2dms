@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,6 +44,8 @@ public interface OKMRepositoryServiceAsync {
     public void getThesaurusFolder(AsyncCallback<GWTFolder> callback);
 
     public void getCategoriesFolder(AsyncCallback<GWTFolder> callback);
+
+    public void getMetadataFolder(AsyncCallback<GWTFolder> callback);
 
     public void getPathByUUID(String uuid, AsyncCallback<String> callback);
 

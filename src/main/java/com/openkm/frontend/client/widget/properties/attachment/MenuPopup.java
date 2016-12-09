@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,7 +33,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class MenuPopup extends PopupPanel {
 
     private VerticalPanel panel;
-
     private Menu menu;
 
     public MenuPopup() {

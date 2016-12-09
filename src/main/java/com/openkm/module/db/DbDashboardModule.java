@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -29,6 +29,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import com.openkm.cache.UserItemsManager;
+import com.openkm.core.*;
+import com.openkm.dao.bean.cache.UserItems;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -46,12 +52,6 @@ import com.openkm.bean.Permission;
 import com.openkm.bean.Repository;
 import com.openkm.bean.nr.NodeQueryResult;
 import com.openkm.bean.nr.NodeResultSet;
-import com.openkm.cache.UserItemsManager;
-import com.openkm.core.Config;
-import com.openkm.core.DatabaseException;
-import com.openkm.core.ParseException;
-import com.openkm.core.PathNotFoundException;
-import com.openkm.core.RepositoryException;
 import com.openkm.dao.ActivityDAO;
 import com.openkm.dao.DashboardDAO;
 import com.openkm.dao.HibernateUtil;
@@ -60,13 +60,12 @@ import com.openkm.dao.NodeFolderDAO;
 import com.openkm.dao.NodeMailDAO;
 import com.openkm.dao.QueryParamsDAO;
 import com.openkm.dao.SearchDAO;
-import com.openkm.dao.bean.Activity;
 import com.openkm.dao.bean.Dashboard;
+import com.openkm.dao.bean.DashboardActivity;
 import com.openkm.dao.bean.NodeDocument;
 import com.openkm.dao.bean.NodeFolder;
 import com.openkm.dao.bean.NodeMail;
 import com.openkm.dao.bean.QueryParams;
-import com.openkm.dao.bean.cache.UserItems;
 import com.openkm.module.DashboardModule;
 import com.openkm.module.db.base.BaseDocumentModule;
 import com.openkm.module.db.base.BaseFolderModule;
@@ -77,14 +76,12 @@ import com.openkm.spring.PrincipalUtils;
 import com.openkm.util.UserActivity;
 
 public class DbDashboardModule implements DashboardModule {
-    private static Logger log = LoggerFactory
-            .getLogger(DbDashboardModule.class);
-
+    private static Logger log = LoggerFactory.getLogger(DbDashboardModule.class);
     private static final int MAX_RESULTS = 20;
 
     @Override
-    public List<DashboardDocumentResult> getUserLockedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLockedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserLockedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -96,8 +93,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserLockedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserLockedDocumentsSrv(auth.getName());
             log.debug("getUserLockedDocuments: {}", al);
             return al;
         } finally {
@@ -110,22 +106,22 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserLockedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLockedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getUserLockedDocumentsSrv({})", user);
-        final String qs = "from NodeDocument nd where nd.checkedOut='F' and nd.lock.owner=:user";
-        final List<DashboardDocumentResult> al = executeQueryDocument(user, qs,
-                "LOCK_DOCUMENT", Integer.MAX_VALUE);
+        long begin = System.currentTimeMillis();
+        String qs = "from NodeDocument nd where nd.checkedOut='F' and nd.lock.owner=:user";
+        List<DashboardDocumentResult> al = executeQueryDocument(user, qs, "LOCK_DOCUMENT", Integer.MAX_VALUE);
 
         // Check for already visited results
         checkVisitedDocuments(user, "UserLockedDocuments", al);
+        log.trace("getUserLockedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLockedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserCheckedOutDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserCheckedOutDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserCheckedOutDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -137,8 +133,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserCheckedOutDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserCheckedOutDocumentsSrv(auth.getName());
             log.debug("getUserCheckedOutDocuments: {}", al);
             return al;
         } finally {
@@ -151,22 +146,22 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserCheckedOutDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserCheckedOutDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getUserCheckedOutDocumentsSrv({})", user);
-        final String qs = "from NodeDocument nd where nd.checkedOut='T' and nd.lock.owner=:user";
-        final List<DashboardDocumentResult> al = executeQueryDocument(user, qs,
-                "CHECKOUT_DOCUMENT", Integer.MAX_VALUE);
+        long begin = System.currentTimeMillis();
+        String qs = "from NodeDocument nd where nd.checkedOut='T' and nd.lock.owner=:user";
+        List<DashboardDocumentResult> al = executeQueryDocument(user, qs, "CHECKOUT_DOCUMENT", Integer.MAX_VALUE);
 
         // Check for already visited results
         checkVisitedDocuments(user, "UserCheckedOutDocuments", al);
+        log.trace("getUserCheckedOutDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserCheckedOutDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserSubscribedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserSubscribedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserSubscribedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -178,8 +173,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserSubscribedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserSubscribedDocumentsSrv(auth.getName());
             log.debug("getUserSubscribedDocuments: {}", al);
             return al;
         } finally {
@@ -192,22 +186,22 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserSubscribedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserSubscribedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getUserSubscribedDocumentsSrv({})", user);
-        final String qs = "from NodeDocument nd where :user in elements(nd.subscriptors)";
-        final List<DashboardDocumentResult> al = executeQueryDocument(user, qs,
-                "SUBSCRIBE_USER", Integer.MAX_VALUE);
+        long begin = System.currentTimeMillis();
+        String qs = "from NodeDocument nd where :user in elements(nd.subscriptors)";
+        List<DashboardDocumentResult> al = executeQueryDocument(user, qs, "SUBSCRIBE_USER", Integer.MAX_VALUE);
 
         // Check for already visited results
         checkVisitedDocuments(user, "UserSubscribedDocuments", al);
+        log.trace("getUserSubscribedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserSubscribedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardFolderResult> getUserSubscribedFolders(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardFolderResult> getUserSubscribedFolders(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserSubscribedFolders({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -219,8 +213,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardFolderResult> al = getUserSubscribedFoldersSrv(auth
-                    .getName());
+            List<DashboardFolderResult> al = getUserSubscribedFoldersSrv(auth.getName());
             log.debug("getUserSubscribedFolders: {}", al);
             return al;
         } finally {
@@ -233,16 +226,15 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardFolderResult> getUserSubscribedFoldersSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardFolderResult> getUserSubscribedFoldersSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getUserSubscribedFoldersSrv({})", user);
-        final String qs = "from NodeFolder nf where '" + user
-                + "' in elements(nf.subscriptors)";
-        final List<DashboardFolderResult> al = executeQueryFolder(user, qs,
-                "SUBSCRIBE_USER", Integer.MAX_VALUE);
+        long begin = System.currentTimeMillis();
+        String qs = "from NodeFolder nf where '" + user + "' in elements(nf.subscriptors)";
+        List<DashboardFolderResult> al = executeQueryFolder(user, qs, "SUBSCRIBE_USER", Integer.MAX_VALUE);
 
         // Check for already visited results
         checkVisitedFolders(user, "UserSubscribedFolders", al);
+        log.trace("getUserSubscribedFoldersSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserSubscribedFoldersSrv: {}", al);
         return al;
     }
@@ -251,42 +243,36 @@ public class DbDashboardModule implements DashboardModule {
      * Execute query with documents
      */
     @SuppressWarnings("unchecked")
-    private List<DashboardDocumentResult> executeQueryDocument(
-            final String user, final String qs, final String action,
-            final int maxResults) throws RepositoryException, DatabaseException {
-        log.debug("executeQueryDocument({}, {}, {}, {})", new Object[] { user,
-                qs, action, maxResults });
-        final List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
+    private List<DashboardDocumentResult> executeQueryDocument(String user, String qs, String action, int maxResults)
+            throws RepositoryException, DatabaseException {
+        log.debug("executeQueryDocument({}, {}, {}, {})", new Object[] { user, qs, action, maxResults });
+        List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
         Session session = null;
         int i = 0;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
-            final List<NodeDocument> results = q.list();
+            List<NodeDocument> results = q.list();
 
-            for (final Iterator<NodeDocument> it = results.iterator(); it
-                    .hasNext() && i < maxResults;) {
-                final NodeDocument nDoc = it.next();
+            for (Iterator<NodeDocument> it = results.iterator(); it.hasNext() && i < maxResults;) {
+                NodeDocument nDoc = it.next();
 
-                if (SecurityHelper.getAccessManager().isGranted(nDoc,
-                        Permission.READ)) {
+                if (SecurityHelper.getAccessManager().isGranted(nDoc, Permission.READ)) {
                     NodeDocumentDAO.getInstance().initialize(nDoc, false);
-                    final Document doc = BaseDocumentModule.getProperties(user,
-                            nDoc);
-                    final DashboardDocumentResult vo = new DashboardDocumentResult();
+                    Document doc = BaseDocumentModule.getProperties(user, nDoc);
+                    DashboardDocumentResult vo = new DashboardDocumentResult();
                     vo.setDocument(doc);
-                    vo.setDate(ActivityDAO.getActivityDate(user, action,
-                            nDoc.getUuid()));
+                    vo.setDate(ActivityDAO.getActivityDate(user, action, nDoc.getUuid()));
                     vo.setVisited(false);
                     al.add(vo);
                     i++;
                 }
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -294,9 +280,7 @@ public class DbDashboardModule implements DashboardModule {
 
         // Sort results
         Collections.sort(al, new Comparator<DashboardDocumentResult>() {
-            @Override
-            public int compare(final DashboardDocumentResult doc1,
-                    final DashboardDocumentResult doc2) {
+            public int compare(DashboardDocumentResult doc1, DashboardDocumentResult doc2) {
                 return doc2.getDate().compareTo(doc1.getDate());
             }
         });
@@ -308,39 +292,34 @@ public class DbDashboardModule implements DashboardModule {
      * Execute query with folders
      */
     @SuppressWarnings("unchecked")
-    private List<DashboardFolderResult> executeQueryFolder(final String user,
-            final String qs, final String action, final int maxResults)
+    private List<DashboardFolderResult> executeQueryFolder(String user, String qs, String action, int maxResults)
             throws RepositoryException, DatabaseException {
-        final List<DashboardFolderResult> al = new ArrayList<DashboardFolderResult>();
+        List<DashboardFolderResult> al = new ArrayList<DashboardFolderResult>();
         Session session = null;
         int i = 0;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<NodeFolder> results = q.list();
+            Query q = session.createQuery(qs);
+            List<NodeFolder> results = q.list();
 
-            for (final Iterator<NodeFolder> it = results.iterator(); it
-                    .hasNext() && i < maxResults;) {
-                final NodeFolder nFld = it.next();
+            for (Iterator<NodeFolder> it = results.iterator(); it.hasNext() && i < maxResults;) {
+                NodeFolder nFld = it.next();
 
-                if (SecurityHelper.getAccessManager().isGranted(nFld,
-                        Permission.READ)) {
+                if (SecurityHelper.getAccessManager().isGranted(nFld, Permission.READ)) {
                     NodeFolderDAO.getInstance().initialize(nFld);
-                    final Folder fld = BaseFolderModule.getProperties(user,
-                            nFld);
-                    final DashboardFolderResult vo = new DashboardFolderResult();
+                    Folder fld = BaseFolderModule.getProperties(user, nFld);
+                    DashboardFolderResult vo = new DashboardFolderResult();
                     vo.setFolder(fld);
-                    vo.setDate(ActivityDAO.getActivityDate(user, action,
-                            nFld.getUuid()));
+                    vo.setDate(ActivityDAO.getActivityDate(user, action, nFld.getUuid()));
                     vo.setVisited(false);
                     al.add(vo);
                     i++;
                 }
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -348,9 +327,7 @@ public class DbDashboardModule implements DashboardModule {
 
         // Order results
         Collections.sort(al, new Comparator<DashboardFolderResult>() {
-            @Override
-            public int compare(final DashboardFolderResult fld1,
-                    final DashboardFolderResult fld2) {
+            public int compare(DashboardFolderResult fld1, DashboardFolderResult fld2) {
                 return fld2.getDate().compareTo(fld1.getDate());
             }
         });
@@ -359,8 +336,8 @@ public class DbDashboardModule implements DashboardModule {
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserLastUploadedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLastUploadedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserLastUploadedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -372,8 +349,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserLastUploadedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserLastUploadedDocumentsSrv(auth.getName());
             log.debug("getUserLastUploadedDocuments: {}", al);
             return al;
         } finally {
@@ -386,25 +362,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserLastUploadedDocumentsSrv(
-            final String user) throws DatabaseException {
+    public List<DashboardDocumentResult> getUserLastUploadedDocumentsSrv(String user) throws DatabaseException {
         log.debug("getUserLastUploadedDocumentsSrv({})", user);
-        final String qs = "select a.item, a.date from Activity a "
-                + "where a.action='CREATE_DOCUMENT' and a.user= :user "
-                + "order by a.date desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, a.date from DashboardActivity a " + "where a.action='CREATE_DOCUMENT' and a.user= :user "
+                        + "order by a.date desc";
         final String SOURCE = "UserLastUploadedDocuments";
-        final List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE,
-                qs);
+        List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE, qs);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getUserLastUploadedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastUploadedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserLastModifiedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLastModifiedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserLastModifiedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -416,8 +392,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserLastModifiedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserLastModifiedDocumentsSrv(auth.getName());
             log.debug("getUserLastModifiedDocuments: {}", al);
             return al;
         } finally {
@@ -430,25 +405,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserLastModifiedDocumentsSrv(
-            final String user) throws DatabaseException {
+    public List<DashboardDocumentResult> getUserLastModifiedDocumentsSrv(String user) throws DatabaseException {
         log.debug("getUserLastModifiedDocumentsSrv({})", user);
-        final String qs = "select distinct a.item, max(a.date) from Activity a "
-                + "where a.action='CHECKIN_DOCUMENT' and a.user= :user "
-                + "group by a.item order by max(a.date) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select distinct a.item, max(a.date) from DashboardActivity a " + "where a.action='CHECKIN_DOCUMENT' and a.user= :user "
+                        + "group by a.item order by max(a.date) desc";
         final String SOURCE = "UserLastModifiedDocuments";
-        final List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE,
-                qs);
+        List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE, qs);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getUserLastModifiedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastModifiedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserLastDownloadedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLastDownloadedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserLastDownloadedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -460,8 +435,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserLastDownloadedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserLastDownloadedDocumentsSrv(auth.getName());
             log.debug("getUserLastDownloadedDocuments: {}", al);
             return al;
         } finally {
@@ -474,25 +448,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getUserLastDownloadedDocumentsSrv(
-            final String user) throws DatabaseException {
+    public List<DashboardDocumentResult> getUserLastDownloadedDocumentsSrv(String user) throws DatabaseException {
         log.debug("getUserLastDownloadedDocumentsSrv({})", user);
-        final String qs = "select distinct a.item, max(a.date) from Activity a "
-                + "where a.action='GET_DOCUMENT_CONTENT' and a.user= :user "
-                + "group by a.item order by max(a.date) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select distinct a.item, max(a.date) from DashboardActivity a "
+                        + "where a.action='GET_DOCUMENT_CONTENT' and a.user= :user " + "group by a.item order by max(a.date) desc";
         final String SOURCE = "UserLastDownloadedDocuments";
-        final List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE,
-                qs);
+        List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE, qs);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getUserLastDownloadedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastDownloadedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardMailResult> getUserLastImportedMails(final String token)
-            throws RepositoryException, DatabaseException {
+    public List<DashboardMailResult> getUserLastImportedMails(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getUserLastImportedMails({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -504,8 +478,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardMailResult> al = getUserLastImportedMailsSrv(auth
-                    .getName());
+            List<DashboardMailResult> al = getUserLastImportedMailsSrv(auth.getName());
             log.debug("getUserLastImportedMails: {}", al);
             return al;
         } finally {
@@ -518,24 +491,23 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardMailResult> getUserLastImportedMailsSrv(
-            final String user) throws DatabaseException {
+    public List<DashboardMailResult> getUserLastImportedMailsSrv(String user) throws DatabaseException {
         log.debug("getUserLastImportedMailsSrv({})", user);
-        final String qs = "from Activity a "
-                + "where a.action='CREATE_MAIL' and a.user= :user "
-                + "order by a.date desc";
+        long begin = System.currentTimeMillis();
+        String qs = "from DashboardActivity a " + "where a.action='CREATE_MAIL' and a.user= :user " + "order by a.date desc";
         final String SOURCE = "UserLastImportedMails";
-        final List<DashboardMailResult> al = getUserMails(user, SOURCE, qs);
+        List<DashboardMailResult> al = getUserMails(user, SOURCE, qs);
 
         // Check for already visited results
         checkVisitedMails(user, SOURCE, al);
+        log.trace("getUserLastImportedMailsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastImportedMailsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getUserLastImportedMailAttachments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getUserLastImportedMailAttachments(String token) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("getUserLastImportedMailAttachments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -547,8 +519,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getUserLastImportedMailAttachmentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getUserLastImportedMailAttachmentsSrv(auth.getName());
             log.debug("getUserLastImportedMailAttachments: {}", al);
             return al;
         } finally {
@@ -558,26 +529,26 @@ public class DbDashboardModule implements DashboardModule {
         }
     }
 
-    public List<DashboardDocumentResult> getUserLastImportedMailAttachmentsSrv(
-            final String user) throws DatabaseException {
+    public List<DashboardDocumentResult> getUserLastImportedMailAttachmentsSrv(String user) throws DatabaseException {
         log.debug("getUserLastImportedMailAttachmentsSrv({})", user);
-        final String qs = "select a.item, a.date from Activity a "
-                + "where a.action='CREATE_MAIL_ATTACHMENT' and a.user= :user "
-                + "order by a.date desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, a.date from DashboardActivity a " + "where a.action='CREATE_MAIL_ATTACHMENT' and a.user= :user "
+                        + "order by a.date desc";
         final String SOURCE = "UserLastImportedMailAttachments";
-        final List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE,
-                qs);
+        List<DashboardDocumentResult> al = getUserDocuments(user, SOURCE, qs);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getUserLastImportedMailAttachmentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastImportedMailAttachmentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public long getUserDocumentsSize(final String token)
-            throws RepositoryException, DatabaseException {
+    public long getUserDocumentsSize(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getUserDocumentsSize({})", token);
+        long begin = System.currentTimeMillis();
         Authentication auth = null, oldAuth = null;
         long size = 0;
 
@@ -590,12 +561,13 @@ public class DbDashboardModule implements DashboardModule {
             }
 
             if (Config.USER_ITEM_CACHE) {
-                final UserItems usrItems = UserItemsManager.get(auth.getName());
+                UserItems usrItems = UserItemsManager.get(auth.getName());
                 size = usrItems.getSize();
             } else {
                 size = DbUtils.calculateQuota(auth.getName());
             }
 
+            log.trace("getUserDocumentsSize.Time: {}", System.currentTimeMillis() - begin);
             log.debug("getUserDocumentsSize: {}", size);
             return size;
         } finally {
@@ -606,10 +578,10 @@ public class DbDashboardModule implements DashboardModule {
     }
 
     @Override
-    public List<QueryParams> getUserSearchs(final String token)
-            throws RepositoryException, DatabaseException {
+    public List<QueryParams> getUserSearchs(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getUserSearchs({})", token);
-        final List<QueryParams> ret = new ArrayList<QueryParams>();
+        long begin = System.currentTimeMillis();
+        List<QueryParams> ret = new ArrayList<QueryParams>();
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -620,10 +592,11 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<QueryParams> qParams = QueryParamsDAO.findByUser(auth
-                    .getName());
+            List<QueryParams> qParams = QueryParamsDAO.findByUser(auth.getName());
 
-            for (final QueryParams qp : qParams) {
+            for (Iterator<QueryParams> it = qParams.iterator(); it.hasNext();) {
+                QueryParams qp = it.next();
+
                 // If this is a dashboard user search, dates are used internally
                 if (qp.isDashboard()) {
                     qp.setLastModifiedFrom(null);
@@ -633,22 +606,21 @@ public class DbDashboardModule implements DashboardModule {
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_DASHBOARD_USER_SEARCHS",
-                    null, null, null);
+            UserActivity.log(auth.getName(), "GET_DASHBOARD_USER_SEARCHS", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
             }
         }
 
+        log.trace("getUserSearchs.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserSearchs: {}", ret);
         return ret;
     }
 
     @Override
-    public List<DashboardDocumentResult> find(final String token, final int qpId)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException {
+    public List<DashboardDocumentResult> find(String token, int qpId) throws IOException, ParseException, AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("find({}, {})", token, qpId);
         List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
         Authentication auth = null, oldAuth = null;
@@ -675,26 +647,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> findSrv(final String user,
-            final int qpId) throws RepositoryException, DatabaseException,
-            ParseException, IOException {
+    public List<DashboardDocumentResult> findSrv(String user, int qpId) throws RepositoryException, DatabaseException, ParseException,
+            IOException {
         log.debug("findSrv({}, {})", user, qpId);
         List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
-        final DbSearchModule directSearch = new DbSearchModule();
+        DbSearchModule directSearch = new DbSearchModule();
 
         // Get the saved query params
-        final QueryParams params = QueryParamsDAO.findByPk(qpId);
+        QueryParams params = QueryParamsDAO.findByPk(qpId);
         log.debug("PARAMS: {}", params.toString());
 
         // Set query date (first time)
         if (params.getLastModifiedTo() == null) {
-            final Calendar firstExecution = Calendar.getInstance();
+            Calendar firstExecution = Calendar.getInstance();
             firstExecution.add(Calendar.MONTH, -1);
             params.setLastModifiedTo(firstExecution);
         }
 
-        final Calendar lastExecution = resetHours(params.getLastModifiedTo());
-        final Calendar actualDate = resetHours(Calendar.getInstance());
+        Calendar lastExecution = resetHours(params.getLastModifiedTo());
+        Calendar actualDate = resetHours(Calendar.getInstance());
         log.debug("lastExecution -> {}", lastExecution.getTime());
         log.debug("actualDate -> {}", actualDate.getTime());
 
@@ -706,8 +677,7 @@ public class DbDashboardModule implements DashboardModule {
 
         // Prepare statement
         log.debug("PARAMS {}", params);
-        final org.apache.lucene.search.Query query = directSearch
-                .prepareStatement(params);
+        org.apache.lucene.search.Query query = directSearch.prepareStatement(params);
         log.debug("STATEMENT {}", query);
 
         // Execute query
@@ -725,8 +695,8 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Reset calendar hours
      */
-    private Calendar resetHours(final Calendar cal) {
-        final Calendar tmp = (Calendar) cal.clone();
+    private Calendar resetHours(Calendar cal) {
+        Calendar tmp = (Calendar) cal.clone();
         tmp.set(Calendar.HOUR_OF_DAY, 0);
         tmp.set(Calendar.MINUTE, 0);
         tmp.set(Calendar.SECOND, 0);
@@ -737,29 +707,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Execute Lucene query with documents
      */
-    private List<DashboardDocumentResult> executeQueryDocument(
-            final String user, final org.apache.lucene.search.Query query,
-            final int maxResults) throws RepositoryException, DatabaseException {
-        final List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
+    private List<DashboardDocumentResult> executeQueryDocument(String user, org.apache.lucene.search.Query query, int maxResults)
+            throws RepositoryException, DatabaseException {
+        List<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
 
         try {
-            final NodeResultSet nrs = SearchDAO.getInstance().findByQuery(
-                    query, 0, maxResults);
+            NodeResultSet nrs = SearchDAO.getInstance().findByQuery(query, 0, maxResults);
 
-            for (final NodeQueryResult nqr : nrs.getResults()) {
-                final DashboardDocumentResult vo = new DashboardDocumentResult();
-                final NodeDocument nDoc = nqr.getDocument();
-                final Document doc = BaseDocumentModule.getProperties(user,
-                        nDoc);
+            for (NodeQueryResult nqr : nrs.getResults()) {
+                DashboardDocumentResult vo = new DashboardDocumentResult();
+                NodeDocument nDoc = nqr.getDocument();
+                Document doc = BaseDocumentModule.getProperties(user, nDoc);
                 vo.setDocument(doc);
-                vo.setDate(ActivityDAO.getActivityDate(user, null,
-                        nDoc.getUuid()));
+                vo.setDate(ActivityDAO.getActivityDate(user, null, nDoc.getUuid()));
                 vo.setVisited(false);
                 al.add(vo);
             }
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
         }
 
@@ -767,8 +733,8 @@ public class DbDashboardModule implements DashboardModule {
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastWeekTopDownloadedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastWeekTopDownloadedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getLastWeekTopDownloadedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -780,8 +746,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastWeekTopDownloadedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastWeekTopDownloadedDocumentsSrv(auth.getName());
             log.debug("getLastWeekTopDownloadedDocuments: {}", al);
             return al;
         } finally {
@@ -794,28 +759,27 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastWeekTopDownloadedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastWeekTopDownloadedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getUserLastImportedMailAttachmentsSrv({})", user);
-        final String qs = "select a.item, max(a.date) from Activity a "
-                + "where a.action='GET_DOCUMENT_CONTENT' and a.path like '/"
-                + Repository.ROOT + "/%' and a.date>:date "
-                + "group by a.item " + "order by count(a.item) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, max(a.date) from DashboardActivity a " + "where a.action='GET_DOCUMENT_CONTENT' and a.path like '/"
+                        + Repository.ROOT + "/%' and a.date>:date " + "group by a.item " + "order by count(a.item) desc";
         final String SOURCE = "LastWeekTopDownloadedDocuments";
-        final Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.add(Calendar.WEEK_OF_YEAR, -1);
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, cal);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, cal);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getUserLastImportedMailAttachmentsByUser.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getUserLastImportedMailAttachmentsByUser: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastMonthTopDownloadedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastMonthTopDownloadedDocuments(String token) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("getLastMonthTopDownloadedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -827,8 +791,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastMonthTopDownloadedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastMonthTopDownloadedDocumentsSrv(auth.getName());
             log.debug("getLastMonthTopDownloadedDocuments: {}", al);
             return al;
         } finally {
@@ -841,28 +804,27 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastMonthTopDownloadedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastMonthTopDownloadedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getLastMonthTopDownloadedDocumentsSrv({})", user);
-        final String qs = "select a.item, max(a.date) from Activity a "
-                + "where a.action='GET_DOCUMENT_CONTENT' and a.path like '/"
-                + Repository.ROOT + "/%' and a.date>:date "
-                + "group by a.item " + "order by count(a.item) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, max(a.date) from DashboardActivity a " + "where a.action='GET_DOCUMENT_CONTENT' and a.path like '/"
+                        + Repository.ROOT + "/%' and a.date>:date " + "group by a.item " + "order by count(a.item) desc";
         final String SOURCE = "LastMonthTopDownloadedDocuments";
-        final Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -1);
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, cal);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, cal);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getLastMonthTopDownloadedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getLastMonthTopDownloadedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastWeekTopModifiedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastWeekTopModifiedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getLastWeekTopModifiedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -874,8 +836,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastWeekTopModifiedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastWeekTopModifiedDocumentsSrv(auth.getName());
             log.debug("getLastWeekTopModifiedDocuments: {}", al);
             return al;
         } finally {
@@ -888,28 +849,27 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastWeekTopModifiedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastWeekTopModifiedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getLastWeekTopModifiedDocumentsSrv({})", user);
-        final String qs = "select a.item, max(a.date) from Activity a "
-                + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
-                + Repository.ROOT + "/%' and a.date>:date "
-                + "group by a.item " + "order by count(a.item) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, max(a.date) from DashboardActivity a " + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
+                        + Repository.ROOT + "/%' and a.date>:date " + "group by a.item " + "order by count(a.item) desc";
         final String SOURCE = "LastWeekTopModifiedDocuments";
-        final Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.add(Calendar.WEEK_OF_YEAR, -1);
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, cal);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, cal);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getLastWeekTopModifiedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getLastWeekTopModifiedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastMonthTopModifiedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastMonthTopModifiedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getLastMonthTopModifiedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -921,8 +881,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastMonthTopModifiedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastMonthTopModifiedDocumentsSrv(auth.getName());
             log.debug("getLastMonthTopModifiedDocuments: {}", al);
             return al;
         } finally {
@@ -935,28 +894,27 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastMonthTopModifiedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastMonthTopModifiedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getLastMonthTopModifiedDocumentsSrv({})", user);
-        final String qs = "select a.item, max(a.date) from Activity a "
-                + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
-                + Repository.ROOT + "/%' and a.date>:date "
-                + "group by a.item " + "order by count(a.item) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select a.item, max(a.date) from DashboardActivity a " + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
+                        + Repository.ROOT + "/%' and a.date>:date " + "group by a.item " + "order by count(a.item) desc";
         final String SOURCE = "LastMonthTopModifiedDocuments";
-        final Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -1);
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, cal);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, cal);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getLastMonthTopModifiedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getLastMonthTopModifiedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastModifiedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastModifiedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getLastModifiedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -968,8 +926,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastModifiedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastModifiedDocumentsSrv(auth.getName());
             log.debug("getLastModifiedDocuments: {}", al);
             return al;
         } finally {
@@ -982,28 +939,25 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastModifiedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastModifiedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getLastModifiedDocumentsSrv({})", user);
-        final String qs = "select distinct a.item, max(a.date) from Activity a "
-                + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
-                + Repository.ROOT
-                + "/%' "
-                + "group by a.item "
-                + "order by max(a.date) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select distinct a.item, max(a.date) from DashboardActivity a " + "where a.action='CHECKIN_DOCUMENT' and a.path like '/"
+                        + Repository.ROOT + "/%' " + "group by a.item " + "order by max(a.date) desc";
         final String SOURCE = "LastModifiedDocuments";
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, null);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, null);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getLastModifiedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getLastModifiedDocumentsSrv: {}", al);
         return al;
     }
 
     @Override
-    public List<DashboardDocumentResult> getLastUploadedDocuments(
-            final String token) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastUploadedDocuments(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getLastUploadedDocuments({})", token);
         Authentication auth = null, oldAuth = null;
 
@@ -1015,8 +969,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final List<DashboardDocumentResult> al = getLastUploadedDocumentsSrv(auth
-                    .getName());
+            List<DashboardDocumentResult> al = getLastUploadedDocumentsSrv(auth.getName());
             log.debug("getLastUploadedDocuments: {}", al);
             return al;
         } finally {
@@ -1029,21 +982,18 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Convenient method for syndication
      */
-    public List<DashboardDocumentResult> getLastUploadedDocumentsSrv(
-            final String user) throws RepositoryException, DatabaseException {
+    public List<DashboardDocumentResult> getLastUploadedDocumentsSrv(String user) throws RepositoryException, DatabaseException {
         log.debug("getLastUploadedDocumentsSrv({})", user);
-        final String qs = "select distinct a.item, max(a.date) from Activity a "
-                + "where a.action='CREATE_DOCUMENT' and a.path like '/"
-                + Repository.ROOT
-                + "/%' "
-                + "group by a.item "
-                + "order by max(a.date) desc";
+        long begin = System.currentTimeMillis();
+        String qs =
+                "select distinct a.item, max(a.date) from DashboardActivity a " + "where a.action='CREATE_DOCUMENT' and a.path like '/"
+                        + Repository.ROOT + "/%' " + "group by a.item " + "order by max(a.date) desc";
         final String SOURCE = "LastUploadedDocuments";
-        final List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE,
-                qs, null);
+        List<DashboardDocumentResult> al = getTopDocuments(user, SOURCE, qs, null);
 
         // Check for already visited results
         checkVisitedDocuments(user, SOURCE, al);
+        log.trace("getLastUploadedDocumentsSrv.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getLastUploadedDocumentsSrv: {}", al);
         return al;
     }
@@ -1052,51 +1002,46 @@ public class DbDashboardModule implements DashboardModule {
      * Get top documents
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<DashboardDocumentResult> getTopDocuments(
-            final String user, final String source, final String qs,
-            final Calendar date) throws RepositoryException, DatabaseException {
-        log.debug("getTopDocuments({}, {}, {}, {})", new Object[] { user,
-                source, qs, date != null ? date.getTime() : "null" });
-        final ArrayList<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
+    private ArrayList<DashboardDocumentResult> getTopDocuments(String user, String source, String qs, Calendar date)
+            throws RepositoryException, DatabaseException {
+        log.debug("getTopDocuments({}, {}, {}, {})", new Object[] { user, source, qs, (date != null ? date.getTime() : "null") });
+        ArrayList<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
         Session session = null;
         int cont = 0;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs).setFetchSize(MAX_RESULTS);
+            Query q = session.createQuery(qs).setFetchSize(MAX_RESULTS);
 
             if (date != null) {
                 q.setCalendar("date", date);
             }
 
             // While there is more query results and the MAX_RESULT limit has reached
-            for (final Iterator<Object[]> it = q.iterate(); it.hasNext()
-                    && cont < MAX_RESULTS; cont++) {
-                final Object[] obj = it.next();
-                final String resItem = (String) obj[0];
-                final Calendar resDate = (Calendar) obj[1];
+            for (Iterator<Object[]> it = q.iterate(); it.hasNext() && cont < MAX_RESULTS; cont++) {
+                Object[] obj = it.next();
+                String resItem = (String) obj[0];
+                Calendar resDate = (Calendar) obj[1];
 
                 try {
-                    final NodeDocument nDoc = NodeDocumentDAO.getInstance()
-                            .findByPk(resItem);
+                    NodeDocument nDoc = NodeDocumentDAO.getInstance().findByPk(resItem);
                     // String docPath = NodeBaseDAO.getInstance().getPathFromUuid(nDoc.getUuid());
 
                     // Only documents from taxonomy
                     // Already filtered in the query
                     // if (docPath.startsWith("/okm:root")) {
-                    final Document doc = BaseDocumentModule.getProperties(user,
-                            nDoc);
-                    final DashboardDocumentResult vo = new DashboardDocumentResult();
+                    Document doc = BaseDocumentModule.getProperties(user, nDoc);
+                    DashboardDocumentResult vo = new DashboardDocumentResult();
                     vo.setDocument(doc);
                     vo.setDate(resDate);
                     vo.setVisited(false);
                     al.add(vo);
                     // }
-                } catch (final PathNotFoundException e) {
+                } catch (PathNotFoundException e) {
                     // Do nothing
                 }
             }
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -1107,11 +1052,9 @@ public class DbDashboardModule implements DashboardModule {
     }
 
     @Override
-    public void visiteNode(final String token, final String source,
-            final String node, final Calendar date) throws RepositoryException,
+    public void visiteNode(String token, String source, String node, Calendar date) throws AccessDeniedException, RepositoryException,
             DatabaseException {
-        log.debug("visiteNode({}, {}, {}, {})", new Object[] { token, source,
-                node, date == null ? null : date.getTime() });
+        log.debug("visiteNode({}, {}, {}, {})", new Object[] { token, source, node, (date == null ? null : date.getTime()) });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -1122,7 +1065,7 @@ public class DbDashboardModule implements DashboardModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final Dashboard vo = new Dashboard();
+            Dashboard vo = new Dashboard();
             vo.setUser(auth.getName());
             vo.setSource(source);
             vo.setNode(node);
@@ -1140,39 +1083,40 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Check visited documents
      */
-    private void checkVisitedDocuments(final String user, final String source,
-            final List<DashboardDocumentResult> docResult)
-            throws DatabaseException {
-        final List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(
-                user, source);
+    private void checkVisitedDocuments(String user, String source, List<DashboardDocumentResult> docResult) throws DatabaseException {
+        List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(user, source);
 
         // Set already visited nodes
-        for (final DashboardDocumentResult dsDocResult : docResult) {
-            for (final Dashboard visitedNode : visitedNodes) {
+        for (Iterator<DashboardDocumentResult> itDocs = docResult.iterator(); itDocs.hasNext();) {
+            DashboardDocumentResult dsDocResult = itDocs.next();
+
+            for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+                Dashboard visitedNode = itVisited.next();
+
                 // Same node path and same activity log date ?
-                if (visitedNode.getNode().equals(
-                        dsDocResult.getDocument().getUuid())
+                if (visitedNode.getNode().equals(dsDocResult.getDocument().getUuid())
                         && visitedNode.getDate().equals(dsDocResult.getDate())) {
                     dsDocResult.setVisited(true);
                 }
             }
         }
 
-        for (final Dashboard visitedNode : visitedNodes) {
+        for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+            Dashboard visitedNode = itVisited.next();
             boolean old = true;
 
-            for (final DashboardDocumentResult dsDocResult : docResult) {
+            for (Iterator<DashboardDocumentResult> itDocs = docResult.iterator(); itDocs.hasNext();) {
+                DashboardDocumentResult dsDocResult = itDocs.next();
+
                 // Same node path and same activity log date ?
-                if (visitedNode.getNode().equals(
-                        dsDocResult.getDocument().getUuid())
+                if (visitedNode.getNode().equals(dsDocResult.getDocument().getUuid())
                         && visitedNode.getDate().equals(dsDocResult.getDate())) {
                     old = false;
                 }
             }
 
             if (old) {
-                DashboardDAO.purgeOldVisitedNode(user, source,
-                        visitedNode.getNode(), visitedNode.getDate());
+                DashboardDAO.purgeOldVisitedNode(user, source, visitedNode.getNode(), visitedNode.getDate());
             }
         }
     }
@@ -1180,38 +1124,37 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Check visited folders
      */
-    private void checkVisitedFolders(final String user, final String source,
-            final List<DashboardFolderResult> fldResult)
-            throws DatabaseException {
-        final List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(
-                user, source);
+    private void checkVisitedFolders(String user, String source, List<DashboardFolderResult> fldResult) throws DatabaseException {
+        List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(user, source);
 
         // Set already visited nodes
-        for (final DashboardFolderResult dsFldResult : fldResult) {
-            for (final Dashboard visitedNode : visitedNodes) {
-                if (visitedNode.getNode().equals(
-                        dsFldResult.getFolder().getUuid())
-                        && visitedNode.getDate().equals(dsFldResult.getDate())) {
+        for (Iterator<DashboardFolderResult> itFlds = fldResult.iterator(); itFlds.hasNext();) {
+            DashboardFolderResult dsFldResult = itFlds.next();
+
+            for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+                Dashboard visitedNode = itVisited.next();
+
+                if (visitedNode.getNode().equals(dsFldResult.getFolder().getUuid()) && visitedNode.getDate().equals(dsFldResult.getDate())) {
                     dsFldResult.setVisited(true);
                 }
             }
         }
 
-        for (final Dashboard visitedNode : visitedNodes) {
+        for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+            Dashboard visitedNode = itVisited.next();
             boolean old = true;
 
-            for (final DashboardFolderResult dsFldResult : fldResult) {
+            for (Iterator<DashboardFolderResult> itFlds = fldResult.iterator(); itFlds.hasNext();) {
+                DashboardFolderResult dsFldResult = itFlds.next();
+
                 // Same node path and same activity log date ?
-                if (visitedNode.getNode().equals(
-                        dsFldResult.getFolder().getUuid())
-                        && visitedNode.getDate().equals(dsFldResult.getDate())) {
+                if (visitedNode.getNode().equals(dsFldResult.getFolder().getUuid()) && visitedNode.getDate().equals(dsFldResult.getDate())) {
                     old = false;
                 }
             }
 
             if (old) {
-                DashboardDAO.purgeOldVisitedNode(user, source,
-                        visitedNode.getNode(), visitedNode.getDate());
+                DashboardDAO.purgeOldVisitedNode(user, source, visitedNode.getNode(), visitedNode.getDate());
             }
         }
     }
@@ -1219,39 +1162,38 @@ public class DbDashboardModule implements DashboardModule {
     /**
      * Check visited mails
      */
-    private void checkVisitedMails(final String user, final String source,
-            final List<DashboardMailResult> mailResult)
-            throws DatabaseException {
-        final List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(
-                user, source);
+    private void checkVisitedMails(String user, String source, List<DashboardMailResult> mailResult) throws DatabaseException {
+        List<Dashboard> visitedNodes = DashboardDAO.findByUserSource(user, source);
 
         // Set already visited nodes
-        for (final DashboardMailResult dsMailResult : mailResult) {
-            for (final Dashboard visitedNode : visitedNodes) {
+        for (Iterator<DashboardMailResult> itMails = mailResult.iterator(); itMails.hasNext();) {
+            DashboardMailResult dsMailResult = itMails.next();
+
+            for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+                Dashboard visitedNode = itVisited.next();
+
                 // Same node path and same activity log date ?
-                if (visitedNode.getNode().equals(
-                        dsMailResult.getMail().getUuid())
-                        && visitedNode.getDate().equals(dsMailResult.getDate())) {
+                if (visitedNode.getNode().equals(dsMailResult.getMail().getUuid()) && visitedNode.getDate().equals(dsMailResult.getDate())) {
                     dsMailResult.setVisited(true);
                 }
             }
         }
 
-        for (final Dashboard visitedNode : visitedNodes) {
+        for (Iterator<Dashboard> itVisited = visitedNodes.iterator(); itVisited.hasNext();) {
+            Dashboard visitedNode = itVisited.next();
             boolean old = true;
 
-            for (final DashboardMailResult dsMailResult : mailResult) {
+            for (Iterator<DashboardMailResult> itMails = mailResult.iterator(); itMails.hasNext();) {
+                DashboardMailResult dsMailResult = itMails.next();
+
                 // Same node path and same activity log date ?
-                if (visitedNode.getNode().equals(
-                        dsMailResult.getMail().getUuid())
-                        && visitedNode.getDate().equals(dsMailResult.getDate())) {
+                if (visitedNode.getNode().equals(dsMailResult.getMail().getUuid()) && visitedNode.getDate().equals(dsMailResult.getDate())) {
                     old = false;
                 }
             }
 
             if (old) {
-                DashboardDAO.purgeOldVisitedNode(user, source,
-                        visitedNode.getNode(), visitedNode.getDate());
+                DashboardDAO.purgeOldVisitedNode(user, source, visitedNode.getNode(), visitedNode.getDate());
             }
         }
     }
@@ -1260,41 +1202,35 @@ public class DbDashboardModule implements DashboardModule {
      * Get documents from statement
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<DashboardDocumentResult> getUserDocuments(
-            final String user, final String source, final String qs)
-            throws DatabaseException {
-        log.debug("getUserDocuments({}, {}, {})", new Object[] { user, source,
-                qs });
-        final ArrayList<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
+    private ArrayList<DashboardDocumentResult> getUserDocuments(String user, String source, String qs) throws DatabaseException {
+        log.debug("getUserDocuments({}, {}, {})", new Object[] { user, source, qs });
+        ArrayList<DashboardDocumentResult> al = new ArrayList<DashboardDocumentResult>();
         org.hibernate.Session hSession = null;
 
         try {
             hSession = HibernateUtil.getSessionFactory().openSession();
-            final org.hibernate.Query q = hSession.createQuery(qs);
+            org.hibernate.Query q = hSession.createQuery(qs);
             q.setString("user", user);
             q.setMaxResults(MAX_RESULTS);
 
-            for (final Iterator<Object[]> it = q.list().iterator(); it
-                    .hasNext();) {
-                final Object[] actData = it.next();
-                final String actItem = (String) actData[0];
-                final Calendar actDate = (Calendar) actData[1];
+            for (Iterator<Object[]> it = q.list().iterator(); it.hasNext();) {
+                Object[] actData = it.next();
+                String actItem = (String) actData[0];
+                Calendar actDate = (Calendar) actData[1];
 
                 try {
-                    final NodeDocument nDoc = NodeDocumentDAO.getInstance()
-                            .findByPk(actItem);
-                    final Document doc = BaseDocumentModule.getProperties(user,
-                            nDoc);
-                    final DashboardDocumentResult vo = new DashboardDocumentResult();
+                    NodeDocument nDoc = NodeDocumentDAO.getInstance().findByPk(actItem);
+                    Document doc = BaseDocumentModule.getProperties(user, nDoc);
+                    DashboardDocumentResult vo = new DashboardDocumentResult();
                     vo.setDocument(doc);
                     vo.setDate(actDate);
                     vo.setVisited(false);
                     al.add(vo);
-                } catch (final PathNotFoundException e) {
+                } catch (PathNotFoundException e) {
                     // Do nothing
                 }
             }
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(hSession);
@@ -1308,36 +1244,33 @@ public class DbDashboardModule implements DashboardModule {
      * Get mails from statement
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<DashboardMailResult> getUserMails(final String user,
-            final String source, final String qs) throws DatabaseException {
+    private ArrayList<DashboardMailResult> getUserMails(String user, String source, String qs) throws DatabaseException {
         log.debug("getUserMails({}, {}, {})", new Object[] { user, source, qs });
-        final ArrayList<DashboardMailResult> al = new ArrayList<DashboardMailResult>();
+        ArrayList<DashboardMailResult> al = new ArrayList<DashboardMailResult>();
         org.hibernate.Session hSession = null;
 
         try {
             hSession = HibernateUtil.getSessionFactory().openSession();
-            final org.hibernate.Query q = hSession.createQuery(qs);
+            org.hibernate.Query q = hSession.createQuery(qs);
             q.setString("user", user);
             q.setMaxResults(MAX_RESULTS);
 
-            for (final Iterator<Activity> it = q.list().iterator(); it
-                    .hasNext();) {
-                final Activity act = it.next();
+            for (Iterator<DashboardActivity> it = q.list().iterator(); it.hasNext();) {
+                DashboardActivity da = it.next();
 
                 try {
-                    final NodeMail nMail = NodeMailDAO.getInstance().findByPk(
-                            act.getItem());
-                    final Mail mail = BaseMailModule.getProperties(user, nMail);
-                    final DashboardMailResult vo = new DashboardMailResult();
+                    NodeMail nMail = NodeMailDAO.getInstance().findByPk(da.getItem());
+                    Mail mail = BaseMailModule.getProperties(user, nMail);
+                    DashboardMailResult vo = new DashboardMailResult();
                     vo.setMail(mail);
-                    vo.setDate(act.getDate());
+                    vo.setDate(da.getDate());
                     vo.setVisited(false);
                     al.add(vo);
-                } catch (final PathNotFoundException e) {
+                } catch (PathNotFoundException e) {
                     // Do nothing
                 }
             }
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(hSession);

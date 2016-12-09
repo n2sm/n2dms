@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,29 +36,25 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
  * @author jllort
  *
  */
-public class NotEmptyFileUploadValidator extends
-        Validator<NotEmptyFileUploadValidator> {
+public class NotEmptyFileUploadValidator extends Validator<NotEmptyFileUploadValidator> {
 
     protected FileUpload fileUpload;
 
-    public NotEmptyFileUploadValidator(final FileUpload fileUpload) {
+    public NotEmptyFileUploadValidator(FileUpload fileUpload) {
         this.fileUpload = fileUpload;
-        setCustomMsgKey(null);
-        preventsPropagationOfValidationChain();
+        this.setCustomMsgKey(null);
+        this.preventsPropagationOfValidationChain();
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         String str = null;
-        if (fileUpload != null) {
+        if (fileUpload != null)
             str = fileUpload.getFilename();
-        }
         if (str == null || str.length() == 0) {
-            final ValidationResult result = new ValidationResult();
-            final ValidationError error = result.new ValidationError(null,
-                    getErrorMessage(allMessages, messages.mustSelectValue()));
+            ValidationResult result = new ValidationResult();
+            ValidationError error = result.new ValidationError(null, getErrorMessage(allMessages, messages.mustSelectValue()));
             result.getErrors().add(error);
             return result;
         }
@@ -66,12 +62,10 @@ public class NotEmptyFileUploadValidator extends
         return null;
     }
 
-    @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (fileUpload != null) {
-            for (final ValidationAction<FileUpload> action : getFailureActions()) {
+            for (ValidationAction<FileUpload> action : getFailureActions())
                 action.invoke(result, fileUpload);
-            }
         }
     }
 }

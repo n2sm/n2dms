@@ -25,29 +25,25 @@ public class BaseNoteModule {
     /**
      * Add a note to a node.
      */
-    public static Note add(final Session session, final Node node,
-            final String text) throws NoSuchNodeTypeException,
-            VersionException, ConstraintViolationException, LockException,
-            AccessDeniedException, ItemExistsException,
-            InvalidItemStateException, ReferentialIntegrityException,
-            RepositoryException {
+    public static Note add(Session session, Node node, String text) throws NoSuchNodeTypeException, VersionException,
+            ConstraintViolationException, LockException, AccessDeniedException, ItemExistsException, InvalidItemStateException,
+            ReferentialIntegrityException, RepositoryException {
         if (!node.isNodeType(Note.MIX_TYPE)) {
             log.debug("Adding mixing '{}' to {}", Note.MIX_TYPE, node.getPath());
             node.addMixin(Note.MIX_TYPE);
             node.save();
         }
 
-        final Node notesNode = node.getNode(Note.LIST);
-        final Calendar cal = Calendar.getInstance();
-        final Node noteNode = notesNode.addNode(cal.getTimeInMillis() + "",
-                Note.TYPE);
+        Node notesNode = node.getNode(Note.LIST);
+        Calendar cal = Calendar.getInstance();
+        Node noteNode = notesNode.addNode(cal.getTimeInMillis() + "", Note.TYPE);
         noteNode.setProperty(Note.DATE, cal);
         noteNode.setProperty(Note.USER, session.getUserID());
         noteNode.setProperty(Note.TEXT, text);
         notesNode.save();
 
         // Retrieve stored values
-        final Note newNote = get(noteNode);
+        Note newNote = get(noteNode);
 
         return newNote;
     }
@@ -55,10 +51,8 @@ public class BaseNoteModule {
     /**
      * Read note values
      */
-    public static Note get(final Node noteNode)
-            throws javax.jcr.PathNotFoundException,
-            javax.jcr.RepositoryException {
-        final Note note = new Note();
+    public static Note get(Node noteNode) throws javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
+        Note note = new Note();
 
         note.setDate(noteNode.getProperty(Note.DATE).getDate());
         note.setAuthor(noteNode.getProperty(Note.USER).getString());

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,13 +33,7 @@ import com.openkm.dao.ConfigDAO;
 
 @SuppressWarnings("serial")
 public class ConfigStoredSelectTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String key;
-
     private String value;
 
     @Override
@@ -47,27 +41,24 @@ public class ConfigStoredSelectTag extends TagSupport {
         String html = "";
 
         try {
-            final ConfigStoredSelect stSelect = ConfigDAO.getSelect(key);
+            ConfigStoredSelect stSelect = ConfigDAO.getSelect(key);
 
             if (stSelect != null) {
                 html += "<select name=\"cfg_value\">";
 
-                for (final ConfigStoredOption stOption : stSelect.getOptions()) {
-                    html += "<option value=\""
-                            + stOption.getValue()
-                            + "\" "
-                            + (stOption.isSelected() ? "selected=\"selected\""
-                                    : "") + ">" + stOption.getName()
-                            + "</option>";
+                for (ConfigStoredOption stOption : stSelect.getOptions()) {
+                    html +=
+                            "<option value=\"" + stOption.getValue() + "\" " + (stOption.isSelected() ? "selected=\"selected\"" : "") + ">"
+                                    + stOption.getName() + "</option>";
                 }
 
                 html += "</select>";
             }
 
             pageContext.getOut().write(html);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             e.printStackTrace();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -85,7 +76,7 @@ public class ConfigStoredSelectTag extends TagSupport {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -93,7 +84,7 @@ public class ConfigStoredSelectTag extends TagSupport {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 }

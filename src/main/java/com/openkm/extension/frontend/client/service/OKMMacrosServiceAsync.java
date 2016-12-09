@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,6 +36,5 @@ import com.openkm.extension.frontend.client.bean.GWTMacros;
 public interface OKMMacrosServiceAsync extends RemoteService {
     public void getActions(AsyncCallback<List<GWTMacros>> callback);
 
-    public void executeAction(GWTMacros action, String path,
-            AsyncCallback<?> callback);
+    public void executeAction(GWTMacros action, String path, AsyncCallback<?> callback);
 }

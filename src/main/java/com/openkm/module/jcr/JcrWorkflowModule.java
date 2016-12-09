@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.jcr;
@@ -47,13 +47,11 @@ import com.openkm.module.jcr.stuff.JcrSessionManager;
 import com.openkm.util.UserActivity;
 
 public class JcrWorkflowModule implements WorkflowModule {
-    private static Logger log = LoggerFactory
-            .getLogger(JcrWorkflowModule.class);
+    private static Logger log = LoggerFactory.getLogger(JcrWorkflowModule.class);
 
     @Override
-    public void registerProcessDefinition(final String token,
-            final InputStream is) throws ParseException, RepositoryException,
-            WorkflowException, DatabaseException, IOException {
+    public void registerProcessDefinition(String token, InputStream is) throws ParseException, RepositoryException, WorkflowException,
+            DatabaseException, IOException {
         log.debug("registerProcessDefinition({}, {})", token, is);
         Session session = null;
 
@@ -67,9 +65,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.registerProcessDefinition(is);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "REGISTER_PROCESS_DEFINITION", null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "REGISTER_PROCESS_DEFINITION", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -81,9 +78,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessDefinition(final String token,
-            final long processDefinitionId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void deleteProcessDefinition(String token, long processDefinitionId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("deleteProcessDefinition({}, {})", token, processDefinitionId);
         Session session = null;
 
@@ -97,9 +93,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.deleteProcessDefinition(processDefinitionId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "DELETE_PROCESS_DEFINITION",
-                    "" + processDefinitionId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "DELETE_PROCESS_DEFINITION", "" + processDefinitionId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -112,9 +107,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessDefinition getProcessDefinition(final String token,
-            final long processDefinitionId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public ProcessDefinition getProcessDefinition(String token, long processDefinitionId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("getProcessDefinition({}, {})", token, processDefinitionId);
         ProcessDefinition vo = null;
         Session session = null;
@@ -129,9 +123,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getProcessDefinition(processDefinitionId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_PROCESS_DEFINITION", ""
-                    + processDefinitionId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_PROCESS_DEFINITION", "" + processDefinitionId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -144,11 +137,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public byte[] getProcessDefinitionImage(final String token,
-            final long processDefinitionId, final String node)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("getProcessDefinitionImage({}, {}, {})", new Object[] {
-                token, processDefinitionId, node });
+    public byte[] getProcessDefinitionImage(String token, long processDefinitionId, String node) throws RepositoryException,
+            DatabaseException, WorkflowException {
+        log.debug("getProcessDefinitionImage({}, {}, {})", new Object[] { token, processDefinitionId, node });
         byte[] image = null;
         Session session = null;
 
@@ -159,14 +150,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            image = CommonWorkflowModule.getProcessDefinitionImage(
-                    processDefinitionId, node);
+            image = CommonWorkflowModule.getProcessDefinitionImage(processDefinitionId, node);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "GET_PROCESS_DEFINITION_IMAGE", "" + processDefinitionId,
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_PROCESS_DEFINITION_IMAGE", "" + processDefinitionId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -179,12 +167,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Map<String, List<FormElement>> getProcessDefinitionForms(
-            final String token, final long processDefinitionId)
-            throws ParseException, RepositoryException, DatabaseException,
-            WorkflowException {
-        log.debug("getProcessDefinitionForms({}, {})", token,
-                processDefinitionId);
+    public Map<String, List<FormElement>> getProcessDefinitionForms(String token, long processDefinitionId) throws ParseException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("getProcessDefinitionForms({}, {})", token, processDefinitionId);
         Map<String, List<FormElement>> forms = null;
         Session session = null;
 
@@ -195,14 +180,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            forms = CommonWorkflowModule
-                    .getProcessDefinitionForms(processDefinitionId);
+            forms = CommonWorkflowModule.getProcessDefinitionForms(processDefinitionId);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "GET_PROCESS_DEFINITION_FORMS", processDefinitionId + "",
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_PROCESS_DEFINITION_FORMS", processDefinitionId + "", null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -215,12 +197,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance runProcessDefinition(final String token,
-            final long processDefinitionId, final String uuid,
-            final List<FormElement> variables) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("runProcessDefinition({}, {}, {})", new Object[] { token,
-                processDefinitionId, variables });
+    public ProcessInstance runProcessDefinition(String token, long processDefinitionId, String uuid, List<FormElement> variables)
+            throws RepositoryException, DatabaseException, WorkflowException {
+        log.debug("runProcessDefinition({}, {}, {})", new Object[] { token, processDefinitionId, variables });
         ProcessInstance vo = null;
         Session session = null;
 
@@ -231,13 +210,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            vo = CommonWorkflowModule.runProcessDefinition(session.getUserID(),
-                    processDefinitionId, uuid, variables);
+            vo = CommonWorkflowModule.runProcessDefinition(session.getUserID(), processDefinitionId, uuid, variables);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "RUN_PROCESS_DEFINITION", ""
-                    + processDefinitionId, null, variables.toString());
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "RUN_PROCESS_DEFINITION", "" + processDefinitionId, null, variables.toString());
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -250,11 +227,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance sendProcessInstanceSignal(final String token,
-            final long processInstanceId, final String transitionName)
+    public ProcessInstance sendProcessInstanceSignal(String token, long processInstanceId, String transitionName)
             throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("sendProcessInstanceSignal({}, {}, {})", new Object[] {
-                token, processInstanceId, transitionName });
+        log.debug("sendProcessInstanceSignal({}, {}, {})", new Object[] { token, processInstanceId, transitionName });
         ProcessInstance vo = null;
         Session session = null;
 
@@ -265,14 +240,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            vo = CommonWorkflowModule.sendProcessInstanceSignal(
-                    processInstanceId, transitionName);
+            vo = CommonWorkflowModule.sendProcessInstanceSignal(processInstanceId, transitionName);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "SEND_PROCESS_INSTANCE_SIGNAL", "" + processInstanceId,
-                    null, transitionName);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SEND_PROCESS_INSTANCE_SIGNAL", "" + processInstanceId, null, transitionName);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -285,9 +257,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void endProcessInstance(String token, long processInstanceId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("endProcessInstance({}, {})", token, processInstanceId);
         Session session = null;
 
@@ -301,9 +271,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.endProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "END_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "END_PROCESS_INSTANCE", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -315,9 +284,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void deleteProcessInstance(String token, long processInstanceId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("deleteProcessInstance({}, {})", token, processInstanceId);
         Session session = null;
 
@@ -331,9 +299,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.deleteProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "DELETE_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "DELETE_PROCESS_INSTANCE", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -345,8 +312,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessInstance> findProcessInstances(final String token,
-            final long processDefinitionId) throws RepositoryException,
+    public List<ProcessInstance> findProcessInstances(String token, long processDefinitionId) throws RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("findProcessInstances({}, {})", token, processDefinitionId);
         List<ProcessInstance> al = null;
@@ -362,9 +328,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findProcessInstances(processDefinitionId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "FIND_PROCESS_INSTANCES", ""
-                    + processDefinitionId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_PROCESS_INSTANCES", "" + processDefinitionId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -377,8 +342,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findAllProcessDefinitions(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<ProcessDefinition> findAllProcessDefinitions(String token) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("findAllProcessDefinitions({})", token);
         List<ProcessDefinition> al = null;
         Session session = null;
@@ -393,9 +357,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findAllProcessDefinitions();
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "FIND_ALL_PROCESS_DEFINITIONS", null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_ALL_PROCESS_DEFINITIONS", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -408,8 +371,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findLatestProcessDefinitions(
-            final String token) throws RepositoryException, DatabaseException,
+    public List<ProcessDefinition> findLatestProcessDefinitions(String token) throws RepositoryException, DatabaseException,
             WorkflowException {
         log.debug("findLatestProcessDefinitions({})", token);
         List<ProcessDefinition> al = null;
@@ -425,9 +387,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findLatestProcessDefinitions();
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "FIND_LATEST_PROCESS_DEFINITIONS", null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_LATEST_PROCESS_DEFINITIONS", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -440,8 +401,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessDefinition findLastProcessDefinition(final String token,
-            final String name) throws RepositoryException, DatabaseException,
+    public ProcessDefinition findLastProcessDefinition(String token, String name) throws RepositoryException, DatabaseException,
             WorkflowException {
         log.debug("findLastProcessDefinition({}, {})", token, name);
         ProcessDefinition pd = null;
@@ -457,9 +417,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             pd = CommonWorkflowModule.findLastProcessDefinition(name);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "FIND_LAST_PROCESS_DEFINITION", name, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_LAST_PROCESS_DEFINITION", name, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -472,8 +431,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findAllProcessDefinitionVersions(
-            final String token, final String name) throws RepositoryException,
+    public List<ProcessDefinition> findAllProcessDefinitionVersions(String token, String name) throws RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("findAllProcessDefinitionVersions({}, {})", token, name);
         List<ProcessDefinition> al = null;
@@ -489,9 +447,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findAllProcessDefinitionVersions(name);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "FIND_ALL_PROCESS_DEFINITION_VERSIONS", name, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_ALL_PROCESS_DEFINITION_VERSIONS", name, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -504,9 +461,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance getProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public ProcessInstance getProcessInstance(String token, long processInstanceId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("getProcessInstance({}, {})", token, processInstanceId);
         ProcessInstance vo = null;
         Session session = null;
@@ -521,9 +477,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_PROCESS_INSTANCE", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -536,9 +491,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void suspendProcessInstance(String token, long processInstanceId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("suspendProcessInstance({}, {})", token, processInstanceId);
         Session session = null;
 
@@ -552,9 +506,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SUSPEND_PROCESS_INSTANCE",
-                    "" + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SUSPEND_PROCESS_INSTANCE", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -566,9 +519,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void resumeProcessInstance(String token, long processInstanceId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("resumeProcessInstance({}, {})", token, processInstanceId);
         Session session = null;
 
@@ -582,9 +534,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "RESUME_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "RESUME_PROCESS_INSTANCE", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -596,11 +547,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addProcessInstanceVariable(final String token,
-            final long processInstanceId, final String name, final Object value)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addProcessInstanceVariable({}, {}, {}, {})", new Object[] {
-                token, processInstanceId, name, value });
+    public void addProcessInstanceVariable(String token, long processInstanceId, String name, Object value) throws RepositoryException,
+            DatabaseException, WorkflowException {
+        log.debug("addProcessInstanceVariable({}, {}, {}, {})", new Object[] { token, processInstanceId, name, value });
         Session session = null;
 
         try {
@@ -610,14 +559,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.addProcessInstanceVariable(processInstanceId,
-                    name, value);
+            CommonWorkflowModule.addProcessInstanceVariable(processInstanceId, name, value);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "ADD_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId,
-                    null, name + ", " + value);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "ADD_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId, null, name + ", " + value);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -629,11 +575,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessInstanceVariable(final String token,
-            final long processInstanceId, final String name)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("deleteProcessInstanceVariable({}, {}, {})", new Object[] {
-                token, processInstanceId, name });
+    public void deleteProcessInstanceVariable(String token, long processInstanceId, String name) throws RepositoryException,
+            DatabaseException, WorkflowException {
+        log.debug("deleteProcessInstanceVariable({}, {}, {})", new Object[] { token, processInstanceId, name });
         Session session = null;
 
         try {
@@ -643,14 +587,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.deleteProcessInstanceVariable(
-                    processInstanceId, name);
+            CommonWorkflowModule.deleteProcessInstanceVariable(processInstanceId, name);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "DELETE_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId,
-                    null, name);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "DELETE_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId, null, name);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -662,8 +603,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findUserTaskInstances(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<TaskInstance> findUserTaskInstances(String token) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("findUserTaskInstances({})", token);
         List<TaskInstance> al = null;
         Session session = null;
@@ -675,13 +615,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            al = CommonWorkflowModule
-                    .findUserTaskInstances(session.getUserID());
+            al = CommonWorkflowModule.findUserTaskInstances(session.getUserID());
 
             // Activity log
-            UserActivity.log(session.getUserID(), "FIND_USER_TASK_INSTANCES",
-                    null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_USER_TASK_INSTANCES", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -694,8 +632,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findPooledTaskInstances(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<TaskInstance> findPooledTaskInstances(String token) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("findPooledTaskInstances({})", token);
         List<TaskInstance> al = null;
         Session session = null;
@@ -707,13 +644,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            al = CommonWorkflowModule.findPooledTaskInstances(session
-                    .getUserID());
+            al = CommonWorkflowModule.findPooledTaskInstances(session.getUserID());
 
             // Activity log
-            UserActivity.log(session.getUserID(), "FIND_POOLED_TASK_INSTANCES",
-                    null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_POOLED_TASK_INSTANCES", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -726,9 +661,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findTaskInstances(final String token,
-            final long processInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public List<TaskInstance> findTaskInstances(String token, long processInstanceId) throws RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("findTaskInstances({}, {})", token, processInstanceId);
         List<TaskInstance> al = null;
         Session session = null;
@@ -743,9 +677,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findTaskInstances(processInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "FIND_TASK_INSTANCES", ""
-                    + processInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_TASK_INSTANCES", "" + processInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -758,12 +691,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTaskInstanceValues(final String token,
-            final long taskInstanceId, final String transitionName,
-            final List<FormElement> values) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("setTaskInstanceValues({}, {}, {}, {})", new Object[] {
-                token, taskInstanceId, transitionName, values });
+    public void setTaskInstanceValues(String token, long taskInstanceId, String transitionName, List<FormElement> values)
+            throws RepositoryException, DatabaseException, WorkflowException {
+        log.debug("setTaskInstanceValues({}, {}, {}, {})", new Object[] { token, taskInstanceId, transitionName, values });
         Session session = null;
 
         try {
@@ -773,13 +703,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.setTaskInstanceValues(taskInstanceId,
-                    transitionName, values);
+            CommonWorkflowModule.setTaskInstanceValues(taskInstanceId, transitionName, values);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SET_TASK_INSTANCE_VALUES",
-                    "" + taskInstanceId, null, transitionName);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SET_TASK_INSTANCE_VALUES", "" + taskInstanceId, null, transitionName);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -791,11 +719,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTaskInstanceComment(final String token,
-            final long taskInstanceId, final String message)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addTaskInstanceComment({}, {}, {})", new Object[] { token,
-                taskInstanceId, message });
+    public void addTaskInstanceComment(String token, long taskInstanceId, String message) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("addTaskInstanceComment({}, {}, {})", new Object[] { token, taskInstanceId, message });
         Session session = null;
 
         try {
@@ -805,13 +731,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.addTaskInstanceComment(session.getUserID(),
-                    taskInstanceId, message);
+            CommonWorkflowModule.addTaskInstanceComment(session.getUserID(), taskInstanceId, message);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "ADD_TASK_INSTANCE_COMMENT",
-                    "" + taskInstanceId, null, message);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "ADD_TASK_INSTANCE_COMMENT", "" + taskInstanceId, null, message);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -823,9 +747,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public TaskInstance getTaskInstance(final String token,
-            final long taskInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public TaskInstance getTaskInstance(String token, long taskInstanceId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("getTaskInstance({}, {})", token, taskInstanceId);
         TaskInstance vo = null;
         Session session = null;
@@ -840,9 +762,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_TASK_INSTANCE", "" + taskInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -855,11 +776,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTaskInstanceActorId(final String token,
-            final long taskInstanceId, final String actorId)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("setTaskInstanceActorId({}, {}, {})", new Object[] { token,
-                taskInstanceId, actorId });
+    public void setTaskInstanceActorId(String token, long taskInstanceId, String actorId) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("setTaskInstanceActorId({}, {}, {})", new Object[] { token, taskInstanceId, actorId });
         Session session = null;
 
         try {
@@ -869,13 +788,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule
-                    .setTaskInstanceActorId(taskInstanceId, actorId);
+            CommonWorkflowModule.setTaskInstanceActorId(taskInstanceId, actorId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SET_TASK_INSTANCE_ACTOR_ID",
-                    "" + taskInstanceId, null, actorId);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SET_TASK_INSTANCE_ACTOR_ID", "" + taskInstanceId, null, actorId);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -887,11 +804,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTaskInstanceVariable(final String token,
-            final long taskInstanceId, final String name, final Object value)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addTaskInstanceVariable({}, {}, {}, {})", new Object[] {
-                token, taskInstanceId, name, value });
+    public void addTaskInstanceVariable(String token, long taskInstanceId, String name, Object value) throws RepositoryException,
+            DatabaseException, WorkflowException {
+        log.debug("addTaskInstanceVariable({}, {}, {}, {})", new Object[] { token, taskInstanceId, name, value });
         Session session = null;
 
         try {
@@ -901,13 +816,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.addTaskInstanceVariable(taskInstanceId, name,
-                    value);
+            CommonWorkflowModule.addTaskInstanceVariable(taskInstanceId, name, value);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "ADD_TASK_INSTANCE_VARIABLE",
-                    "" + taskInstanceId, null, name + ", " + value);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "ADD_TASK_INSTANCE_VARIABLE", "" + taskInstanceId, null, name + ", " + value);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -919,11 +832,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteTaskInstanceVariable(final String token,
-            final long taskInstanceId, final String name)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("deleteTaskInstanceVariable({}, {}, {})", new Object[] {
-                token, taskInstanceId, name });
+    public void deleteTaskInstanceVariable(String token, long taskInstanceId, String name) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("deleteTaskInstanceVariable({}, {}, {})", new Object[] { token, taskInstanceId, name });
         Session session = null;
 
         try {
@@ -933,14 +844,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.deleteTaskInstanceVariable(taskInstanceId,
-                    name);
+            CommonWorkflowModule.deleteTaskInstanceVariable(taskInstanceId, name);
 
             // Activity log
-            UserActivity.log(session.getUserID(),
-                    "DELETE_TASK_INSTANCE_VARIABLE", "" + taskInstanceId, null,
-                    name);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "DELETE_TASK_INSTANCE_VARIABLE", "" + taskInstanceId, null, name);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -952,8 +860,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void startTaskInstance(final String token, final long taskInstanceId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void startTaskInstance(String token, long taskInstanceId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("startTaskInstance({}, {})", token, taskInstanceId);
         Session session = null;
 
@@ -967,9 +874,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.startTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "START_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "START_TASK_INSTANCE", "" + taskInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -981,11 +887,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endTaskInstance(final String token, final long taskInstanceId,
-            final String transitionName) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("endTaskInstance({}, {}, {})", new Object[] { token,
-                taskInstanceId, transitionName });
+    public void endTaskInstance(String token, long taskInstanceId, String transitionName) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("endTaskInstance({}, {}, {})", new Object[] { token, taskInstanceId, transitionName });
         Session session = null;
 
         try {
@@ -995,13 +899,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule
-                    .endTaskInstance(taskInstanceId, transitionName);
+            CommonWorkflowModule.endTaskInstance(taskInstanceId, transitionName);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "END_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "END_TASK_INSTANCE", "" + taskInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1013,9 +915,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendTaskInstance(final String token,
-            final long taskInstanceId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public void suspendTaskInstance(String token, long taskInstanceId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("suspendTaskInstance({}, {})", token, taskInstanceId);
         Session session = null;
 
@@ -1029,9 +929,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SUSPEND_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SUSPEND_TASK_INSTANCE", "" + taskInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1043,8 +942,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeTaskInstance(final String token, final long taskInstanceId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void resumeTaskInstance(String token, long taskInstanceId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("resumeTaskInstance({}, {})", token, taskInstanceId);
         Session session = null;
 
@@ -1058,9 +956,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "RESUME_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "RESUME_TASK_INSTANCE", "" + taskInstanceId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1072,8 +969,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Token getToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public Token getToken(String token, long tokenId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("getToken({}, {})", token, tokenId);
         Token vo = null;
         Session session = null;
@@ -1088,9 +984,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getToken(tokenId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_TOKEN", "" + tokenId,
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_TOKEN", "" + tokenId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1103,11 +998,9 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTokenComment(final String token, final long tokenId,
-            final String message) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("addTokenComment({}, {}, {})", new Object[] { token, tokenId,
-                message });
+    public void addTokenComment(String token, long tokenId, String message) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("addTokenComment({}, {}, {})", new Object[] { token, tokenId, message });
         Session session = null;
 
         try {
@@ -1117,13 +1010,11 @@ public class JcrWorkflowModule implements WorkflowModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            CommonWorkflowModule.addTokenComment(session.getUserID(), tokenId,
-                    message);
+            CommonWorkflowModule.addTokenComment(session.getUserID(), tokenId, message);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "ADD_TOKEN_COMMENT", ""
-                    + tokenId, null, message);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "ADD_TOKEN_COMMENT", "" + tokenId, null, message);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1135,8 +1026,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void suspendToken(String token, long tokenId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("suspendToken({}, {})", token, tokenId);
         Session session = null;
 
@@ -1150,9 +1040,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendToken(tokenId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SUSPEND_TOKEN",
-                    "" + tokenId, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SUSPEND_TOKEN", "" + tokenId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1164,8 +1053,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void resumeToken(String token, long tokenId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("resumeToken({}, {})", token, tokenId);
         Session session = null;
 
@@ -1179,9 +1067,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeToken(tokenId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "RESUME_TOKEN", "" + tokenId,
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "RESUME_TOKEN", "" + tokenId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1193,12 +1080,10 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Token sendTokenSignal(final String token, final long tokenId,
-            final String transitionName) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("sendTokenSignal({}, {}, {})", new Object[] { token, tokenId,
-                transitionName });
-        final Token vo = null;
+    public Token sendTokenSignal(String token, long tokenId, String transitionName) throws RepositoryException, DatabaseException,
+            WorkflowException {
+        log.debug("sendTokenSignal({}, {}, {})", new Object[] { token, tokenId, transitionName });
+        Token vo = null;
         Session session = null;
 
         try {
@@ -1211,9 +1096,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.sendTokenSignal(tokenId, transitionName);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SEND_TOKEN_SIGNAL", ""
-                    + tokenId, null, transitionName);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SEND_TOKEN_SIGNAL", "" + tokenId, null, transitionName);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1226,11 +1110,8 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTokenNode(final String token, final long tokenId,
-            final String nodeName) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("setTokenNode({}, {}, {})", new Object[] { token, tokenId,
-                nodeName });
+    public void setTokenNode(String token, long tokenId, String nodeName) throws RepositoryException, DatabaseException, WorkflowException {
+        log.debug("setTokenNode({}, {}, {})", new Object[] { token, tokenId, nodeName });
         Session session = null;
 
         try {
@@ -1243,9 +1124,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.setTokenNode(tokenId, nodeName);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SEND_TOKEN_NODE", ""
-                    + tokenId, null, nodeName);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SEND_TOKEN_NODE", "" + tokenId, null, nodeName);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -1257,8 +1137,7 @@ public class JcrWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void endToken(String token, long tokenId) throws RepositoryException, DatabaseException, WorkflowException {
         log.debug("endToken({}, {})", token, tokenId);
         Session session = null;
 
@@ -1272,9 +1151,8 @@ public class JcrWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.endToken(tokenId);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "END_TOKEN", "" + tokenId,
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "END_TOKEN", "" + tokenId, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {

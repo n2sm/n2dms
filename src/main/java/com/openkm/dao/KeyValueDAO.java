@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,20 +43,19 @@ public class KeyValueDAO {
     /**
      * Find key values
      */
-    public static List<KeyValue> getKeyValues(final String query)
-            throws DatabaseException {
+    public static List<KeyValue> getKeyValues(String query) throws DatabaseException {
         log.debug("getKeyValues({})", query);
-        final List<KeyValue> ret = new ArrayList<KeyValue>();
+        List<KeyValue> ret = new ArrayList<KeyValue>();
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(query);
+            Query q = session.createQuery(query);
 
-            for (final Object obj : q.list()) {
+            for (Object obj : q.list()) {
                 if (obj instanceof Object[]) {
-                    final Object[] ao = (Object[]) obj;
-                    final KeyValue kv = new KeyValue();
+                    Object[] ao = (Object[]) obj;
+                    KeyValue kv = new KeyValue();
                     kv.setKey(String.valueOf(ao[0]));
                     kv.setValue(String.valueOf(ao[1]));
                     ret.add(kv);
@@ -65,7 +64,7 @@ public class KeyValueDAO {
 
             log.debug("getKeyValues: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -75,12 +74,10 @@ public class KeyValueDAO {
     /**
      * Find key values
      */
-    public static List<KeyValue> getKeyValues(final List<String> tables,
-            final String query) throws DatabaseException {
+    public static List<KeyValue> getKeyValues(List<String> tables, String query) throws DatabaseException {
         log.debug("getKeyValues({}, {})", tables, query);
-        final String realQuery = DatabaseMetadataUtils.replaceVirtual(tables,
-                query);
-        final List<KeyValue> ret = getKeyValues(realQuery);
+        String realQuery = DatabaseMetadataUtils.replaceVirtual(tables, query);
+        List<KeyValue> ret = getKeyValues(realQuery);
         log.debug("getKeyValues: {}", ret);
         return ret;
     }
@@ -88,12 +85,11 @@ public class KeyValueDAO {
     /**
      * Find key values
      */
-    public static List<KeyValue> getKeyValues(final String table,
-            final String query) throws DatabaseException {
+    public static List<KeyValue> getKeyValues(String table, String query) throws DatabaseException {
         log.debug("getKeyValues({}, {})", table, query);
-        final List<String> tables = new ArrayList<String>();
+        List<String> tables = new ArrayList<String>();
         tables.add(table);
-        final List<KeyValue> ret = getKeyValues(tables, query);
+        List<KeyValue> ret = getKeyValues(tables, query);
         log.debug("getKeyValues: {}", ret);
         return ret;
     }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,13 +30,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTTerm implements IsSerializable {
 
     private String text;
-
     private String id;
-
     private String comment = "";
-
     private String prefTermID = null;
-
     private boolean isLeaf = false;
 
     /**
@@ -51,7 +47,7 @@ public class GWTTerm implements IsSerializable {
      * @param text
      * @param id
      */
-    public GWTTerm(final String text, final String id) {
+    public GWTTerm(String text, String id) {
         this.text = text;
         this.id = id;
     }
@@ -60,7 +56,7 @@ public class GWTTerm implements IsSerializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -68,7 +64,7 @@ public class GWTTerm implements IsSerializable {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -76,18 +72,17 @@ public class GWTTerm implements IsSerializable {
         return comment;
     }
 
-    public void setComment(final String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
     public String getPrefTermID() {
-        if (prefTermID == null) {
+        if (prefTermID == null)
             return "";
-        }
         return prefTermID;
     }
 
-    public void setPrefTermID(final String prefTermID) {
+    public void setPrefTermID(String prefTermID) {
         this.prefTermID = prefTermID;
     }
 
@@ -99,39 +94,31 @@ public class GWTTerm implements IsSerializable {
         return isLeaf;
     }
 
-    public void setLeaf(final boolean leaf) {
+    public void setLeaf(boolean leaf) {
         isLeaf = leaf;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(Object o) {
+        if (this == o)
             return true;
-        }
-        if (o == null || !(o instanceof GWTTerm)) {
+        if ((o == null) || !(o instanceof GWTTerm))
             return false;
-        }
 
-        final GWTTerm term = (GWTTerm) o;
+        GWTTerm term = (GWTTerm) o;
 
-        if (comment != null ? !comment.equals(term.comment)
-                : term.comment != null) {
+        if (comment != null ? !comment.equals(term.comment) : term.comment != null)
             return false;
-        }
-        if (id != null ? !id.equals(term.id) : term.id != null) {
+        if (id != null ? !id.equals(term.id) : term.id != null)
             return false;
-        }
-        if (text != null ? !text.equals(term.text) : term.text != null) {
+        if (text != null ? !text.equals(term.text) : term.text != null)
             return false;
-        }
 
         return true;
     }
 
-    @Override
     public int hashCode() {
         int result;
-        result = text != null ? text.hashCode() : 0;
+        result = (text != null ? text.hashCode() : 0);
         result = 31 * result + (id != null ? id.hashCode() : 0);
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         return result;

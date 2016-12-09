@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,30 +28,21 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTToken implements IsSerializable {
     private double id;
-
     private String name;
-
     private boolean suspended;
-
     private GWTToken parent;
-
     private String node;
-
     private Date start;
-
     private Date end;
-
     private Collection<GWTTransition> availableTransitions;
-
     private Collection<GWTWorkflowComment> comments;
-
     private GWTProcessInstance processInstance;
 
     public double getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -59,7 +50,7 @@ public class GWTToken implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -67,7 +58,7 @@ public class GWTToken implements IsSerializable {
         return suspended;
     }
 
-    public void setSuspended(final boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 
@@ -75,15 +66,15 @@ public class GWTToken implements IsSerializable {
         return comments;
     }
 
-    public void setComments(final Collection<GWTWorkflowComment> comments2) {
-        comments = comments2;
+    public void setComments(Collection<GWTWorkflowComment> comments2) {
+        this.comments = comments2;
     }
 
     public GWTToken getParent() {
         return parent;
     }
 
-    public void setParent(final GWTToken parent) {
+    public void setParent(GWTToken parent) {
         this.parent = parent;
     }
 
@@ -91,7 +82,7 @@ public class GWTToken implements IsSerializable {
         return node;
     }
 
-    public void setNode(final String node) {
+    public void setNode(String node) {
         this.node = node;
     }
 
@@ -99,7 +90,7 @@ public class GWTToken implements IsSerializable {
         return start;
     }
 
-    public void setStart(final Date start) {
+    public void setStart(Date start) {
         this.start = start;
     }
 
@@ -107,7 +98,7 @@ public class GWTToken implements IsSerializable {
         return end;
     }
 
-    public void setEnd(final Date end) {
+    public void setEnd(Date end) {
         this.end = end;
     }
 
@@ -115,8 +106,7 @@ public class GWTToken implements IsSerializable {
         return availableTransitions;
     }
 
-    public void setAvailableTransitions(
-            final Collection<GWTTransition> availableTransitions) {
+    public void setAvailableTransitions(Collection<GWTTransition> availableTransitions) {
         this.availableTransitions = availableTransitions;
     }
 
@@ -124,13 +114,12 @@ public class GWTToken implements IsSerializable {
         return processInstance;
     }
 
-    public void setProcessInstance(final GWTProcessInstance processInstance) {
+    public void setProcessInstance(GWTProcessInstance processInstance) {
         this.processInstance = processInstance;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("id=");
         sb.append(id);

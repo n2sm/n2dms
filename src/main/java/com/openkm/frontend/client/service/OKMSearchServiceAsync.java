@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,23 +35,17 @@ import com.openkm.frontend.client.bean.GWTResultSet;
 public interface OKMSearchServiceAsync {
     public void getAllSearchs(AsyncCallback<List<GWTQueryParams>> callback);
 
-    public void saveSearch(GWTQueryParams params, String type,
-            AsyncCallback<Long> callback);
+    public void saveSearch(GWTQueryParams params, String type, AsyncCallback<Long> callback);
 
     public void deleteSearch(long id, AsyncCallback<?> callback);
 
-    public void findPaginated(GWTQueryParams params, int offset, int limit,
-            AsyncCallback<GWTResultSet> callback);
+    public void findPaginated(GWTQueryParams params, int offset, int limit, AsyncCallback<GWTResultSet> callback);
 
-    public void getKeywordMap(List<String> filter,
-            AsyncCallback<List<GWTKeyword>> callback);
+    public void getKeywordMap(List<String> filter, AsyncCallback<List<GWTKeyword>> callback);
 
     public void find(GWTQueryParams params, AsyncCallback<GWTResultSet> callback);
 
-    public void share(long qpId, AsyncCallback<?> callback);
+    public void findSimpleQueryPaginated(String statement, int offset, int limit, AsyncCallback<GWTResultSet> callback);
 
-    public void unshare(long qpId, AsyncCallback<?> callback);
-
-    public void findSimpleQueryPaginated(String statement, int offset,
-            int limit, AsyncCallback<GWTResultSet> callback);
+    public void findMoreLikeThis(String uuid, AsyncCallback<GWTResultSet> callback);
 }

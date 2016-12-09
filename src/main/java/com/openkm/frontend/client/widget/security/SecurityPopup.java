@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,8 +34,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -51,28 +49,18 @@ import com.openkm.frontend.client.util.Util;
  *
  */
 public class SecurityPopup extends DialogBox {
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     public Status status;
-
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     public CheckBox recursive;
-
     private Button close;
-
     private Button change;
-
     private SimplePanel sp;
-
     public SecurityPanel securityPanel;
-
     private int width = 612;
-
-    private String path = "";
+    private String uuid = "";
 
     /**
      * Security popup
@@ -88,59 +76,51 @@ public class SecurityPopup extends DialogBox {
         recursive = new CheckBox(Main.i18n("security.recursive"));
         close = new Button(Main.i18n("button.close"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .securityRefresh();
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.desktop.browser.tabMultiple.securityRefresh();
                 hide();
             }
         });
 
         change = new Button(Main.i18n("button.change"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 final boolean recursiveChecked = recursive.getValue();
 
                 if (!recursiveChecked) {
                     Main.get().securityPopup.status.setFlag_update();
                 }
 
-                final List<Map<String, Integer>> userGrants = securityPanel.securityUser
-                        .getNewGrants();
-                final List<Map<String, Integer>> roleGrants = securityPanel.securityRole
-                        .getNewGrants();
-                final Map<String, Integer> addUsers = userGrants.get(0);
-                final Map<String, Integer> revokeUsers = userGrants.get(1);
-                final Map<String, Integer> addRoles = roleGrants.get(0);
-                final Map<String, Integer> revokeRoles = roleGrants.get(1);
-                authService.changeSecurity(path, addUsers, revokeUsers,
-                        addRoles, revokeRoles, recursiveChecked,
+                List<Map<String, Integer>> userGrants = securityPanel.securityUser.getNewGrants();
+                List<Map<String, Integer>> roleGrants = securityPanel.securityRole.getNewGrants();
+                Map<String, Integer> addUsers = userGrants.get(0);
+                Map<String, Integer> revokeUsers = userGrants.get(1);
+                Map<String, Integer> addRoles = roleGrants.get(0);
+                Map<String, Integer> revokeRoles = roleGrants.get(1);
+                authService.changeSecurity(uuid, addUsers, revokeUsers, addRoles, revokeRoles, recursiveChecked,
                         new AsyncCallback<Object>() {
                             @Override
-                            public void onSuccess(final Object result) {
+                            public void onSuccess(Object result) {
                                 if (!recursiveChecked) {
-                                    Main.get().securityPopup.status
-                                            .unsetFlag_update();
-                                    Main.get().mainPanel.desktop.browser.tabMultiple
-                                            .securityRefresh();
+                                    Main.get().securityPopup.status.unsetFlag_update();
+                                    Main.get().mainPanel.desktop.browser.tabMultiple.securityRefresh();
                                 }
                             }
 
                             @Override
-                            public void onFailure(final Throwable caught) {
+                            public void onFailure(Throwable caught) {
                                 if (!recursiveChecked) {
-                                    Main.get().securityPopup.status
-                                            .unsetFlag_update();
+                                    Main.get().securityPopup.status.unsetFlag_update();
                                 }
                                 Main.get().showError("changeSecurity", caught);
                             }
                         });
 
                 if (recursiveChecked) {
-                    final Timer timer = new Timer() {
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
-                            Main.get().mainPanel.desktop.browser.tabMultiple
-                                    .securityRefresh();
+                            Main.get().mainPanel.desktop.browser.tabMultiple.securityRefresh();
                         }
                     };
                     timer.schedule(200);
@@ -152,24 +132,21 @@ public class SecurityPopup extends DialogBox {
         hPanel = new HorizontalPanel();
         hPanel.add(close);
 
-        sp.setHeight("4");
+        sp.setHeight("4px");
 
         vPanel.add(sp);
         vPanel.add(securityPanel);
         vPanel.add(recursive);
         vPanel.add(hPanel);
-        vPanel.add(Util.vSpace("5"));
+        vPanel.add(Util.vSpace("5px"));
 
-        vPanel.setCellHeight(sp, "4");
-        vPanel.setCellHeight(hPanel, "25");
-        vPanel.setCellHorizontalAlignment(securityPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellVerticalAlignment(hPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        vPanel.setCellHeight(sp, "4px");
+        vPanel.setCellHeight(hPanel, "25px");
+        vPanel.setCellHorizontalAlignment(securityPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellVerticalAlignment(hPanel, VerticalPanel.ALIGN_MIDDLE);
 
-        vPanel.setWidth(String.valueOf(width));
+        vPanel.setWidth(String.valueOf(width) + "px");
 
         close.setStyleName("okm-NoButton");
         change.setStyleName("okm-ChangeButton");
@@ -177,6 +154,13 @@ public class SecurityPopup extends DialogBox {
 
         super.hide();
         setWidget(vPanel);
+    }
+
+    /**
+     * initSecurity
+     */
+    public void initSecurity() {
+        securityPanel.initSecurity();
     }
 
     /**
@@ -193,20 +177,20 @@ public class SecurityPopup extends DialogBox {
     /**
      * Show the security popup
      */
-    public void show(final String path) {
-        this.path = path;
-        final int left = (Window.getClientWidth() - width) / 2;
-        final int top = (Window.getClientHeight() - 400) / 2;
+    public void show(String uuid) {
+        this.uuid = uuid;
+        int left = (Window.getClientWidth() - width) / 2;
+        int top = (Window.getClientHeight() - 400) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("security.label"));
-        securityPanel.reset(path);
+        securityPanel.reset(uuid);
         change.setEnabled(false);
         super.show();
 
         // TODO:Solves minor bug with IE
         if (Util.getUserAgent().startsWith("ie")) {
-            securityPanel.tabPanel.setWidth(String.valueOf(width));
-            securityPanel.tabPanel.setWidth(String.valueOf(width + 1));
+            securityPanel.tabPanel.setWidth(String.valueOf(width) + "px");
+            securityPanel.tabPanel.setWidth(String.valueOf((width + 1)) + "px");
         }
 
         // Fill width must be done on visible widgets
@@ -231,7 +215,7 @@ public class SecurityPopup extends DialogBox {
     /**
      * @param enableChangeButton
      */
-    public void enableChangeButton(final boolean enable) {
+    public void enableChangeButton(boolean enable) {
         change.setEnabled(enable);
     }
 }

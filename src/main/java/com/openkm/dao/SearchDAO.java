@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -21,41 +21,6 @@
 
 package com.openkm.dao;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.highlight.Highlighter;
-import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
-import org.apache.lucene.search.highlight.QueryScorer;
-import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
-import org.apache.lucene.search.highlight.SimpleSpanFragmenter;
-import org.apache.lucene.search.similar.MoreLikeThis;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.search.FullTextQuery;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.ProjectionConstants;
-import org.hibernate.search.Search;
-import org.hibernate.search.SearchFactory;
-import org.hibernate.search.reader.ReaderProvider;
-import org.hibernate.search.store.DirectoryProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.openkm.bean.Permission;
 import com.openkm.bean.nr.NodeQueryResult;
 import com.openkm.bean.nr.NodeResultSet;
@@ -69,6 +34,35 @@ import com.openkm.dao.bean.NodeFolder;
 import com.openkm.dao.bean.NodeMail;
 import com.openkm.module.db.stuff.DbAccessManager;
 import com.openkm.module.db.stuff.SecurityHelper;
+import com.openkm.util.FormatUtil;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.*;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.*;
+import org.apache.lucene.search.highlight.*;
+import org.apache.lucene.search.similar.MoreLikeThis;
+import org.apache.lucene.store.Directory;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.search.FullTextQuery;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.SearchFactory;
+import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.reader.ReaderProvider;
+import org.hibernate.search.store.DirectoryProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Search results are filtered by com.openkm.module.db.stuff.ReadAccessFilterFactory, which limit the results only for
@@ -78,36 +72,25 @@ import com.openkm.module.db.stuff.SecurityHelper;
  */
 public class SearchDAO {
     private static Logger log = LoggerFactory.getLogger(SearchDAO.class);
-
     private static SearchDAO single = new SearchDAO();
-
     private static final int MAX_FRAGMENT_LEN = 256;
-
     public static final String SEARCH_LUCENE = "lucene";
-
     public static final String SEARCH_ACCESS_MANAGER_MORE = "am_more";
-
     public static final String SEARCH_ACCESS_MANAGER_WINDOW = "am_window";
-
     public static final String SEARCH_ACCESS_MANAGER_LIMITED = "am_limited";
-
     public static Analyzer analyzer = null;
 
     static {
         try {
-            final Class<?> Analyzer = Class
-                    .forName(Config.HIBERNATE_SEARCH_ANALYZER);
+            Class<?> Analyzer = Class.forName(Config.HIBERNATE_SEARCH_ANALYZER);
 
-            if (Analyzer.getCanonicalName().startsWith(
-                    "org.apache.lucene.analysis")) {
-                final Constructor<?> constructor = Analyzer
-                        .getConstructor(Config.LUCENE_VERSION.getClass());
-                analyzer = (Analyzer) constructor
-                        .newInstance(Config.LUCENE_VERSION);
+            if (Analyzer.getCanonicalName().startsWith("org.apache.lucene.analysis")) {
+                Constructor<?> constructor = Analyzer.getConstructor(Config.LUCENE_VERSION.getClass());
+                analyzer = (Analyzer) constructor.newInstance(Config.LUCENE_VERSION);
             } else {
                 analyzer = (Analyzer) Analyzer.newInstance();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
             analyzer = new StandardAnalyzer(Config.LUCENE_VERSION);
         }
@@ -125,15 +108,14 @@ public class SearchDAO {
     /**
      * Search by query
      */
-    public NodeResultSet findByQuery(final Query query, final int offset,
-            final int limit) throws ParseException, DatabaseException {
-        log.debug("findByQuery({}, {}, {})", new Object[] { query, offset,
-                limit });
+    public NodeResultSet findByQuery(Query query, int offset, int limit) throws ParseException, DatabaseException {
+        log.debug("findByQuery({}, {}, {})", new Object[] { query, offset, limit });
         FullTextSession ftSession = null;
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             ftSession = Search.getFullTextSession(session);
             tx = ftSession.beginTransaction();
@@ -142,30 +124,25 @@ public class SearchDAO {
 
             if (SEARCH_LUCENE.equals(Config.SECURITY_SEARCH_EVALUATION)) {
                 result = runQueryLucene(ftSession, query, offset, limit);
-            } else if (SEARCH_ACCESS_MANAGER_MORE
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerMore(ftSession, query, offset,
-                        limit);
-            } else if (SEARCH_ACCESS_MANAGER_WINDOW
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerWindow(ftSession, query, offset,
-                        limit);
-            } else if (SEARCH_ACCESS_MANAGER_LIMITED
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerLimited(ftSession, query, offset,
-                        limit);
+            } else if (SEARCH_ACCESS_MANAGER_MORE.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                result = runQueryAccessManagerMore(ftSession, query, offset, limit);
+            } else if (SEARCH_ACCESS_MANAGER_WINDOW.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                result = runQueryAccessManagerWindow(ftSession, query, offset, limit);
+            } else if (SEARCH_ACCESS_MANAGER_LIMITED.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                result = runQueryAccessManagerLimited(ftSession, query, offset, limit);
             }
 
             HibernateUtil.commit(tx);
+            log.trace("findByQuery.Time: {}", FormatUtil.formatMiliSeconds(System.currentTimeMillis() - begin));
             log.debug("findByQuery: {}", result);
             return result;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final InvalidTokenOffsetsException e) {
+        } catch (InvalidTokenOffsetsException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -175,62 +152,23 @@ public class SearchDAO {
     }
 
     /**
-     * Search by simple query
+     * Parses a query string, returning a {@link org.apache.lucene.search.Query}.
+     *
+     * @param expression  the query string to be parsed.
+     * @param field the default field for query terms.
      */
-    public NodeResultSet findBySimpleQuery(final String expression,
-            final int offset, final int limit) throws ParseException,
-            DatabaseException {
-        log.debug("findBySimpleQuery({}, {}, {})", new Object[] { expression,
-                offset, limit });
-        FullTextSession ftSession = null;
-        Session session = null;
-        Transaction tx = null;
+    public Query parseQuery(String expression, String field) throws ParseException, DatabaseException {
+        log.debug("parseQuery({})", new Object[] { expression });
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            ftSession = Search.getFullTextSession(session);
-            tx = ftSession.beginTransaction();
-
-            final QueryParser parser = new QueryParser(Config.LUCENE_VERSION,
-                    NodeDocument.TEXT_FIELD, analyzer);
-            final Query query = parser.parse(expression);
-            NodeResultSet result = null;
-            log.debug("findBySimpleQuery.query: {}", query);
-
-            if (SEARCH_LUCENE.equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryLucene(ftSession, query, offset, limit);
-            } else if (SEARCH_ACCESS_MANAGER_MORE
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerMore(ftSession, query, offset,
-                        limit);
-            } else if (SEARCH_ACCESS_MANAGER_WINDOW
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerWindow(ftSession, query, offset,
-                        limit);
-            } else if (SEARCH_ACCESS_MANAGER_LIMITED
-                    .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                result = runQueryAccessManagerLimited(ftSession, query, offset,
-                        limit);
-            }
-
-            HibernateUtil.commit(tx);
-            log.debug("findBySimpleQuery: {}", result);
-            return result;
-        } catch (final org.apache.lucene.queryParser.ParseException e) {
-            HibernateUtil.rollback(tx);
+            QueryParser parser = new QueryParser(Config.LUCENE_VERSION, field, analyzer);
+            Query query = parser.parse(expression);
+            log.debug("parseQuery: {}", query);
+            return query;
+        } catch (org.apache.lucene.queryParser.ParseException e) {
             throw new ParseException(e.getMessage(), e);
-        } catch (final IOException e) {
-            HibernateUtil.rollback(tx);
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final InvalidTokenOffsetsException e) {
-            HibernateUtil.rollback(tx);
-            throw new DatabaseException(e.getMessage(), e);
-        } catch (final HibernateException e) {
-            HibernateUtil.rollback(tx);
-            throw new DatabaseException(e.getMessage(), e);
-        } finally {
-            HibernateUtil.close(ftSession);
-            HibernateUtil.close(session);
         }
     }
 
@@ -241,36 +179,29 @@ public class SearchDAO {
      * repository. This may take several hours (or days) is big repositories.
      */
     @SuppressWarnings("unchecked")
-    private NodeResultSet runQueryLucene(final FullTextSession ftSession,
-            final Query query, final int offset, final int limit)
-            throws IOException, InvalidTokenOffsetsException,
-            HibernateException {
-        log.debug("runQueryLucene({}, {}, {}, {})", new Object[] { ftSession,
-                query, offset, limit });
-        final List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
-        final NodeResultSet result = new NodeResultSet();
-        final FullTextQuery ftq = ftSession.createFullTextQuery(query,
-                NodeDocument.class, NodeFolder.class, NodeMail.class);
-        ftq.setProjection(ProjectionConstants.SCORE, ProjectionConstants.THIS);
+    private NodeResultSet runQueryLucene(FullTextSession ftSession, Query query, int offset, int limit) throws IOException,
+            InvalidTokenOffsetsException, HibernateException {
+        log.debug("runQueryLucene({}, {}, {}, {})", new Object[] { ftSession, query, offset, limit });
+        List<NodeQueryResult> results = new ArrayList<>();
+        NodeResultSet result = new NodeResultSet();
+        FullTextQuery ftq = ftSession.createFullTextQuery(query, NodeDocument.class, NodeFolder.class, NodeMail.class);
+        ftq.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
         ftq.enableFullTextFilter("readAccess");
-        final QueryScorer scorer = new QueryScorer(query,
-                NodeDocument.TEXT_FIELD);
+        QueryScorer scorer = new QueryScorer(query, NodeDocument.TEXT_FIELD);
 
         // Set limits
         ftq.setFirstResult(offset);
         ftq.setMaxResults(limit);
 
         // Highlight using a CSS style
-        final SimpleHTMLFormatter formatter = new SimpleHTMLFormatter(
-                "<span class='highlight'>", "</span>");
-        final Highlighter highlighter = new Highlighter(formatter, scorer);
-        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer,
-                MAX_FRAGMENT_LEN));
+        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class='highlight'>", "</span>");
+        Highlighter highlighter = new Highlighter(formatter, scorer);
+        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer, MAX_FRAGMENT_LEN));
 
-        for (final Iterator<Object[]> it = ftq.iterate(); it.hasNext();) {
-            final Object[] qRes = it.next();
-            final Float score = (Float) qRes[0];
-            final NodeBase nBase = (NodeBase) qRes[1];
+        for (Iterator<Object[]> it = ftq.iterate(); it.hasNext();) {
+            Object[] qRes = it.next();
+            Float score = (Float) qRes[0];
+            NodeBase nBase = (NodeBase) qRes[1];
 
             // Add result
             addResult(ftSession, results, highlighter, score, nBase);
@@ -293,37 +224,30 @@ public class SearchDAO {
      * that will check if there is another document more who the user can read.
      */
     @SuppressWarnings("unchecked")
-    private NodeResultSet runQueryAccessManagerMore(
-            final FullTextSession ftSession, final Query query,
-            final int offset, final int limit) throws IOException,
+    private NodeResultSet runQueryAccessManagerMore(FullTextSession ftSession, Query query, int offset, int limit) throws IOException,
             InvalidTokenOffsetsException, DatabaseException, HibernateException {
-        log.debug("runQueryAccessManagerMore({}, {}, {}, {})", new Object[] {
-                ftSession, query, offset, limit });
-        final List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
-        final NodeResultSet result = new NodeResultSet();
-        final FullTextQuery ftq = ftSession.createFullTextQuery(query,
-                NodeDocument.class, NodeFolder.class, NodeMail.class);
-        ftq.setProjection(ProjectionConstants.SCORE, ProjectionConstants.THIS);
+        log.debug("runQueryAccessManagerMore({}, {}, {}, {})", new Object[] { ftSession, query, offset, limit });
+        List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
+        NodeResultSet result = new NodeResultSet();
+        FullTextQuery ftq = ftSession.createFullTextQuery(query, NodeDocument.class, NodeFolder.class, NodeMail.class);
+        ftq.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
         ftq.enableFullTextFilter("readAccess");
-        final QueryScorer scorer = new QueryScorer(query,
-                NodeDocument.TEXT_FIELD);
+        QueryScorer scorer = new QueryScorer(query, NodeDocument.TEXT_FIELD);
         int count = 0;
 
         // Highlight using a CSS style
-        final SimpleHTMLFormatter formatter = new SimpleHTMLFormatter(
-                "<span class='highlight'>", "</span>");
-        final Highlighter highlighter = new Highlighter(formatter, scorer);
-        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer,
-                MAX_FRAGMENT_LEN));
+        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class='highlight'>", "</span>");
+        Highlighter highlighter = new Highlighter(formatter, scorer);
+        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer, MAX_FRAGMENT_LEN));
 
         // Set limits
-        final Iterator<Object[]> it = ftq.iterate();
-        final DbAccessManager am = SecurityHelper.getAccessManager();
+        Iterator<Object[]> it = ftq.iterate();
+        DbAccessManager am = SecurityHelper.getAccessManager();
 
         // Bypass offset
         while (it.hasNext() && count < offset) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -332,9 +256,9 @@ public class SearchDAO {
 
         // Read limit results
         while (it.hasNext() && results.size() < limit) {
-            final Object[] qRes = it.next();
-            final Float score = (Float) qRes[0];
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            Float score = (Float) qRes[0];
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 // Add result
@@ -346,8 +270,8 @@ public class SearchDAO {
         count = results.size() + offset;
 
         while (it.hasNext() && count < offset + limit + 1) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -371,37 +295,30 @@ public class SearchDAO {
      * that will check if there are more documents (2 * limit) the user can read.
      */
     @SuppressWarnings("unchecked")
-    private NodeResultSet runQueryAccessManagerWindow(
-            final FullTextSession ftSession, final Query query,
-            final int offset, final int limit) throws IOException,
+    private NodeResultSet runQueryAccessManagerWindow(FullTextSession ftSession, Query query, int offset, int limit) throws IOException,
             InvalidTokenOffsetsException, DatabaseException, HibernateException {
-        log.debug("runQueryAccessManagerWindow({}, {}, {}, {})", new Object[] {
-                ftSession, query, offset, limit });
-        final List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
-        final NodeResultSet result = new NodeResultSet();
-        final FullTextQuery ftq = ftSession.createFullTextQuery(query,
-                NodeDocument.class, NodeFolder.class, NodeMail.class);
-        ftq.setProjection(ProjectionConstants.SCORE, ProjectionConstants.THIS);
+        log.debug("runQueryAccessManagerWindow({}, {}, {}, {})", new Object[] { ftSession, query, offset, limit });
+        List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
+        NodeResultSet result = new NodeResultSet();
+        FullTextQuery ftq = ftSession.createFullTextQuery(query, NodeDocument.class, NodeFolder.class, NodeMail.class);
+        ftq.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
         ftq.enableFullTextFilter("readAccess");
-        final QueryScorer scorer = new QueryScorer(query,
-                NodeDocument.TEXT_FIELD);
+        QueryScorer scorer = new QueryScorer(query, NodeDocument.TEXT_FIELD);
         int count = 0;
 
         // Highlight using a CSS style
-        final SimpleHTMLFormatter formatter = new SimpleHTMLFormatter(
-                "<span class='highlight'>", "</span>");
-        final Highlighter highlighter = new Highlighter(formatter, scorer);
-        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer,
-                MAX_FRAGMENT_LEN));
+        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class='highlight'>", "</span>");
+        Highlighter highlighter = new Highlighter(formatter, scorer);
+        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer, MAX_FRAGMENT_LEN));
 
         // Set limits
-        final Iterator<Object[]> it = ftq.iterate();
-        final DbAccessManager am = SecurityHelper.getAccessManager();
+        Iterator<Object[]> it = ftq.iterate();
+        DbAccessManager am = SecurityHelper.getAccessManager();
 
         // Bypass offset
         while (it.hasNext() && count < offset) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -410,9 +327,9 @@ public class SearchDAO {
 
         // Read limit results
         while (it.hasNext() && results.size() < limit) {
-            final Object[] qRes = it.next();
-            final Float score = (Float) qRes[0];
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            Float score = (Float) qRes[0];
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 // Add result
@@ -424,8 +341,8 @@ public class SearchDAO {
         count = results.size() + offset;
 
         while (it.hasNext() && count < offset + limit * 2) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -449,37 +366,30 @@ public class SearchDAO {
      * that will check if there are more documents (MAX_SEARCH_RESULTS) the user can read.
      */
     @SuppressWarnings("unchecked")
-    private NodeResultSet runQueryAccessManagerLimited(
-            final FullTextSession ftSession, final Query query,
-            final int offset, final int limit) throws IOException,
+    private NodeResultSet runQueryAccessManagerLimited(FullTextSession ftSession, Query query, int offset, int limit) throws IOException,
             InvalidTokenOffsetsException, DatabaseException, HibernateException {
-        log.debug("runQueryAccessManagerLimited({}, {}, {}, {})", new Object[] {
-                ftSession, query, offset, limit });
-        final List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
-        final NodeResultSet result = new NodeResultSet();
-        final FullTextQuery ftq = ftSession.createFullTextQuery(query,
-                NodeDocument.class, NodeFolder.class, NodeMail.class);
-        ftq.setProjection(ProjectionConstants.SCORE, ProjectionConstants.THIS);
+        log.debug("runQueryAccessManagerLimited({}, {}, {}, {})", new Object[] { ftSession, query, offset, limit });
+        List<NodeQueryResult> results = new ArrayList<NodeQueryResult>();
+        NodeResultSet result = new NodeResultSet();
+        FullTextQuery ftq = ftSession.createFullTextQuery(query, NodeDocument.class, NodeFolder.class, NodeMail.class);
+        ftq.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
         ftq.enableFullTextFilter("readAccess");
-        final QueryScorer scorer = new QueryScorer(query,
-                NodeDocument.TEXT_FIELD);
+        QueryScorer scorer = new QueryScorer(query, NodeDocument.TEXT_FIELD);
         int count = 0;
 
         // Highlight using a CSS style
-        final SimpleHTMLFormatter formatter = new SimpleHTMLFormatter(
-                "<span class='highlight'>", "</span>");
-        final Highlighter highlighter = new Highlighter(formatter, scorer);
-        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer,
-                MAX_FRAGMENT_LEN));
+        SimpleHTMLFormatter formatter = new SimpleHTMLFormatter("<span class='highlight'>", "</span>");
+        Highlighter highlighter = new Highlighter(formatter, scorer);
+        highlighter.setTextFragmenter(new SimpleSpanFragmenter(scorer, MAX_FRAGMENT_LEN));
 
         // Set limits
-        final Iterator<Object[]> it = ftq.iterate();
-        final DbAccessManager am = SecurityHelper.getAccessManager();
+        Iterator<Object[]> it = ftq.iterate();
+        DbAccessManager am = SecurityHelper.getAccessManager();
 
         // Bypass offset
         while (it.hasNext() && count < offset) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -488,9 +398,9 @@ public class SearchDAO {
 
         // Read limit results
         while (it.hasNext() && results.size() < limit) {
-            final Object[] qRes = it.next();
-            final Float score = (Float) qRes[0];
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            Float score = (Float) qRes[0];
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 // Add result
@@ -502,8 +412,8 @@ public class SearchDAO {
         count = results.size() + offset;
 
         while (it.hasNext() && count < Config.MAX_SEARCH_RESULTS) {
-            final Object[] qRes = it.next();
-            final NodeBase nBase = (NodeBase) qRes[1];
+            Object[] qRes = it.next();
+            NodeBase nBase = (NodeBase) qRes[1];
 
             if (am.isGranted(nBase, Permission.READ)) {
                 count++;
@@ -520,11 +430,9 @@ public class SearchDAO {
     /**
      * Add result
      */
-    private void addResult(final FullTextSession ftSession,
-            final List<NodeQueryResult> results, final Highlighter highlighter,
-            final Float score, final NodeBase nBase) throws IOException,
-            InvalidTokenOffsetsException {
-        final NodeQueryResult qr = new NodeQueryResult();
+    private void addResult(FullTextSession ftSession, List<NodeQueryResult> results, Highlighter highlighter, Float score, NodeBase nBase)
+            throws IOException, InvalidTokenOffsetsException {
+        NodeQueryResult qr = new NodeQueryResult();
         NodeDocument nDocument = null;
         NodeMail nMail = null;
         String excerpt = null;
@@ -532,8 +440,7 @@ public class SearchDAO {
         if (nBase instanceof NodeDocument) {
             nDocument = (NodeDocument) nBase;
 
-            if (NodeMailDAO.getInstance().isMail(ftSession,
-                    nDocument.getParent())) {
+            if (NodeMailDAO.getInstance().isMail(ftSession, nDocument.getParent())) {
                 log.debug("NODE DOCUMENT - ATTACHMENT");
                 qr.setAttachment(nDocument);
             } else {
@@ -542,7 +449,7 @@ public class SearchDAO {
             }
         } else if (nBase instanceof NodeFolder) {
             log.debug("NODE FOLDER");
-            final NodeFolder nFld = (NodeFolder) nBase;
+            NodeFolder nFld = (NodeFolder) nBase;
             qr.setFolder(nFld);
         } else if (nBase instanceof NodeMail) {
             log.debug("NODE MAIL");
@@ -553,17 +460,14 @@ public class SearchDAO {
         }
 
         if (nDocument != null && nDocument.getText() != null) {
-            excerpt = highlighter.getBestFragment(analyzer,
-                    NodeDocument.TEXT_FIELD, nDocument.getText());
+            excerpt = highlighter.getBestFragment(analyzer, NodeDocument.TEXT_FIELD, nDocument.getText());
         } else if (nMail != null && nMail.getContent() != null) {
-            excerpt = highlighter.getBestFragment(analyzer,
-                    NodeMail.CONTENT_FIELD, nMail.getContent());
+            excerpt = highlighter.getBestFragment(analyzer, NodeMail.CONTENT_FIELD, nMail.getContent());
         }
 
-        log.debug("Result: SCORE({}), EXCERPT({}), DOCUMENT({})", new Object[] {
-                score, excerpt, nBase });
+        log.debug("Result: SCORE({}), EXCERPT({}), DOCUMENT({})", new Object[] { score, excerpt, nBase });
         qr.setScore(score);
-        qr.setExcerpt(excerpt);
+        qr.setExcerpt(FormatUtil.stripNonValidXMLCharacters(excerpt));
 
         if (qr.getDocument() != null) {
             NodeDocumentDAO.getInstance().initialize(qr.getDocument(), false);
@@ -586,32 +490,33 @@ public class SearchDAO {
      * TODO This cache should be for every user (no pass through access manager) and cleaned
      * after a create, move or copy folder operation.
      */
-    public List<String> findFoldersInDepth(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    @SuppressWarnings("unchecked")
+    public List<String> findFoldersInDepth(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findFoldersInDepth({})", parentUuid);
         List<String> ret = null;
-
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                    parentUuid);
+            NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
             SecurityHelper.checkRead(parentNode);
 
             ret = findFoldersInDepthHelper(session, parentUuid);
             HibernateUtil.commit(tx);
-        } catch (final PathNotFoundException e) {
+
+            log.trace("findFoldersInDepth.Time: {}", FormatUtil.formatMiliSeconds(System.currentTimeMillis() - begin));
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -626,20 +531,20 @@ public class SearchDAO {
      * Find by parent in depth helper
      */
     @SuppressWarnings("unchecked")
-    private List<String> findFoldersInDepthHelper(final Session session,
-            final String parentUuid) throws HibernateException,
-            DatabaseException {
+    private List<String> findFoldersInDepthHelper(Session session, String parentUuid) throws HibernateException, DatabaseException {
         log.debug("findFoldersInDepthHelper({}, {})", "session", parentUuid);
-        final List<String> ret = new ArrayList<String>();
-        final String qs = "from NodeFolder nf where nf.parent=:parent";
-        final org.hibernate.Query q = session.createQuery(qs);
+        List<String> ret = new ArrayList<String>();
+        String qs = "from NodeFolder nf where nf.parent=:parent";
+        org.hibernate.Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
-        final List<NodeFolder> results = q.list();
+        List<NodeFolder> results = q.list();
 
         // Security Check
-        final DbAccessManager am = SecurityHelper.getAccessManager();
+        DbAccessManager am = SecurityHelper.getAccessManager();
 
-        for (final NodeFolder node : results) {
+        for (Iterator<NodeFolder> it = results.iterator(); it.hasNext();) {
+            NodeFolder node = it.next();
+
             if (am.isGranted(node, Permission.READ)) {
                 ret.add(node.getUuid());
                 ret.addAll(findFoldersInDepthHelper(session, node.getUuid()));
@@ -653,22 +558,21 @@ public class SearchDAO {
     /**
      * Return a list of similar documents.
      */
-    public NodeResultSet moreLikeThis(final String uuid, final int maxResults)
-            throws DatabaseException, PathNotFoundException {
+    public NodeResultSet moreLikeThis(String uuid, int maxResults) throws DatabaseException, PathNotFoundException {
         log.debug("moreLikeThis({}, {})", new Object[] { uuid, maxResults });
-        final String[] moreLikeFields = new String[] { "text" };
+        String[] moreLikeFields = new String[] { "text" };
         FullTextSession ftSession = null;
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             ftSession = Search.getFullTextSession(session);
             tx = ftSession.beginTransaction();
             NodeResultSet result = new NodeResultSet();
 
-            final MoreLikeThis mlt = new MoreLikeThis(getReader(ftSession,
-                    NodeDocument.class));
+            MoreLikeThis mlt = new MoreLikeThis(getReader(ftSession, NodeDocument.class));
             mlt.setFieldNames(moreLikeFields);
             mlt.setMaxQueryTerms(10);
             mlt.setMinDocFreq(1);
@@ -677,47 +581,41 @@ public class SearchDAO {
             mlt.setMinWordLen(7);
             mlt.setMinTermFreq(1);
 
-            final String str = NodeDocumentDAO.getInstance().getExtractedText(
-                    session, uuid);
+            String str = NodeDocumentDAO.getInstance().getExtractedText(session, uuid);
 
             if (str != null && !str.isEmpty()) {
-                final StringReader sr = new StringReader(str);
-                final Query likeThisQuery = mlt.like(sr);
+                StringReader sr = new StringReader(str);
+                Query likeThisQuery = mlt.like(sr);
 
-                final BooleanQuery query = new BooleanQuery();
+                BooleanQuery query = new BooleanQuery();
                 query.add(likeThisQuery, Occur.SHOULD);
                 query.add(new TermQuery(new Term("uuid", uuid)), Occur.MUST_NOT);
                 log.debug("moreLikeThis.Query: {}", query);
 
                 if (SEARCH_LUCENE.equals(Config.SECURITY_SEARCH_EVALUATION)) {
                     result = runQueryLucene(ftSession, query, 0, maxResults);
-                } else if (SEARCH_ACCESS_MANAGER_MORE
-                        .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                    result = runQueryAccessManagerMore(ftSession, query, 0,
-                            maxResults);
-                } else if (SEARCH_ACCESS_MANAGER_WINDOW
-                        .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                    result = runQueryAccessManagerWindow(ftSession, query, 0,
-                            maxResults);
-                } else if (SEARCH_ACCESS_MANAGER_LIMITED
-                        .equals(Config.SECURITY_SEARCH_EVALUATION)) {
-                    result = runQueryAccessManagerLimited(ftSession, query, 0,
-                            maxResults);
+                } else if (SEARCH_ACCESS_MANAGER_MORE.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                    result = runQueryAccessManagerMore(ftSession, query, 0, maxResults);
+                } else if (SEARCH_ACCESS_MANAGER_WINDOW.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                    result = runQueryAccessManagerWindow(ftSession, query, 0, maxResults);
+                } else if (SEARCH_ACCESS_MANAGER_LIMITED.equals(Config.SECURITY_SEARCH_EVALUATION)) {
+                    result = runQueryAccessManagerLimited(ftSession, query, 0, maxResults);
                 }
             } else {
                 log.warn("Document has not text extracted: {}", uuid);
             }
 
             HibernateUtil.commit(tx);
+            log.trace("moreLikeThis.Time: {}", FormatUtil.formatMiliSeconds(System.currentTimeMillis() - begin));
             log.debug("moreLikeThis: {}", result);
             return result;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final InvalidTokenOffsetsException e) {
+        } catch (InvalidTokenOffsetsException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -730,12 +628,66 @@ public class SearchDAO {
      * Get Lucene index reader.
      */
     @SuppressWarnings("rawtypes")
-    private IndexReader getReader(final FullTextSession session,
-            final Class entity) {
-        final SearchFactory searchFactory = session.getSearchFactory();
-        final DirectoryProvider provider = searchFactory
-                .getDirectoryProviders(entity)[0];
-        final ReaderProvider readerProvider = searchFactory.getReaderProvider();
+    private IndexReader getReader(FullTextSession session, Class entity) {
+        SearchFactory searchFactory = session.getSearchFactory();
+        DirectoryProvider provider = searchFactory.getDirectoryProviders(entity)[0];
+        ReaderProvider readerProvider = searchFactory.getReaderProvider();
         return readerProvider.openReader(provider);
+    }
+
+    /**
+     * Get Lucent document terms.
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getTerms(Class<?> entityType, String nodeUuid) throws CorruptIndexException, IOException {
+        List<String> terms = new ArrayList<String>();
+        FullTextSession ftSession = null;
+        IndexSearcher searcher = null;
+        ReaderProvider provider = null;
+        Session session = null;
+        IndexReader reader = null;
+
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            ftSession = Search.getFullTextSession(session);
+            SearchFactory sFactory = ftSession.getSearchFactory();
+            provider = sFactory.getReaderProvider();
+            QueryBuilder builder = sFactory.buildQueryBuilder().forEntity(entityType).get();
+            Query query = builder.keyword().onField("uuid").matching(nodeUuid).createQuery();
+
+            DirectoryProvider<Directory>[] dirProv = sFactory.getDirectoryProviders(NodeDocument.class);
+            reader = provider.openReader(dirProv[0]);
+            searcher = new IndexSearcher(reader);
+            TopDocs topDocs = searcher.search(query, 1);
+
+            for (ScoreDoc sDoc : topDocs.scoreDocs) {
+                if (!reader.isDeleted(sDoc.doc)) {
+                    for (TermEnum te = reader.terms(); te.next();) {
+                        Term t = te.term();
+
+                        if ("text".equals(t.field())) {
+                            for (TermDocs tds = reader.termDocs(t); tds.next();) {
+                                if (sDoc.doc == tds.doc()) {
+                                    terms.add(t.text());
+                                    //log.info("Field: {} - {}", t.field(), t.text());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } finally {
+            if (provider != null && reader != null) {
+                provider.closeReader(reader);
+            }
+
+            if (searcher != null) {
+                searcher.close();
+            }
+            HibernateUtil.close(ftSession);
+            HibernateUtil.close(session);
+        }
+
+        return terms;
     }
 }

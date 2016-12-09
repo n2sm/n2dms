@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,6 +24,7 @@ package com.openkm.frontend.client.widget.wizard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +46,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
@@ -70,37 +70,22 @@ import com.openkm.frontend.client.widget.thesaurus.ThesaurusSelectPopup;
  */
 public class KeywordsWidget extends Composite {
 
-    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT
-            .create(OKMPropertyService.class);
+    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT.create(OKMPropertyService.class);
 
     private FlexTable table;
-
     private String docPath;
-
     private CellFormatter cellFormatter;
-
     private HorizontalPanel keywordPanel;
-
     private SuggestBox suggestKey;
-
     private MultiWordSuggestOracle multiWordkSuggestKey;
-
     private List<String> keywordList;
-
     private List<String> keyWordsListPending; // Keyword list pending to be added ( each one is added sequentially )
-
     private TagCloud keywordsCloud;
-
     private Map<String, Widget> keywordMap;
-
     private FlowPanel hKeyPanel;
-
     private Collection<String> docKeywords;
-
     private boolean remove = true;
-
     private Image thesaurusImage;
-
     private boolean keyShortcutsEnabled = true;
 
     /**
@@ -109,7 +94,7 @@ public class KeywordsWidget extends Composite {
      * @param grpName The group name
      * @param widget Widget at firs row
      */
-    public KeywordsWidget(final String docPath, final Widget widget) {
+    public KeywordsWidget(String docPath, Widget widget) {
         table = new FlexTable();
         this.docPath = docPath;
 
@@ -117,22 +102,21 @@ public class KeywordsWidget extends Composite {
         keywordMap = new HashMap<String, Widget>();
         keyWordsListPending = new ArrayList<String>();
         keywordsCloud = new TagCloud();
-        keywordsCloud.setWidth("350");
+        keywordsCloud.setWidth("350px");
 
         keywordPanel = new HorizontalPanel();
         multiWordkSuggestKey = new MultiWordSuggestOracle();
         keywordList = new ArrayList<String>();
         suggestKey = new SuggestBox(multiWordkSuggestKey);
-        suggestKey.setHeight("20");
+        suggestKey.setHeight("20px");
         suggestKey.setText(Main.i18n("dashboard.keyword.suggest"));
         suggestKey.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
-                if ((char) KeyCodes.KEY_ENTER == event.getNativeKeyCode()
-                        && keyWordsListPending.isEmpty()) {
-                    final String keys[] = suggestKey.getText().split(" "); // Separates keywords by space
-                    for (final String key : keys) {
-                        keyWordsListPending.add(key);
+            public void onKeyUp(KeyUpEvent event) {
+                if ((char) KeyCodes.KEY_ENTER == event.getNativeKeyCode() && keyWordsListPending.isEmpty()) {
+                    String keys[] = suggestKey.getText().split(" "); // Separates keywords by space
+                    for (int i = 0; i < keys.length; i++) {
+                        keyWordsListPending.add(keys[i]);
                     }
                     addPendingKeyWordsList();
                     suggestKey.setText("");
@@ -141,9 +125,8 @@ public class KeywordsWidget extends Composite {
         });
         suggestKey.getTextBox().addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                if (suggestKey.getText().equals(
-                        Main.i18n("dashboard.keyword.suggest"))) {
+            public void onClick(ClickEvent event) {
+                if (suggestKey.getText().equals(Main.i18n("dashboard.keyword.suggest"))) {
                     suggestKey.setText("");
                 }
 
@@ -152,7 +135,7 @@ public class KeywordsWidget extends Composite {
 
         suggestKey.getTextBox().addMouseOutHandler(new MouseOutHandler() {
             @Override
-            public void onMouseOut(final MouseOutEvent event) {
+            public void onMouseOut(MouseOutEvent event) {
                 if (!keyShortcutsEnabled) {
                     Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
                     keyShortcutsEnabled = true;
@@ -162,7 +145,7 @@ public class KeywordsWidget extends Composite {
 
         suggestKey.getTextBox().addMouseOverHandler(new MouseOverHandler() {
             @Override
-            public void onMouseOver(final MouseOverEvent event) {
+            public void onMouseOver(MouseOverEvent event) {
                 if (keyShortcutsEnabled) {
                     Main.get().mainPanel.disableKeyShorcuts();
                     keyShortcutsEnabled = false;
@@ -173,25 +156,24 @@ public class KeywordsWidget extends Composite {
         thesaurusImage = new Image(OKMBundleResources.INSTANCE.bookOpenIcon());
         thesaurusImage.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup
-                        .show(ThesaurusSelectPopup.WIZARD);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup.show(ThesaurusSelectPopup.WIZARD);
             }
         });
 
-        final VerticalPanel vPanel = new VerticalPanel();
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        VerticalPanel vPanel = new VerticalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(suggestKey);
         hPanel.add(new HTML("&nbsp;"));
         hPanel.add(thesaurusImage);
         hKeyPanel = new FlowPanel();
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         vPanel.add(hPanel);
         vPanel.add(space);
         vPanel.add(hKeyPanel);
 
-        hKeyPanel.setWidth("250");
-        vPanel.setCellHeight(space, "5");
+        hKeyPanel.setWidth("250px");
+        vPanel.setCellHeight(space, "5px");
 
         keywordPanel.add(vPanel);
 
@@ -202,35 +184,29 @@ public class KeywordsWidget extends Composite {
         table.getFlexCellFormatter().setColSpan(0, 0, 2);
         cellFormatter.addStyleName(0, 0, "okm-Security-Title-RightBorder"); // Border and margins
 
-        final RowFormatter rowFormatter = table.getRowFormatter();
+        RowFormatter rowFormatter = table.getRowFormatter();
         rowFormatter.setStyleName(0, "okm-Security-Title");
 
         // Widget format
-        cellFormatter.setHorizontalAlignment(0, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        cellFormatter.setVerticalAlignment(0, 0,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        cellFormatter.setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
+        cellFormatter.setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
 
         table.setHTML(1, 0, "<b>" + Main.i18n("document.keywords") + "</b>");
         table.setWidget(1, 1, keywordPanel);
-        cellFormatter
-                .setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
+        cellFormatter.setVerticalAlignment(1, 0, HasAlignment.ALIGN_TOP);
         table.setHTML(2, 0, "");
-        table.getFlexCellFormatter().setHeight(2, 0, "5");
-        table.setHTML(3, 0, "<b>" + Main.i18n("document.keywords.cloud")
-                + "</b>");
+        table.getFlexCellFormatter().setHeight(2, 0, "5px");
+        table.setHTML(3, 0, "<b>" + Main.i18n("document.keywords.cloud") + "</b>");
         table.getFlexCellFormatter().setColSpan(3, 0, 2);
         table.setWidget(4, 0, keywordsCloud);
         table.getFlexCellFormatter().setColSpan(4, 0, 2);
-        cellFormatter.setHorizontalAlignment(4, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        cellFormatter.setHorizontalAlignment(4, 0, HasAlignment.ALIGN_CENTER);
 
         // Reloading keyword list
         multiWordkSuggestKey.clear();
         keywordList = new ArrayList<String>();
-        for (final GWTKeyword gwtKeyword : Main.get().mainPanel.dashboard.keyMapDashboard
-                .getAllKeywordList()) {
-            final String keyword = gwtKeyword.getKeyword();
+        for (Iterator<GWTKeyword> it = Main.get().mainPanel.dashboard.keyMapDashboard.getAllKeywordList().iterator(); it.hasNext();) {
+            String keyword = it.next().getKeyword();
             multiWordkSuggestKey.add(keyword);
             keywordList.add(keyword);
         }
@@ -250,13 +226,12 @@ public class KeywordsWidget extends Composite {
      * 
      * @param keyword The key to be removed
      */
-    public void removeKey(final String keyword) {
+    public void removeKey(String keyword) {
         if (keywordMap.containsKey(keyword)) {
             keywordMap.remove(keyword);
             docKeywords.remove(keyword);
             removeKeyword(keyword);
-            Main.get().mainPanel.dashboard.keyMapDashboard
-                    .decreaseKeywordRate(keyword);
+            Main.get().mainPanel.dashboard.keyMapDashboard.decreaseKeywordRate(keyword);
             drawTagCloud(docKeywords);
         }
     }
@@ -266,7 +241,7 @@ public class KeywordsWidget extends Composite {
      * 
      * @param key
      */
-    public void addKeywordToPendinList(final String key) {
+    public void addKeywordToPendinList(String key) {
         keyWordsListPending.add(key);
     }
 
@@ -276,21 +251,21 @@ public class KeywordsWidget extends Composite {
      */
     public void addPendingKeyWordsList() {
         if (!keyWordsListPending.isEmpty()) {
-            final String keyword = keyWordsListPending.remove(0);
+            String keyword = keyWordsListPending.remove(0);
             if (!keywordMap.containsKey(keyword) && keyword.length() > 0) {
-                for (final String key : keywordMap.keySet()) {
+                for (Iterator<String> it = keywordMap.keySet().iterator(); it.hasNext();) {
+                    String key = it.next();
                     if (!keywordList.contains(key)) {
                         multiWordkSuggestKey.add(key);
                         keywordList.add(key);
                     }
                 }
-                final Widget keywordButton = getKeyWidget(keyword, remove);
+                Widget keywordButton = getKeyWidget(keyword, remove);
                 keywordMap.put(keyword, keywordButton);
                 hKeyPanel.add(keywordButton);
                 docKeywords.add(keyword);
                 addKeyword(keyword);
-                Main.get().mainPanel.dashboard.keyMapDashboard
-                        .increaseKeywordRate(keyword);
+                Main.get().mainPanel.dashboard.keyMapDashboard.increaseKeywordRate(keyword);
             } else if (keyWordsListPending.isEmpty()) {
                 drawTagCloud(docKeywords);
             }
@@ -304,17 +279,14 @@ public class KeywordsWidget extends Composite {
      * 
      * @return The widget
      */
-    private HorizontalPanel getKeyWidget(final String keyword,
-            final boolean remove) {
+    private HorizontalPanel getKeyWidget(final String keyword, boolean remove) {
         final HorizontalPanel externalPanel = new HorizontalPanel();
-        final HorizontalPanel hPanel = new HorizontalPanel();
-        final HTML space = new HTML();
-        final ImageHover delete = new ImageHover(
-                "img/icon/actions/delete_disabled.gif",
-                "img/icon/actions/delete.gif");
+        HorizontalPanel hPanel = new HorizontalPanel();
+        HTML space = new HTML();
+        ImageHover delete = new ImageHover("img/icon/actions/delete_disabled.gif", "img/icon/actions/delete.gif");
         delete.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 removeKey(keyword);
                 hKeyPanel.remove(externalPanel);
             }
@@ -325,12 +297,12 @@ public class KeywordsWidget extends Composite {
         if (remove) {
             hPanel.add(delete);
         }
-        hPanel.setCellWidth(space, "6");
+        hPanel.setCellWidth(space, "6px");
         hPanel.setStyleName("okm-KeyMap-Gray");
-        final HTML space1 = new HTML();
+        HTML space1 = new HTML();
         externalPanel.add(hPanel);
         externalPanel.add(space1);
-        externalPanel.setCellWidth(space1, "6");
+        externalPanel.setCellWidth(space1, "6px");
         externalPanel.setStylePrimaryName("okm-cloudTags");
         return externalPanel;
     }
@@ -338,28 +310,22 @@ public class KeywordsWidget extends Composite {
     /**
      * Draws a tag cloud
      */
-    private void drawTagCloud(final Collection<String> keywords) {
+    private void drawTagCloud(Collection<String> keywords) {
         // Deletes all tag clouds keys
         keywordsCloud.clear();
-        keywordsCloud
-                .setMinFrequency(Main.get().mainPanel.dashboard.keyMapDashboard
-                        .getTotalMinFrequency());
-        keywordsCloud
-                .setMaxFrequency(Main.get().mainPanel.dashboard.keyMapDashboard
-                        .getTotalMaxFrequency());
+        keywordsCloud.setMinFrequency(Main.get().mainPanel.dashboard.keyMapDashboard.getTotalMinFrequency());
+        keywordsCloud.setMaxFrequency(Main.get().mainPanel.dashboard.keyMapDashboard.getTotalMaxFrequency());
 
-        for (final String keyword : keywords) {
-            final HTML tagKey = new HTML(keyword);
+        for (Iterator<String> it = keywords.iterator(); it.hasNext();) {
+            String keyword = it.next();
+            HTML tagKey = new HTML(keyword);
             tagKey.setStyleName("okm-cloudTags");
-            final Style linkStyle = tagKey.getElement().getStyle();
-            final int fontSize = keywordsCloud
-                    .getLabelSize(Main.get().mainPanel.dashboard.keyMapDashboard
-                            .getKeywordRate(keyword));
+            Style linkStyle = tagKey.getElement().getStyle();
+            int fontSize = keywordsCloud.getLabelSize(Main.get().mainPanel.dashboard.keyMapDashboard.getKeywordRate(keyword));
             linkStyle.setProperty("fontSize", fontSize + "pt");
             linkStyle.setProperty("color", keywordsCloud.getColor(fontSize));
             if (fontSize > 0) {
-                linkStyle.setProperty("top",
-                        (keywordsCloud.getMaxFontSize() - fontSize) / 2 + "px");
+                linkStyle.setProperty("top", (keywordsCloud.getMaxFontSize() - fontSize) / 2 + "px");
             }
             keywordsCloud.add(tagKey);
         }
@@ -369,8 +335,7 @@ public class KeywordsWidget extends Composite {
      * Callback addKeyword document
      */
     final AsyncCallback<Object> callbackAddKeywords = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             if (keyWordsListPending.isEmpty()) {
                 drawTagCloud(docKeywords);
             } else {
@@ -378,8 +343,7 @@ public class KeywordsWidget extends Composite {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             if (keyWordsListPending.isEmpty()) {
                 drawTagCloud(docKeywords);
             } else {
@@ -393,12 +357,10 @@ public class KeywordsWidget extends Composite {
      * Callback removeKeyword document
      */
     final AsyncCallback<Object> callbackRemoveKeywords = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("RemoveKeyword", caught);
         }
     };
@@ -406,14 +368,14 @@ public class KeywordsWidget extends Composite {
     /**
      * addKeyword document
      */
-    public void addKeyword(final String keyword) {
+    public void addKeyword(String keyword) {
         propertyService.addKeyword(docPath, keyword, callbackAddKeywords);
     }
 
     /**
      * removeKeyword document
      */
-    public void removeKeyword(final String keyword) {
+    public void removeKeyword(String keyword) {
         propertyService.removeKeyword(docPath, keyword, callbackRemoveKeywords);
     }
 }

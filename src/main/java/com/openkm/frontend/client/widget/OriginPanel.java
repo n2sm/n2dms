@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,10 +23,7 @@ package com.openkm.frontend.client.widget;
 
 public interface OriginPanel {
     static final int NONE = -1;
-
     static final int TREE_ROOT = 1;
-
     static final int FILE_BROWSER = 2;
-
     static final int TREE_TRASH = 3;
 }

@@ -1,6 +1,6 @@
 /**
 *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,6 +24,7 @@ package com.openkm.frontend.client.widget.properties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,43 +73,25 @@ import com.openkm.frontend.client.widget.dashboard.keymap.TagCloud;
  *
  */
 public class KeywordManager {
-    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT
-            .create(OKMPropertyService.class);
+    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT.create(OKMPropertyService.class);
 
     private HorizontalPanel keywordPanel;
-
     private SuggestBox suggestKey;
-
     private MultiWordSuggestOracle multiWordkSuggestKey;
-
     private List<String> keywordList;
-
     private List<String> keyWordsListPending; // Keyword list pending to be added ( each one is added sequentially )
-
     private Image thesaurusImage;
-
     private FlowPanel hKeyPanel;
-
     private SimplePanel sp;
-
     private Map<String, Widget> keywordMap;
-
     private TagCloud keywordsCloud;
-
     private HTML keywordsCloudText;
-
     private HTML keywordsText;
-
     private Set<String> keywords;
-
     private String path = "";
-
     private boolean remove;
-
     private boolean keyShortcutsEnabled = true;
-
     private boolean removeKeywordEnabled = false;
-
     private Object object;
 
     /**
@@ -119,24 +102,22 @@ public class KeywordManager {
     public KeywordManager(final int selectedFrom) {
         // Keywords
         keywordsCloud = new TagCloud();
-        keywordsCloud.setWidth("350");
-        keywordsCloudText = new HTML("<b>"
-                + Main.i18n("document.keywords.cloud") + "</b>");
+        keywordsCloud.setWidth("350px");
+        keywordsCloudText = new HTML("<b>" + Main.i18n("document.keywords.cloud") + "</b>");
         keywordsText = new HTML("<b>" + Main.i18n("document.keywords") + "</b>");
         keywordMap = new HashMap<String, Widget>();
         multiWordkSuggestKey = new MultiWordSuggestOracle();
         keywordList = new ArrayList<String>();
         suggestKey = new SuggestBox(multiWordkSuggestKey);
-        suggestKey.setHeight("20");
+        suggestKey.setHeight("20px");
         suggestKey.setText(Main.i18n("dashboard.keyword.suggest"));
         suggestKey.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
-                if ((char) KeyCodes.KEY_ENTER == event.getNativeKeyCode()
-                        && keyWordsListPending.isEmpty()) {
-                    final String keys[] = suggestKey.getText().split(" "); // Separates keywords by space
-                    for (final String key : keys) {
-                        keyWordsListPending.add(key);
+            public void onKeyUp(KeyUpEvent event) {
+                if ((char) KeyCodes.KEY_ENTER == event.getNativeKeyCode() && keyWordsListPending.isEmpty()) {
+                    String keys[] = suggestKey.getText().split(" "); // Separates keywords by space
+                    for (int i = 0; i < keys.length; i++) {
+                        keyWordsListPending.add(keys[i]);
                     }
                     addPendingKeyWordsList();
                     suggestKey.setText("");
@@ -145,9 +126,8 @@ public class KeywordManager {
         });
         suggestKey.getTextBox().addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                if (suggestKey.getText().equals(
-                        Main.i18n("dashboard.keyword.suggest"))) {
+            public void onClick(ClickEvent event) {
+                if (suggestKey.getText().equals(Main.i18n("dashboard.keyword.suggest"))) {
                     suggestKey.setText("");
                 }
             }
@@ -155,7 +135,7 @@ public class KeywordManager {
 
         suggestKey.getTextBox().addMouseOutHandler(new MouseOutHandler() {
             @Override
-            public void onMouseOut(final MouseOutEvent event) {
+            public void onMouseOut(MouseOutEvent event) {
                 if (!keyShortcutsEnabled) {
                     Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
                     keyShortcutsEnabled = true;
@@ -165,7 +145,7 @@ public class KeywordManager {
 
         suggestKey.getTextBox().addMouseOverHandler(new MouseOverHandler() {
             @Override
-            public void onMouseOver(final MouseOverEvent event) {
+            public void onMouseOver(MouseOverEvent event) {
                 if (keyShortcutsEnabled) {
                     Main.get().mainPanel.disableKeyShorcuts();
                     keyShortcutsEnabled = false;
@@ -176,28 +156,27 @@ public class KeywordManager {
         thesaurusImage = new Image(OKMBundleResources.INSTANCE.bookOpenIcon());
         thesaurusImage.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup
-                        .show(selectedFrom);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup.show(selectedFrom);
             }
         });
 
         keywordPanel = new HorizontalPanel();
         sp = new SimplePanel();
         sp.setWidth("16px");
-        final VerticalPanel vPanel = new VerticalPanel();
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        VerticalPanel vPanel = new VerticalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(suggestKey);
         hPanel.add(new HTML("&nbsp;"));
         hPanel.add(thesaurusImage);
         hKeyPanel = new FlowPanel();
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         vPanel.add(hPanel);
         vPanel.add(space);
         vPanel.add(hKeyPanel);
 
-        hKeyPanel.setWidth("250");
-        vPanel.setCellHeight(space, "5");
+        hKeyPanel.setWidth("250px");
+        vPanel.setCellHeight(space, "5px");
 
         keywordPanel.add(vPanel);
         keywordPanel.add(sp);
@@ -216,7 +195,7 @@ public class KeywordManager {
      * @param object
      * @param remove
      */
-    public void setObject(final Object object, final boolean remove) {
+    public void setObject(Object object, boolean remove) {
         this.object = object;
         this.remove = remove;
         keywords = new HashSet<String>();
@@ -237,8 +216,8 @@ public class KeywordManager {
      */
     public void drawAll() {
         hKeyPanel.clear();
-        for (final String keyword : keywords) {
-            final Widget keywordButton = getKeyWidget(keyword, remove);
+        for (String keyword : keywords) {
+            Widget keywordButton = getKeyWidget(keyword, remove);
             keywordMap.put(keyword, keywordButton);
             hKeyPanel.add(keywordButton);
         }
@@ -246,9 +225,8 @@ public class KeywordManager {
         // Reloading keyword list
         multiWordkSuggestKey.clear();
         keywordList = new ArrayList<String>();
-        for (final GWTKeyword key : Main.get().mainPanel.dashboard.keyMapDashboard
-                .getAllKeywordList()) {
-            final String keyword = key.getKeyword();
+        for (GWTKeyword key : Main.get().mainPanel.dashboard.keyMapDashboard.getAllKeywordList()) {
+            String keyword = key.getKeyword();
             multiWordkSuggestKey.add(keyword);
             keywordList.add(keyword);
         }
@@ -263,7 +241,7 @@ public class KeywordManager {
      * 
      * @param visible
      */
-    public void setVisible(final boolean visible) {
+    public void setVisible(boolean visible) {
         suggestKey.setVisible(visible);
         thesaurusImage.setVisible(visible);
     }
@@ -318,7 +296,7 @@ public class KeywordManager {
      * 
      * @param key
      */
-    public void addKeywordToPendinList(final String key) {
+    public void addKeywordToPendinList(String key) {
         keyWordsListPending.add(key);
     }
 
@@ -327,23 +305,18 @@ public class KeywordManager {
      * 
      * @param keyword The key to be removed
      */
-    public void removeKey(final String keyword) {
+    public void removeKey(String keyword) {
         if (keywordMap.containsKey(keyword)) {
             keywordMap.remove(keyword);
             keywords.remove(keyword);
             removeKeyword(keyword);
-            Main.get().mainPanel.dashboard.keyMapDashboard
-                    .decreaseKeywordRate(keyword);
+            Main.get().mainPanel.dashboard.keyMapDashboard.decreaseKeywordRate(keyword);
             WidgetUtil.drawTagCloud(keywordsCloud, keywords);
             if (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS) {
-                final GWTFolder folder = (GWTFolder) Main.get().activeFolderTree.actualItem
-                        .getUserObject();
+                GWTFolder folder = ((GWTFolder) Main.get().activeFolderTree.actualItem.getUserObject());
                 // When remove the keyword for which are browsing must refreshing filebrowser view
-                if (folder.getPath()
-                        .substring(folder.getPath().lastIndexOf("/") + 1)
-                        .replace(" ", "_").equals(keyword)) {
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .refresh(folder.getPath());
+                if (folder.getPath().substring(folder.getPath().lastIndexOf("/") + 1).replace(" ", "_").equals(keyword)) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refresh(folder.getPath());
                 }
             }
         }
@@ -363,39 +336,32 @@ public class KeywordManager {
      * Callback addKeyword document
      */
     final AsyncCallback<Object> callbackAddKeywords = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            final String keyword = (String) result;
-            final Widget keywordButton = getKeyWidget(keyword, remove);
+        public void onSuccess(Object result) {
+            String keyword = (String) result;
+            Widget keywordButton = getKeyWidget(keyword, remove);
             keywordMap.put(keyword, keywordButton);
             hKeyPanel.add(keywordButton);
             keywords.add(keyword);
 
             if (keyWordsListPending.isEmpty()) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.status
-                        .unsetKeywords();
+                Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetKeywords();
                 WidgetUtil.drawTagCloud(keywordsCloud, keywords);
 
                 if (object instanceof GWTDocument) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                            .fireEvent(HasDocumentEvent.KEYWORD_ADDED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.fireEvent(HasDocumentEvent.KEYWORD_ADDED);
                 } else if (object instanceof GWTFolder) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                            .fireEvent(HasFolderEvent.KEYWORD_ADDED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.fireEvent(HasFolderEvent.KEYWORD_ADDED);
                 } else if (object instanceof GWTMail) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                            .fireEvent(HasMailEvent.KEYWORD_ADDED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.fireEvent(HasMailEvent.KEYWORD_ADDED);
                 }
             } else {
                 addPendingKeyWordsList();
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             if (keyWordsListPending.isEmpty()) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.status
-                        .unsetKeywords();
+                Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetKeywords();
                 WidgetUtil.drawTagCloud(keywordsCloud, keywords);
             } else {
                 addPendingKeyWordsList();
@@ -409,26 +375,19 @@ public class KeywordManager {
      * Callback removeKeyword mail
      */
     final AsyncCallback<Object> callbackRemoveKeywords = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetKeywords();
+        public void onSuccess(Object result) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetKeywords();
             if (object instanceof GWTDocument) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                        .fireEvent(HasDocumentEvent.KEYWORD_REMOVED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.fireEvent(HasDocumentEvent.KEYWORD_REMOVED);
             } else if (object instanceof GWTFolder) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                        .fireEvent(HasFolderEvent.KEYWORD_REMOVED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.fireEvent(HasFolderEvent.KEYWORD_REMOVED);
             } else if (object instanceof GWTMail) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                        .fireEvent(HasMailEvent.KEYWORD_REMOVED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.fireEvent(HasMailEvent.KEYWORD_REMOVED);
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetKeywords();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetKeywords();
             Main.get().showError("RemoveKeyword", caught);
         }
     };
@@ -436,27 +395,27 @@ public class KeywordManager {
     /**
      * @param enabled
      */
-    public void setKeywordEnabled(final boolean enabled) {
+    public void setKeywordEnabled(boolean enabled) {
         suggestKey.getTextBox().setEnabled(enabled);
     }
 
     /**
      * addKeyword mail
      */
-    public void addKeyword(final String keyword) {
+    public void addKeyword(String keyword) {
         if (!keywordMap.containsKey(keyword) && keyword.length() > 0) {
-            for (final String key : keywordMap.keySet()) {
+            for (Iterator<String> it = keywordMap.keySet().iterator(); it.hasNext();) {
+                String key = it.next();
+
                 if (!keywordList.contains(key)) {
                     multiWordkSuggestKey.add(key);
                     keywordList.add(key);
                 }
             }
 
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setKeywords();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setKeywords();
             propertyService.addKeyword(path, keyword, callbackAddKeywords);
-            Main.get().mainPanel.dashboard.keyMapDashboard
-                    .increaseKeywordRate(keyword);
+            Main.get().mainPanel.dashboard.keyMapDashboard.increaseKeywordRate(keyword);
         } else if (keyWordsListPending.isEmpty()) {
             WidgetUtil.drawTagCloud(keywordsCloud, keywords);
         }
@@ -465,7 +424,7 @@ public class KeywordManager {
     /**
      * removeKeyword mail
      */
-    public void removeKeyword(final String keyword) {
+    public void removeKeyword(String keyword) {
         Main.get().mainPanel.desktop.browser.tabMultiple.status.setKeywords();
         propertyService.removeKeyword(path, keyword, callbackRemoveKeywords);
     }
@@ -475,7 +434,7 @@ public class KeywordManager {
      * 
      * @param ktr
      */
-    public void removeKeyword(final KeywordToRemove ktr) {
+    public void removeKeyword(KeywordToRemove ktr) {
         removeKey(ktr.getKeyword());
         hKeyPanel.remove(ktr.getExternalPanel());
     }
@@ -487,28 +446,21 @@ public class KeywordManager {
      * 
      * @return The widget
      */
-    private HorizontalPanel getKeyWidget(final String keyword,
-            final boolean remove) {
+    private HorizontalPanel getKeyWidget(final String keyword, boolean remove) {
         final HorizontalPanel externalPanel = new HorizontalPanel();
-        final HorizontalPanel hPanel = new HorizontalPanel();
-        final HTML space = new HTML();
-        final ImageHover delete = new ImageHover(
-                "img/icon/actions/delete_disabled.gif",
-                "img/icon/actions/delete.gif");
+        HorizontalPanel hPanel = new HorizontalPanel();
+        HTML space = new HTML();
+        ImageHover delete = new ImageHover("img/icon/actions/delete_disabled.gif", "img/icon/actions/delete.gif");
         delete.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final KeywordToRemove ktr = new KeywordToRemove(externalPanel,
-                        keyword);
+            public void onClick(ClickEvent event) {
+                KeywordToRemove ktr = new KeywordToRemove(externalPanel, keyword);
                 if (object instanceof GWTDocument) {
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_DOCUMENT);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_DOCUMENT);
                 } else if (object instanceof GWTFolder) {
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_FOLDER);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_FOLDER);
                 } else if (object instanceof GWTMail) {
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_MAIL);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_KEYWORD_MAIL);
                 }
                 Main.get().confirmPopup.setValue(ktr);
                 Main.get().confirmPopup.show();
@@ -520,12 +472,12 @@ public class KeywordManager {
         if (remove && removeKeywordEnabled) {
             hPanel.add(delete);
         }
-        hPanel.setCellWidth(space, "6");
+        hPanel.setCellWidth(space, "6px");
         hPanel.setStyleName("okm-KeyMap-Gray");
-        final HTML space1 = new HTML();
+        HTML space1 = new HTML();
         externalPanel.add(hPanel);
         externalPanel.add(space1);
-        externalPanel.setCellWidth(space1, "6");
+        externalPanel.setCellWidth(space1, "6px");
         externalPanel.setStylePrimaryName("okm-cloudTags");
         return externalPanel;
     }
@@ -548,8 +500,7 @@ public class KeywordManager {
      * langRefresh
      */
     public void langRefresh() {
-        keywordsCloudText.setHTML("<b>" + Main.i18n("document.keywords.cloud")
-                + "</b>");
+        keywordsCloudText.setHTML("<b>" + Main.i18n("document.keywords.cloud") + "</b>");
         keywordsText.setHTML("<b>" + Main.i18n("document.keywords") + "</b>");
     }
 
@@ -561,11 +512,9 @@ public class KeywordManager {
      */
     public class KeywordToRemove {
         private HorizontalPanel externalPanel;
-
         private String keyword;
 
-        public KeywordToRemove(final HorizontalPanel externalPanel,
-                final String keyword) {
+        public KeywordToRemove(HorizontalPanel externalPanel, String keyword) {
             this.externalPanel = externalPanel;
             this.keyword = keyword;
         }
@@ -574,7 +523,7 @@ public class KeywordManager {
             return externalPanel;
         }
 
-        public void setExternalPanel(final HorizontalPanel externalPanel) {
+        public void setExternalPanel(HorizontalPanel externalPanel) {
             this.externalPanel = externalPanel;
         }
 
@@ -582,7 +531,7 @@ public class KeywordManager {
             return keyword;
         }
 
-        public void setKeyword(final String keyword) {
+        public void setKeyword(String keyword) {
             this.keyword = keyword;
         }
     }

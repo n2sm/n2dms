@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,6 +36,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openkm.core.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,21 +58,14 @@ import com.openkm.util.WebUtils;
  */
 public class DataBrowserServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(DataBrowserServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(DataBrowserServlet.class);
     private static final String SEL_BOTH = "both";
-
     private static final String SEL_FOLDER = "fld";
-
     private static final String SEL_DOCUMENT = "doc";
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
         if (method.equals(METHOD_GET)) {
             doGet(request, response);
@@ -81,11 +75,9 @@ public class DataBrowserServlet extends BaseServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
+        String action = WebUtils.getString(request, "action");
         updateSessionManager(request);
 
         try {
@@ -94,13 +86,13 @@ public class DataBrowserServlet extends BaseServlet {
             } else if (action.equals("repo")) {
                 repositoryList(request, response);
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -109,19 +101,15 @@ public class DataBrowserServlet extends BaseServlet {
     /**
      * File system list
      */
-    private void fileSystemList(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    private void fileSystemList(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("fileSystemList({}, {})", request, response);
-        final String path = WebUtils.getString(request, "path",
-                EnvironmentDetector.getUserHome());
-        final String sel = WebUtils.getString(request, "sel", SEL_BOTH);
-        final String dst = WebUtils.getString(request, "dst");
-        final String root = WebUtils.getString(request, "root");
-        final File dir = new File(
-                path.isEmpty() ? EnvironmentDetector.getUserHome() : path);
-        final List<Map<String, String>> folders = new ArrayList<Map<String, String>>();
-        final List<Map<String, String>> documents = new ArrayList<Map<String, String>>();
+        String path = WebUtils.getString(request, "path", EnvironmentDetector.getUserHome());
+        String sel = WebUtils.getString(request, "sel", SEL_BOTH);
+        String dst = WebUtils.getString(request, "dst");
+        String root = WebUtils.getString(request, "root");
+        File dir = new File(path.isEmpty() ? EnvironmentDetector.getUserHome() : path);
+        List<Map<String, String>> folders = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> documents = new ArrayList<Map<String, String>>();
         boolean browseParent = false;
 
         if (!root.equals("")) {
@@ -132,16 +120,16 @@ public class DataBrowserServlet extends BaseServlet {
 
         // Add parent folder link
         if (browseParent) {
-            final Map<String, String> item = new HashMap<String, String>();
-            final File parent = dir.getParentFile();
+            Map<String, String> item = new HashMap<String, String>();
+            File parent = dir.getParentFile();
             item.put("name", "&lt;PARENT FOLDER&gt;");
             item.put("path", fixPath(parent.getPath()));
             item.put("sel", "false");
             folders.add(item);
         }
 
-        for (final File f : dir.listFiles()) {
-            final Map<String, String> item = new HashMap<String, String>();
+        for (File f : dir.listFiles()) {
+            Map<String, String> item = new HashMap<String, String>();
 
             if (f.isDirectory() && !f.isHidden()) {
                 item.put("name", f.getName());
@@ -154,8 +142,7 @@ public class DataBrowserServlet extends BaseServlet {
                 }
 
                 folders.add(item);
-            } else if (f.isFile() && !f.isHidden()
-                    && (sel.equals(SEL_BOTH) || sel.equals(SEL_DOCUMENT))) {
+            } else if (f.isFile() && !f.isHidden() && (sel.equals(SEL_BOTH) || sel.equals(SEL_DOCUMENT))) {
                 item.put("name", f.getName());
                 item.put("path", fixPath(f.getPath()));
                 item.put("sel", "true");
@@ -167,7 +154,7 @@ public class DataBrowserServlet extends BaseServlet {
         Collections.sort(folders, new MapComparator());
         Collections.sort(documents, new MapComparator());
 
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
         sc.setAttribute("action", "fs");
         sc.setAttribute("path", path);
         sc.setAttribute("root", root);
@@ -175,19 +162,17 @@ public class DataBrowserServlet extends BaseServlet {
         sc.setAttribute("sel", sel);
         sc.setAttribute("folders", folders);
         sc.setAttribute("documents", documents);
-        sc.getRequestDispatcher("/extension/data_browser.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/extension/data_browser.jsp").forward(request, response);
 
         // Activity log
-        UserActivity.log(request.getRemoteUser(), "BROWSER_FILESYSTEM_LIST",
-                null, path, null);
+        UserActivity.log(request.getRemoteUser(), "BROWSER_FILESYSTEM_LIST", null, path, null);
         log.debug("fileSystemList: void");
     }
 
     /**
      * Fix path when deployed in Windows
      */
-    private String fixPath(final String path) {
+    private String fixPath(String path) {
         if (EnvironmentDetector.isWindows()) {
             return path.replace("\\", "/");
         } else {
@@ -198,32 +183,28 @@ public class DataBrowserServlet extends BaseServlet {
     /**
      * File system list
      */
-    private void repositoryList(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException, PathNotFoundException, RepositoryException,
-            DatabaseException {
+    private void repositoryList(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException,
+            AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("repositoryList({}, {})", request, response);
-        final Folder rootFolder = OKMRepository.getInstance().getRootFolder(
-                null);
-        final String path = WebUtils.getString(request, "path",
-                rootFolder.getPath());
-        final String sel = WebUtils.getString(request, "sel", SEL_BOTH);
-        final String dst = WebUtils.getString(request, "dst");
-        final String root = WebUtils.getString(request, "root", "/");
-        final List<Map<String, String>> folders = new ArrayList<Map<String, String>>();
-        final List<Map<String, String>> documents = new ArrayList<Map<String, String>>();
+        Folder rootFolder = OKMRepository.getInstance().getRootFolder(null);
+        String path = WebUtils.getString(request, "path", rootFolder.getPath());
+        String sel = WebUtils.getString(request, "sel", SEL_BOTH);
+        String dst = WebUtils.getString(request, "dst");
+        String root = WebUtils.getString(request, "root", "/");
+        List<Map<String, String>> folders = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> documents = new ArrayList<Map<String, String>>();
 
         if (!root.equals(path)) {
             // Add parent folder link
-            final Map<String, String> item = new HashMap<String, String>();
+            Map<String, String> item = new HashMap<String, String>();
             item.put("name", "&lt;PARENT FOLDER&gt;");
             item.put("path", PathUtils.getParent(path));
             item.put("sel", "false");
             folders.add(item);
         }
 
-        for (final Folder fld : OKMFolder.getInstance().getChildren(null, path)) {
-            final Map<String, String> item = new HashMap<String, String>();
+        for (Folder fld : OKMFolder.getInstance().getChildren(null, path)) {
+            Map<String, String> item = new HashMap<String, String>();
             item.put("name", PathUtils.getName(fld.getPath()));
             item.put("path", fld.getPath());
 
@@ -237,9 +218,8 @@ public class DataBrowserServlet extends BaseServlet {
         }
 
         if (sel.equals(SEL_BOTH) || sel.equals(SEL_DOCUMENT)) {
-            for (final Document doc : OKMDocument.getInstance().getChildren(
-                    null, path)) {
-                final Map<String, String> item = new HashMap<String, String>();
+            for (Document doc : OKMDocument.getInstance().getChildren(null, path)) {
+                Map<String, String> item = new HashMap<String, String>();
                 item.put("name", PathUtils.getName(doc.getPath()));
                 item.put("path", doc.getPath());
                 item.put("sel", "true");
@@ -251,7 +231,7 @@ public class DataBrowserServlet extends BaseServlet {
         Collections.sort(folders, new MapComparator());
         Collections.sort(documents, new MapComparator());
 
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
         sc.setAttribute("action", "repo");
         sc.setAttribute("path", path);
         sc.setAttribute("root", root);
@@ -259,12 +239,10 @@ public class DataBrowserServlet extends BaseServlet {
         sc.setAttribute("sel", sel);
         sc.setAttribute("folders", folders);
         sc.setAttribute("documents", documents);
-        sc.getRequestDispatcher("/extension/data_browser.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/extension/data_browser.jsp").forward(request, response);
 
         // Activity log
-        UserActivity.log(request.getRemoteUser(), "BROWSER_REPOSITORY_LIST",
-                null, path, null);
+        UserActivity.log(request.getRemoteUser(), "BROWSER_REPOSITORY_LIST", null, path, null);
         log.debug("repositoryList: void");
     }
 
@@ -274,8 +252,7 @@ public class DataBrowserServlet extends BaseServlet {
     private class MapComparator implements Comparator<Map<String, String>> {
 
         @Override
-        public int compare(final Map<String, String> o1,
-                final Map<String, String> o2) {
+        public int compare(Map<String, String> o1, Map<String, String> o2) {
             return o1.get("name").compareToIgnoreCase(o2.get("name"));
         }
     }

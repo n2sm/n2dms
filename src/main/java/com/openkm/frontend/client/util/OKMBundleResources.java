@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,8 +32,7 @@ import com.google.gwt.resources.client.ImageResource;
  *
  */
 public interface OKMBundleResources extends ClientBundle {
-    public static final OKMBundleResources INSTANCE = GWT
-            .create(OKMBundleResources.class);
+    public static final OKMBundleResources INSTANCE = GWT.create(OKMBundleResources.class);
 
     @Source("com/openkm/frontend/public/img/icon/actions/delete.gif")
     public ImageResource deleteIcon();
@@ -287,9 +286,6 @@ public interface OKMBundleResources extends ClientBundle {
     @Source("com/openkm/frontend/public/img/icon/quota/quota6.gif")
     public ImageResource quota6();
 
-    @Source("com/openkm/frontend/public/img/logo_n2sm_tiny.gif")
-    public ImageResource logoOpenKM();
-
     @Source("com/openkm/frontend/public/img/icon/search/calendar.gif")
     public ImageResource calendar();
 
@@ -467,9 +463,6 @@ public interface OKMBundleResources extends ClientBundle {
     @Source("com/openkm/frontend/public/img/icon/actions/filter.png")
     public ImageResource filter();
 
-    @Source("com/openkm/frontend/public/img/icon/actions/omr.png")
-    public ImageResource omr();
-
-    @Source("com/openkm/frontend/public/img/icon/actions/omr_disabled.png")
-    public ImageResource omrDisabled();
+    @Source("com/openkm/frontend/public/img/icon/actions/export_csv.png")
+    public ImageResource exportCSV();
 }

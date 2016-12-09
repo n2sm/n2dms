@@ -159,6 +159,19 @@
       </td>
     </tr>
     <tr>
+      <td>Update property group</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMenu.prfEdit.updatePropertyGroupVisible}">
+            <input name="prf_menu_edit_update_property_group_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_menu_edit_update_property_group_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
       <td>Remove property group</td>
       <td>
         <c:choose>

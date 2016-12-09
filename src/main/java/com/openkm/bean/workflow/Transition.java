@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,18 +30,15 @@ public class Transition implements Serializable, Comparable<Transition> {
     private static final long serialVersionUID = 9113136516768190724L;
 
     private long id;
-
     private String name;
-
     private String from;
-
     private String to;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -49,7 +46,7 @@ public class Transition implements Serializable, Comparable<Transition> {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -57,7 +54,7 @@ public class Transition implements Serializable, Comparable<Transition> {
         return to;
     }
 
-    public void setTo(final String to) {
+    public void setTo(String to) {
         this.to = to;
     }
 
@@ -65,18 +62,16 @@ public class Transition implements Serializable, Comparable<Transition> {
         return from;
     }
 
-    public void setFrom(final String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
-    @Override
-    public int compareTo(final Transition arg0) {
-        return new Long(id).compareTo(arg0.id);
+    public int compareTo(Transition arg0) {
+        return new Long(this.id).compareTo(arg0.id);
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("id=");
         sb.append(id);

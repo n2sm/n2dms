@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,40 +27,28 @@ public class MailFilterRule implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String FIELD_FROM = "FROM";
-
     public static final String FIELD_TO = "TO";
-
     public static final String FIELD_SUBJECT = "SUBJECT";
-
     public static final String FIELD_CONTENT = "CONTENT";
-
     public static final String FIELD_ATTACHMENT = "ATTACHMENT";
 
     public static final String OPERATION_EQUALS = "EQUALS";
-
     public static final String OPERATION_NOT_EQUALS = "NOT_EQUALS";
-
     public static final String OPERATION_CONTAINS = "CONTAINS";
-
     public static final String OPERATION_ENDS_WITH = "ENDS_WITH";
-
     public static final String OPERATION_STARTS_WITH = "STARTS_WITH";
 
     private long id;
-
     private String field;
-
     private String operation;
-
     private String value;
-
     private boolean active;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -68,7 +56,7 @@ public class MailFilterRule implements Serializable {
         return field;
     }
 
-    public void setField(final String field) {
+    public void setField(String field) {
         this.field = field;
     }
 
@@ -76,7 +64,7 @@ public class MailFilterRule implements Serializable {
         return operation;
     }
 
-    public void setOperation(final String operation) {
+    public void setOperation(String operation) {
         this.operation = operation;
     }
 
@@ -84,7 +72,7 @@ public class MailFilterRule implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -92,13 +80,12 @@ public class MailFilterRule implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

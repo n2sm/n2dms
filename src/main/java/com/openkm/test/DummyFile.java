@@ -15,19 +15,13 @@ import org.slf4j.LoggerFactory;
 
 public class DummyFile {
     private static Logger log = LoggerFactory.getLogger(DummyFile.class);
-
     private static final String FILE = "prueba.txt";
 
-    public static void main(final String[] args) throws IOException {
-        System.out.println("** CHARACTER ENCODING: "
-                + new OutputStreamWriter(new ByteArrayOutputStream())
-                        .getEncoding());
-        System.out
-                .println("** CHARACTER ENCODING: " + Charset.defaultCharset());
-        System.out.println("** file.encoding: "
-                + System.getProperty("file.encoding"));
-        System.out.println("** sun.jnu.encoding: "
-                + System.getProperty("sun.jnu.encoding"));
+    public static void main(String[] args) throws IOException {
+        System.out.println("** CHARACTER ENCODING: " + (new OutputStreamWriter(new ByteArrayOutputStream())).getEncoding());
+        System.out.println("** CHARACTER ENCODING: " + Charset.defaultCharset());
+        System.out.println("** file.encoding: " + System.getProperty("file.encoding"));
+        System.out.println("** sun.jnu.encoding: " + System.getProperty("sun.jnu.encoding"));
         write();
         read();
     }
@@ -36,8 +30,7 @@ public class DummyFile {
      * 
      */
     private static void write() throws FileNotFoundException, IOException {
-        final BufferedOutputStream bos = new BufferedOutputStream(
-                new FileOutputStream(FILE));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(FILE));
         bos.write("Esto es una coñó".getBytes());
         bos.close();
     }
@@ -46,9 +39,8 @@ public class DummyFile {
      * 
      */
     private static void read() throws FileNotFoundException, IOException {
-        final BufferedInputStream bis = new BufferedInputStream(
-                new FileInputStream(FILE));
-        final byte[] buffer = new byte[24];
+        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(FILE));
+        byte[] buffer = new byte[24];
 
         while (bis.read(buffer) > 0) {
             log.info("** Contenido: " + new String(buffer));

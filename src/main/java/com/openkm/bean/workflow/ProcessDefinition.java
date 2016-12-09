@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,20 +31,16 @@ public class ProcessDefinition implements Serializable {
     private static final long serialVersionUID = -2927429131071624036L;
 
     private long id;
-
     private String name;
-
     private String description;
-
     private int version;
-
     private List<String> nodes;
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -52,7 +48,7 @@ public class ProcessDefinition implements Serializable {
         return version;
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
@@ -60,7 +56,7 @@ public class ProcessDefinition implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -68,7 +64,7 @@ public class ProcessDefinition implements Serializable {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -76,13 +72,12 @@ public class ProcessDefinition implements Serializable {
         return nodes;
     }
 
-    public void setNodes(final List<String> nodes) {
+    public void setNodes(List<String> nodes) {
         this.nodes = nodes;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("name=");
         sb.append(name);

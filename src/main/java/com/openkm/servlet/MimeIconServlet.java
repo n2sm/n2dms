@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,26 +43,21 @@ import com.openkm.util.SecureStore;
  */
 public class MimeIconServlet extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(MimeIconServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String mime = request.getPathInfo();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String mime = request.getPathInfo();
         OutputStream os = null;
 
         try {
             if (mime.length() > 1) {
-                final MimeType mt = MimeTypeDAO.findByName(mime.substring(1));
+                MimeType mt = MimeTypeDAO.findByName(mime.substring(1));
 
                 if (mt != null) {
-                    final byte[] img = SecureStore.b64Decode(new String(mt
-                            .getImageContent()));
+                    byte[] img = SecureStore.b64Decode(new String(mt.getImageContent()));
                     response.setContentType(mt.getImageMime());
                     response.setContentLength(img.length);
                     os = response.getOutputStream();
@@ -70,7 +65,7 @@ public class MimeIconServlet extends HttpServlet {
                     os.flush();
                 }
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(os);

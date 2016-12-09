@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,9 +34,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -62,36 +61,22 @@ import com.openkm.frontend.client.widget.propertygroup.PropertyGroupWidgetToFire
 public class TemplateWizardPopup extends DialogBox {
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
-
-    private final OKMDocumentServiceAsync documentService = (OKMDocumentServiceAsync) GWT
-            .create(OKMDocumentService.class);
+    private final OKMDocumentServiceAsync documentService = (OKMDocumentServiceAsync) GWT.create(OKMDocumentService.class);
 
     private static final int STATUS_NONE = -1;
-
     private static final int STATUS_PROPERTY_GROUPS = 0;
-
     private static final int STATUS_FINISH = 1;
 
     private FiredVerticalPanel vPanelFired;
-
     private String docPath = "";
-
     private String destinationPath = "";
-
     private List<GWTPropertyGroup> groupsList = null;
-
     private List<GWTFormElement> formElementList = null;
-
     private Map<String, List<Map<String, String>>> tableProperties = new HashMap<String, List<Map<String, String>>>();
-
     private int groupIndex = 0;
-
     private PropertyGroupWidget propertyGroupWidget = null;
-
     private int status = STATUS_NONE;
-
     public Button actualButton;
-
     private boolean open = false;
 
     /**
@@ -103,7 +88,7 @@ public class TemplateWizardPopup extends DialogBox {
 
         actualButton = new Button("");
         vPanelFired = new FiredVerticalPanel();
-        vPanelFired.setSize("100%", "20");
+        vPanelFired.setSize("100%", "20px");
         setText(Main.i18n("template.wizard.creation"));
 
         actualButton.setStyleName("okm-YesButton");
@@ -117,8 +102,7 @@ public class TemplateWizardPopup extends DialogBox {
      * 
      * @param docPath
      */
-    public void start(final String docPath, final String destinationPath,
-            final boolean open) {
+    public void start(String docPath, String destinationPath, boolean open) {
         groupsList = new ArrayList<GWTPropertyGroup>();
         formElementList = new ArrayList<GWTFormElement>();
         tableProperties = new HashMap<String, List<Map<String, String>>>();
@@ -132,46 +116,42 @@ public class TemplateWizardPopup extends DialogBox {
 
         // Wizard
         groupIndex = 0;
-        propertyGroupService.getGroups(docPath,
-                new AsyncCallback<List<GWTPropertyGroup>>() {
-                    @Override
-                    public void onSuccess(final List<GWTPropertyGroup> result) {
-                        for (final GWTPropertyGroup group : result) {
-                            groupsList.add(group);
-                        }
-                        showNextWizard();
-                    }
+        propertyGroupService.getGroups(docPath, new AsyncCallback<List<GWTPropertyGroup>>() {
+            @Override
+            public void onSuccess(List<GWTPropertyGroup> result) {
+                for (GWTPropertyGroup group : result) {
+                    groupsList.add(group);
+                }
+                showNextWizard();
+            }
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        Main.get().showError("getGroups", caught);
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                Main.get().showError("getGroups", caught);
+            }
+        });
     }
 
     /**
      * getProperties()
      */
     private void getProperties() {
-        final HorizontalPanel hPanel = new HorizontalPanel();
-        final HTML space = new HTML("");
+        HorizontalPanel hPanel = new HorizontalPanel();
+        HTML space = new HTML("");
         hPanel.add(actualButton);
         hPanel.add(space);
-        hPanel.setCellWidth(space, "3");
-        propertyGroupWidget = new PropertyGroupWidget(docPath,
-                groupsList.get(groupIndex), new HTML(groupsList.get(groupIndex)
-                        .getLabel()), vPanelFired);
+        hPanel.setCellWidth(space, "3px");
+        propertyGroupWidget =
+                new PropertyGroupWidget(docPath, groupsList.get(groupIndex), new HTML(groupsList.get(groupIndex).getLabel()), vPanelFired);
         vPanelFired.clear();
         vPanelFired.add(propertyGroupWidget);
         vPanelFired.add(hPanel);
-        final HTML space2 = new HTML("");
+        HTML space2 = new HTML("");
         vPanelFired.add(space2);
-        vPanelFired.setCellVerticalAlignment(propertyGroupWidget,
-                HasVerticalAlignment.ALIGN_TOP);
-        vPanelFired.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-        vPanelFired.setCellHeight(space2, "5");
-        propertyGroupWidget.getProperties();
+        vPanelFired.setCellVerticalAlignment(propertyGroupWidget, HasAlignment.ALIGN_TOP);
+        vPanelFired.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_RIGHT);
+        vPanelFired.setCellHeight(space2, "5px");
+        propertyGroupWidget.getProperties(false);
     }
 
     /**
@@ -190,26 +170,19 @@ public class TemplateWizardPopup extends DialogBox {
                 getProperties();
                 groupIndex++;
             } else {
-                documentService.createFromTemplate(docPath, destinationPath,
-                        formElementList, tableProperties,
+                documentService.createFromTemplate(docPath, destinationPath, formElementList, tableProperties,
                         new AsyncCallback<GWTDocument>() {
                             @Override
-                            public void onSuccess(final GWTDocument result) {
+                            public void onSuccess(GWTDocument result) {
                                 if (open) {
-                                    CommonUI.openPath(result.getParentPath(),
-                                            result.getPath());
+                                    CommonUI.openPath(result.getParentPath(), result.getPath());
                                 } else {
-                                    Main.get().mainPanel.desktop.browser.fileBrowser
-                                            .mantainSelectedRowByPath(result
-                                                    .getPath());
-                                    Main.get().mainPanel.desktop.browser.fileBrowser
-                                            .refresh(Main.get().activeFolderTree
-                                                    .getActualPath());
+                                    Main.get().mainPanel.desktop.browser.fileBrowser.mantainSelectedRowByPath(result.getPath());
+                                    Main.get().mainPanel.desktop.browser.fileBrowser.refresh(Main.get().activeFolderTree.getActualPath());
                                 }
 
                                 // Refreshing users repository size
-                                Main.get().workspaceUserProperties
-                                        .getUserDocumentsSize();
+                                Main.get().workspaceUserProperties.getUserDocumentsSize();
 
                                 // Forward to next status
                                 status = STATUS_FINISH;
@@ -217,9 +190,8 @@ public class TemplateWizardPopup extends DialogBox {
                             }
 
                             @Override
-                            public void onFailure(final Throwable caught) {
-                                Main.get().showError("createFromTemplate",
-                                        caught);
+                            public void onFailure(Throwable caught) {
+                                Main.get().showError("createFromTemplate", caught);
 
                                 // Forward to next status
                                 status = STATUS_FINISH;
@@ -241,14 +213,13 @@ public class TemplateWizardPopup extends DialogBox {
      * @return
      */
     private Button acceptButton() {
-        final Button button = new Button(Main.i18n("button.accept"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        actualButton.setEnabled(false);
-                        executeActionButton();
-                    }
-                });
+        Button button = new Button(Main.i18n("button.accept"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                actualButton.setEnabled(false);
+                executeActionButton();
+            }
+        });
 
         button.setStyleName("okm-YesButton");
         button.setEnabled(false);
@@ -261,14 +232,13 @@ public class TemplateWizardPopup extends DialogBox {
      * @return
      */
     private Button nextButton() {
-        final Button button = new Button(Main.i18n("button.next"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        actualButton.setEnabled(false);
-                        executeActionButton();
-                    }
-                });
+        Button button = new Button(Main.i18n("button.next"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                actualButton.setEnabled(false);
+                executeActionButton();
+            }
+        });
 
         button.setStyleName("okm-YesButton");
         button.setEnabled(false);
@@ -279,8 +249,7 @@ public class TemplateWizardPopup extends DialogBox {
         switch (status) {
         case STATUS_PROPERTY_GROUPS:
             if (propertyGroupWidget != null) {
-                formElementList.addAll(propertyGroupWidget
-                        .updateFormElementsValuesWithNewer());
+                formElementList.addAll(propertyGroupWidget.updateFormElementsValuesWithNewer());
                 showNextWizard();
             }
             break;
@@ -303,8 +272,7 @@ public class TemplateWizardPopup extends DialogBox {
      * @author jllort
      *
      */
-    private class FiredVerticalPanel extends Composite implements
-            PropertyGroupWidgetToFire {
+    private class FiredVerticalPanel extends Composite implements PropertyGroupWidgetToFire {
         private VerticalPanel vPanel;
 
         public FiredVerticalPanel() {
@@ -334,23 +302,21 @@ public class TemplateWizardPopup extends DialogBox {
         /**
          * setCellHorizontalAlignment
          */
-        public void setCellHorizontalAlignment(final Widget w,
-                final HorizontalAlignmentConstant align) {
+        public void setCellHorizontalAlignment(Widget w, HorizontalAlignmentConstant align) {
             vPanel.setCellHorizontalAlignment(w, align);
         }
 
         /**
          * setCellHeight
          */
-        public void setCellHeight(final Widget w, final String height) {
+        public void setCellHeight(Widget w, String height) {
             vPanel.setCellHeight(w, height);
         }
 
         /**
          * setCellVerticalAlignment
          */
-        public void setCellVerticalAlignment(final Widget w,
-                final VerticalAlignmentConstant align) {
+        public void setCellVerticalAlignment(Widget w, VerticalAlignmentConstant align) {
             vPanel.setCellVerticalAlignment(w, align);
         }
 
@@ -364,7 +330,7 @@ public class TemplateWizardPopup extends DialogBox {
         /**
          * add
          */
-        public void add(final Widget widget) {
+        public void add(Widget widget) {
             vPanel.add(widget);
         }
     }

@@ -32,24 +32,16 @@ import org.slf4j.LoggerFactory;
  * @author Paco Avila
  */
 public class MyAccessManagerLockAccessDenied implements AccessManager {
-    private static Logger log = LoggerFactory
-            .getLogger(MyAccessManagerLockAccessDenied.class);
-
+    private static Logger log = LoggerFactory.getLogger(MyAccessManagerLockAccessDenied.class);
     private Subject subject = null;
-
     private HierarchyManager hierMgr = null;
-
     private static final int READ = 1;
-
     private static final int WRITE = 2;
-
     private static final int REMOVE = 4;
-
     public static boolean CAN_WRITE = true;
 
     @Override
-    public void init(final AMContext context) throws AccessDeniedException,
-            Exception {
+    public void init(AMContext context) throws AccessDeniedException, Exception {
         log.debug("init(" + context + ")");
         subject = context.getSubject();
         log.debug("##### " + subject.getPrincipals());
@@ -63,29 +55,18 @@ public class MyAccessManagerLockAccessDenied implements AccessManager {
     }
 
     @Override
-    public void checkPermission(final ItemId id, final int permissions)
-            throws AccessDeniedException, ItemNotFoundException,
-            RepositoryException {
+    public void checkPermission(ItemId id, int permissions) throws AccessDeniedException, ItemNotFoundException, RepositoryException {
         log.debug("checkPermission()");
     }
 
     @Override
-    public boolean isGranted(final ItemId id, final int permissions)
-            throws ItemNotFoundException, RepositoryException {
-        log.debug("isGranted("
-                + subject.getPrincipals()
-                + ", "
-                + id
-                + ", "
-                + (permissions == READ ? "READ"
-                        : permissions == WRITE ? "WRITE"
-                                : permissions == REMOVE ? "REMOVE" : "NONE")
-                + ")");
+    public boolean isGranted(ItemId id, int permissions) throws ItemNotFoundException, RepositoryException {
+        log.debug("isGranted(" + subject.getPrincipals() + ", " + id + ", "
+                + (permissions == READ ? "READ" : (permissions == WRITE ? "WRITE" : (permissions == REMOVE ? "REMOVE" : "NONE"))) + ")");
         boolean access = false;
-        final Session systemSession = DummyLockAccessDenied.getSystemSession();
+        Session systemSession = DummyLockAccessDenied.getSystemSession();
 
-        if (subject.getPrincipals().contains(
-                new UserPrincipal(systemSession.getUserID()))) {
+        if (subject.getPrincipals().contains(new UserPrincipal(systemSession.getUserID()))) {
             // Si es del tipo SYSTEM dar permisos totales
             // Es necesario para que no caiga en un bucle infinito
             access = true;
@@ -95,19 +76,16 @@ public class MyAccessManagerLockAccessDenied implements AccessManager {
 
             // Workaround because of transiente node visibility
             try {
-                log.debug(subject.getPrincipals() + " Item Path: "
-                        + hierMgr.getPath(id));
-            } catch (final ItemNotFoundException e) {
-                log.warn(subject.getPrincipals()
-                        + " hierMgr.getPath() > ItemNotFoundException: "
-                        + e.getMessage());
+                log.debug(subject.getPrincipals() + " Item Path: " + hierMgr.getPath(id));
+            } catch (ItemNotFoundException e) {
+                log.warn(subject.getPrincipals() + " hierMgr.getPath() > ItemNotFoundException: " + e.getMessage());
             }
 
             if (id instanceof NodeId) {
                 nodeId = (NodeId) id;
                 log.debug(subject.getPrincipals() + " This is a NODE");
             } else {
-                final PropertyId propertyId = (PropertyId) id;
+                PropertyId propertyId = (PropertyId) id;
                 nodeId = propertyId.getParentId();
                 log.debug(subject.getPrincipals() + " This is a PROPERTY");
             }
@@ -121,31 +99,25 @@ public class MyAccessManagerLockAccessDenied implements AccessManager {
                 // Workaround because of transiente node visibility
                 try {
                     node = ((SessionImpl) systemSession).getNodeById(nodeId);
-                } catch (final ItemNotFoundException e1) {
-                    log.warn(subject.getPrincipals()
-                            + " systemSession.getNodeById() > ItemNotFoundException: "
-                            + e1.getMessage());
+                } catch (ItemNotFoundException e1) {
+                    log.warn(subject.getPrincipals() + " systemSession.getNodeById() > ItemNotFoundException: " + e1.getMessage());
                 }
 
                 if (node == null) {
                     access = true;
                 } else {
-                    log.debug(subject.getPrincipals() + " Node Name: "
-                            + node.getPath());
-                    log.debug(subject.getPrincipals() + " Node Type: "
-                            + node.getPrimaryNodeType().getName());
+                    log.debug(subject.getPrincipals() + " Node Name: " + node.getPath());
+                    log.debug(subject.getPrincipals() + " Node Type: " + node.getPrimaryNodeType().getName());
 
                     if (permissions == READ) {
-                        for (final PropertyIterator pi = node.getProperties(); pi
-                                .hasNext();) {
-                            final Property property = pi.nextProperty();
+                        for (PropertyIterator pi = node.getProperties(); pi.hasNext();) {
+                            Property property = (Property) pi.nextProperty();
                             log.debug("Property: " + property.getName());
                         }
                         access = true;
                     } else if (permissions == WRITE || permissions == REMOVE) {
-                        for (final PropertyIterator pi = node.getProperties(); pi
-                                .hasNext();) {
-                            final Property property = pi.nextProperty();
+                        for (PropertyIterator pi = node.getProperties(); pi.hasNext();) {
+                            Property property = (Property) pi.nextProperty();
                             log.debug("Property: " + property.getName());
                         }
                         if (CAN_WRITE) {
@@ -159,59 +131,47 @@ public class MyAccessManagerLockAccessDenied implements AccessManager {
         // Workaround because of transiente node visibility
         try {
             log.debug(subject.getPrincipals() + " Path: " + hierMgr.getPath(id));
-        } catch (final ItemNotFoundException e) {
-            log.warn(subject.getPrincipals()
-                    + " hierMgr.getPath() > ItemNotFoundException: "
-                    + e.getMessage());
+        } catch (ItemNotFoundException e) {
+            log.warn(subject.getPrincipals() + " hierMgr.getPath() > ItemNotFoundException: " + e.getMessage());
         }
 
-        log.debug(subject.getPrincipals()
-                + " isGranted "
-                + (permissions == READ ? "READ"
-                        : permissions == WRITE ? "WRITE"
-                                : permissions == REMOVE ? "REMOVE" : "NONE")
-                + ": " + access);
+        log.debug(subject.getPrincipals() + " isGranted "
+                + (permissions == READ ? "READ" : (permissions == WRITE ? "WRITE" : (permissions == REMOVE ? "REMOVE" : "NONE"))) + ": "
+                + access);
         log.debug("-------------------------------------");
 
         return access;
     }
 
     @Override
-    public boolean canAccess(final String workspaceName)
-            throws NoSuchWorkspaceException, RepositoryException {
-        final boolean access = true;
+    public boolean canAccess(String workspaceName) throws NoSuchWorkspaceException, RepositoryException {
+        boolean access = true;
         log.debug("canAccess(" + workspaceName + ")");
         log.debug("canAccess: " + access);
         return access;
     }
 
     @Override
-    public boolean canRead(final Path arg0) throws RepositoryException {
+    public boolean canRead(Path arg0) throws RepositoryException {
         return false;
     }
 
     @Override
-    public void init(final AMContext arg0, final AccessControlProvider arg1,
-            final WorkspaceAccessManager arg2) throws AccessDeniedException,
-            Exception {
+    public void init(AMContext arg0, AccessControlProvider arg1, WorkspaceAccessManager arg2) throws AccessDeniedException, Exception {
     }
 
     @Override
-    public boolean isGranted(final Path arg0, final int arg1)
-            throws RepositoryException {
+    public boolean isGranted(Path arg0, int arg1) throws RepositoryException {
         return false;
     }
 
     @Override
-    public boolean isGranted(final Path arg0, final Name arg1, final int arg2)
-            throws RepositoryException {
+    public boolean isGranted(Path arg0, Name arg1, int arg2) throws RepositoryException {
         return false;
     }
 
     // @Override
     // TODO Enable when using jackrabbit 1.6
-    @Override
-    public void checkPermission(final Path arg0, final int arg1)
-            throws AccessDeniedException, RepositoryException {
+    public void checkPermission(Path arg0, int arg1) throws AccessDeniedException, RepositoryException {
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -40,14 +40,13 @@ public class DbUtils {
      * 
      * @see com.openkm.module.jcr.stuff.JCRUtils
      */
-    public static long calculateQuota(final String user)
-            throws DatabaseException {
+    public static long calculateQuota(String user) throws DatabaseException {
         // String qs = "/jcr:root//element(*, okm:document)[okm:content/@okm:author='" + session.getUserID() + "']";
         // Workspace workspace = session.getWorkspace();
         // QueryManager queryManager = workspace.getQueryManager();
         // Query query = queryManager.createQuery(qs, Query.XPATH);
         // QueryResult result = query.execute();
-        final long size = 0;
+        long size = 0;
 
         // for (NodeIterator nit = result.getNodes(); nit.hasNext(); ) {
         // Node node = nit.nextNode();

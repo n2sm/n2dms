@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,8 +26,8 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 
 import eu.maydu.gwt.validation.client.ValidationAction;
 import eu.maydu.gwt.validation.client.ValidationResult;
-import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.Validator;
+import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.i18n.StandardValidationMessages;
 import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 
@@ -37,114 +37,91 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
  * @author jllort
  *
  */
-public class StringMaxLengthValidator extends
-        Validator<StringMaxLengthValidator> {
+public class StringMaxLengthValidator extends Validator<StringMaxLengthValidator> {
 
     protected TextBoxBase text;
-
     protected SuggestBox suggest;
-
     protected int max;
 
-    public StringMaxLengthValidator(final TextBoxBase text) {
+    public StringMaxLengthValidator(TextBoxBase text) {
         this(text, false);
     }
 
-    public StringMaxLengthValidator(final TextBoxBase text, final int max) {
+    public StringMaxLengthValidator(TextBoxBase text, int max) {
         this(text, max, false);
     }
 
-    public StringMaxLengthValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMaxLengthValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain) {
         this(text, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMaxLengthValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMaxLengthValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringMaxLengthValidator(final TextBoxBase text, final int max,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMaxLengthValidator(TextBoxBase text, int max, boolean preventsPropagationOfValidationChain) {
         this(text, max, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMaxLengthValidator(final TextBoxBase text, final int max,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMaxLengthValidator(TextBoxBase text, int max, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
         setMax(max);
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringMaxLengthValidator(final SuggestBox suggest) {
+    public StringMaxLengthValidator(SuggestBox suggest) {
         this(suggest, false);
     }
 
-    public StringMaxLengthValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMaxLengthValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain) {
         this(suggest, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMaxLengthValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMaxLengthValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new IllegalArgumentException("suggest must not be null");
-        }
         this.suggest = suggest;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringMaxLengthValidator(final SuggestBox suggest, final int min,
-            final int max, final boolean preventsPropagationOfValidationChain) {
+    public StringMaxLengthValidator(SuggestBox suggest, int min, int max, boolean preventsPropagationOfValidationChain) {
         this(suggest, min, max, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMaxLengthValidator(final SuggestBox suggest, final int min,
-            final int max, final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMaxLengthValidator(SuggestBox suggest, int min, int max, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new IllegalArgumentException("suggest must not be null");
-        }
         this.suggest = suggest;
         setMax(max);
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         String str;
-        if (text != null) {
+        if (text != null)
             str = text.getText();
-        } else {
+        else
             str = suggest.getText();
-        }
-        if (str == null) {
+        if (str == null)
             str = "";
-        }
-        if (str.length() > max) {
-            final ValidationResult result = new ValidationResult();
-            final ValidationError error = result.new ValidationError(null,
-                    getErrorMessage(allMessages, messages.validator_max()));
+        if (str.length() > this.max) {
+            ValidationResult result = new ValidationResult();
+            ValidationError error = result.new ValidationError(null, getErrorMessage(allMessages, messages.validator_max()));
             result.getErrors().add(error);
             return result;
         }
@@ -152,20 +129,17 @@ public class StringMaxLengthValidator extends
         return null;
     }
 
-    @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (text != null) {
-            for (final ValidationAction<TextBoxBase> action : getFailureActions()) {
+            for (ValidationAction<TextBoxBase> action : getFailureActions())
                 action.invoke(result, text);
-            }
         } else {
-            for (final ValidationAction<SuggestBox> action : getFailureActions()) {
+            for (ValidationAction<SuggestBox> action : getFailureActions())
                 action.invoke(result, suggest);
-            }
         }
     }
 
-    public StringMaxLengthValidator setMax(final int max) {
+    public StringMaxLengthValidator setMax(int max) {
         this.max = max;
         return this;
     }

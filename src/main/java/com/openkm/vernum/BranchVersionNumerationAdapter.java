@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,11 +38,10 @@ public class BranchVersionNumerationAdapter implements VersionNumerationAdapter 
     }
 
     @Override
-    public String getNextVersionNumber(final Session session,
-            final NodeDocument nDoc, final NodeDocumentVersion nDocVer) {
-        final String curVersionName = nDocVer.getName();
+    public String getNextVersionNumber(Session session, NodeDocument nDoc, NodeDocumentVersion nDocVer, int increment) {
+        String curVersionName = nDocVer.getName();
         String nextVersionName = curVersionName;
-        final Query q = session.createQuery(qs);
+        Query q = session.createQuery(qs);
         NodeDocumentVersion ndv = null;
 
         do {
@@ -62,9 +61,9 @@ public class BranchVersionNumerationAdapter implements VersionNumerationAdapter 
     /**
      * Build version name
      */
-    private String buildVersionName(final String versionNumber) {
-        final String ver[] = versionNumber.split("\\.");
-        final StringBuilder sb = new StringBuilder();
+    private String buildVersionName(String versionNumber) {
+        String ver[] = versionNumber.split("\\.");
+        StringBuilder sb = new StringBuilder();
 
         if (ver.length > 1) {
             int verNum = Integer.parseInt(ver[ver.length - 1]);

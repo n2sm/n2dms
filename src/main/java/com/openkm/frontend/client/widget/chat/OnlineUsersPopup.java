@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,8 +32,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -50,31 +49,20 @@ import com.openkm.frontend.client.service.OKMChatServiceAsync;
  */
 public class OnlineUsersPopup extends DialogBox {
 
-    private final OKMChatServiceAsync chatService = (OKMChatServiceAsync) GWT
-            .create(OKMChatService.class);
+    private final OKMChatServiceAsync chatService = (OKMChatServiceAsync) GWT.create(OKMChatService.class);
 
     public static final int ACTION_NONE = -1;
-
     public static final int ACTION_NEW_CHAT = 0;
-
     public static final int ACTION_ADD_USER_TO_ROOM = 1;
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private Button cancel;
-
     private Button accept;
-
     private ExtendedFlexTable table;
-
     private ScrollPanel scrollPanel;
-
     private int action = ACTION_NONE;
-
     private String room = "";
-
     private List<String> usersInChat;
 
     /**
@@ -91,24 +79,24 @@ public class OnlineUsersPopup extends DialogBox {
         vPanel = new VerticalPanel();
         cancel = new Button(Main.i18n("button.cancel"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
 
         accept = new Button(Main.i18n("button.accept"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 executeAction();
             }
         });
 
         hPanel = new HorizontalPanel();
         hPanel.add(cancel);
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         hPanel.add(space);
         hPanel.add(accept);
-        hPanel.setCellWidth(space, "25");
+        hPanel.setCellWidth(space, "25px");
 
         table = new ExtendedFlexTable();
         table.setBorderWidth(0);
@@ -117,21 +105,17 @@ public class OnlineUsersPopup extends DialogBox {
         table.setWidth("100%");
 
         scrollPanel = new ScrollPanel(table);
-        scrollPanel.setSize("240", "300");
+        scrollPanel.setSize("240px", "300px");
 
         vPanel.add(scrollPanel);
         vPanel.add(hPanel);
 
-        vPanel.setCellHeight(scrollPanel, "300");
-        vPanel.setCellHeight(hPanel, "25");
-        vPanel.setCellHorizontalAlignment(scrollPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellVerticalAlignment(scrollPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        vPanel.setCellVerticalAlignment(hPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        vPanel.setCellHeight(scrollPanel, "300px");
+        vPanel.setCellHeight(hPanel, "25px");
+        vPanel.setCellHorizontalAlignment(scrollPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellVerticalAlignment(scrollPanel, HasAlignment.ALIGN_MIDDLE);
+        vPanel.setCellVerticalAlignment(hPanel, HasAlignment.ALIGN_MIDDLE);
 
         scrollPanel.setStyleName("okm-PanelSelected");
         scrollPanel.addStyleName("okm-Input");
@@ -152,11 +136,9 @@ public class OnlineUsersPopup extends DialogBox {
     public void refreshOnlineUsers() {
         table.removeAllRows(); // Remove all table values
         enableAcceptButton();
-        final String actualUser = Main.get().workspaceUserProperties.getUser()
-                .getId();
-        for (final GWTUser user : Main.get().mainPanel.bottomPanel.userInfo
-                .getConnectedUserList()) {
-            final int rows = table.getRowCount();
+        String actualUser = Main.get().workspaceUserProperties.getUser().getId();
+        for (GWTUser user : Main.get().mainPanel.bottomPanel.userInfo.getConnectedUserList()) {
+            int rows = table.getRowCount();
             // Only we add other user than actual UI user connected ( you can not chat yourself )
             // Evaluate case new chat or existing chat
             if (action == ACTION_NEW_CHAT && !user.getId().equals(actualUser)) {
@@ -165,8 +147,7 @@ public class OnlineUsersPopup extends DialogBox {
                 table.getCellFormatter().setVisible(rows, 1, false);
                 table.getRowFormatter().setStyleName(rows, "okm-Table-Row");
                 setRowWordWarp(rows, 1, false);
-            } else if (!user.getId().equals(actualUser)
-                    && !usersInChat.contains(user)) {
+            } else if (!user.getId().equals(actualUser) && !usersInChat.contains(user)) {
                 table.setHTML(rows, 0, user.getUsername());
                 table.setHTML(rows, 1, user.getId());
                 table.getCellFormatter().setVisible(rows, 1, false);
@@ -183,9 +164,8 @@ public class OnlineUsersPopup extends DialogBox {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, warp);
         }
@@ -204,7 +184,7 @@ public class OnlineUsersPopup extends DialogBox {
      * enableAcceptButton
      */
     public void enableAcceptButton() {
-        accept.setEnabled(table.getSelectedRow() >= 0);
+        accept.setEnabled((table.getSelectedRow() >= 0));
     }
 
     /**
@@ -215,17 +195,15 @@ public class OnlineUsersPopup extends DialogBox {
             final String user = table.getHTML(table.getSelectedRow(), 1);
             chatService.createNewChatRoom(user, new AsyncCallback<String>() {
                 @Override
-                public void onSuccess(final String result) {
-                    final ChatRoomPopup chatRoomPopup = new ChatRoomPopup(user,
-                            result);
+                public void onSuccess(String result) {
+                    ChatRoomPopup chatRoomPopup = new ChatRoomPopup(user, result);
                     chatRoomPopup.center();
                     chatRoomPopup.getPendingMessage(result);
-                    Main.get().mainPanel.bottomPanel.userInfo
-                            .addChatRoom(chatRoomPopup);
+                    Main.get().mainPanel.bottomPanel.userInfo.addChatRoom(chatRoomPopup);
                 }
 
                 @Override
-                public void onFailure(final Throwable caught) {
+                public void onFailure(Throwable caught) {
                     Main.get().showError("GetCreateNewChatRoom", caught);
                 }
             });
@@ -237,18 +215,17 @@ public class OnlineUsersPopup extends DialogBox {
      */
     public void addUserToRoom() {
         if (table.getSelectedRow() >= 0) {
-            final String user = table.getHTML(table.getSelectedRow(), 1);
-            chatService.addUserToChatRoom(room, user,
-                    new AsyncCallback<Object>() {
-                        @Override
-                        public void onSuccess(final Object result) {
-                        }
+            String user = table.getHTML(table.getSelectedRow(), 1);
+            chatService.addUserToChatRoom(room, user, new AsyncCallback<Object>() {
+                @Override
+                public void onSuccess(Object result) {
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("AddUserToChatRoom", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("AddUserToChatRoom", caught);
+                }
+            });
         }
     }
 
@@ -257,7 +234,7 @@ public class OnlineUsersPopup extends DialogBox {
      * 
      * @param action
      */
-    public void setAction(final int action) {
+    public void setAction(int action) {
         setAction(action, "");
     }
 
@@ -266,7 +243,7 @@ public class OnlineUsersPopup extends DialogBox {
      * 
      * @param action
      */
-    public void setAction(final int action, final String room) {
+    public void setAction(int action, String room) {
         this.action = action;
         this.room = room;
     }
@@ -291,7 +268,7 @@ public class OnlineUsersPopup extends DialogBox {
      * 
      * @param usersInChat
      */
-    public void setUsersInChat(final List<String> usersInChat) {
+    public void setUsersInChat(List<String> usersInChat) {
         this.usersInChat = usersInChat;
     }
 }

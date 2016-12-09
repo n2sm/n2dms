@@ -42,7 +42,7 @@ public class BasicCredentialsProvider implements CredentialsProvider {
      *
      * @param defaultHeaderValue
      */
-    public BasicCredentialsProvider(final String defaultHeaderValue) {
+    public BasicCredentialsProvider(String defaultHeaderValue) {
         this.defaultHeaderValue = defaultHeaderValue;
     }
 
@@ -73,23 +73,18 @@ public class BasicCredentialsProvider implements CredentialsProvider {
      * @throws LoginException if no suitable auth header and missing-auth-mapping
      *         is not present
      */
-    @Override
-    public Credentials getCredentials(final HttpServletRequest request)
-            throws LoginException, ServletException {
+    public Credentials getCredentials(HttpServletRequest request) throws LoginException, ServletException {
         try {
-            final String authHeader = request
-                    .getHeader(DavConstants.HEADER_AUTHORIZATION);
+            String authHeader = request.getHeader(DavConstants.HEADER_AUTHORIZATION);
             if (authHeader != null) {
-                final String[] authStr = authHeader.split(" ");
-                if (authStr.length >= 2
-                        && authStr[0]
-                                .equalsIgnoreCase(HttpServletRequest.BASIC_AUTH)) {
-                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                String[] authStr = authHeader.split(" ");
+                if (authStr.length >= 2 && authStr[0].equalsIgnoreCase(HttpServletRequest.BASIC_AUTH)) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
                     Base64.decode(authStr[1].toCharArray(), out);
-                    final String decAuthStr = out.toString("ISO-8859-1");
-                    final int pos = decAuthStr.indexOf(':');
-                    final String userid = decAuthStr.substring(0, pos);
-                    final String passwd = decAuthStr.substring(pos + 1);
+                    String decAuthStr = out.toString("ISO-8859-1");
+                    int pos = decAuthStr.indexOf(':');
+                    String userid = decAuthStr.substring(0, pos);
+                    String passwd = decAuthStr.substring(pos + 1);
                     return new SimpleCredentials(userid, passwd.toCharArray());
                 }
                 throw new ServletException("Unable to decode authorization.");
@@ -100,21 +95,17 @@ public class BasicCredentialsProvider implements CredentialsProvider {
                 } else if (defaultHeaderValue.equals("")) {
                     return null;
                 } else {
-                    final int pos = defaultHeaderValue.indexOf(':');
+                    int pos = defaultHeaderValue.indexOf(':');
                     if (pos < 0) {
-                        return new SimpleCredentials(defaultHeaderValue,
-                                new char[0]);
+                        return new SimpleCredentials(defaultHeaderValue, new char[0]);
                     } else {
-                        return new SimpleCredentials(
-                                defaultHeaderValue.substring(0, pos),
-                                defaultHeaderValue.substring(pos + 1)
-                                        .toCharArray());
+                        return new SimpleCredentials(defaultHeaderValue.substring(0, pos), defaultHeaderValue.substring(pos + 1)
+                                .toCharArray());
                     }
                 }
             }
-        } catch (final IOException e) {
-            throw new ServletException("Unable to decode authorization: "
-                    + e.toString());
+        } catch (IOException e) {
+            throw new ServletException("Unable to decode authorization: " + e.toString());
         }
     }
 

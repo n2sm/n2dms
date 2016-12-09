@@ -11,7 +11,7 @@
   <title>Check Email</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -29,7 +29,12 @@
           <tr><td>Subject</td><td><input type="text" name="subject" size="40" value="${subject}"/></td></tr>
           <tr><td colspan="2">Content</td></tr>
           <tr><td colspan="2"><textarea name="content" cols="60" rows="7">${content}</textarea></td></tr>
-          <tr><td colspan="2" align="right"><input type="submit" value="Send"/></td></tr>
+          <tr>
+            <td colspan="2" align="right">
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <input type="submit" value="Check" class="yesButton"/>
+            </td>
+          </tr>
         </table>
       </form>
       <br/>

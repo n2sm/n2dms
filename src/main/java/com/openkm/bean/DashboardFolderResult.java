@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,18 +26,15 @@ import java.util.Calendar;
 
 public class DashboardFolderResult implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Folder folder;
-
     private boolean visited;
-
     private Calendar date;
 
     public Folder getFolder() {
         return folder;
     }
 
-    public void setFolder(final Folder folder) {
+    public void setFolder(Folder folder) {
         this.folder = folder;
     }
 
@@ -45,7 +42,7 @@ public class DashboardFolderResult implements Serializable {
         return visited;
     }
 
-    public void setVisited(final boolean visited) {
+    public void setVisited(boolean visited) {
         this.visited = visited;
     }
 
@@ -53,13 +50,12 @@ public class DashboardFolderResult implements Serializable {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("folder=");
         sb.append(folder);

@@ -1,6 +1,6 @@
 /**
 *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
@@ -57,58 +57,42 @@ import com.openkm.frontend.client.widget.ConfirmPopup;
  *
  */
 public class CategoryManager {
-    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT
-            .create(OKMPropertyService.class);
-
+    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT.create(OKMPropertyService.class);
     public static final int ORIGIN_FOLDER = 1;
-
     public static final int ORIGIN_DOCUMENT = 2;
-
     public static final int ORIGIN_MAIL = 3;
 
     private Image categoriesImage;
-
     private HTML categoriesText;
-
     private FlexTable tableSubscribedCategories;
-
     private HorizontalPanel hPanelCategories;
-
     private boolean remove;
-
     private Set<GWTFolder> categories = new HashSet<GWTFolder>();
-
     private String path = "";
-
     private Object object;
-
     private int origin;
-
     private boolean removeCategoryEnabled = false;
 
     /**
      * CategoryManager
      */
-    public CategoryManager(final int origin) {
+    public CategoryManager(int origin) {
         this.origin = origin;
         tableSubscribedCategories = new FlexTable();
         hPanelCategories = new HorizontalPanel();
-        categoriesText = new HTML("<b>" + Main.i18n("document.categories")
-                + "</b>");
+        categoriesText = new HTML("<b>" + Main.i18n("document.categories") + "</b>");
         categoriesImage = new Image(OKMBundleResources.INSTANCE.tableKeyIcon());
         categoriesImage.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup
-                        .show();
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.show();
             }
         });
 
         hPanelCategories.add(categoriesText);
         hPanelCategories.add(new HTML("&nbsp;"));
         hPanelCategories.add(categoriesImage);
-        hPanelCategories.setCellVerticalAlignment(categoriesText,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        hPanelCategories.setCellVerticalAlignment(categoriesText, HasAlignment.ALIGN_MIDDLE);
 
         setRowWordWarp(0, 0, true, tableSubscribedCategories);
         tableSubscribedCategories.setStyleName("okm-DisableSelect");
@@ -122,7 +106,7 @@ public class CategoryManager {
      * @param object
      * @param remove
      */
-    public void setObject(final Object object, final boolean remove) {
+    public void setObject(Object object, boolean remove) {
         this.object = object;
         this.remove = remove;
         categories = new HashSet<GWTFolder>();
@@ -170,7 +154,7 @@ public class CategoryManager {
      * 
      * @param visible
      */
-    public void setVisible(final boolean visible) {
+    public void setVisible(boolean visible) {
         categoriesImage.setVisible(visible);
     }
 
@@ -178,7 +162,7 @@ public class CategoryManager {
      * drawAll
      */
     public void drawAll() {
-        for (final GWTFolder category : categories) {
+        for (GWTFolder category : categories) {
             drawCategory(category, remove);
         }
     }
@@ -188,51 +172,44 @@ public class CategoryManager {
      * 
      * @param category
      */
-    private void drawCategory(final GWTFolder category, final boolean remove) {
-        final int row = tableSubscribedCategories.getRowCount();
-        final Anchor anchor = new Anchor();
+    private void drawCategory(final GWTFolder category, boolean remove) {
+        int row = tableSubscribedCategories.getRowCount();
+        Anchor anchor = new Anchor();
 
         // Looks if must change icon on parent if now has no childs and properties with user security atention
-        final String path = category.getPath().substring(16); // Removes /okm:categories
+        String path = category.getPath().substring(16); // Removes /okm:categories
 
         if (category.isHasChildren()) {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path, "top"));
         } else {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path, "top"));
         }
 
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent arg0) {
+            public void onClick(ClickEvent arg0) {
                 CommonUI.openPath(category.getPath(), null);
             }
         });
         anchor.setStyleName("okm-KeyMap-ImageHover");
 
-        final Image delete = new Image(OKMBundleResources.INSTANCE.deleteIcon());
+        Image delete = new Image(OKMBundleResources.INSTANCE.deleteIcon());
         delete.setStyleName("okm-KeyMap-ImageHover");
         delete.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 switch (origin) {
                 case ORIGIN_FOLDER:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_FOLDER);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_FOLDER);
                     break;
                 case ORIGIN_DOCUMENT:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_DOCUMENT);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_DOCUMENT);
                     break;
                 case ORIGIN_MAIL:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_MAIL);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_CATEGORY_MAIL);
                     break;
                 }
-                final CategoryToRemove ctr = new CategoryToRemove(category,
-                        tableSubscribedCategories.getCellForEvent(event)
-                                .getRowIndex());
+                CategoryToRemove ctr = new CategoryToRemove(category, tableSubscribedCategories.getCellForEvent(event).getRowIndex());
                 Main.get().confirmPopup.setValue(ctr);
                 Main.get().confirmPopup.show();
             }
@@ -253,26 +230,19 @@ public class CategoryManager {
      * Callback addCategory document
      */
     final AsyncCallback<Object> callbackAddCategory = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetCategories();
+        public void onSuccess(Object result) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetCategories();
             if (object instanceof GWTDocument) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                        .fireEvent(HasDocumentEvent.CATEGORY_ADDED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.fireEvent(HasDocumentEvent.CATEGORY_ADDED);
             } else if (object instanceof GWTFolder) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                        .fireEvent(HasFolderEvent.CATEGORY_ADDED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.fireEvent(HasFolderEvent.CATEGORY_ADDED);
             } else if (object instanceof GWTMail) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                        .fireEvent(HasMailEvent.CATEGORY_ADDED);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.fireEvent(HasMailEvent.CATEGORY_ADDED);
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetCategories();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetCategories();
             Main.get().showError("AddCategory", caught);
         }
     };
@@ -280,14 +250,12 @@ public class CategoryManager {
     /**
      * addCategory document
      */
-    public void addCategory(final GWTFolder category) {
+    public void addCategory(GWTFolder category) {
         if (!existCategory(category.getUuid())) {
             categories.add(category);
             drawCategory(category, remove);
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setCategories();
-            propertyService.addCategory(path, category.getUuid(),
-                    callbackAddCategory);
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setCategories();
+            propertyService.addCategory(path, category.getUuid(), callbackAddCategory);
         }
     }
 
@@ -297,19 +265,14 @@ public class CategoryManager {
     public void removeCategory(final String UUID) {
         Main.get().mainPanel.desktop.browser.tabMultiple.status.setCategories();
         propertyService.removeCategory(path, UUID, new AsyncCallback<Object>() {
-            @Override
-            public void onSuccess(final Object result) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.status
-                        .unsetCategories();
+            public void onSuccess(Object result) {
+                Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetCategories();
                 if (object instanceof GWTDocument) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                            .fireEvent(HasDocumentEvent.CATEGORY_REMOVED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.fireEvent(HasDocumentEvent.CATEGORY_REMOVED);
                 } else if (object instanceof GWTFolder) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                            .fireEvent(HasFolderEvent.CATEGORY_REMOVED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.fireEvent(HasFolderEvent.CATEGORY_REMOVED);
                 } else if (object instanceof GWTMail) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                            .fireEvent(HasMailEvent.CATEGORY_REMOVED);
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.fireEvent(HasMailEvent.CATEGORY_REMOVED);
                 }
 
                 // removing row
@@ -320,7 +283,7 @@ public class CategoryManager {
                     }
                 }
                 // removing category
-                for (final GWTFolder category : categories) {
+                for (GWTFolder category : categories) {
                     if (category.getUuid().equals(UUID)) {
                         categories.remove(category);
                         break;
@@ -329,10 +292,8 @@ public class CategoryManager {
 
             }
 
-            @Override
-            public void onFailure(final Throwable caught) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.status
-                        .unsetCategories();
+            public void onFailure(Throwable caught) {
+                Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetCategories();
                 Main.get().showError("RemoveCategory", caught);
             }
         });
@@ -343,7 +304,7 @@ public class CategoryManager {
      * 
      * @param category
      */
-    public void removeCategory(final CategoryToRemove obj) {
+    public void removeCategory(CategoryToRemove obj) {
         categories.remove(obj.getCategory());
         removeCategory(obj.getCategory().getUuid());
         tableSubscribedCategories.removeRow(obj.getRow());
@@ -355,9 +316,9 @@ public class CategoryManager {
      * @param Uuid
      * @return
      */
-    private boolean existCategory(final String Uuid) {
+    private boolean existCategory(String Uuid) {
         boolean found = false;
-        for (final GWTFolder category : categories) {
+        for (GWTFolder category : categories) {
             if (category.getUuid().equals(Uuid)) {
                 found = true;
                 break;
@@ -374,9 +335,8 @@ public class CategoryManager {
      * @param warp
      * @param table The table to change word wrap
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp, final FlexTable table) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp, FlexTable table) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, warp);
         }
@@ -386,8 +346,7 @@ public class CategoryManager {
      * Lang refresh
      */
     public void langRefresh() {
-        categoriesText.setHTML("<b>" + Main.i18n("document.categories")
-                + "</b>");
+        categoriesText.setHTML("<b>" + Main.i18n("document.categories") + "</b>");
     }
 
     /**
@@ -412,10 +371,9 @@ public class CategoryManager {
      */
     public class CategoryToRemove {
         private GWTFolder category;
-
         private int row;
 
-        public CategoryToRemove(final GWTFolder category, final int row) {
+        public CategoryToRemove(GWTFolder category, int row) {
             this.category = category;
             this.row = row;
         }
@@ -424,7 +382,7 @@ public class CategoryManager {
             return category;
         }
 
-        public void setCategory(final GWTFolder category) {
+        public void setCategory(GWTFolder category) {
             this.category = category;
         }
 
@@ -432,7 +390,7 @@ public class CategoryManager {
             return row;
         }
 
-        public void setRow(final int row) {
+        public void setRow(int row) {
             this.row = row;
         }
     }

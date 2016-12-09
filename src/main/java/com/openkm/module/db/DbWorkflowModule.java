@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,8 +49,7 @@ public class DbWorkflowModule implements WorkflowModule {
     private static Logger log = LoggerFactory.getLogger(DbWorkflowModule.class);
 
     @Override
-    public void registerProcessDefinition(final String token,
-            final InputStream is) throws ParseException, RepositoryException,
+    public void registerProcessDefinition(String token, InputStream is) throws ParseException, AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException, IOException {
         log.debug("registerProcessDefinition({}, {})", token, is);
         Authentication auth = null, oldAuth = null;
@@ -66,8 +65,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.registerProcessDefinition(is);
 
             // Activity log
-            UserActivity.log(auth.getName(), "REGISTER_PROCESS_DEFINITION",
-                    null, null, null);
+            UserActivity.log(auth.getName(), "REGISTER_PROCESS_DEFINITION", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -78,8 +76,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessDefinition(final String token,
-            final long processDefinitionId) throws RepositoryException,
+    public void deleteProcessDefinition(String token, long processDefinitionId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("deleteProcessDefinition({}, {})", token, processDefinitionId);
         Authentication auth = null, oldAuth = null;
@@ -95,8 +92,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.deleteProcessDefinition(processDefinitionId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_PROCESS_DEFINITION", ""
-                    + processDefinitionId, null, null);
+            UserActivity.log(auth.getName(), "DELETE_PROCESS_DEFINITION", "" + processDefinitionId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -107,9 +103,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessDefinition getProcessDefinition(final String token,
-            final long processDefinitionId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public ProcessDefinition getProcessDefinition(String token, long processDefinitionId) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
         log.debug("getProcessDefinition({}, {})", token, processDefinitionId);
         ProcessDefinition vo = null;
         Authentication auth = null, oldAuth = null;
@@ -125,8 +120,7 @@ public class DbWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getProcessDefinition(processDefinitionId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION", ""
-                    + processDefinitionId, null, null);
+            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION", "" + processDefinitionId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -138,11 +132,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public byte[] getProcessDefinitionImage(final String token,
-            final long processDefinitionId, final String node)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("getProcessDefinitionImage({}, {}, {})", new Object[] {
-                token, processDefinitionId, node });
+    public byte[] getProcessDefinitionImage(String token, long processDefinitionId, String node) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("getProcessDefinitionImage({}, {}, {})", new Object[] { token, processDefinitionId, node });
         byte[] image = null;
         Authentication auth = null, oldAuth = null;
 
@@ -154,12 +146,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            image = CommonWorkflowModule.getProcessDefinitionImage(
-                    processDefinitionId, node);
+            image = CommonWorkflowModule.getProcessDefinitionImage(processDefinitionId, node);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION_IMAGE", ""
-                    + processDefinitionId, null, null);
+            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION_IMAGE", "" + processDefinitionId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -171,12 +161,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Map<String, List<FormElement>> getProcessDefinitionForms(
-            final String token, final long processDefinitionId)
-            throws ParseException, RepositoryException, DatabaseException,
-            WorkflowException {
-        log.debug("getProcessDefinitionForms({}, {})", token,
-                processDefinitionId);
+    public Map<String, List<FormElement>> getProcessDefinitionForms(String token, long processDefinitionId) throws ParseException,
+            AccessDeniedException, RepositoryException, DatabaseException, WorkflowException {
+        log.debug("getProcessDefinitionForms({}, {})", token, processDefinitionId);
         Map<String, List<FormElement>> forms = null;
         Authentication auth = null, oldAuth = null;
 
@@ -188,12 +175,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            forms = CommonWorkflowModule
-                    .getProcessDefinitionForms(processDefinitionId);
+            forms = CommonWorkflowModule.getProcessDefinitionForms(processDefinitionId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION_FORMS",
-                    processDefinitionId + "", null, null);
+            UserActivity.log(auth.getName(), "GET_PROCESS_DEFINITION_FORMS", processDefinitionId + "", null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -205,12 +190,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance runProcessDefinition(final String token,
-            final long processDefinitionId, final String uuid,
-            final List<FormElement> variables) throws WorkflowException,
-            AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("runProcessDefinition({}, {}, {})", new Object[] { token,
-                processDefinitionId, variables });
+    public ProcessInstance runProcessDefinition(String token, long processDefinitionId, String uuid, List<FormElement> variables)
+            throws WorkflowException, AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("runProcessDefinition({}, {}, {})", new Object[] { token, processDefinitionId, variables });
         ProcessInstance vo = null;
         Authentication auth = null, oldAuth = null;
 
@@ -222,12 +204,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            vo = CommonWorkflowModule.runProcessDefinition(auth.getName(),
-                    processDefinitionId, uuid, variables);
+            vo = CommonWorkflowModule.runProcessDefinition(auth.getName(), processDefinitionId, uuid, variables);
 
             // Activity log
-            UserActivity.log(auth.getName(), "RUN_PROCESS_DEFINITION", ""
-                    + processDefinitionId, null, variables.toString());
+            UserActivity.log(auth.getName(), "RUN_PROCESS_DEFINITION", "" + processDefinitionId, null, variables.toString());
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -239,11 +219,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance sendProcessInstanceSignal(final String token,
-            final long processInstanceId, final String transitionName)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("sendProcessInstanceSignal({}, {}, {})", new Object[] {
-                token, processInstanceId, transitionName });
+    public ProcessInstance sendProcessInstanceSignal(String token, long processInstanceId, String transitionName)
+            throws AccessDeniedException, RepositoryException, DatabaseException, WorkflowException {
+        log.debug("sendProcessInstanceSignal({}, {}, {})", new Object[] { token, processInstanceId, transitionName });
         ProcessInstance vo = null;
         Authentication auth = null, oldAuth = null;
 
@@ -255,12 +233,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            vo = CommonWorkflowModule.sendProcessInstanceSignal(
-                    processInstanceId, transitionName);
+            vo = CommonWorkflowModule.sendProcessInstanceSignal(processInstanceId, transitionName);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SEND_PROCESS_INSTANCE_SIGNAL", ""
-                    + processInstanceId, null, transitionName);
+            UserActivity.log(auth.getName(), "SEND_PROCESS_INSTANCE_SIGNAL", "" + processInstanceId, null, transitionName);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -272,8 +248,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public void endProcessInstance(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("endProcessInstance({}, {})", token, processInstanceId);
         Authentication auth = null, oldAuth = null;
@@ -289,8 +264,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.endProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "END_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "END_PROCESS_INSTANCE", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -301,8 +275,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public void deleteProcessInstance(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("deleteProcessInstance({}, {})", token, processInstanceId);
         Authentication auth = null, oldAuth = null;
@@ -318,8 +291,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.deleteProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "DELETE_PROCESS_INSTANCE", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -330,9 +302,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessInstance> findProcessInstances(final String token,
-            final long processDefinitionId) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public List<ProcessInstance> findProcessInstances(String token, long processDefinitionId) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
         log.debug("findProcessInstances({}, {})", token, processDefinitionId);
         List<ProcessInstance> al = null;
         Authentication auth = null, oldAuth = null;
@@ -348,8 +319,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findProcessInstances(processDefinitionId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_PROCESS_INSTANCES", ""
-                    + processDefinitionId, null, null);
+            UserActivity.log(auth.getName(), "FIND_PROCESS_INSTANCES", "" + processDefinitionId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -361,8 +331,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findAllProcessDefinitions(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<ProcessDefinition> findAllProcessDefinitions(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException, WorkflowException {
         log.debug("findAllProcessDefinitions({})", token);
         List<ProcessDefinition> al = null;
         Authentication auth = null, oldAuth = null;
@@ -378,8 +348,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findAllProcessDefinitions();
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_ALL_PROCESS_DEFINITIONS",
-                    null, null, null);
+            UserActivity.log(auth.getName(), "FIND_ALL_PROCESS_DEFINITIONS", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -391,9 +360,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findLatestProcessDefinitions(
-            final String token) throws RepositoryException, DatabaseException,
-            WorkflowException {
+    public List<ProcessDefinition> findLatestProcessDefinitions(String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException, WorkflowException {
         log.debug("findLatestProcessDefinitions({})", token);
         List<ProcessDefinition> al = null;
         Authentication auth = null, oldAuth = null;
@@ -409,8 +377,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findLatestProcessDefinitions();
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_LATEST_PROCESS_DEFINITIONS",
-                    null, null, null);
+            UserActivity.log(auth.getName(), "FIND_LATEST_PROCESS_DEFINITIONS", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -422,9 +389,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessDefinition findLastProcessDefinition(final String token,
-            final String name) throws RepositoryException, DatabaseException,
-            WorkflowException {
+    public ProcessDefinition findLastProcessDefinition(String token, String name) throws AccessDeniedException, RepositoryException,
+            DatabaseException, WorkflowException {
         log.debug("findLastProcessDefinition({}, {})", token, name);
         ProcessDefinition pd = null;
         Authentication auth = null, oldAuth = null;
@@ -440,8 +406,7 @@ public class DbWorkflowModule implements WorkflowModule {
             pd = CommonWorkflowModule.findLastProcessDefinition(name);
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_LAST_PROCESS_DEFINITION",
-                    name, null, null);
+            UserActivity.log(auth.getName(), "FIND_LAST_PROCESS_DEFINITION", name, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -453,9 +418,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<ProcessDefinition> findAllProcessDefinitionVersions(
-            final String token, final String name) throws RepositoryException,
-            DatabaseException, WorkflowException {
+    public List<ProcessDefinition> findAllProcessDefinitionVersions(String token, String name) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
         log.debug("findAllProcessDefinitionVersions({}, {})", token, name);
         List<ProcessDefinition> al = null;
         Authentication auth = null, oldAuth = null;
@@ -471,8 +435,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findAllProcessDefinitionVersions(name);
 
             // Activity log
-            UserActivity.log(auth.getName(),
-                    "FIND_ALL_PROCESS_DEFINITION_VERSIONS", name, null, null);
+            UserActivity.log(auth.getName(), "FIND_ALL_PROCESS_DEFINITION_VERSIONS", name, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -484,8 +447,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public ProcessInstance getProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public ProcessInstance getProcessInstance(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("getProcessInstance({}, {})", token, processInstanceId);
         ProcessInstance vo = null;
@@ -502,8 +464,7 @@ public class DbWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "GET_PROCESS_INSTANCE", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -515,8 +476,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public void suspendProcessInstance(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("suspendProcessInstance({}, {})", token, processInstanceId);
         Authentication auth = null, oldAuth = null;
@@ -532,8 +492,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SUSPEND_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "SUSPEND_PROCESS_INSTANCE", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -544,8 +503,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeProcessInstance(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public void resumeProcessInstance(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("resumeProcessInstance({}, {})", token, processInstanceId);
         Authentication auth = null, oldAuth = null;
@@ -561,8 +519,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeProcessInstance(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "RESUME_PROCESS_INSTANCE", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "RESUME_PROCESS_INSTANCE", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -573,11 +530,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addProcessInstanceVariable(final String token,
-            final long processInstanceId, final String name, final Object value)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addProcessInstanceVariable({}, {}, {}, {})", new Object[] {
-                token, processInstanceId, name, value });
+    public void addProcessInstanceVariable(String token, long processInstanceId, String name, Object value) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("addProcessInstanceVariable({}, {}, {}, {})", new Object[] { token, processInstanceId, name, value });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -588,12 +543,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.addProcessInstanceVariable(processInstanceId,
-                    name, value);
+            CommonWorkflowModule.addProcessInstanceVariable(processInstanceId, name, value);
 
             // Activity log
-            UserActivity.log(auth.getName(), "ADD_PROCESS_INSTANCE_VARIABLE",
-                    "" + processInstanceId, null, name + ", " + value);
+            UserActivity.log(auth.getName(), "ADD_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId, null, name + ", " + value);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -604,11 +557,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteProcessInstanceVariable(final String token,
-            final long processInstanceId, final String name)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("deleteProcessInstanceVariable({}, {}, {})", new Object[] {
-                token, processInstanceId, name });
+    public void deleteProcessInstanceVariable(String token, long processInstanceId, String name) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("deleteProcessInstanceVariable({}, {}, {})", new Object[] { token, processInstanceId, name });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -619,13 +570,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.deleteProcessInstanceVariable(
-                    processInstanceId, name);
+            CommonWorkflowModule.deleteProcessInstanceVariable(processInstanceId, name);
 
             // Activity log
-            UserActivity.log(auth.getName(),
-                    "DELETE_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId,
-                    null, name);
+            UserActivity.log(auth.getName(), "DELETE_PROCESS_INSTANCE_VARIABLE", "" + processInstanceId, null, name);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -636,8 +584,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findUserTaskInstances(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<TaskInstance> findUserTaskInstances(String token) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("findUserTaskInstances({})", token);
         List<TaskInstance> al = null;
         Authentication auth = null, oldAuth = null;
@@ -653,8 +601,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findUserTaskInstances(auth.getName());
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_USER_TASK_INSTANCES", null,
-                    null, null);
+            UserActivity.log(auth.getName(), "FIND_USER_TASK_INSTANCES", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -666,8 +613,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findPooledTaskInstances(final String token)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public List<TaskInstance> findPooledTaskInstances(String token) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("findPooledTaskInstances({})", token);
         List<TaskInstance> al = null;
         Authentication auth = null, oldAuth = null;
@@ -683,8 +630,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findPooledTaskInstances(auth.getName());
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_POOLED_TASK_INSTANCES",
-                    null, null, null);
+            UserActivity.log(auth.getName(), "FIND_POOLED_TASK_INSTANCES", null, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -696,8 +642,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public List<TaskInstance> findTaskInstances(final String token,
-            final long processInstanceId) throws RepositoryException,
+    public List<TaskInstance> findTaskInstances(String token, long processInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("findTaskInstances({}, {})", token, processInstanceId);
         List<TaskInstance> al = null;
@@ -714,8 +659,7 @@ public class DbWorkflowModule implements WorkflowModule {
             al = CommonWorkflowModule.findTaskInstances(processInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "FIND_TASK_INSTANCES", ""
-                    + processInstanceId, null, null);
+            UserActivity.log(auth.getName(), "FIND_TASK_INSTANCES", "" + processInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -727,12 +671,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTaskInstanceValues(final String token,
-            final long taskInstanceId, final String transitionName,
-            final List<FormElement> values) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("setTaskInstanceValues({}, {}, {}, {})", new Object[] {
-                token, taskInstanceId, transitionName, values });
+    public void setTaskInstanceValues(String token, long taskInstanceId, String transitionName, List<FormElement> values)
+            throws AccessDeniedException, RepositoryException, DatabaseException, WorkflowException {
+        log.debug("setTaskInstanceValues({}, {}, {}, {})", new Object[] { token, taskInstanceId, transitionName, values });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -743,12 +684,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.setTaskInstanceValues(taskInstanceId,
-                    transitionName, values);
+            CommonWorkflowModule.setTaskInstanceValues(taskInstanceId, transitionName, values);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SET_TASK_INSTANCE_VALUES", ""
-                    + taskInstanceId, null, transitionName);
+            UserActivity.log(auth.getName(), "SET_TASK_INSTANCE_VALUES", "" + taskInstanceId, null, transitionName);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -759,11 +698,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTaskInstanceComment(final String token,
-            final long taskInstanceId, final String message)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addTaskInstanceComment({}, {}, {})", new Object[] { token,
-                taskInstanceId, message });
+    public void addTaskInstanceComment(String token, long taskInstanceId, String message) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("addTaskInstanceComment({}, {}, {})", new Object[] { token, taskInstanceId, message });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -774,12 +711,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.addTaskInstanceComment(auth.getName(),
-                    taskInstanceId, message);
+            CommonWorkflowModule.addTaskInstanceComment(auth.getName(), taskInstanceId, message);
 
             // Activity log
-            UserActivity.log(auth.getName(), "ADD_TASK_INSTANCE_COMMENT", ""
-                    + taskInstanceId, null, message);
+            UserActivity.log(auth.getName(), "ADD_TASK_INSTANCE_COMMENT", "" + taskInstanceId, null, message);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -790,8 +725,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public TaskInstance getTaskInstance(final String token,
-            final long taskInstanceId) throws RepositoryException,
+    public TaskInstance getTaskInstance(String token, long taskInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("getTaskInstance({}, {})", token, taskInstanceId);
         TaskInstance vo = null;
@@ -808,8 +742,7 @@ public class DbWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
+            UserActivity.log(auth.getName(), "GET_TASK_INSTANCE", "" + taskInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -821,11 +754,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTaskInstanceActorId(final String token,
-            final long taskInstanceId, final String actorId)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("setTaskInstanceActorId({}, {}, {})", new Object[] { token,
-                taskInstanceId, actorId });
+    public void setTaskInstanceActorId(String token, long taskInstanceId, String actorId) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("setTaskInstanceActorId({}, {}, {})", new Object[] { token, taskInstanceId, actorId });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -836,12 +767,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule
-                    .setTaskInstanceActorId(taskInstanceId, actorId);
+            CommonWorkflowModule.setTaskInstanceActorId(taskInstanceId, actorId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SET_TASK_INSTANCE_ACTOR_ID", ""
-                    + taskInstanceId, null, actorId);
+            UserActivity.log(auth.getName(), "SET_TASK_INSTANCE_ACTOR_ID", "" + taskInstanceId, null, actorId);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -852,11 +781,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTaskInstanceVariable(final String token,
-            final long taskInstanceId, final String name, final Object value)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("addTaskInstanceVariable({}, {}, {}, {})", new Object[] {
-                token, taskInstanceId, name, value });
+    public void addTaskInstanceVariable(String token, long taskInstanceId, String name, Object value) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("addTaskInstanceVariable({}, {}, {}, {})", new Object[] { token, taskInstanceId, name, value });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -867,12 +794,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.addTaskInstanceVariable(taskInstanceId, name,
-                    value);
+            CommonWorkflowModule.addTaskInstanceVariable(taskInstanceId, name, value);
 
             // Activity log
-            UserActivity.log(auth.getName(), "ADD_TASK_INSTANCE_VARIABLE", ""
-                    + taskInstanceId, null, name + ", " + value);
+            UserActivity.log(auth.getName(), "ADD_TASK_INSTANCE_VARIABLE", "" + taskInstanceId, null, name + ", " + value);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -883,11 +808,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void deleteTaskInstanceVariable(final String token,
-            final long taskInstanceId, final String name)
-            throws RepositoryException, DatabaseException, WorkflowException {
-        log.debug("deleteTaskInstanceVariable({}, {}, {})", new Object[] {
-                token, taskInstanceId, name });
+    public void deleteTaskInstanceVariable(String token, long taskInstanceId, String name) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("deleteTaskInstanceVariable({}, {}, {})", new Object[] { token, taskInstanceId, name });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -898,12 +821,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.deleteTaskInstanceVariable(taskInstanceId,
-                    name);
+            CommonWorkflowModule.deleteTaskInstanceVariable(taskInstanceId, name);
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_TASK_INSTANCE_VARIABLE",
-                    "" + taskInstanceId, null, name);
+            UserActivity.log(auth.getName(), "DELETE_TASK_INSTANCE_VARIABLE", "" + taskInstanceId, null, name);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -914,8 +835,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void startTaskInstance(final String token, final long taskInstanceId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void startTaskInstance(String token, long taskInstanceId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("startTaskInstance({}, {})", token, taskInstanceId);
         Authentication auth = null, oldAuth = null;
 
@@ -930,8 +851,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.startTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "START_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
+            UserActivity.log(auth.getName(), "START_TASK_INSTANCE", "" + taskInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -942,11 +862,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endTaskInstance(final String token, final long taskInstanceId,
-            final String transitionName) throws RepositoryException,
-            DatabaseException, WorkflowException {
-        log.debug("endTaskInstance({}, {}, {})", new Object[] { token,
-                taskInstanceId, transitionName });
+    public void endTaskInstance(String token, long taskInstanceId, String transitionName) throws AccessDeniedException,
+            RepositoryException, DatabaseException, WorkflowException {
+        log.debug("endTaskInstance({}, {}, {})", new Object[] { token, taskInstanceId, transitionName });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -957,12 +875,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule
-                    .endTaskInstance(taskInstanceId, transitionName);
+            CommonWorkflowModule.endTaskInstance(taskInstanceId, transitionName);
 
             // Activity log
-            UserActivity.log(auth.getName(), "END_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
+            UserActivity.log(auth.getName(), "END_TASK_INSTANCE", "" + taskInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -973,8 +889,7 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendTaskInstance(final String token,
-            final long taskInstanceId) throws RepositoryException,
+    public void suspendTaskInstance(String token, long taskInstanceId) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
         log.debug("suspendTaskInstance({}, {})", token, taskInstanceId);
         Authentication auth = null, oldAuth = null;
@@ -990,8 +905,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SUSPEND_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
+            UserActivity.log(auth.getName(), "SUSPEND_TASK_INSTANCE", "" + taskInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1002,8 +916,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeTaskInstance(final String token, final long taskInstanceId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void resumeTaskInstance(String token, long taskInstanceId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("resumeTaskInstance({}, {})", token, taskInstanceId);
         Authentication auth = null, oldAuth = null;
 
@@ -1018,8 +932,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeTaskInstance(taskInstanceId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "RESUME_TASK_INSTANCE", ""
-                    + taskInstanceId, null, null);
+            UserActivity.log(auth.getName(), "RESUME_TASK_INSTANCE", "" + taskInstanceId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1030,8 +943,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Token getToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public Token getToken(String token, long tokenId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("getToken({}, {})", token, tokenId);
         Token vo = null;
         Authentication auth = null, oldAuth = null;
@@ -1047,8 +960,7 @@ public class DbWorkflowModule implements WorkflowModule {
             vo = CommonWorkflowModule.getToken(tokenId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_TOKEN", "" + tokenId, null,
-                    null);
+            UserActivity.log(auth.getName(), "GET_TOKEN", "" + tokenId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1060,11 +972,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void addTokenComment(final String token, final long tokenId,
-            final String message) throws RepositoryException,
+    public void addTokenComment(String token, long tokenId, String message) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
-        log.debug("addTokenComment({}, {}, {})", new Object[] { token, tokenId,
-                message });
+        log.debug("addTokenComment({}, {}, {})", new Object[] { token, tokenId, message });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -1075,12 +985,10 @@ public class DbWorkflowModule implements WorkflowModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            CommonWorkflowModule.addTokenComment(auth.getName(), tokenId,
-                    message);
+            CommonWorkflowModule.addTokenComment(auth.getName(), tokenId, message);
 
             // Activity log
-            UserActivity.log(auth.getName(), "ADD_TOKEN_COMMENT", "" + tokenId,
-                    null, message);
+            UserActivity.log(auth.getName(), "ADD_TOKEN_COMMENT", "" + tokenId, null, message);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1091,8 +999,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void suspendToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void suspendToken(String token, long tokenId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("suspendToken({}, {})", token, tokenId);
         Authentication auth = null, oldAuth = null;
 
@@ -1107,8 +1015,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.suspendToken(tokenId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SUSPEND_TOKEN", "" + tokenId,
-                    null, null);
+            UserActivity.log(auth.getName(), "SUSPEND_TOKEN", "" + tokenId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1119,8 +1026,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void resumeToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void resumeToken(String token, long tokenId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("resumeToken({}, {})", token, tokenId);
         Authentication auth = null, oldAuth = null;
 
@@ -1135,8 +1042,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.resumeToken(tokenId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "RESUME_TOKEN", "" + tokenId,
-                    null, null);
+            UserActivity.log(auth.getName(), "RESUME_TOKEN", "" + tokenId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1147,12 +1053,10 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public Token sendTokenSignal(final String token, final long tokenId,
-            final String transitionName) throws RepositoryException,
+    public Token sendTokenSignal(String token, long tokenId, String transitionName) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
-        log.debug("sendTokenSignal({}, {}, {})", new Object[] { token, tokenId,
-                transitionName });
-        final Token vo = null;
+        log.debug("sendTokenSignal({}, {}, {})", new Object[] { token, tokenId, transitionName });
+        Token vo = null;
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -1166,8 +1070,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.sendTokenSignal(tokenId, transitionName);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SEND_TOKEN_SIGNAL", "" + tokenId,
-                    null, transitionName);
+            UserActivity.log(auth.getName(), "SEND_TOKEN_SIGNAL", "" + tokenId, null, transitionName);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1179,11 +1082,9 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void setTokenNode(final String token, final long tokenId,
-            final String nodeName) throws RepositoryException,
+    public void setTokenNode(String token, long tokenId, String nodeName) throws AccessDeniedException, RepositoryException,
             DatabaseException, WorkflowException {
-        log.debug("setTokenNode({}, {}, {})", new Object[] { token, tokenId,
-                nodeName });
+        log.debug("setTokenNode({}, {}, {})", new Object[] { token, tokenId, nodeName });
         Authentication auth = null, oldAuth = null;
 
         try {
@@ -1197,8 +1098,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.setTokenNode(tokenId, nodeName);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SEND_TOKEN_NODE", "" + tokenId,
-                    null, nodeName);
+            UserActivity.log(auth.getName(), "SEND_TOKEN_NODE", "" + tokenId, null, nodeName);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);
@@ -1209,8 +1109,8 @@ public class DbWorkflowModule implements WorkflowModule {
     }
 
     @Override
-    public void endToken(final String token, final long tokenId)
-            throws RepositoryException, DatabaseException, WorkflowException {
+    public void endToken(String token, long tokenId) throws AccessDeniedException, RepositoryException, DatabaseException,
+            WorkflowException {
         log.debug("endToken({}, {})", token, tokenId);
         Authentication auth = null, oldAuth = null;
 
@@ -1225,8 +1125,7 @@ public class DbWorkflowModule implements WorkflowModule {
             CommonWorkflowModule.endToken(tokenId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "END_TOKEN", "" + tokenId, null,
-                    null);
+            UserActivity.log(auth.getName(), "END_TOKEN", "" + tokenId, null, null);
         } finally {
             if (token != null) {
                 PrincipalUtils.setAuthentication(oldAuth);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.openkm.frontend.client.bean.form.GWTFormElement;
 
 /**
  * @author jllort
@@ -37,36 +38,34 @@ public class GWTFolder implements IsSerializable {
     public static final String TYPE = "okm:folder";
 
     private String parentPath;
-
     private String path;
-
     private String name;
-
     private boolean hasChildren;
-
     private Date created;
-
     private String author;
-
     private int permissions;
-
     private boolean subscribed;
-
     private String uuid;
-
     private boolean hasNotes = false;
-
     private List<GWTNote> notes;
-
     private Set<GWTUser> subscriptors;
-
     private Set<GWTFolder> categories;
-
     private Set<String> keywords;
-
     private GWTUser user;
 
-    public void initMetadata(final String fldPath, final boolean hasChildren) {
+    // Extra columns
+    private GWTFormElement column0;
+    private GWTFormElement column1;
+    private GWTFormElement column2;
+    private GWTFormElement column3;
+    private GWTFormElement column4;
+    private GWTFormElement column5;
+    private GWTFormElement column6;
+    private GWTFormElement column7;
+    private GWTFormElement column8;
+    private GWTFormElement column9;
+
+    public void initMetadata(String fldPath, boolean hasChildren) {
         setAuthor("");
         setCategories(new HashSet<GWTFolder>());
         setCreated(new Date());
@@ -84,8 +83,7 @@ public class GWTFolder implements IsSerializable {
         setUser(new GWTUser());
     }
 
-    public void initMetadata(final String fldPath, final String name,
-            final boolean hasChilds) {
+    public void initMetadata(String fldPath, String name, boolean hasChilds) {
         initMetadata(fldPath, hasChilds);
         setName(name);
     }
@@ -94,7 +92,7 @@ public class GWTFolder implements IsSerializable {
         return subscriptors;
     }
 
-    public void setSubscriptors(final Set<GWTUser> subscriptors) {
+    public void setSubscriptors(Set<GWTUser> subscriptors) {
         this.subscriptors = subscriptors;
     }
 
@@ -102,7 +100,7 @@ public class GWTFolder implements IsSerializable {
         return hasChildren;
     }
 
-    public void setHasChildren(final boolean hasChildren) {
+    public void setHasChildren(boolean hasChildren) {
         this.hasChildren = hasChildren;
     }
 
@@ -110,7 +108,7 @@ public class GWTFolder implements IsSerializable {
         return parentPath;
     }
 
-    public void setParentPath(final String parentPath) {
+    public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
 
@@ -118,7 +116,7 @@ public class GWTFolder implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -126,11 +124,11 @@ public class GWTFolder implements IsSerializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
-    public void setCreated(final Date created) {
+    public void setCreated(Date created) {
         this.created = created;
     }
 
@@ -142,7 +140,7 @@ public class GWTFolder implements IsSerializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -150,7 +148,7 @@ public class GWTFolder implements IsSerializable {
         return permissions;
     }
 
-    public void setPermissions(final int permissions) {
+    public void setPermissions(int permissions) {
         this.permissions = permissions;
     }
 
@@ -158,7 +156,7 @@ public class GWTFolder implements IsSerializable {
         return subscribed;
     }
 
-    public void setSubscribed(final boolean subscribed) {
+    public void setSubscribed(boolean subscribed) {
         this.subscribed = subscribed;
     }
 
@@ -166,7 +164,7 @@ public class GWTFolder implements IsSerializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -174,7 +172,7 @@ public class GWTFolder implements IsSerializable {
         return hasNotes;
     }
 
-    public void setHasNotes(final boolean hasNotes) {
+    public void setHasNotes(boolean hasNotes) {
         this.hasNotes = hasNotes;
     }
 
@@ -182,7 +180,7 @@ public class GWTFolder implements IsSerializable {
         return notes;
     }
 
-    public void setNotes(final List<GWTNote> notes) {
+    public void setNotes(List<GWTNote> notes) {
         this.notes = notes;
     }
 
@@ -190,7 +188,7 @@ public class GWTFolder implements IsSerializable {
         return categories;
     }
 
-    public void setCategories(final Set<GWTFolder> categories) {
+    public void setCategories(Set<GWTFolder> categories) {
         this.categories = categories;
     }
 
@@ -198,7 +196,7 @@ public class GWTFolder implements IsSerializable {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -206,13 +204,92 @@ public class GWTFolder implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 
-    @Override
+    public GWTFormElement getColumn0() {
+        return column0;
+    }
+
+    public void setColumn0(GWTFormElement column0) {
+        this.column0 = column0;
+    }
+
+    public GWTFormElement getColumn1() {
+        return column1;
+    }
+
+    public void setColumn1(GWTFormElement column1) {
+        this.column1 = column1;
+    }
+
+    public GWTFormElement getColumn2() {
+        return column2;
+    }
+
+    public void setColumn2(GWTFormElement column2) {
+        this.column2 = column2;
+    }
+
+    public GWTFormElement getColumn3() {
+        return column3;
+    }
+
+    public void setColumn3(GWTFormElement column3) {
+        this.column3 = column3;
+    }
+
+    public GWTFormElement getColumn4() {
+        return column4;
+    }
+
+    public void setColumn4(GWTFormElement column4) {
+        this.column4 = column4;
+    }
+
+    public GWTFormElement getColumn5() {
+        return column5;
+    }
+
+    public void setColumn5(GWTFormElement column5) {
+        this.column5 = column5;
+    }
+
+    public GWTFormElement getColumn6() {
+        return column6;
+    }
+
+    public void setColumn6(GWTFormElement column6) {
+        this.column6 = column6;
+    }
+
+    public GWTFormElement getColumn7() {
+        return column7;
+    }
+
+    public void setColumn7(GWTFormElement column7) {
+        this.column7 = column7;
+    }
+
+    public GWTFormElement getColumn8() {
+        return column8;
+    }
+
+    public void setColumn8(GWTFormElement column8) {
+        this.column8 = column8;
+    }
+
+    public GWTFormElement getColumn9() {
+        return column9;
+    }
+
+    public void setColumn9(GWTFormElement column9) {
+        this.column9 = column9;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("path=").append(path);
         sb.append(", permissions=").append(permissions);

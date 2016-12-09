@@ -1,5 +1,5 @@
 /**
-*  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+*  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,12 +37,10 @@ import com.openkm.frontend.client.util.Util;
  */
 public class FindToolBarMenu extends DialogBox {
     private ToolBarOption toolBarOption;
-
     private MenuBar dirMenu;
-
     private MenuItem findFolder;
-
     private MenuItem findDocument;
+    private MenuItem findSimilarDocument;
 
     /**
      * ResizeToolBarMenu
@@ -54,24 +52,25 @@ public class FindToolBarMenu extends DialogBox {
 
         dirMenu = new MenuBar(true);
         dirMenu.setStyleName("okm-SubMenuBar");
-        findFolder = new MenuItem(Util.menuHTML(
-                "img/icon/actions/folder_find.gif",
-                Main.i18n("general.menu.file.find.folder")), true,
-                findFolderOKM);
-        findDocument = new MenuItem(Util.menuHTML(
-                "img/icon/actions/document_find.png",
-                Main.i18n("general.menu.file.find.document")), true,
-                findDocumentOKM);
+        findFolder =
+                new MenuItem(Util.menuHTML("img/icon/actions/folder_find.gif", Main.i18n("general.menu.file.find.folder")), true,
+                        findFolderOKM);
+        findDocument =
+                new MenuItem(Util.menuHTML("img/icon/actions/document_find.png", Main.i18n("general.menu.file.find.document")), true,
+                        findDocumentOKM);
+        findSimilarDocument =
+                new MenuItem(Util.menuHTML("img/icon/actions/similar_find.png", Main.i18n("general.menu.file.find.similar.document")),
+                        true, findSimilarOKM);
 
         dirMenu.addItem(findFolder);
         dirMenu.addItem(findDocument);
+        dirMenu.addItem(findSimilarDocument);
 
         setWidget(dirMenu);
     }
 
     // Command menu to find folder
     Command findFolderOKM = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.findFolderOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeFindFolder();
@@ -82,10 +81,19 @@ public class FindToolBarMenu extends DialogBox {
 
     // Command menu to find document
     Command findDocumentOKM = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.findDocumentOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeFindDocument();
+                hide();
+            }
+        }
+    };
+
+    // Command menu to find similardocument
+    Command findSimilarOKM = new Command() {
+        public void execute() {
+            if (toolBarOption.findSimilarDocumentOption) {
+                Main.get().mainPanel.topPanel.toolBar.executeFindSimilarDocument();
                 hide();
             }
         }
@@ -95,11 +103,10 @@ public class FindToolBarMenu extends DialogBox {
      * langRefresh
      */
     public void langRefresh() {
-        findFolder.setHTML(Util.menuHTML("img/icon/actions/normal_size.png",
-                Main.i18n("general.menu.file.find.folder")));
-        findDocument.setHTML(Util.menuHTML(
-                "img/icon/actions/document_find.png",
-                Main.i18n("general.menu.file.find.document")));
+        findFolder.setHTML(Util.menuHTML("img/icon/actions/normal_size.png", Main.i18n("general.menu.file.find.folder")));
+        findDocument.setHTML(Util.menuHTML("img/icon/actions/document_find.png", Main.i18n("general.menu.file.find.document")));
+        findSimilarDocument
+                .setHTML(Util.menuHTML("img/icon/actions/similar_find.png", Main.i18n("general.menu.file.find.similar.document")));
     }
 
     /**
@@ -107,7 +114,7 @@ public class FindToolBarMenu extends DialogBox {
      * 
      * @param toolBarOption
      */
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         this.toolBarOption = toolBarOption;
         evaluateMenuOptions();
     }
@@ -134,6 +141,11 @@ public class FindToolBarMenu extends DialogBox {
         } else {
             disable(findDocument);
         }
+        if (toolBarOption.findSimilarDocumentOption) {
+            enable(findSimilarDocument);
+        } else {
+            disable(findSimilarDocument);
+        }
     }
 
     /**
@@ -141,12 +153,15 @@ public class FindToolBarMenu extends DialogBox {
      * 
      * @param option
      */
-    public void setAvailableOption(final GWTProfileToolbar option) {
+    public void setAvailableOption(GWTProfileToolbar option) {
         if (!option.isFindFolderVisible()) {
             dirMenu.removeItem(findFolder);
         }
         if (!option.isFindDocumentVisible()) {
             dirMenu.removeItem(findDocument);
+        }
+        if (!option.isSimilarDocumentVisible()) {
+            dirMenu.removeItem(findSimilarDocument);
         }
     }
 
@@ -155,7 +170,7 @@ public class FindToolBarMenu extends DialogBox {
      * 
      * @param menuItem The menu item
      */
-    public void enable(final MenuItem menuItem) {
+    public void enable(MenuItem menuItem) {
         menuItem.addStyleName("okm-MenuItem");
         menuItem.removeStyleName("okm-MenuItem-strike");
     }
@@ -165,7 +180,7 @@ public class FindToolBarMenu extends DialogBox {
      * 
      * @param menuItem The menu item
      */
-    public void disable(final MenuItem menuItem) {
+    public void disable(MenuItem menuItem) {
         menuItem.removeStyleName("okm-MenuItem");
         menuItem.addStyleName("okm-MenuItem-strike");
     }

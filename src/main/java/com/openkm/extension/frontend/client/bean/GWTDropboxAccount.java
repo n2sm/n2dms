@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,24 +30,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTDropboxAccount implements IsSerializable {
 
     private String country;
-
     private String displayName;
-
     private long quota;
-
     private long quotaNormal;
-
     private long quotaShared;
-
     private String referralLink;
-
     private long uid;
 
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(final String country) {
+    public void setCountry(String country) {
         this.country = country;
     }
 
@@ -55,7 +49,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return displayName;
     }
 
-    public void setDisplayName(final String displayName) {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
@@ -63,7 +57,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return quota;
     }
 
-    public void setQuota(final long quota) {
+    public void setQuota(long quota) {
         this.quota = quota;
     }
 
@@ -71,7 +65,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return quotaNormal;
     }
 
-    public void setQuotaNormal(final long quotaNormal) {
+    public void setQuotaNormal(long quotaNormal) {
         this.quotaNormal = quotaNormal;
     }
 
@@ -79,7 +73,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return quotaShared;
     }
 
-    public void setQuotaShared(final long quotaShared) {
+    public void setQuotaShared(long quotaShared) {
         this.quotaShared = quotaShared;
     }
 
@@ -87,7 +81,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return referralLink;
     }
 
-    public void setReferralLink(final String referralLink) {
+    public void setReferralLink(String referralLink) {
         this.referralLink = referralLink;
     }
 
@@ -95,7 +89,7 @@ public class GWTDropboxAccount implements IsSerializable {
         return uid;
     }
 
-    public void setUid(final long uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 

@@ -22,8 +22,7 @@
 package com.openkm.extension.frontend.client.widget.macros;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -39,13 +38,9 @@ import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
  *
  */
 public class Status extends PopupPanel {
-
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
 
     private boolean flag_executeAction = false;
@@ -64,11 +59,9 @@ public class Status extends PopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -85,11 +78,9 @@ public class Status extends PopupPanel {
      */
     public void refresh() {
         if (flag_executeAction) {
-            final Widget tab = Main.get().mainPanel;
-            final int left = tab.getAbsoluteLeft()
-                    + (tab.getOffsetWidth() - 200) / 2;
-            final int top = tab.getAbsoluteTop() + (tab.getOffsetHeight() - 40)
-                    / 2;
+            Widget tab = Main.get().mainPanel;
+            int left = tab.getAbsoluteLeft() + (tab.getOffsetWidth() - 200) / 2;
+            int top = tab.getAbsoluteTop() + (tab.getOffsetHeight() - 40) / 2;
 
             if (left > 0 && top > 0) {
                 setPopupPosition(left, top);

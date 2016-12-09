@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -26,11 +26,10 @@ import java.util.Collection;
 import org.hibernate.collection.PersistentSet;
 
 public class UtilFunctions {
-    public static boolean contains(final Collection<?> collection,
-            final Object obj) {
+    public static boolean contains(Collection<?> collection, Object obj) {
         if (collection != null) {
             if (collection instanceof PersistentSet) {
-                for (final Object elto : collection) {
+                for (Object elto : collection) {
                     if (elto.equals(obj)) {
                         return true;
                     }
@@ -45,7 +44,7 @@ public class UtilFunctions {
         }
     }
 
-    public static int bitwiseAnd(final int arg0, final int arg1) {
+    public static int bitwiseAnd(int arg0, int arg1) {
         return arg0 & arg1;
     }
 }

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -9,13 +9,13 @@
   <link rel="Shortcut icon" href="favicon.ico" />
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link rel="stylesheet" type="text/css" href="js/codemirror/lib/codemirror.css" />
-  <link rel="stylesheet" type="text/css" href="js/codemirror/mode/clike/clike.css" />
+  <link rel="stylesheet" type="text/css" href="js/codemirror/mode/xml/xml.css" />
   <style type="text/css">
     .CodeMirror { width: 600px; height: 300px; background-color: #f8f6c2; }
     .activeline { background: #f0fcff !important; }
   </style>
   <script type="text/javascript" src="js/codemirror/lib/codemirror.js"></script>
-  <script type="text/javascript" src="js/codemirror/mode/clike/clike.js"></script>
+  <script type="text/javascript" src="js/codemirror/mode/xml/xml.js"></script>
   <script type="text/javascript" src="../js/jquery-1.7.1.min.js"></script>
   <script type="text/javascript">
 	$(document).ready(function() {
@@ -23,7 +23,7 @@
 			lineNumbers: true,
 			matchBrackets: true,
 			indentUnit: 4,
-			mode: "text/x-java",
+			mode: "application/xml",
 			onCursorActivity: function() {
 				cm.setLineClass(hlLine, null);
 				hlLine = cm.setLineClass(cm.getCursor().line, "activeline");
@@ -31,6 +31,10 @@
 		});
       	
 		hlLine = cm.setLineClass(0, "activeline");
+		var width = $(window).width() - 60;
+	    var height = $(window).height() - 130;
+	    $('.CodeMirror').css({"width": width});
+	    $('.CodeMirror').css({"height": height});
     });
   </script>
   <title>Property Group Edit</title>
@@ -57,8 +61,8 @@
           </tr>
           <tr>
             <td align="right">
-              <input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              <input type="submit" value="Send"/>
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <input type="submit" value="Edit" class="yesButton"/>
             </td>
           </tr>
         </table>

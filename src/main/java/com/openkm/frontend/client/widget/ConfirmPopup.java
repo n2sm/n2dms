@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
@@ -35,7 +34,7 @@ import com.openkm.frontend.client.bean.GWTTaskInstance;
 import com.openkm.frontend.client.bean.form.GWTButton;
 import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
 import com.openkm.frontend.client.constants.ui.UIDockPanelConstants;
-import com.openkm.frontend.client.widget.Dragable.ObjectToMove;
+import com.openkm.frontend.client.widget.Draggable.ObjectToMove;
 import com.openkm.frontend.client.widget.form.FormManager.ValidationButton;
 import com.openkm.frontend.client.widget.form.HasWorkflow;
 import com.openkm.frontend.client.widget.properties.CategoryManager.CategoryToRemove;
@@ -48,88 +47,52 @@ import eu.maydu.gwt.validation.client.ValidationProcessor;
  * Confirm panel
  * 
  * @author jllort
- *
  */
 public class ConfirmPopup extends DialogBox {
 
     public static final int NO_ACTION = 0;
-
     public static final int CONFIRM_DELETE_FOLDER = 1;
-
     public static final int CONFIRM_DELETE_DOCUMENT = 2;
-
     public static final int CONFIRM_EMPTY_TRASH = 3;
-
     public static final int CONFIRM_PURGE_FOLDER = 4;
-
     public static final int CONFIRM_PURGE_DOCUMENT = 5;
-
     public static final int CONFIRM_DELETE_PROPERTY_GROUP = 6;
-
     public static final int CONFIRM_PURGE_VERSION_HISTORY_DOCUMENT = 7;
-
     public static final int CONFIRM_RESTORE_HISTORY_DOCUMENT = 8;
-
     public static final int CONFIRM_SET_DEFAULT_HOME = 9;
-
     public static final int CONFIRM_DELETE_SAVED_SEARCH = 10;
-
     public static final int CONFIRM_DELETE_USER_NEWS = 11;
-
     public static final int CONFIRM_DELETE_MAIL = 12;
-
     public static final int CONFIRM_PURGE_MAIL = 13;
-
     public static final int CONFIRM_GET_POOLED_WORKFLOW_TASK = 14;
-
     public static final int CONFIRM_FORCE_UNLOCK = 15;
-
     public static final int CONFIRM_FORCE_CANCEL_CHECKOUT = 16;
-
     public static final int CONFIRM_WORKFLOW_ACTION = 17;
-
     public static final int CONFIRM_DELETE_NOTE_DOCUMENT = 18;
-
     public static final int CONFIRM_DELETE_NOTE_FOLDER = 19;
-
     public static final int CONFIRM_DELETE_NOTE_MAIL = 20;
-
     public static final int CONFIRM_DRAG_DROP_MOVE_DOCUMENT = 21;
-
     public static final int CONFIRM_DRAG_DROP_MOVE_FOLDER_FROM_TREE = 22;
-
     public static final int CONFIRM_DRAG_DROP_MOVE_FOLDER_FROM_BROWSER = 23;
-
     public static final int CONFIRM_DRAG_DROP_MOVE_MAIL = 24;
-
     public static final int CONFIRM_DELETE_CATEGORY_FOLDER = 25;
-
     public static final int CONFIRM_DELETE_CATEGORY_DOCUMENT = 26;
-
     public static final int CONFIRM_DELETE_CATEGORY_MAIL = 27;
-
     public static final int CONFIRM_DELETE_KEYWORD_FOLDER = 28;
-
     public static final int CONFIRM_DELETE_KEYWORD_DOCUMENT = 29;
-
     public static final int CONFIRM_DELETE_KEYWORD_MAIL = 30;
-
     public static final int CONFIRM_DELETE_MASSIVE = 31;
-
     public static final int CONFIRM_LOGOUT_DOCUMENTS_CHECKOUT = 32;
+    public static final int CONFIRM_FORCE_CHAT_LOGIN = 39;
+    public static final int CONFIRM_LOCK_MASSIVE = 41;
+    public static final int CONFIRM_UNLOCK_MASSIVE = 42;
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private HTML text;
-
     private Button cancelButton;
-
     private Button acceptButton;
-
     private int action = 0;
-
     private Object object;
 
     /**
@@ -144,22 +107,20 @@ public class ConfirmPopup extends DialogBox {
         text = new HTML();
         text.setStyleName("okm-NoWrap");
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
-        acceptButton = new Button(Main.i18n("button.accept"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        execute();
-                        hide();
-                    }
-                });
+        acceptButton = new Button(Main.i18n("button.accept"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                execute();
+                hide();
+            }
+        });
 
         vPanel.setWidth("300px");
         vPanel.setHeight("100px");
@@ -178,10 +139,8 @@ public class ConfirmPopup extends DialogBox {
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(text,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(text, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
 
         super.hide();
         setWidget(vPanel);
@@ -194,8 +153,7 @@ public class ConfirmPopup extends DialogBox {
         switch (action) {
 
         case CONFIRM_DELETE_FOLDER:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.delete();
             } else if (Main.get().activeFolderTree.isPanelSelected()) {
                 Main.get().activeFolderTree.delete();
@@ -203,32 +161,27 @@ public class ConfirmPopup extends DialogBox {
             break;
 
         case CONFIRM_DELETE_DOCUMENT:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.delete();
             }
             break;
 
         case CONFIRM_EMPTY_TRASH:
             // Ensures DESKTOP view is enabled
-            if (Main.get().mainPanel.topPanel.tabWorkspace
-                    .getSelectedWorkspace() != UIDockPanelConstants.DESKTOP) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DESKTOP);
+            if (Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() != UIDockPanelConstants.DESKTOP) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DESKTOP);
             }
 
-            //Ensures that trash view is enabled
+            // Ensures that trash view is enabled
             if (Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH) {
-                Main.get().mainPanel.desktop.navigator.stackPanel.showStack(
-                        UIDesktopConstants.NAVIGATOR_TRASH, false);
+                Main.get().mainPanel.desktop.navigator.stackPanel.showStack(UIDesktopConstants.NAVIGATOR_TRASH, false);
             }
 
             Main.get().activeFolderTree.purgeTrash();
             break;
 
         case CONFIRM_PURGE_FOLDER:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.purge();
             } else if (Main.get().activeFolderTree.isPanelSelected()) {
                 Main.get().activeFolderTree.purge();
@@ -236,36 +189,31 @@ public class ConfirmPopup extends DialogBox {
             break;
 
         case CONFIRM_PURGE_DOCUMENT:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.purge();
             }
             break;
 
         case CONFIRM_DELETE_PROPERTY_GROUP:
             if (Main.get().mainPanel.topPanel.toolBar.isNodeDocument()) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                        .removePropertyGroup();
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.removePropertyGroup();
             } else if (Main.get().mainPanel.topPanel.toolBar.isNodeFolder()) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                        .removePropertyGroup();
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.removePropertyGroup();
             } else if (Main.get().mainPanel.topPanel.toolBar.isNodeMail()) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                        .removePropertyGroup();
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.removePropertyGroup();
             }
-            // Always if a property group is deleted add property button on tool bar must be enabled, we execute to ensure this
+            // Always if a property group is deleted add property button on
+            // tool bar must be enabled, we execute to ensure this
             Main.get().mainPanel.topPanel.toolBar.enableAddPropertyGroup();
             break;
 
         case CONFIRM_PURGE_VERSION_HISTORY_DOCUMENT:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.version
-                    .purgeVersionHistory();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.version.purgeVersionHistory();
             break;
 
         case CONFIRM_RESTORE_HISTORY_DOCUMENT:
             if (object != null && object instanceof String) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.version
-                        .restoreVersion((String) object);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.version.restoreVersion((String) object);
             }
             break;
 
@@ -274,8 +222,7 @@ public class ConfirmPopup extends DialogBox {
             break;
 
         case CONFIRM_DELETE_SAVED_SEARCH:
-            Main.get().mainPanel.search.historySearch.searchSaved
-                    .deleteSearch();
+            Main.get().mainPanel.search.historySearch.searchSaved.deleteSearch();
             break;
 
         case CONFIRM_DELETE_USER_NEWS:
@@ -283,22 +230,19 @@ public class ConfirmPopup extends DialogBox {
             break;
 
         case CONFIRM_DELETE_MAIL:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.delete();
             }
             break;
 
         case CONFIRM_PURGE_MAIL:
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
                 Main.get().mainPanel.desktop.browser.fileBrowser.purge();
             }
             break;
 
         case CONFIRM_GET_POOLED_WORKFLOW_TASK:
-            Main.get().mainPanel.dashboard.workflowDashboard
-                    .setTaskInstanceActorId();
+            Main.get().mainPanel.dashboard.workflowDashboard.setTaskInstanceActorId();
             break;
 
         case CONFIRM_FORCE_UNLOCK:
@@ -306,38 +250,30 @@ public class ConfirmPopup extends DialogBox {
             break;
 
         case CONFIRM_FORCE_CANCEL_CHECKOUT:
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .forceCancelCheckout();
+            Main.get().mainPanel.desktop.browser.fileBrowser.forceCancelCheckout();
             break;
 
         case CONFIRM_WORKFLOW_ACTION:
             if (object != null && object instanceof ValidationButton) {
-                final ValidationButton validationButton = (ValidationButton) object;
-                final GWTButton gWTButton = validationButton.getButton();
-                final ValidationProcessor validationProcessor = validationButton
-                        .getValidationProcessor();
-                final HasWorkflow workflow = validationButton.getWorkflow();
-                final GWTTaskInstance taskInstance = validationButton
-                        .getTaskInstance();
+                ValidationButton validationButton = (ValidationButton) object;
+                GWTButton gWTButton = validationButton.getButton();
+                ValidationProcessor validationProcessor = validationButton.getValidationProcessor();
+                HasWorkflow workflow = validationButton.getWorkflow();
+                GWTTaskInstance taskInstance = validationButton.getTaskInstance();
                 if (gWTButton.isValidate()) {
                     if (validationProcessor.validate()) {
                         if (gWTButton.getTransition().equals("")) {
-                            workflow.setTaskInstanceValues(
-                                    taskInstance.getId(), null);
+                            workflow.setTaskInstanceValues(taskInstance.getId(), null);
                         } else {
-                            workflow.setTaskInstanceValues(
-                                    taskInstance.getId(),
-                                    gWTButton.getTransition());
+                            workflow.setTaskInstanceValues(taskInstance.getId(), gWTButton.getTransition());
                         }
                         validationButton.disableAllButtonList();
                     }
                 } else {
                     if (gWTButton.getTransition().equals("")) {
-                        workflow.setTaskInstanceValues(taskInstance.getId(),
-                                null);
+                        workflow.setTaskInstanceValues(taskInstance.getId(), null);
                     } else {
-                        workflow.setTaskInstanceValues(taskInstance.getId(),
-                                gWTButton.getTransition());
+                        workflow.setTaskInstanceValues(taskInstance.getId(), gWTButton.getTransition());
                     }
                     validationButton.disableAllButtonList();
                 }
@@ -346,75 +282,66 @@ public class ConfirmPopup extends DialogBox {
 
         case CONFIRM_DELETE_NOTE_DOCUMENT:
             if (object != null && object instanceof NoteToDelete) {
-                final NoteToDelete noteToDelete = (NoteToDelete) object;
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.notes
-                        .deleteNote(noteToDelete.getNotePath(),
-                                noteToDelete.getRow());
+                NoteToDelete noteToDelete = (NoteToDelete) object;
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.notes.deleteNote(noteToDelete.getNotePath(),
+                        noteToDelete.getRow());
             }
             break;
 
         case CONFIRM_DELETE_NOTE_FOLDER:
             if (object != null && object instanceof NoteToDelete) {
-                final NoteToDelete noteToDelete = (NoteToDelete) object;
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.notes
-                        .deleteNote(noteToDelete.getNotePath(),
-                                noteToDelete.getRow());
+                NoteToDelete noteToDelete = (NoteToDelete) object;
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.notes.deleteNote(noteToDelete.getNotePath(),
+                        noteToDelete.getRow());
             }
             break;
 
         case CONFIRM_DELETE_NOTE_MAIL:
             if (object != null && object instanceof NoteToDelete) {
-                final NoteToDelete noteToDelete = (NoteToDelete) object;
+                NoteToDelete noteToDelete = (NoteToDelete) object;
                 Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.notes
-                        .deleteNote(noteToDelete.getNotePath(),
-                                noteToDelete.getRow());
+                        .deleteNote(noteToDelete.getNotePath(), noteToDelete.getRow());
             }
             break;
 
         case CONFIRM_DRAG_DROP_MOVE_DOCUMENT:
-            Main.get().dragable.modeDocument((ObjectToMove) object);
+            Main.get().draggable.modeDocument((ObjectToMove) object);
             break;
 
         case CONFIRM_DRAG_DROP_MOVE_FOLDER_FROM_TREE:
-            Main.get().dragable.modeFolderFromTree((ObjectToMove) object);
+            Main.get().draggable.modeFolderFromTree((ObjectToMove) object);
             break;
 
         case CONFIRM_DRAG_DROP_MOVE_FOLDER_FROM_BROWSER:
-            Main.get().dragable.modeFolderFromBrowser((ObjectToMove) object);
+            Main.get().draggable.modeFolderFromBrowser((ObjectToMove) object);
             break;
 
         case CONFIRM_DRAG_DROP_MOVE_MAIL:
-            Main.get().dragable.modeMail((ObjectToMove) object);
+            Main.get().draggable.modeMail((ObjectToMove) object);
             break;
 
         case CONFIRM_DELETE_CATEGORY_FOLDER:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                    .removeCategory((CategoryToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.removeCategory((CategoryToRemove) object);
             break;
 
         case CONFIRM_DELETE_CATEGORY_DOCUMENT:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                    .removeCategory((CategoryToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.removeCategory((CategoryToRemove) object);
             break;
 
         case CONFIRM_DELETE_CATEGORY_MAIL:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                    .removeCategory((CategoryToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.removeCategory((CategoryToRemove) object);
             break;
 
         case CONFIRM_DELETE_KEYWORD_FOLDER:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                    .removeKeyword((KeywordToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.removeKeyword((KeywordToRemove) object);
             break;
 
         case CONFIRM_DELETE_KEYWORD_DOCUMENT:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                    .removeKeyword((KeywordToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.removeKeyword((KeywordToRemove) object);
             break;
 
         case CONFIRM_DELETE_KEYWORD_MAIL:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                    .removeKeyword((KeywordToRemove) object);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.removeKeyword((KeywordToRemove) object);
             break;
 
         case CONFIRM_DELETE_MASSIVE:
@@ -423,6 +350,18 @@ public class ConfirmPopup extends DialogBox {
 
         case CONFIRM_LOGOUT_DOCUMENTS_CHECKOUT:
             Main.get().logoutPopup.logout();
+            break;
+
+        case CONFIRM_FORCE_CHAT_LOGIN:
+            Main.get().mainPanel.bottomPanel.userInfo.forceLogin();
+            break;
+
+        case CONFIRM_LOCK_MASSIVE:
+            Main.get().mainPanel.desktop.browser.fileBrowser.lockMasive();
+            break;
+
+        case CONFIRM_UNLOCK_MASSIVE:
+            Main.get().mainPanel.desktop.browser.fileBrowser.unlockMasive();
             break;
         }
 
@@ -434,7 +373,7 @@ public class ConfirmPopup extends DialogBox {
      * 
      * @param action The action to be confirmed
      */
-    public void setConfirm(final int action) {
+    public void setConfirm(int action) {
         this.action = action;
         switch (action) {
 
@@ -545,6 +484,18 @@ public class ConfirmPopup extends DialogBox {
         case CONFIRM_LOGOUT_DOCUMENTS_CHECKOUT:
             text.setHTML(Main.i18n("confirm.logout.documents.checkout"));
             break;
+
+        case CONFIRM_FORCE_CHAT_LOGIN:
+            text.setHTML(Main.i18n("user.info.chat.force.login"));
+            break;
+
+        case CONFIRM_LOCK_MASSIVE:
+            text.setHTML(Main.i18n("confirm.massive.lock"));
+            break;
+
+        case CONFIRM_UNLOCK_MASSIVE:
+            text.setHTML(Main.i18n("confirm.massive.unlock"));
+            break;
         }
     }
 
@@ -553,7 +504,7 @@ public class ConfirmPopup extends DialogBox {
      * 
      * @param text
      */
-    public void setConfirmationText(final String text) {
+    public void setConfirmationText(String text) {
         this.text.setHTML(text);
     }
 
@@ -571,7 +522,7 @@ public class ConfirmPopup extends DialogBox {
      * 
      * @param object The object to set
      */
-    public void setValue(final Object object) {
+    public void setValue(Object object) {
         this.object = object;
     }
 
@@ -581,17 +532,16 @@ public class ConfirmPopup extends DialogBox {
      * @return The object
      */
     public Object getValue() {
-        return object;
+        return this.object;
     }
 
     /**
      * Shows de popup
      */
-    @Override
     public void show() {
         setText(Main.i18n("confirm.label"));
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 125) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 125) / 2;
         setPopupPosition(left, top);
         super.show();
     }

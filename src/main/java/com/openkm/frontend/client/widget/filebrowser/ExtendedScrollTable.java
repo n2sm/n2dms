@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.gen2.table.client.FixedWidthFlexTable;
@@ -60,7 +59,6 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
     // Actions on rows
     public static final int ACTION_NONE = 0;
-
     public static final int ACTION_RENAMING = 1;
 
     // Special event case
@@ -71,40 +69,26 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
     // Holds the data rows of the table this is a list of RowData Object
     public Map<Integer, Object> data = new HashMap<Integer, Object>();
-
     public List<Integer> massiveSelected = new ArrayList<Integer>();
-
     private FixedWidthGrid dataTable;
-
     private FixedWidthFlexTable headerTable;
 
     private int selectedRow = -1;
-
     private int mouseX = 0;
-
     private int mouseY = 0;
-
     private int dataIndexValue = 0;
-
     private int rowAction = ACTION_NONE;
-
     private int mouseDownX = 0;
-
     private int mouseDownY = 0;
 
     private boolean dragged = false;
-
     private int oldMassiveSelected = 0;
-
     private ExtendedColumnSorter columnSorter;
 
     // Columns
     private GWTProfileFileBrowser profileFileBrowser;
-
     public int colDataIndex = 0;
-
     public int colStatusIndex = 0; // Always is 0
-
     public int colMassiveIndex = 0;
 
     /**
@@ -112,9 +96,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @param headerTable
      * @param scrollTableImages
      */
-    public ExtendedScrollTable(final FixedWidthGrid dataTable,
-            final FixedWidthFlexTable headerTable,
-            final ScrollTableImages scrollTableImages) {
+    public ExtendedScrollTable(FixedWidthGrid dataTable, FixedWidthFlexTable headerTable, ScrollTableImages scrollTableImages) {
         super(dataTable, headerTable, scrollTableImages);
 
         this.dataTable = dataTable;
@@ -122,17 +104,15 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
         // Table data SortableFixedWidthGrid.HOVERING_POLICY_CELL
         dataTable.setSelectionPolicy(SelectionGrid.SelectionPolicy.ONE_ROW);
-        setResizePolicy(ResizePolicy.UNCONSTRAINED);
+        setResizePolicy(ResizePolicy.FILL_WIDTH);
         setScrollPolicy(ScrollPolicy.BOTH);
 
         columnSorter = new ExtendedColumnSorter();
         dataTable.setColumnSorter(columnSorter);
 
         // Sets some events
-        DOM.sinkEvents(getDataWrapper(), Event.ONCLICK | Event.ONDBLCLICK
-                | Event.ONMOUSEDOWN | Event.ONMOUSEUP | Event.ONMOUSEMOVE
+        DOM.sinkEvents(getDataWrapper(), Event.ONCLICK | Event.ONDBLCLICK | Event.ONMOUSEDOWN | Event.ONMOUSEUP | Event.ONMOUSEMOVE
                 | Event.ONMOUSEUP);
-
     }
 
     /**
@@ -173,7 +153,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param row The row number
      */
-    public void setSelectedRow(final int row) {
+    public void setSelectedRow(int row) {
         // Log.debug("ExtendedScrollTable setSelectedRow:"+row);
         dataTable.selectRow(row, true);
         selectedRow = row;
@@ -184,7 +164,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param folder
      */
-    public void addRow(final GWTFolder folder) {
+    public void addRow(GWTFolder folder) {
         addRow(folder, false);
     }
 
@@ -197,9 +177,9 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @param rows The actual table row
      * @param GWTFolder The folder
      */
-    public void addRow(final GWTFolder folder, final boolean update) {
+    public void addRow(GWTFolder folder, boolean update) {
         int col = 0;
-        final int row = update ? getSelectedRow() : dataTable.getRowCount();
+        final int row = (update) ? getSelectedRow() : dataTable.getRowCount();
         if (update) {
             data.put(new Integer(dataTable.getText(row, colDataIndex)), folder);
         } else {
@@ -212,21 +192,15 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         // Subscribed is a special case, must add icon with others
         if (profileFileBrowser.isStatusVisible()) {
             if (folder.isSubscribed()) {
-                dataTable.setHTML(row, col,
-                        Util.imageItemHTML("img/icon/subscribed.gif"));
+                dataTable.setHTML(row, col, Util.imageItemHTML("img/icon/subscribed.gif"));
             } else {
                 dataTable.setHTML(row, col, "&nbsp;");
             }
 
             if (folder.isHasNotes()) {
-                dataTable.setHTML(
-                        row,
-                        col,
-                        dataTable.getHTML(row, col)
-                                + Util.imageItemHTML("img/icon/note.gif"));
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/note.gif"));
             }
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_RIGHT);
         }
 
         if (profileFileBrowser.isMassiveVisible()) {
@@ -235,83 +209,73 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             checkBox.setStyleName("okm-CheckBox");
             checkBox.addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     oldMassiveSelected = massiveSelected.size();
 
                     if (checkBox.getValue()) {
-                        massiveSelected.add(new Integer(dataTable.getText(row,
-                                colDataIndex)));
+                        massiveSelected.add(new Integer(dataTable.getText(row, colDataIndex)));
                     } else {
-                        massiveSelected.remove(new Integer(dataTable.getText(
-                                row, colDataIndex)));
+                        massiveSelected.remove(new Integer(dataTable.getText(row, colDataIndex)));
                     }
                 }
             });
 
             dataTable.setWidget(row, col, checkBox);
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (profileFileBrowser.isIconVisible()) {
             // Looks if must change icon on parent if now has no childs and properties with user security atention
             if ((folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
                 if (folder.isHasChildren()) {
-                    dataTable.setHTML(row, col,
-                            Util.imageItemHTML("img/menuitem_childs.gif"));
+                    dataTable.setHTML(row, col, Util.imageItemHTML("img/menuitem_childs.gif"));
                 } else {
-                    dataTable.setHTML(row, col,
-                            Util.imageItemHTML("img/menuitem_empty.gif"));
+                    dataTable.setHTML(row, col, Util.imageItemHTML("img/menuitem_empty.gif"));
                 }
             } else {
                 if (folder.isHasChildren()) {
-                    dataTable.setHTML(row, col,
-                            Util.imageItemHTML("img/menuitem_childs_ro.gif"));
+                    dataTable.setHTML(row, col, Util.imageItemHTML("img/menuitem_childs_ro.gif"));
                 } else {
-                    dataTable.setHTML(row, col,
-                            Util.imageItemHTML("img/menuitem_empty_ro.gif"));
+                    dataTable.setHTML(row, col, Util.imageItemHTML("img/menuitem_empty_ro.gif"));
                 }
             }
 
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (profileFileBrowser.isNameVisible()) {
             dataTable.setHTML(row, col, folder.getName());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_LEFT);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_LEFT);
         }
+
         if (profileFileBrowser.isSizeVisible()) {
             dataTable.setHTML(row, col, "&nbsp;");
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isLastModifiedVisible()) {
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.date.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
             dataTable.setHTML(row, col, dtf.format(folder.getCreated()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isAuthorVisible()) {
             dataTable.setHTML(row, col, folder.getUser().getUsername());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isVersionVisible()) {
             dataTable.setHTML(row, col, "&nbsp;");
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (!update) {
-            dataTable.setHTML(row, colDataIndex, "" + dataIndexValue++);
+            dataTable.setHTML(row, colDataIndex, "" + (dataIndexValue++));
             dataTable.getCellFormatter().setVisible(row, colDataIndex, false);
         }
 
         for (int i = 0; i < colDataIndex; i++) {
-            dataTable.getCellFormatter().addStyleName(row, i,
-                    "okm-DisableSelect");
+            dataTable.getCellFormatter().addStyleName(row, i, "okm-DisableSelect");
         }
     }
 
@@ -320,11 +284,8 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      */
     public void addNoteIconToSelectedRow() {
         if (profileFileBrowser.isStatusVisible()) {
-            dataTable.setHTML(
-                    selectedRow,
-                    colStatusIndex,
-                    dataTable.getHTML(selectedRow, colStatusIndex)
-                            + Util.imageItemHTML("img/icon/note.gif"));
+            dataTable.setHTML(selectedRow, colStatusIndex,
+                    dataTable.getHTML(selectedRow, colStatusIndex) + Util.imageItemHTML("img/icon/note.gif"));
         }
     }
 
@@ -333,8 +294,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      */
     public void deleteNoteIconToSelectedRow() {
         if (profileFileBrowser.isStatusVisible()) {
-            final String htmlValue = dataTable.getHTML(selectedRow,
-                    colStatusIndex);
+            String htmlValue = dataTable.getHTML(selectedRow, colStatusIndex);
             String newHtmlIcons = "";
 
             if (htmlValue.indexOf("edit.gif") >= 0) {
@@ -359,7 +319,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @param rows The table row
      * @param doc The document
      */
-    public void addRow(final GWTDocument doc) {
+    public void addRow(GWTDocument doc) {
         addRow(doc, false);
     }
 
@@ -367,13 +327,11 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * Sets the document to the row
      * 
      * Update indicates should be updated selected row otherside inserts new
-     * 
-     * @param doc
-     * @param update
      */
-    public void addRow(final GWTDocument doc, final boolean update) {
+    public void addRow(GWTDocument doc, boolean update) {
         int col = 0;
-        final int row = update ? getSelectedRow() : dataTable.getRowCount();
+        final int row = (update) ? getSelectedRow() : dataTable.getRowCount();
+
         if (update) {
             data.put(new Integer(dataTable.getText(row, colDataIndex)), doc);
         } else {
@@ -385,35 +343,34 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
         if (profileFileBrowser.isStatusVisible()) {
             if (doc.isCheckedOut()) {
-                dataTable.setHTML(row, col,
-                        Util.imageItemHTML("img/icon/edit.gif"));
+                dataTable.setHTML(row, col, Util.imageItemHTML("img/icon/edit.gif"));
             } else if (doc.isLocked()) {
-                dataTable.setHTML(row, col,
-                        Util.imageItemHTML("img/icon/lock.gif"));
+                dataTable.setHTML(row, col, Util.imageItemHTML("img/icon/lock.gif"));
             } else {
                 dataTable.setHTML(row, col, "&nbsp;");
             }
 
             // Subscribed is a special case, must add icon with others
             if (doc.isSubscribed()) {
-                dataTable
-                        .setHTML(
-                                row,
-                                col,
-                                dataTable.getHTML(row, col)
-                                        + Util.imageItemHTML("img/icon/subscribed.gif"));
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/subscribed.gif"));
             }
+
             // Document has notes
             if (doc.isHasNotes()) {
-                dataTable.setHTML(
-                        row,
-                        col,
-                        dataTable.getHTML(row, col)
-                                + Util.imageItemHTML("img/icon/note.gif"));
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/note.gif"));
             }
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
 
+            // Document encrypted
+            if (doc.getCipherName() != null && !doc.getCipherName().equals("")) {
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/actions/crypt.png"));
+            }
+
+            // Document signed
+            if (doc.isSigned()) {
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/actions/digital_signature.png"));
+            }
+
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_RIGHT);
         }
 
         if (profileFileBrowser.isMassiveVisible()) {
@@ -422,77 +379,70 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             checkBox.setStyleName("okm-CheckBox");
             checkBox.addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     oldMassiveSelected = massiveSelected.size();
 
                     if (checkBox.getValue()) {
-                        massiveSelected.add(new Integer(dataTable.getText(row,
-                                colDataIndex)));
+                        massiveSelected.add(new Integer(dataTable.getText(row, colDataIndex)));
                     } else {
-                        massiveSelected.remove(new Integer(dataTable.getText(
-                                row, colDataIndex)));
+                        massiveSelected.remove(new Integer(dataTable.getText(row, colDataIndex)));
                     }
+                    evaluateMergePdf(); // Only when document checkbox is changed ( only document can be merged )
                 }
             });
 
             dataTable.setWidget(row, col, checkBox);
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isIconVisible()) {
             dataTable.setHTML(row, col, Util.mimeImageHTML(doc.getMimeType()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isNameVisible()) {
             dataTable.setHTML(row, col, doc.getName());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_LEFT);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_LEFT);
         }
+
         if (profileFileBrowser.isSizeVisible()) {
-            dataTable.setHTML(row, col,
-                    Util.formatSize(doc.getActualVersion().getSize()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.setHTML(row, col, Util.formatSize(doc.getActualVersion().getSize()));
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isLastModifiedVisible()) {
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.date.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
             dataTable.setHTML(row, col, dtf.format(doc.getLastModified()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isAuthorVisible()) {
-            dataTable.setHTML(row, col, doc.getActualVersion().getUser()
-                    .getUsername());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.setHTML(row, col, doc.getActualVersion().getUser().getUsername());
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isVersionVisible()) {
-            final Hyperlink hLink = new Hyperlink();
+            Hyperlink hLink = new Hyperlink();
             hLink.setText(doc.getActualVersion().getName());
             hLink.setTitle(doc.getActualVersion().getComment());
             dataTable.setWidget(row, col, hLink);
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (!update) {
-            dataTable.setHTML(row, colDataIndex, "" + dataIndexValue++);
+            dataTable.setHTML(row, colDataIndex, "" + (dataIndexValue++));
             dataTable.getCellFormatter().setVisible(row, colDataIndex, false);
         }
 
         for (int i = 0; i < colDataIndex; i++) {
-            dataTable.getCellFormatter().addStyleName(row, i,
-                    "okm-DisableSelect");
+            dataTable.getCellFormatter().addStyleName(row, i, "okm-DisableSelect");
         }
     }
 
     /**
      * addRow
-     * 
-     * @param mail
      */
-    public void addRow(final GWTMail mail) {
+    public void addRow(GWTMail mail) {
         addRow(mail, false);
     }
 
@@ -500,13 +450,11 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * Sets the mail to the row
      * 
      * Update indicates should be updated selected row otherside inserts new
-     * 
-     * @param mail
-     * @param update
      */
-    public void addRow(final GWTMail mail, final boolean update) {
+    public void addRow(GWTMail mail, boolean update) {
         int col = 0;
-        final int row = update ? getSelectedRow() : dataTable.getRowCount();
+        final int row = (update) ? getSelectedRow() : dataTable.getRowCount();
+
         if (update) {
             data.put(new Integer(dataTable.getText(row, colDataIndex)), mail);
         } else {
@@ -519,16 +467,11 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         if (profileFileBrowser.isStatusVisible()) {
             // Mail is never checkout or subscribed ( because can not be changed )
             if (mail.isHasNotes()) {
-                dataTable.setHTML(
-                        row,
-                        col,
-                        dataTable.getHTML(row, col)
-                                + Util.imageItemHTML("img/icon/note.gif"));
+                dataTable.setHTML(row, col, dataTable.getHTML(row, col) + Util.imageItemHTML("img/icon/note.gif"));
             } else {
                 dataTable.setHTML(row, col, "&nbsp;");
             }
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_RIGHT);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_RIGHT);
         }
 
         if (profileFileBrowser.isMassiveVisible()) {
@@ -537,71 +480,63 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             checkBox.setStyleName("okm-CheckBox");
             checkBox.addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     oldMassiveSelected = massiveSelected.size();
 
                     if (checkBox.getValue()) {
-                        massiveSelected.add(new Integer(dataTable.getText(row,
-                                colDataIndex)));
+                        massiveSelected.add(new Integer(dataTable.getText(row, colDataIndex)));
                     } else {
-                        massiveSelected.remove(new Integer(dataTable.getText(
-                                row, colDataIndex)));
+                        massiveSelected.remove(new Integer(dataTable.getText(row, colDataIndex)));
                     }
                 }
             });
 
             dataTable.setWidget(row, col, checkBox);
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (profileFileBrowser.isIconVisible()) {
             if (mail.getAttachments().size() > 0) {
-                dataTable.setHTML(row, col,
-                        Util.imageItemHTML("img/email_attach.gif"));
+                dataTable.setHTML(row, col, Util.imageItemHTML("img/email_attach.gif"));
             } else {
-                dataTable
-                        .setHTML(row, col, Util.imageItemHTML("img/email.gif"));
+                dataTable.setHTML(row, col, Util.imageItemHTML("img/email.gif"));
             }
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (profileFileBrowser.isNameVisible()) {
             dataTable.setHTML(row, col, mail.getSubject());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_LEFT);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_LEFT);
         }
+
         if (profileFileBrowser.isSizeVisible()) {
             dataTable.setHTML(row, col, Util.formatSize(mail.getSize()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isLastModifiedVisible()) {
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.date.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
             dataTable.setHTML(row, col, dtf.format(mail.getReceivedDate()));
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isAuthorVisible()) {
-            dataTable.setHTML(row, col, mail.getFrom());
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.setHTML(row, col, Util.showMailName(mail.getFrom()));
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (profileFileBrowser.isVersionVisible()) {
             dataTable.setHTML(row, col, "&nbsp;");
-            dataTable.getCellFormatter().setHorizontalAlignment(row, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(row, col++, HasHorizontalAlignment.ALIGN_CENTER);
         }
+
         if (!update) {
-            dataTable.setHTML(row, colDataIndex, "" + dataIndexValue++);
+            dataTable.setHTML(row, colDataIndex, "" + (dataIndexValue++));
             dataTable.getCellFormatter().setVisible(row, colDataIndex, false);
         }
 
         for (int i = 0; i < colDataIndex; i++) {
-            dataTable.getCellFormatter().addStyleName(row, i,
-                    "okm-DisableSelect");
+            dataTable.getCellFormatter().addStyleName(row, i, "okm-DisableSelect");
         }
     }
 
@@ -610,8 +545,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      */
     public void deselecSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             dataTable.deselectRow(selectedRow);
         }
         selectedRow = -1;
@@ -621,8 +555,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * (non-Javadoc)
      * @see com.google.gwt.user.client.EventListener#onBrowserEvent(com.google.gwt.user.client.Event)
      */
-    @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
         boolean headerFired = false; // Controls when event is fired by header
 
         // Case targe event is header must disable drag & drop
@@ -630,6 +563,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             dragged = false;
             headerFired = true;
         }
+
         boolean isRenaming = false;
 
         // If some action is on course must do speacil actions, this must be made before selected row
@@ -646,8 +580,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
         int type = DOM.eventGetType(event);
 
-        if (type == Event.ONMOUSEDOWN
-                && DOM.eventGetButton(event) == NativeEvent.BUTTON_RIGHT) {
+        if (type == Event.ONMOUSEDOWN && DOM.eventGetButton(event) == Event.BUTTON_RIGHT) {
             type = EVENT_ONMOUSEDOWN_RIGHT; // Special case, that must be so much similar to click event
         }
 
@@ -663,11 +596,8 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
 
             if (dataTable.getEventTargetCell(event) != null) {
                 // Mark panel as selected and disables tree navigator panel
-                if (getSelectedRow() >= 0
-                        && !Main.get().mainPanel.desktop.browser.fileBrowser
-                                .isPanelSelected()) {
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .setSelectedPanel(true);
+                if (getSelectedRow() >= 0 && !Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.setSelectedPanel(true);
                 }
 
                 // And row must be other than the selected one
@@ -677,8 +607,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
                     switch (rowAction) {
                     case ACTION_RENAMING:
                         if (getSelectedRow() != selectedRow) {
-                            Main.get().mainPanel.desktop.browser.fileBrowser
-                                    .hideRename(selectedRow);
+                            Main.get().mainPanel.desktop.browser.fileBrowser.hideRename(selectedRow);
                         }
                         break;
                     }
@@ -686,17 +615,13 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
                     selectedRow = getSelectedRow();
 
                     refreshTabValues();
-                } else if (getSelectedRow() >= 0
-                        && getSelectedRow() == selectedRow) {
+                } else if (getSelectedRow() >= 0 && getSelectedRow() == selectedRow) {
                     // Special case should evaluate massive because toolbar will not be refreshed
                     if (oldMassiveSelected == 0 && massiveSelected.size() > 0) {
-                        Main.get().mainPanel.topPanel.toolBar
-                                .enableMassiveView();
+                        Main.get().mainPanel.topPanel.toolBar.enableMassiveView();
                         oldMassiveSelected = massiveSelected.size();
-                    } else if (oldMassiveSelected == 1
-                            && massiveSelected.size() == 0) {
-                        Main.get().mainPanel.topPanel.toolBar
-                                .disableMassiveView();
+                    } else if (oldMassiveSelected == 1 && massiveSelected.size() == 0) {
+                        Main.get().mainPanel.topPanel.toolBar.disableMassiveView();
                         oldMassiveSelected = 0;
                     }
                 }
@@ -707,45 +632,38 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             // On double click not sends event to onCellClicked across super.onBrowserEvent();
             // Disables the event propagation the sequence is:
             // Two time entry onCellClicked before entry on onBrowserEvent and disables the
-            // Tree onCellClicked that produces inconsistence error refreshing
+            // Tree onCellClicked that produces inconsistency error refreshing
             DOM.eventCancelBubble(event, true);
 
             if (!headerFired && getSelectedRow() >= 0) {
                 if (isFolderSelected()) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple
-                            .enableTabFolder();
-                    if (getSelectedRow() != selectedRow) { // Must not refresh properties on double click if row is
-                                                           // yet selected
-                        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                                .setProperties(getFolder());
+                    Main.get().mainPanel.desktop.browser.tabMultiple.enableTabFolder();
+
+                    // Must not refresh properties on double click if row is already selected
+                    if (getSelectedRow() != selectedRow) {
+                        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.setProperties(getFolder());
                     }
-                    Main.get().activeFolderTree.setActiveNode(getFolder()
-                            .getPath(), false, true);
+
+                    Main.get().activeFolderTree.setActiveNode(getFolder().getPath(), false, true);
                 } else if (isMailSelected()) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple
-                            .enableTabMail();
-                    final GWTMail mail = getMail();
-                    if (getSelectedRow() != selectedRow) { // Must not refresh properties on double click if row is
-                                                           // yet selected
-                        Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                                .setProperties(mail);
-                    }
-                    Main.get().mainPanel.topPanel.toolBar
-                            .checkToolButtonPermissions(mail,
-                                    Main.get().activeFolderTree.getFolder());
-                } else {
-                    Main.get().mainPanel.desktop.browser.tabMultiple
-                            .enableTabDocument();
-                    final GWTDocument doc = getDocument();
-                    Main.get().mainPanel.topPanel.toolBar
-                            .checkToolButtonPermissions(doc,
-                                    Main.get().activeFolderTree.getFolder());
+                    Main.get().mainPanel.desktop.browser.tabMultiple.enableTabMail();
+                    GWTMail mail = getMail();
+                    Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(mail, Main.get().activeFolderTree.getFolder());
+
                     // We come here before executing click ( click is always executed )
-                    if (!isRenaming
-                            && Main.get().mainPanel.topPanel.toolBar
-                                    .getToolBarOption().downloadOption) {
-                        if (Main.get().workspaceUserProperties.getWorkspace()
-                                .getAvailableOption().isDownloadOption()) {
+                    if (!isRenaming && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().downloadOption) {
+                        if (Main.get().workspaceUserProperties.getWorkspace().getAvailableOption().isDownloadOption()) {
+                            downloadMail();
+                        }
+                    }
+                } else {
+                    Main.get().mainPanel.desktop.browser.tabMultiple.enableTabDocument();
+                    GWTDocument doc = getDocument();
+                    Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(doc, Main.get().activeFolderTree.getFolder());
+
+                    // We come here before executing click ( click is always executed )
+                    if (!isRenaming && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().downloadOption) {
+                        if (Main.get().workspaceUserProperties.getWorkspace().getAvailableOption().isDownloadOption()) {
                             downloadDocument(false);
                         }
                     }
@@ -754,54 +672,44 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             break;
 
         case Event.ONMOUSEMOVE:
-            if (isDragged() && mouseDownX > 0 && mouseDownY > 0
-                    && evalDragPixelSensibility()) {
+            if (isDragged() && mouseDownX > 0 && mouseDownY > 0 && evalDragPixelSensibility()) {
 
                 // Implements drag & drop
-                final int noAction = FileBrowser.ACTION_NONE;
+                int noAction = FileBrowser.ACTION_NONE;
 
                 // On trash drag is disabled
-                if (isSelectedRow()
-                        && Main.get().mainPanel.desktop.browser.fileBrowser.fileBrowserAction == noAction
-                        && Main.get().mainPanel.desktop.navigator
-                                .getStackIndex() != UIDesktopConstants.NAVIGATOR_CATEGORIES
-                        && Main.get().mainPanel.desktop.navigator
-                                .getStackIndex() != UIDesktopConstants.NAVIGATOR_THESAURUS
-                        && Main.get().mainPanel.desktop.navigator
-                                .getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH) {
+                if (isSelectedRow() && Main.get().mainPanel.desktop.browser.fileBrowser.fileBrowserAction == noAction
+                        && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_CATEGORIES
+                        && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_THESAURUS
+                        && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH) {
                     String dragText = "";
+
                     if (isDocumentSelected()) {
-                        final GWTDocument doc = getDocument();
-                        dragText = Util.mimeImageHTML(doc.getMimeType())
-                                + doc.getName();
+                        GWTDocument doc = getDocument();
+                        dragText = Util.mimeImageHTML(doc.getMimeType()) + doc.getName();
                     } else if (isFolderSelected()) {
-                        final GWTFolder folder = getFolder();
+                        GWTFolder folder = getFolder();
 
                         if ((folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
                             if (folder.isHasChildren()) {
-                                dragText = Util
-                                        .imageItemHTML("img/menuitem_childs.gif");
+                                dragText = Util.imageItemHTML("img/menuitem_childs.gif");
                             } else {
-                                dragText = Util
-                                        .imageItemHTML("img/menuitem_empty.gif");
+                                dragText = Util.imageItemHTML("img/menuitem_empty.gif");
                             }
                         } else {
                             if (folder.isHasChildren()) {
-                                dragText = Util
-                                        .imageItemHTML("img/menuitem_childs_ro.gif");
+                                dragText = Util.imageItemHTML("img/menuitem_childs_ro.gif");
                             } else {
-                                dragText = Util
-                                        .imageItemHTML("img/menuitem_empty_ro.gif");
+                                dragText = Util.imageItemHTML("img/menuitem_empty_ro.gif");
                             }
                         }
 
                         dragText += folder.getName();
                     } else if (isMailSelected()) {
-                        final GWTMail mail = getMail();
+                        GWTMail mail = getMail();
 
                         if (mail.getAttachments().size() > 0) {
-                            dragText = Util
-                                    .imageItemHTML("img/email_attach.gif");
+                            dragText = Util.imageItemHTML("img/email_attach.gif");
                         } else {
                             dragText = Util.imageItemHTML("img/email.gif");
                         }
@@ -809,8 +717,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
                         dragText += mail.getSubject();
                     }
 
-                    Main.get().dragable
-                            .show(dragText, OriginPanel.FILE_BROWSER);
+                    Main.get().draggable.show(dragText, OriginPanel.FILE_BROWSER);
                 }
 
                 unsetDraged();
@@ -882,7 +789,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @param id The id
      * @return The selected row
      */
-    public int findSelectedRowById(final String id) {
+    public int findSelectedRowById(String id) {
         int selected = 0;
         int rowIndex = 0;
         boolean found = false;
@@ -912,11 +819,10 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         if (found) {
             found = false;
             rowIndex = 0;
-            final int tmpSelected = selected;
+            int tmpSelected = selected;
             selected = 0;
             while (!found && rowIndex < dataTable.getRowCount()) {
-                if (dataTable.getText(rowIndex, colDataIndex).equals(
-                        String.valueOf(tmpSelected))) {
+                if (dataTable.getText(rowIndex, colDataIndex).equals(String.valueOf(tmpSelected))) {
                     found = true;
                     selected = rowIndex;
                 }
@@ -939,8 +845,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         int selectedRow = -1;
 
         if (!dataTable.getSelectedRows().isEmpty()) {
-            selectedRow = dataTable.getSelectedRows().iterator().next()
-                    .intValue();
+            selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
         }
 
         // Log.debug("ExtendedScrollTable selectedRow:"+selectedRow);
@@ -961,7 +866,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param selectedRow The selected row
      */
-    public void restoreSelectedRow(final int selectedRow) {
+    public void restoreSelectedRow(int selectedRow) {
         // Log.debug("ExtendedScrollTable restoreSelectedRow:"+selectedRow);
         this.selectedRow = selectedRow;
     }
@@ -991,8 +896,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      */
     public GWTDocument getDocument() {
         if (isDocumentSelected()) {
-            return (GWTDocument) data.get(Integer.parseInt(dataTable.getText(
-                    getSelectedRow(), colDataIndex)));
+            return (GWTDocument) data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex)));
         } else {
             return null;
         }
@@ -1003,7 +907,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param doc The document
      */
-    public void setDocument(final GWTDocument doc) {
+    public void setDocument(GWTDocument doc) {
         if (isDocumentSelected()) {
             addRow(doc, true);
         }
@@ -1015,8 +919,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     public void delete() {
         if (isSelectedRow()) {
             // Log.debug("ExtendedScrollTable delete:");
-            data.remove(Integer.parseInt(dataTable.getText(getSelectedRow(),
-                    colDataIndex)));
+            data.remove(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex)));
             dataTable.removeRow(getSelectedRow());
             selectPrevRow();
         }
@@ -1059,8 +962,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * selectDown
      */
     public void selectDown() {
-        if (dataTable.getRowCount() > 0
-                && dataTable.getRowCount() - 1 > selectedRow) {
+        if (dataTable.getRowCount() > 0 && (dataTable.getRowCount() - 1 > selectedRow)) {
             dataTable.selectRow(++selectedRow, true);
             refreshTabValues();
         }
@@ -1072,27 +974,19 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     private void refreshTabValues() {
         if (isFolderSelected()) {
             Main.get().mainPanel.desktop.browser.tabMultiple.enableTabFolder();
-            final GWTFolder folder = getFolder();
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                    .setProperties(folder);
-            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(
-                    folder, Main.get().activeFolderTree.getFolder(),
-                    FILE_BROWSER);
+            GWTFolder folder = getFolder();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.setProperties(folder);
+            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(folder, Main.get().activeFolderTree.getFolder(), FILE_BROWSER);
         } else if (isMailSelected()) {
             Main.get().mainPanel.desktop.browser.tabMultiple.enableTabMail();
-            final GWTMail mail = getMail();
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail
-                    .setProperties(mail);
-            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(
-                    mail, Main.get().activeFolderTree.getFolder());
+            GWTMail mail = getMail();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.setProperties(mail);
+            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(mail, Main.get().activeFolderTree.getFolder());
         } else {
-            Main.get().mainPanel.desktop.browser.tabMultiple
-                    .enableTabDocument();
-            final GWTDocument doc = getDocument();
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                    .setProperties(doc);
-            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(
-                    doc, Main.get().activeFolderTree.getFolder());
+            Main.get().mainPanel.desktop.browser.tabMultiple.enableTabDocument();
+            GWTDocument doc = getDocument();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.setProperties(doc);
+            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(doc, Main.get().activeFolderTree.getFolder());
         }
     }
 
@@ -1104,8 +998,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     public GWTFolder getFolder() {
         // Row selected must be on table folder
         if (isFolderSelected()) {
-            return (GWTFolder) data.get(Integer.parseInt(dataTable.getText(
-                    getSelectedRow(), colDataIndex)));
+            return (GWTFolder) data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex)));
         } else {
             return null;
         }
@@ -1119,8 +1012,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     public GWTMail getMail() {
         // Row selected must be on table mail
         if (isMailSelected()) {
-            return (GWTMail) data.get(Integer.parseInt(dataTable.getText(
-                    getSelectedRow(), colDataIndex)));
+            return (GWTMail) data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex)));
         } else {
             return null;
         }
@@ -1132,7 +1024,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @param rows The table row
      * @param doc The document
      */
-    public void setMail(final GWTMail mail) {
+    public void setMail(GWTMail mail) {
         if (isMailSelected()) {
             addRow(mail, true);
         }
@@ -1143,7 +1035,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param folder The folder object
      */
-    public void setFolder(final GWTFolder folder) {
+    public void setFolder(GWTFolder folder) {
         // Row selected must be on table folder
         if (isFolderSelected()) {
             addRow(folder, true);
@@ -1157,8 +1049,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      */
     public boolean isDocumentSelected() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(),
-                    colDataIndex))) instanceof GWTDocument) {
+            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex))) instanceof GWTDocument) {
                 return true;
             } else {
                 return false;
@@ -1178,8 +1069,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             // Log.debug("ExtendedScrollTable isFolderSelected: key " + dataTable.getText(getSelectedRow(),7));
             // Log.debug("ExtendedScrollTable isFolderSelected: data size" + data.size());
 
-            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(),
-                    colDataIndex))) instanceof GWTFolder) {
+            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex))) instanceof GWTFolder) {
                 return true;
             } else {
                 return false;
@@ -1199,8 +1089,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             // Log.debug("ExtendedScrollTable isFolderSelected: key " + dataTable.getText(getSelectedRow(),8));
             // Log.debug("ExtendedScrollTable isFolderSelected: data size" + data.size());
 
-            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(),
-                    colDataIndex))) instanceof GWTMail) {
+            if (data.get(Integer.parseInt(dataTable.getText(getSelectedRow(), colDataIndex))) instanceof GWTMail) {
                 return true;
             } else {
                 return false;
@@ -1229,47 +1118,34 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     /**
      * Download documents
      */
-    public void downloadDocuments(final boolean checkout,
-            final List<String> uuidList) {
+    public void downloadDocuments(boolean checkout, List<String> uuidList) {
         if (uuidList.size() > 0) {
-            Util.downloadFilesByUUID(uuidList, checkout ? "checkout" : "");
-        }
-    }
-
-    /**
-     * Download documents
-     */
-    public void downloadDocuments(final boolean checkout) {
-        final List<String> uuidList = new ArrayList<String>();
-
-        for (int i = 0; dataTable.getRowCount() > i; i++) {
-            final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                    colMassiveIndex);
-            if (checkBox.getValue()) {
-                final Object obj = data.get(Integer.parseInt(dataTable.getText(
-                        i, colDataIndex)));
-                if (obj instanceof GWTDocument) {
-                    uuidList.add(((GWTDocument) obj).getUuid());
-                }
-            }
-        }
-
-        if (uuidList.size() > 0) {
-            Util.downloadFilesByUUID(uuidList, checkout ? "checkout" : "");
+            Util.downloadFilesByUUID(uuidList, (checkout ? "checkout" : ""));
         }
     }
 
     /**
      * Download document
      */
-    public void downloadDocument(final boolean checkout) {
+    public void downloadDocument(boolean checkout) {
         // Log.debug("downloadDocument()");
         if (isDocumentSelected()) {
             // Log.debug("jump to download");
-            Util.downloadFileByUUID(getDocument().getUuid(),
-                    checkout ? "checkout" : "");
+            Util.downloadFileByUUID(getDocument().getUuid(), (checkout ? "checkout" : ""));
         }
         // Log.debug("downloadDocument: void");
+    }
+
+    /**
+     * Download mail
+     */
+    public void downloadMail() {
+        // Log.debug("downloadMail()");
+        if (isMailSelected()) {
+            // Log.debug("jump to download");
+            Util.downloadFileByUUID(getMail().getUuid(), "");
+        }
+        // Log.debug("downloadMail: void");
     }
 
     /**
@@ -1282,6 +1158,18 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             Util.downloadFilePdf(getDocument().getUuid());
         }
         // Log.debug("downloadDocumentPdf: void");
+    }
+
+    /**
+     * print
+     */
+    public void print() {
+        // Log.debug("print()");
+        if (isDocumentSelected()) {
+            Log.debug("jump to download");
+            Util.print(getDocument().getUuid());
+        }
+        // Log.debug("print: void");
     }
 
     /**
@@ -1317,7 +1205,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param action The action
      */
-    public void setAction(final int action) {
+    public void setAction(int action) {
         rowAction = action;
     }
 
@@ -1343,7 +1231,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * Sets dragged flag to false;
      */
     private void unsetDraged() {
-        dragged = false;
+        this.dragged = false;
         mouseDownX = 0;
         mouseDownY = 0;
     }
@@ -1363,12 +1251,11 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     public void selectAllMassive() {
         massiveSelected = new ArrayList<Integer>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
-            final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                    colMassiveIndex);
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
             checkBox.setValue(true);
-            massiveSelected.add(Integer.parseInt(dataTable.getText(i,
-                    colDataIndex)));
+            massiveSelected.add(Integer.parseInt(dataTable.getText(i, colDataIndex)));
         }
+        evaluateMergePdf();
     }
 
     /**
@@ -1378,11 +1265,9 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         massiveSelected = new ArrayList<Integer>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
             if (data.get(Integer.parseInt(dataTable.getText(i, colDataIndex))) instanceof GWTFolder) {
-                final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                        colMassiveIndex);
+                CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
                 checkBox.setValue(true);
-                massiveSelected.add(Integer.parseInt(dataTable.getText(i,
-                        colDataIndex)));
+                massiveSelected.add(Integer.parseInt(dataTable.getText(i, colDataIndex)));
             }
         }
     }
@@ -1394,13 +1279,12 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         massiveSelected = new ArrayList<Integer>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
             if (data.get(Integer.parseInt(dataTable.getText(i, colDataIndex))) instanceof GWTDocument) {
-                final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                        colMassiveIndex);
+                CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
                 checkBox.setValue(true);
-                massiveSelected.add(Integer.parseInt(dataTable.getText(i,
-                        colDataIndex)));
+                massiveSelected.add(Integer.parseInt(dataTable.getText(i, colDataIndex)));
             }
         }
+        evaluateMergePdf();
     }
 
     /**
@@ -1410,11 +1294,9 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
         massiveSelected = new ArrayList<Integer>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
             if (data.get(Integer.parseInt(dataTable.getText(i, colDataIndex))) instanceof GWTMail) {
-                final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                        colMassiveIndex);
+                CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
                 checkBox.setValue(true);
-                massiveSelected.add(Integer.parseInt(dataTable.getText(i,
-                        colDataIndex)));
+                massiveSelected.add(Integer.parseInt(dataTable.getText(i, colDataIndex)));
             }
         }
     }
@@ -1425,10 +1307,10 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
     public void removeAllMassive() {
         massiveSelected = new ArrayList<Integer>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
-            final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                    colMassiveIndex);
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
             checkBox.setValue(false);
         }
+        evaluateMergePdf();
     }
 
     /**
@@ -1437,7 +1319,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @return
      */
     public boolean isMassive() {
-        return massiveSelected.size() > 0;
+        return (massiveSelected.size() > 0);
     }
 
     /**
@@ -1446,13 +1328,11 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * @return
      */
     public List<String> getAllSelectedPaths() {
-        final List<String> paths = new ArrayList<String>();
+        List<String> paths = new ArrayList<String>();
         for (int i = 0; dataTable.getRowCount() > i; i++) {
-            final CheckBox checkBox = (CheckBox) dataTable.getWidget(i,
-                    colMassiveIndex);
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
             if (checkBox.getValue()) {
-                final Object obj = data.get(Integer.parseInt(dataTable.getText(
-                        i, colDataIndex)));
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
                 if (obj instanceof GWTDocument) {
                     paths.add(((GWTDocument) obj).getPath());
                 } else if (obj instanceof GWTFolder) {
@@ -1463,6 +1343,127 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
             }
         }
         return paths;
+    }
+
+    /**
+     * getAllSelectedUUIDs
+     */
+    public List<String> getAllSelectedUUIDs() {
+        List<String> uuidList = new ArrayList<String>();
+
+        for (int i = 0; dataTable.getRowCount() > i; i++) {
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
+
+            if (checkBox.getValue()) {
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
+                if (obj instanceof GWTDocument) {
+                    uuidList.add(((GWTDocument) obj).getUuid());
+                } else if (obj instanceof GWTFolder) {
+                    uuidList.add(((GWTFolder) obj).getUuid());
+                } else if (obj instanceof GWTMail) {
+                    uuidList.add(((GWTMail) obj).getUuid());
+                }
+            }
+        }
+
+        return uuidList;
+    }
+
+    /**
+     * getAllSelectedDocumentsUUIDs
+     */
+    public List<String> getAllSelectedDocumentsUUIDs() {
+        List<String> uuidList = new ArrayList<String>();
+
+        for (int i = 0; dataTable.getRowCount() > i; i++) {
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
+
+            if (checkBox.getValue()) {
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
+                if (obj instanceof GWTDocument) {
+                    uuidList.add(((GWTDocument) obj).getUuid());
+                }
+            }
+        }
+
+        return uuidList;
+    }
+
+    /**
+     * getAllSelectedDocumentsPaths
+     */
+    public List<String> getAllSelectedDocumentsPaths() {
+        List<String> pathList = new ArrayList<String>();
+
+        for (int i = 0; dataTable.getRowCount() > i; i++) {
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
+
+            if (checkBox.getValue()) {
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
+                if (obj instanceof GWTDocument) {
+                    pathList.add(((GWTDocument) obj).getPath());
+                }
+            }
+        }
+
+        return pathList;
+    }
+
+    /**
+     * getAllSelectedMailUUIDs
+     */
+    public List<String> getAllSelectedMailUUIDs() {
+        List<String> uuidList = new ArrayList<String>();
+
+        for (int i = 0; dataTable.getRowCount() > i; i++) {
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
+
+            if (checkBox.getValue()) {
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
+                if (obj instanceof GWTMail) {
+                    uuidList.add(((GWTMail) obj).getUuid());
+                }
+            }
+        }
+
+        return uuidList;
+    }
+
+    /**
+     * getAllSelectedPdfDocuments
+     * 
+     * @return
+     */
+    public List<GWTDocument> getAllSelectedPdfDocuments() {
+        List<GWTDocument> docs = new ArrayList<GWTDocument>();
+        for (int i = 0; dataTable.getRowCount() > i; i++) {
+            CheckBox checkBox = (CheckBox) dataTable.getWidget(i, colMassiveIndex);
+            if (checkBox.getValue()) {
+                Object obj = data.get(Integer.parseInt(dataTable.getText(i, colDataIndex)));
+                if (obj instanceof GWTDocument) {
+                    GWTDocument doc = (GWTDocument) obj;
+                    if (doc.getMimeType().equals("application/pdf")) {
+                        docs.add(doc);
+                    }
+                }
+            }
+        }
+        return docs;
+    }
+
+    /**
+     * evaluateMergePdf
+     */
+    private void evaluateMergePdf() {
+        if (isMassive()
+                && (Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_THESAURUS
+                        && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_CATEGORIES
+                        && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_METADATA && Main.get().mainPanel.desktop.navigator
+                        .getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH) && getAllSelectedPdfDocuments().size() > 1) {
+            Main.get().mainPanel.topPanel.toolBar.enablePdfMerge();
+        } else {
+            Main.get().mainPanel.topPanel.toolBar.disablePdfMerge();
+        }
     }
 
     /**
@@ -1479,7 +1480,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param dataColumn
      */
-    public void setColDataIndex(final int colDataIndex) {
+    public void setColDataIndex(int colDataIndex) {
         this.colDataIndex = colDataIndex;
         columnSorter.setColDataIndex(colDataIndex);
     }
@@ -1489,7 +1490,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param colMassiveIndex
      */
-    public void setColMassiveIndex(final int colMassiveIndex) {
+    public void setColMassiveIndex(int colMassiveIndex) {
         this.colMassiveIndex = colMassiveIndex;
     }
 
@@ -1498,8 +1499,7 @@ public class ExtendedScrollTable extends ScrollTable implements OriginPanel {
      * 
      * @param profileFileBrowser
      */
-    public void setProfileFileBrowser(
-            final GWTProfileFileBrowser profileFileBrowser) {
+    public void setProfileFileBrowser(GWTProfileFileBrowser profileFileBrowser) {
         this.profileFileBrowser = profileFileBrowser;
         columnSorter.setProfileFileBrowser(profileFileBrowser);
     }

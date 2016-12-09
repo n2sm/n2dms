@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -24,15 +24,16 @@ package com.openkm.frontend.client.widget.notify;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollPolicy;
-import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollTableImages;
 import com.google.gwt.gen2.table.client.FixedWidthFlexTable;
 import com.google.gwt.gen2.table.client.FixedWidthGrid;
 import com.google.gwt.gen2.table.client.ScrollTable;
 import com.google.gwt.gen2.table.client.SelectionGrid;
+import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollPolicy;
+import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollTableImages;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
+
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTUser;
 
@@ -47,11 +48,8 @@ public class UserScrollTable extends Composite {
     public static final int NUMBER_OF_COLUMNS = 2;
 
     private ScrollTable table;
-
     private boolean isUserToNofity = false;
-
     private FixedWidthFlexTable headerTable;
-
     private FixedWidthGrid dataTable;
 
     /**
@@ -59,64 +57,52 @@ public class UserScrollTable extends Composite {
      * 
      * @param isUserToNofity
      */
-    public UserScrollTable(final boolean isUserToNofity) {
+    public UserScrollTable(boolean isUserToNofity) {
         this.isUserToNofity = isUserToNofity;
 
-        final ScrollTableImages scrollTableImages = new ScrollTableImages() {
-            @Override
+        ScrollTableImages scrollTableImages = new ScrollTableImages() {
             public AbstractImagePrototype scrollTableAscending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_asc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_asc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_asc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableDescending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_desc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_desc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_desc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableFillWidth() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/fill_width.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/fill_width.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/fill_width.gif\"/>";
                     }
@@ -130,12 +116,11 @@ public class UserScrollTable extends Composite {
         table = new ScrollTable(dataTable, headerTable, scrollTableImages);
         table.setCellSpacing(0);
         table.setCellPadding(0);
-        table.setSize("175", "140");
+        table.setSize("175px", "140px");
 
         // Level 1 headers
         if (isUserToNofity) {
-            headerTable.setHTML(0, 0,
-                    Main.i18n("fileupload.label.users.to.notify"));
+            headerTable.setHTML(0, 0, Main.i18n("fileupload.label.users.to.notify"));
         } else {
             headerTable.setHTML(0, 0, Main.i18n("fileupload.label.users"));
         }
@@ -158,8 +143,8 @@ public class UserScrollTable extends Composite {
      * 
      * @param userName The user name value
      */
-    public void addRow(final GWTUser user) {
-        final int rows = dataTable.getRowCount();
+    public void addRow(GWTUser user) {
+        int rows = dataTable.getRowCount();
         dataTable.insertRow(rows);
         dataTable.setHTML(rows, 0, user.getUsername());
         dataTable.setHTML(rows, 1, user.getId());
@@ -175,8 +160,7 @@ public class UserScrollTable extends Composite {
         GWTUser user = null;
 
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             if (dataTable.isRowSelected(selectedRow)) {
                 user = new GWTUser();
                 user.setUsername(dataTable.getHTML(selectedRow, 0));
@@ -201,8 +185,7 @@ public class UserScrollTable extends Composite {
      */
     public void removeSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             dataTable.removeRow(selectedRow);
 
             if (dataTable.getRowCount() > 0) {
@@ -241,7 +224,7 @@ public class UserScrollTable extends Composite {
      * getUsersToNotifyList
      */
     public List<String> getUsersToNotifyList() {
-        final List<String> usersList = new ArrayList<String>();
+        List<String> usersList = new ArrayList<String>();
 
         if (dataTable.getRowCount() > 0) {
             for (int i = 0; i < dataTable.getRowCount(); i++) {
@@ -275,8 +258,7 @@ public class UserScrollTable extends Composite {
      */
     public void langRefresh() {
         if (isUserToNofity) {
-            headerTable.setHTML(0, 0,
-                    Main.i18n("fileupload.label.users.to.notify"));
+            headerTable.setHTML(0, 0, Main.i18n("fileupload.label.users.to.notify"));
         } else {
             headerTable.setHTML(0, 0, Main.i18n("fileupload.label.users"));
         }

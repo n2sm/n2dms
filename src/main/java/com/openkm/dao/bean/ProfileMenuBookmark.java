@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,20 +25,16 @@ import java.io.Serializable;
 
 public class ProfileMenuBookmark implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean manageBookmarksVisible;
-
     private boolean addBookmarkVisible;
-
     private boolean setHomeVisible;
-
     private boolean goHomeVisible;
 
     public boolean isManageBookmarksVisible() {
         return manageBookmarksVisible;
     }
 
-    public void setManageBookmarksVisible(final boolean manageBookmarksVisible) {
+    public void setManageBookmarksVisible(boolean manageBookmarksVisible) {
         this.manageBookmarksVisible = manageBookmarksVisible;
     }
 
@@ -46,7 +42,7 @@ public class ProfileMenuBookmark implements Serializable {
         return addBookmarkVisible;
     }
 
-    public void setAddBookmarkVisible(final boolean addBookmarkVisible) {
+    public void setAddBookmarkVisible(boolean addBookmarkVisible) {
         this.addBookmarkVisible = addBookmarkVisible;
     }
 
@@ -54,7 +50,7 @@ public class ProfileMenuBookmark implements Serializable {
         return setHomeVisible;
     }
 
-    public void setSetHomeVisible(final boolean setHomeVisible) {
+    public void setSetHomeVisible(boolean setHomeVisible) {
         this.setHomeVisible = setHomeVisible;
     }
 
@@ -62,13 +58,12 @@ public class ProfileMenuBookmark implements Serializable {
         return goHomeVisible;
     }
 
-    public void setGoHomeVisible(final boolean goHomeVisible) {
+    public void setGoHomeVisible(boolean goHomeVisible) {
         this.goHomeVisible = goHomeVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("manageBookmarksVisible=");
         sb.append(manageBookmarksVisible);

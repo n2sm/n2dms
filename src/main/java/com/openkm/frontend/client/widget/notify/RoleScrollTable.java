@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,12 +24,12 @@ package com.openkm.frontend.client.widget.notify;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollPolicy;
-import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollTableImages;
 import com.google.gwt.gen2.table.client.FixedWidthFlexTable;
 import com.google.gwt.gen2.table.client.FixedWidthGrid;
 import com.google.gwt.gen2.table.client.ScrollTable;
 import com.google.gwt.gen2.table.client.SelectionGrid;
+import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollPolicy;
+import com.google.gwt.gen2.table.client.AbstractScrollTable.ScrollTableImages;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -46,11 +46,8 @@ public class RoleScrollTable extends Composite {
     public static final int NUMBER_OF_COLUMNS = 1;
 
     private ScrollTable table;
-
     private FixedWidthFlexTable headerTable;
-
     private FixedWidthGrid dataTable;
-
     private boolean isRolesToNofity = false;
 
     /**
@@ -58,64 +55,52 @@ public class RoleScrollTable extends Composite {
      * 
      * @param isAssigned
      */
-    public RoleScrollTable(final boolean isRolesToNofity) {
+    public RoleScrollTable(boolean isRolesToNofity) {
         this.isRolesToNofity = isRolesToNofity;
 
-        final ScrollTableImages scrollTableImages = new ScrollTableImages() {
-            @Override
+        ScrollTableImages scrollTableImages = new ScrollTableImages() {
             public AbstractImagePrototype scrollTableAscending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_asc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_asc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_asc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableDescending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_desc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_desc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_desc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableFillWidth() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/fill_width.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/fill_width.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/fill_width.gif\"/>";
                     }
@@ -129,12 +114,11 @@ public class RoleScrollTable extends Composite {
         table = new ScrollTable(dataTable, headerTable, scrollTableImages);
         table.setCellSpacing(0);
         table.setCellPadding(0);
-        table.setSize("175", "140");
+        table.setSize("175px", "140px");
 
         // Level 1 headers
         if (isRolesToNofity) {
-            headerTable.setHTML(0, 0,
-                    Main.i18n("fileupload.label.roles.to.notify"));
+            headerTable.setHTML(0, 0, Main.i18n("fileupload.label.roles.to.notify"));
         } else {
             headerTable.setHTML(0, 0, Main.i18n("fileupload.label.roles"));
         }
@@ -154,8 +138,8 @@ public class RoleScrollTable extends Composite {
      * 
      * @param roleName The user name value
      */
-    public void addRow(final String roleName) {
-        final int rows = dataTable.getRowCount();
+    public void addRow(String roleName) {
+        int rows = dataTable.getRowCount();
         dataTable.insertRow(rows);
         dataTable.setHTML(rows, 0, roleName);
     }
@@ -169,11 +153,9 @@ public class RoleScrollTable extends Composite {
         String role = null;
 
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             if (dataTable.isRowSelected(selectedRow)) {
-                role = dataTable.getHTML(dataTable.getSelectedRows().iterator()
-                        .next().intValue(), 0);
+                role = dataTable.getHTML(((Integer) dataTable.getSelectedRows().iterator().next()).intValue(), 0);
             }
         }
 
@@ -194,8 +176,7 @@ public class RoleScrollTable extends Composite {
      */
     public void removeSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             dataTable.removeRow(selectedRow);
             if (dataTable.getRowCount() > 0) {
                 if (dataTable.getRowCount() > selectedRow) {
@@ -235,7 +216,7 @@ public class RoleScrollTable extends Composite {
      * @return The users list
      */
     public List<String> getRolesToNotifyList() {
-        final List<String> rolesList = new ArrayList<String>();
+        List<String> rolesList = new ArrayList<String>();
 
         if (dataTable.getRowCount() > 0) {
             for (int i = 0; i < dataTable.getRowCount(); i++) {
@@ -269,8 +250,7 @@ public class RoleScrollTable extends Composite {
      */
     public void langRefresh() {
         if (isRolesToNofity) {
-            headerTable.setHTML(0, 0,
-                    Main.i18n("fileupload.label.roles.to.notify"));
+            headerTable.setHTML(0, 0, Main.i18n("fileupload.label.roles.to.notify"));
         } else {
             headerTable.setHTML(0, 0, Main.i18n("fileupload.label.roles"));
         }

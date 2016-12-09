@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -45,7 +45,7 @@ public class ThesaurusMenu extends MenuBase {
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ThesaurusMenu extends MenuBase {
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
     }
 
     @Override
@@ -76,5 +76,13 @@ public class ThesaurusMenu extends MenuBase {
 
     @Override
     public void disableAddPropertyGroup() {
+    }
+
+    @Override
+    public void disablePdfMerge() {
+    }
+
+    @Override
+    public void enablePdfMerge() {
     }
 }

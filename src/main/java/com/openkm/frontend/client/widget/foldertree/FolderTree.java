@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.foldertree;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -63,61 +64,36 @@ public class FolderTree extends Composite implements OriginPanel {
 
     // Definitions of folder actions
     public static final int ACTION_NONE = -1;
-
     public static final int ACTION_CREATE = 0;
-
     public static final int ACTION_RENAME = 1;
-
     public static final int ACTION_SECURITY_REFRESH = 2;
 
-    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT
-            .create(OKMFolderService.class);
-
-    private final OKMNotifyServiceAsync notifyService = (OKMNotifyServiceAsync) GWT
-            .create(OKMNotifyService.class);
-
-    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
+    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT.create(OKMFolderService.class);
+    private final OKMNotifyServiceAsync notifyService = (OKMNotifyServiceAsync) GWT.create(OKMNotifyService.class);
+    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
 
     private ExtendedTree tree;
-
     public TreeItem actualItem;
-
     public FolderSelectPopup folderSelectPopup;
-
     public MenuPopup menuPopup;
-
     private boolean panelSelected = true; // Indicates if panel is selected
 
     public TreeItem tmpFolder; // Used temporary to create new folder
-
     private FolderTextBox renFolder; // Used temporary to rename a new folder
-
     public GWTFolder folderRoot; // To preserve folder root value
-
     public TreeItem rootItem;
-
     ArrayList<String> tmpAllPathFolder = new ArrayList<String>(); // Store node path elements
-
     public int folderAction = ACTION_NONE; // To control rename and create
 
     // folder actions
     private TreeItem otherTreeItemSelected = null;
-
     private String tmpRenameHtmlFolder;
-
     private boolean refreshFileBrowser = false;
-
     private boolean setTabFolderAfterRefresh = false;
-
     private boolean treeItemChanged = false;
-
     private boolean treeItemHasBeenClosed = false;
-
     private boolean autoOpenFolder = false;
-
     private boolean openingFldPath = false;
-
     private boolean flagFileBrowserFinished = true;
 
     /**
@@ -128,11 +104,10 @@ public class FolderTree extends Composite implements OriginPanel {
         tmpFolder = new TreeItem("");
         tmpFolder.setStyleName("okm-TreeItem");
         folderSelectPopup = new FolderSelectPopup();
-        folderSelectPopup.setWidth("450");
-        folderSelectPopup.setHeight("440");
+        folderSelectPopup.setWidth("450px");
+        folderSelectPopup.setHeight("440px");
         folderSelectPopup.setStyleName("okm-Popup");
-        final TreeItem rootItem = new TreeItem(Util.imageItemHTML(
-                "img/menuitem_childs.gif", "root_schema", "top"));
+        TreeItem rootItem = new TreeItem(Util.imageItemHTML("img/menuitem_childs.gif", "root_schema", "top"));
         rootItem.setStyleName("okm-TreeItem");
         rootItem.setUserObject(new GWTFolder());
         rootItem.setSelected(true);
@@ -145,10 +120,10 @@ public class FolderTree extends Composite implements OriginPanel {
 
         tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
             @Override
-            public void onSelection(final SelectionEvent<TreeItem> event) {
+            public void onSelection(SelectionEvent<TreeItem> event) {
                 if (!openingFldPath && flagFileBrowserFinished) {
                     final TreeItem treeItem = event.getSelectedItem();
-                    final Timer openIfNotClosed = new Timer() {
+                    Timer openIfNotClosed = new Timer() {
                         @Override
                         public void run() {
                             if (!treeItemHasBeenClosed) {
@@ -156,11 +131,8 @@ public class FolderTree extends Composite implements OriginPanel {
                                 // Case is closed parent which selected forder is the child
                             } else if (treeItemHasBeenClosed
                                     && !actualItem.equals(treeItem)
-                                    && ((GWTFolder) actualItem.getUserObject())
-                                            .getPath().contains(
-                                                    ((GWTFolder) treeItem
-                                                            .getUserObject())
-                                                            .getPath())) {
+                                    && ((GWTFolder) actualItem.getUserObject()).getPath().contains(
+                                            ((GWTFolder) treeItem.getUserObject()).getPath())) {
                                 actualItem.setSelected(false);
                                 treeItem.setSelected(true);
                                 onTreeItemSelected(treeItem);
@@ -178,16 +150,16 @@ public class FolderTree extends Composite implements OriginPanel {
 
         tree.addCloseHandler(new CloseHandler<TreeItem>() {
             @Override
-            public void onClose(final CloseEvent<TreeItem> event) {
-                Main.get().dragable.clear();
+            public void onClose(CloseEvent<TreeItem> event) {
+                Main.get().draggable.clear();
                 treeItemHasBeenClosed = true;
             }
         });
         tree.addOpenHandler(new OpenHandler<TreeItem>() {
             @Override
-            public void onOpen(final OpenEvent<TreeItem> event) {
+            public void onOpen(OpenEvent<TreeItem> event) {
                 if (flagFileBrowserFinished) {
-                    final TreeItem treeItem = event.getTarget();
+                    TreeItem treeItem = event.getTarget();
                     if (!openingFldPath && !autoOpenFolder) {
                         if (!actualItem.equals(treeItem)) {
                             actualItem.setSelected(false);
@@ -222,14 +194,12 @@ public class FolderTree extends Composite implements OriginPanel {
      * Refresh asyncronous subtree branch
      */
     final AsyncCallback<List<GWTFolder>> callbackGetChilds = new AsyncCallback<List<GWTFolder>>() {
-        @Override
-        public void onSuccess(final List<GWTFolder> result) {
-            final List<GWTFolder> folderList = result;
+        public void onSuccess(List<GWTFolder> result) {
+            List<GWTFolder> folderList = result;
 
             autoOpenFolder = actualItem.getState(); // Actual folder open state
             // Case first refreshing when (childcount = 0 or treeItem changed ) and results >0 must ensure enables auto open
-            if ((actualItem.getChildCount() == 0 || treeItemChanged)
-                    && result.size() > 0) {
+            if ((actualItem.getChildCount() == 0 || treeItemChanged) && result.size() > 0) {
                 autoOpenFolder = true;
             }
 
@@ -247,8 +217,9 @@ public class FolderTree extends Composite implements OriginPanel {
             }
 
             // Ads folders childs if exists
-            for (final GWTFolder folder : folderList) {
-                final TreeItem folderItem = new TreeItem(folder.getName());
+            for (Iterator<GWTFolder> it = folderList.iterator(); it.hasNext();) {
+                GWTFolder folder = it.next();
+                TreeItem folderItem = new TreeItem(folder.getName());
                 folderItem.setUserObject(folder);
                 folderItem.setStyleName("okm-TreeItem");
 
@@ -273,8 +244,7 @@ public class FolderTree extends Composite implements OriginPanel {
             Main.get().mainPanel.desktop.navigator.status.unsetFlagChilds();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().mainPanel.desktop.navigator.status.unsetFlagChilds();
             Main.get().showError("GetChilds", caught);
         }
@@ -284,9 +254,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * Refresh asyncronous subtree branch
      */
     final AsyncCallback<List<GWTFolder>> callbackGetOnlyChilds = new AsyncCallback<List<GWTFolder>>() {
-        @Override
-        public void onSuccess(final List<GWTFolder> result) {
-            final List<GWTFolder> folderList = result;
+        public void onSuccess(List<GWTFolder> result) {
+            List<GWTFolder> folderList = result;
 
             // Remove olders items
             if (actualItem.getChildCount() > 0) {
@@ -302,8 +271,9 @@ public class FolderTree extends Composite implements OriginPanel {
             }
 
             // Ads folders childs if exists
-            for (final GWTFolder folder : folderList) {
-                final TreeItem folderItem = new TreeItem(folder.getName());
+            for (Iterator<GWTFolder> it = folderList.iterator(); it.hasNext();) {
+                GWTFolder folder = it.next();
+                TreeItem folderItem = new TreeItem(folder.getName());
                 folderItem.setUserObject(folder);
                 folderItem.setStyleName("okm-TreeItem");
 
@@ -316,8 +286,8 @@ public class FolderTree extends Composite implements OriginPanel {
             evaluesFolderIcon(actualItem);
 
             if (!tmpAllPathFolder.isEmpty()) {
-                final int index = tmpAllPathFolder.size() - 1;
-                final String tmpPath = tmpAllPathFolder.get(index);
+                int index = tmpAllPathFolder.size() - 1;
+                String tmpPath = tmpAllPathFolder.get(index);
                 tmpAllPathFolder.remove(index);
                 if (index > 0) {
                     setActiveNode(tmpPath, false, false);
@@ -329,8 +299,7 @@ public class FolderTree extends Composite implements OriginPanel {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetOnlyChilds", caught);
         }
     };
@@ -339,9 +308,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * Refresh asyncronous subtree branch after an item menu is deleted
      */
     final AsyncCallback<Object> callbackDelete = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            final TreeItem tmpItem = actualItem;
+        public void onSuccess(Object result) {
+            TreeItem tmpItem = actualItem;
             actualItem = actualItem.getParentItem();
             actualItem.setSelected(true);
             actualItem.setState(true);
@@ -352,8 +320,7 @@ public class FolderTree extends Composite implements OriginPanel {
             refresh(true);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().mainPanel.desktop.navigator.status.unsetFlagDelete();
             Main.get().showError("Delete", caught);
         }
@@ -363,22 +330,19 @@ public class FolderTree extends Composite implements OriginPanel {
      * Gets actual folder node
      */
     final AsyncCallback<GWTFolder> callbackGet = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             actualItem.setUserObject(result);
             evaluesFolderIcon(actualItem);
 
             if (folderAction == ACTION_SECURITY_REFRESH) {
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                        .setProperties((GWTFolder) actualItem.getUserObject());
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.setProperties((GWTFolder) actualItem.getUserObject());
                 folderAction = ACTION_NONE;
             }
 
             Main.get().mainPanel.desktop.navigator.status.unsetFlagGet();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             folderAction = ACTION_NONE; // Ensures on error folder action be
             // restores
             Main.get().mainPanel.desktop.navigator.status.unsetFlagGet();
@@ -390,19 +354,17 @@ public class FolderTree extends Composite implements OriginPanel {
      * Call back create
      */
     final AsyncCallback<GWTFolder> callbackCreate = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             actualItem = actualItem.getParentItem(); // Restores the real
             // actualItem
             tmpFolder.setSelected(false);
             actualItem.setSelected(true);
             actualItem.setState(true);
-            final GWTFolder folder = result;
-            final GWTFolder folderItem = (GWTFolder) actualItem.getUserObject();
+            GWTFolder folder = result;
+            GWTFolder folderItem = (GWTFolder) actualItem.getUserObject();
             folderItem.setHasChildren(true);
             actualItem.removeItem(tmpFolder);
-            final TreeItem newFolder = new TreeItem(Util.imageItemHTML(
-                    "img/menuitem_empty.gif", folder.getName(), "top"));
+            TreeItem newFolder = new TreeItem(Util.imageItemHTML("img/menuitem_empty.gif", folder.getName(), "top"));
             newFolder.setUserObject(folder);
             newFolder.setStyleName("okm-TreeItem");
             actualItem.addItem(newFolder);
@@ -410,10 +372,8 @@ public class FolderTree extends Composite implements OriginPanel {
             evaluesFolderIcon(actualItem);
             Main.get().mainPanel.desktop.navigator.status.unsetFlagCreate();
             if (Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_CATEGORIES) {
-                Main.get().mainPanel.desktop.browser.fileBrowser.status
-                        .setFlagFolderChilds();
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .addFolder(folder);
+                Main.get().mainPanel.desktop.browser.fileBrowser.status.setFlagFolderChilds();
+                Main.get().mainPanel.desktop.browser.fileBrowser.addFolder(folder);
             }
 
             // Special case when we are creating a folder and selects other tree
@@ -427,8 +387,7 @@ public class FolderTree extends Composite implements OriginPanel {
             folderAction = ACTION_NONE;
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             // On error remove tmp folder
             removeTmpFolderCreate();
             folderAction = ACTION_NONE;
@@ -441,9 +400,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * Call back rename
      */
     final AsyncCallback<GWTFolder> callbackRename = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
-            final GWTFolder folder = result;
+        public void onSuccess(GWTFolder result) {
+            GWTFolder folder = result;
             String oldPath = ((GWTFolder) actualItem.getUserObject()).getPath();
             actualItem.setUserObject(folder);
             evaluesFolderIcon(actualItem);
@@ -459,8 +417,7 @@ public class FolderTree extends Composite implements OriginPanel {
             folderAction = ACTION_NONE;
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             folderAction = ACTION_NONE;
             Main.get().mainPanel.desktop.navigator.status.unsetFlagRename();
             Main.get().showError("Rename", caught);
@@ -472,11 +429,9 @@ public class FolderTree extends Composite implements OriginPanel {
      * Callback add subscription
      */
     final AsyncCallback<Object> callbackAddSubscription = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             ((GWTFolder) actualItem.getUserObject()).setSubscribed(true);
-            ((GWTFolder) actualItem.getUserObject()).getSubscriptors().add(
-                    Main.get().workspaceUserProperties.getUser()); // Adds user
+            ((GWTFolder) actualItem.getUserObject()).getSubscriptors().add(Main.get().workspaceUserProperties.getUser()); // Adds user
             // on
             // subscribed
             // list
@@ -487,24 +442,18 @@ public class FolderTree extends Composite implements OriginPanel {
             if (actualItem == rootItem) {
                 folderParent = (GWTFolder) actualItem.getUserObject();
             } else {
-                folderParent = (GWTFolder) actualItem.getParentItem()
-                        .getUserObject();
+                folderParent = (GWTFolder) actualItem.getParentItem().getUserObject();
             }
-            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(
-                    (GWTFolder) actualItem.getUserObject(), folderParent,
+            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions((GWTFolder) actualItem.getUserObject(), folderParent,
                     TREE_ROOT);
             evaluesFolderIcon(actualItem);
-            Main.get().mainPanel.desktop.navigator.status
-                    .unsetFlagAddSubscription();
+            Main.get().mainPanel.desktop.navigator.status.unsetFlagAddSubscription();
             showTabFolderProperties(); // Refresh folder properties
-            Main.get().mainPanel.dashboard.userDashboard
-                    .getUserSubscribedFolders();
+            Main.get().mainPanel.dashboard.userDashboard.getUserSubscribedFolders();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.navigator.status
-                    .unsetFlagAddSubscription();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.navigator.status.unsetFlagAddSubscription();
             Main.get().showError("AddSubscription", caught);
         }
     };
@@ -513,11 +462,9 @@ public class FolderTree extends Composite implements OriginPanel {
      * Callback remove subscription
      */
     final AsyncCallback<Object> callbackRemoveSubscription = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             ((GWTFolder) actualItem.getUserObject()).setSubscribed(false);
-            ((GWTFolder) actualItem.getUserObject()).getSubscriptors().remove(
-                    Main.get().workspaceUserProperties.getUser()); // Remove
+            ((GWTFolder) actualItem.getUserObject()).getSubscriptors().remove(Main.get().workspaceUserProperties.getUser()); // Remove
             // user from
             // subscription
             // list
@@ -527,24 +474,18 @@ public class FolderTree extends Composite implements OriginPanel {
             if (actualItem == rootItem) {
                 folderParent = (GWTFolder) actualItem.getUserObject();
             } else {
-                folderParent = (GWTFolder) actualItem.getParentItem()
-                        .getUserObject();
+                folderParent = (GWTFolder) actualItem.getParentItem().getUserObject();
             }
-            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions(
-                    (GWTFolder) actualItem.getUserObject(), folderParent,
+            Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions((GWTFolder) actualItem.getUserObject(), folderParent,
                     TREE_ROOT);
             evaluesFolderIcon(actualItem);
-            Main.get().mainPanel.desktop.navigator.status
-                    .unsetFlagRemoveSubscription();
+            Main.get().mainPanel.desktop.navigator.status.unsetFlagRemoveSubscription();
             showTabFolderProperties(); // Refresh folder properties
-            Main.get().mainPanel.dashboard.userDashboard
-                    .getUserSubscribedFolders();
+            Main.get().mainPanel.dashboard.userDashboard.getUserSubscribedFolders();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.navigator.status
-                    .unsetFlagRemoveSubscription();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.navigator.status.unsetFlagRemoveSubscription();
             Main.get().showError("AddSubscription", caught);
         }
     };
@@ -555,8 +496,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param path
      *            The folder path selected to list items
      */
-    public void getChilds(final String path) {
-        folderService.getChilds(path, false, callbackGetChilds);
+    public void getChilds(String path) {
+        folderService.getChilds(path, false, null, callbackGetChilds);
         Main.get().mainPanel.desktop.navigator.status.setFlagChilds();
     }
 
@@ -568,8 +509,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param path
      *            The folder path selected to list items
      */
-    public void getOnlyChilds(final String path) {
-        folderService.getChilds(path, false, callbackGetOnlyChilds);
+    public void getOnlyChilds(String path) {
+        folderService.getChilds(path, false, null, callbackGetOnlyChilds);
     }
 
     /**
@@ -578,11 +519,10 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param path
      *            The folder subpath selected by user = name
      */
-    public void create(final String path) {
+    public void create(String path) {
         // On creation the actualItem is tmpFolder and must create from the
         // parent of tmpFolder ( the real actualItem )
-        folderService.create(path, ((GWTFolder) actualItem.getParentItem()
-                .getUserObject()).getPath(), callbackCreate);
+        folderService.create(path, ((GWTFolder) actualItem.getParentItem().getUserObject()).getPath(), callbackCreate);
         Main.get().mainPanel.desktop.navigator.status.setFlagCreate();
         hideMenuPopup();
     }
@@ -593,10 +533,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param path
      *            The folder subpath selected by user = name
      */
-    public void rename(final String path) {
-        folderService.rename(
-                ((GWTFolder) actualItem.getUserObject()).getPath(), path,
-                callbackRename);
+    public void rename(String path) {
+        folderService.rename(((GWTFolder) actualItem.getUserObject()).getPath(), path, callbackRename);
         Main.get().mainPanel.desktop.navigator.status.setFlagRename();
         hideMenuPopup();
     }
@@ -607,16 +545,13 @@ public class FolderTree extends Composite implements OriginPanel {
     public void confirmDelete() {
         // In categories stack view, must not fire deleting if user view some
         // document
-        if (!(Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES && Main
-                .get().mainPanel.desktop.browser.fileBrowser.hasRows())) {
-            Main.get().confirmPopup
-                    .setConfirm(ConfirmPopup.CONFIRM_DELETE_FOLDER);
+        if (!(Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES && Main.get().mainPanel.desktop.browser.fileBrowser
+                .hasRows())) {
+            Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_FOLDER);
             Main.get().confirmPopup.show();
         } else {
-            final String msg = Main.i18n("categories.folder.error.delete");
-            final OKMException exception = new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), msg);
+            String msg = Main.i18n("categories.folder.error.delete");
+            OKMException exception = new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), msg);
             Main.get().showError("delete", exception);
         }
     }
@@ -626,7 +561,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * parent
      */
     public void delete() {
-        final String path = ((GWTFolder) actualItem.getUserObject()).getPath();
+        String path = ((GWTFolder) actualItem.getUserObject()).getPath();
         folderService.delete(path, callbackDelete);
         Main.get().mainPanel.desktop.navigator.status.setFlagDelete();
         hideMenuPopup();
@@ -636,7 +571,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Deletes folder on trash after is moved
      */
     public void deleteMovedOrRestored() {
-        final TreeItem tmpItem = actualItem;
+        TreeItem tmpItem = actualItem;
         actualItem = actualItem.getParentItem();
         actualItem.setSelected(true);
         actualItem.setState(true);
@@ -650,8 +585,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Move folder on file browser ( only trash mode )
      */
     public void move() {
-        final GWTFolder folderToRestore = (GWTFolder) actualItem
-                .getUserObject();
+        GWTFolder folderToRestore = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TAXONOMY);
         folderSelectPopup.setToMove(folderToRestore);
         showDirectorySelectPopup();
@@ -661,7 +595,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Copy folder on file browser ( only trash mode )
      */
     public void copy() {
-        final GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
+        GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TAXONOMY);
         folderSelectPopup.setToCopy(folderToCopy);
         showDirectorySelectPopup();
@@ -671,7 +605,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * massiveCopy
      */
     public void massiveCopy() {
-        final GWTFolder parentFolder = (GWTFolder) actualItem.getUserObject();
+        GWTFolder parentFolder = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TAXONOMY);
         folderSelectPopup.setToMassiveCopy(parentFolder);
         showDirectorySelectPopup();
@@ -681,7 +615,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * massiveMove
      */
     public void massiveMove() {
-        final GWTFolder parentFolder = (GWTFolder) actualItem.getUserObject();
+        GWTFolder parentFolder = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TAXONOMY);
         folderSelectPopup.setToMassiveMove(parentFolder);
         showDirectorySelectPopup();
@@ -694,12 +628,12 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param path
      *            The folder
      */
-    public void removeDeleted(final String path) {
+    public void removeDeleted(String path) {
         boolean found = false;
         int i = 0;
 
         while (!found && actualItem.getChildCount() > i) {
-            final TreeItem tmp = actualItem.getChild(i);
+            TreeItem tmp = actualItem.getChild(i);
 
             if (((GWTFolder) tmp.getUserObject()).getPath().equals(path)) {
                 actualItem.removeItem(tmp);
@@ -711,7 +645,7 @@ public class FolderTree extends Composite implements OriginPanel {
         // Looks if must change icon on parent if now has no childs and
         // properties
         if (actualItem.getChildCount() < 1) {
-            final GWTFolder folderItem = (GWTFolder) actualItem.getUserObject();
+            GWTFolder folderItem = (GWTFolder) actualItem.getUserObject();
             folderItem.setHasChildren(false);
         }
 
@@ -723,20 +657,15 @@ public class FolderTree extends Composite implements OriginPanel {
      */
     public void addSubscription() {
         Main.get().mainPanel.desktop.navigator.status.setFlagAddSubscription();
-        notifyService.subscribe(
-                ((GWTFolder) actualItem.getUserObject()).getPath(),
-                callbackAddSubscription);
+        notifyService.subscribe(((GWTFolder) actualItem.getUserObject()).getPath(), callbackAddSubscription);
     }
 
     /**
      * Removes a subscription
      */
     public void removeSubscription() {
-        Main.get().mainPanel.desktop.navigator.status
-                .setFlagRemoveSubscription();
-        notifyService.unsubscribe(
-                ((GWTFolder) actualItem.getUserObject()).getPath(),
-                callbackRemoveSubscription);
+        Main.get().mainPanel.desktop.navigator.status.setFlagRemoveSubscription();
+        notifyService.unsubscribe(((GWTFolder) actualItem.getUserObject()).getPath(), callbackRemoveSubscription);
     }
 
     /**
@@ -747,7 +676,7 @@ public class FolderTree extends Composite implements OriginPanel {
      *            The path
      * @return
      */
-    public TreeItem getChildFolder(final String path) {
+    public TreeItem getChildFolder(String path) {
         boolean found = false;
         int i = 0;
         TreeItem tmp;
@@ -774,12 +703,12 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param newFolder
      *            The new object value
      */
-    public void renameRenamed(String path, final GWTFolder newFolder) {
+    public void renameRenamed(String path, GWTFolder newFolder) {
         boolean found = false;
         int i = 0;
 
         while (!found && actualItem.getChildCount() > i) {
-            final TreeItem tmp = actualItem.getChild(i);
+            TreeItem tmp = actualItem.getChild(i);
 
             if (((GWTFolder) tmp.getUserObject()).getPath().equals(path)) {
                 tmp.setUserObject(newFolder);
@@ -787,7 +716,7 @@ public class FolderTree extends Composite implements OriginPanel {
                 // object
                 evaluesFolderIcon(tmp);
                 found = true;
-                final String oldPath = path.substring(1); // deletes first character
+                String oldPath = path.substring(1); // deletes first character
                 // "/" because parent path
                 // not has and replace not
                 // runs properly
@@ -809,10 +738,7 @@ public class FolderTree extends Composite implements OriginPanel {
      */
     private void get() {
         Main.get().mainPanel.desktop.navigator.status.setFlagGet();
-        folderService
-                .getProperties(
-                        ((GWTFolder) actualItem.getUserObject()).getPath(),
-                        callbackGet);
+        folderService.getProperties(((GWTFolder) actualItem.getUserObject()).getPath(), callbackGet);
     }
 
     /**
@@ -823,11 +749,11 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param docPath
      *            The document path
      */
-    public void openAllPathFolder(final String fldId, final String docPath) {
+    public void openAllPathFolder(String fldId, String docPath) {
         flagFileBrowserFinished = false;
         openingFldPath = true;
         refreshFileBrowser = true;
-        final String rootPath = folderRoot.getPath();
+        String rootPath = folderRoot.getPath();
         String actualPath = fldId;
         // getChilds method needs it for last
         // folder)
@@ -836,13 +762,10 @@ public class FolderTree extends Composite implements OriginPanel {
         // The browser is only called on the last child node refreshing and
         // restores selected row id
         if (refreshFileBrowser && docPath != null && !docPath.equals("")) {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .cleanAllFilteringValues(); // Ensure the document will be selected
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .setSelectedRowId(docPath);
+            Main.get().mainPanel.desktop.browser.fileBrowser.cleanAllFilteringValues(); // Ensure the document will be selected
+            Main.get().mainPanel.desktop.browser.fileBrowser.setSelectedRowId(docPath);
         } else {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .setSelectedRowId(""); // We remove the selectedRowID
+            Main.get().mainPanel.desktop.browser.fileBrowser.setSelectedRowId(""); // We remove the selectedRowID
             if (!rootPath.equals(actualPath)) { // Only if rootPath != actualPath ( case must open folders )
                 setTabFolderAfterRefresh = true; // We must set tab folder properties on the last node
             }
@@ -861,8 +784,8 @@ public class FolderTree extends Composite implements OriginPanel {
         actualItem.setSelected(true);
 
         if (!tmpAllPathFolder.isEmpty()) {
-            final int index = tmpAllPathFolder.size() - 1;
-            final String tmpPath = tmpAllPathFolder.get(index);
+            int index = tmpAllPathFolder.size() - 1;
+            String tmpPath = tmpAllPathFolder.get(index);
             tmpAllPathFolder.remove(index);
             if (index > 0) {
                 setActiveNode(tmpPath, true, false);
@@ -880,13 +803,12 @@ public class FolderTree extends Composite implements OriginPanel {
                 // Refreshing false and docPath="" special case parameter path
                 // pased on browser uri to open
                 // panels
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .refresh(rootPath);
+                Main.get().mainPanel.desktop.browser.fileBrowser.refresh(rootPath);
             }
         }
     }
 
-    private void onTreeItemSelected(final TreeItem item) {
+    private void onTreeItemSelected(TreeItem item) {
         // Try catch to prevent non controled error which stop foldertree and not send expected filebrowser finish signal to folder tree
         try {
             flagFileBrowserFinished = false;
@@ -904,8 +826,7 @@ public class FolderTree extends Composite implements OriginPanel {
                 if (!actualItem.equals(item)) {
                     // Special case when we are creating a folder and selects other
                     // tree item
-                    final FolderTextBox folder = (FolderTextBox) tmpFolder
-                            .getWidget();
+                    FolderTextBox folder = (FolderTextBox) tmpFolder.getWidget();
                     // Ensures is text writen before create folder on other case
                     // eliminates
                     if (folder.getText().length() > 0) {
@@ -932,8 +853,7 @@ public class FolderTree extends Composite implements OriginPanel {
                     showTabFolderProperties(); // an removes browser selected file
                     // or document if any is selected to
                     // change perspective
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .deselecSelectedRow();
+                    Main.get().mainPanel.desktop.browser.fileBrowser.deselecSelectedRow();
 
                 } else {
                     // Disables actual item because on changing active node by
@@ -956,23 +876,17 @@ public class FolderTree extends Composite implements OriginPanel {
                         showTabFolderProperties(); // On this special case
                         // refreshing tab folder
                         // properties
-                        Main.get().mainPanel.desktop.browser.fileBrowser
-                                .deselecSelectedRow();
+                        Main.get().mainPanel.desktop.browser.fileBrowser.deselecSelectedRow();
                     }
                 }
                 // Evaluate privileges
                 if (!isActualItemRoot()) {
-                    final GWTFolder folderParent = (GWTFolder) actualItem
-                            .getParentItem().getUserObject();
-                    Main.get().mainPanel.topPanel.toolBar
-                            .checkToolButtonPermissions(
-                                    (GWTFolder) actualItem.getUserObject(),
-                                    folderParent, TREE_ROOT);
+                    GWTFolder folderParent = (GWTFolder) actualItem.getParentItem().getUserObject();
+                    Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions((GWTFolder) actualItem.getUserObject(), folderParent,
+                            TREE_ROOT);
                 } else {
-                    Main.get().mainPanel.topPanel.toolBar
-                            .checkToolButtonPermissions(
-                                    (GWTFolder) actualItem.getUserObject(),
-                                    folderRoot, TREE_ROOT);
+                    Main.get().mainPanel.topPanel.toolBar.checkToolButtonPermissions((GWTFolder) actualItem.getUserObject(), folderRoot,
+                            TREE_ROOT);
                 }
 
                 break;
@@ -992,7 +906,7 @@ public class FolderTree extends Composite implements OriginPanel {
                     menuPopup.show();
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             fileBrowserRefreshDone();
         }
     }
@@ -1003,11 +917,10 @@ public class FolderTree extends Composite implements OriginPanel {
      * @return
      */
     public boolean canDrag() {
-        return folderAction == ACTION_NONE
-                && !actualItem.equals(rootItem)
+        return (folderAction == ACTION_NONE && !actualItem.equals(rootItem)
                 && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_CATEGORIES
-                && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_THESAURUS
-                && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH;
+                && Main.get().mainPanel.desktop.navigator.getStackIndex() != UIDesktopConstants.NAVIGATOR_THESAURUS && Main.get().mainPanel.desktop.navigator
+                .getStackIndex() != UIDesktopConstants.NAVIGATOR_TRASH);
     }
 
     /**
@@ -1019,7 +932,7 @@ public class FolderTree extends Composite implements OriginPanel {
         final String path = ((GWTFolder) actualItem.getUserObject()).getPath();
         folderService.getProperties(path, new AsyncCallback<GWTFolder>() {
             @Override
-            public void onSuccess(final GWTFolder result) {
+            public void onSuccess(GWTFolder result) {
                 // Try catch to prevent non controled error which stop foldertree and not send expected filebrowser finish signal to folder tree
                 try {
                     actualItem.setUserObject(result); // Updates folder object with last values
@@ -1031,10 +944,8 @@ public class FolderTree extends Composite implements OriginPanel {
                     if (!reset) {
                         // Case exists a selected row must mantain other case mus show
                         // folder properties on tab
-                        if (Main.get().mainPanel.desktop.browser.fileBrowser
-                                .isSelectedRow()) {
-                            Main.get().mainPanel.desktop.browser.fileBrowser
-                                    .mantainSelectedRow();
+                        if (Main.get().mainPanel.desktop.browser.fileBrowser.isSelectedRow()) {
+                            Main.get().mainPanel.desktop.browser.fileBrowser.mantainSelectedRow();
                         } else {
                             showTabFolderProperties();
                         }
@@ -1042,15 +953,14 @@ public class FolderTree extends Composite implements OriginPanel {
                         showTabFolderProperties();
                     }
 
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .refresh(path);
-                } catch (final Exception e) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.refresh(path);
+                } catch (Exception e) {
                     fileBrowserRefreshDone();
                 }
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("getProperties", caught);
                 fileBrowserRefreshDone();
             }
@@ -1064,8 +974,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param refreshRootNode
      * @param refreshFileBrowser
      */
-    public void setActiveNode(final String path, final boolean refreshRootNode,
-            boolean refreshFileBrowser) {
+    public void setActiveNode(String path, boolean refreshRootNode, boolean refreshFileBrowser) {
         // Evaluates first node as special case and then others
         if (actualItem == rootItem && refreshRootNode) {
             if (refreshFileBrowser) {
@@ -1081,8 +990,7 @@ public class FolderTree extends Composite implements OriginPanel {
             int i = 0;
             boolean found = false;
             while (i < actualItem.getChildCount() && !found) {
-                if (((GWTFolder) actualItem.getChild(i).getUserObject())
-                        .getPath().equals(path)) {
+                if (((GWTFolder) actualItem.getChild(i).getUserObject()).getPath().equals(path)) {
                     found = true;
                     actualItem.setState(true);
                     actualItem.setSelected(false);
@@ -1090,8 +998,7 @@ public class FolderTree extends Composite implements OriginPanel {
                     actualItem.setSelected(true);
                     if (refreshFileBrowser) {
                         getChilds(path);
-                        Main.get().mainPanel.desktop.browser.fileBrowser
-                                .refresh(path);
+                        Main.get().mainPanel.desktop.browser.fileBrowser.refresh(path);
                         refreshFileBrowser = false;
                         openingFldPath = false;
                     } else {
@@ -1114,7 +1021,7 @@ public class FolderTree extends Composite implements OriginPanel {
     public void addTmpFolderCreate() {
         if (folderAction == ACTION_NONE) {
             folderAction = ACTION_CREATE;
-            final FolderTextBox newFolder = new FolderTextBox();
+            FolderTextBox newFolder = new FolderTextBox();
             tmpFolder = new TreeItem();
             tmpFolder.setWidget(newFolder);
             tmpFolder.setStyleName("okm-TreeItem");
@@ -1211,16 +1118,15 @@ public class FolderTree extends Composite implements OriginPanel {
      */
     public void showTabFolderProperties() {
         Main.get().mainPanel.desktop.browser.tabMultiple.enableTabFolder();
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .setProperties((GWTFolder) actualItem.getUserObject());
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.setProperties((GWTFolder) actualItem.getUserObject());
     }
 
     /**
      * Evalues actual folder icon to prevent other user interaction with the
      * same folder this ensures icon and object hasChildsValue are consistent
      */
-    public void evaluesFolderIcon(final TreeItem item) {
-        final GWTFolder folderItem = (GWTFolder) item.getUserObject();
+    public void evaluesFolderIcon(TreeItem item) {
+        GWTFolder folderItem = (GWTFolder) item.getUserObject();
         preventFolderInconsitences(item);
 
         // On case folder is subscribed mus change icon
@@ -1233,19 +1139,15 @@ public class FolderTree extends Composite implements OriginPanel {
         // properties with user security atention
         if ((folderItem.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE) {
             if (folderItem.isHasChildren()) {
-                item.setHTML(Util.imageItemHTML("img/menuitem_childs"
-                        + subscribed + ".gif", folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_childs" + subscribed + ".gif", folderItem.getName(), "top"));
             } else {
-                item.setHTML(Util.imageItemHTML("img/menuitem_empty"
-                        + subscribed + ".gif", folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_empty" + subscribed + ".gif", folderItem.getName(), "top"));
             }
         } else {
             if (folderItem.isHasChildren()) {
-                item.setHTML(Util.imageItemHTML("img/menuitem_childs_ro"
-                        + subscribed + ".gif", folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_childs_ro" + subscribed + ".gif", folderItem.getName(), "top"));
             } else {
-                item.setHTML(Util.imageItemHTML("img/menuitem_empty_ro"
-                        + subscribed + ".gif", folderItem.getName(), "top"));
+                item.setHTML(Util.imageItemHTML("img/menuitem_empty_ro" + subscribed + ".gif", folderItem.getName(), "top"));
             }
         }
     }
@@ -1257,8 +1159,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param item
      *            The tree node
      */
-    public void preventFolderInconsitences(final TreeItem item) {
-        final GWTFolder folderItem = (GWTFolder) item.getUserObject();
+    public void preventFolderInconsitences(TreeItem item) {
+        GWTFolder folderItem = (GWTFolder) item.getUserObject();
 
         // Case that must remove all items node
         if (item.getChildCount() > 0 && !folderItem.isHasChildren()) {
@@ -1286,8 +1188,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @return value true or false on actualItem to root node comparation
      */
     public boolean isActualItemRoot() {
-        if (((GWTFolder) actualItem.getUserObject()).getPath().equals(
-                folderRoot.getPath())) {
+        if (((GWTFolder) actualItem.getUserObject()).getPath().equals(folderRoot.getPath())) {
             return true;
         } else {
             return false;
@@ -1309,13 +1210,12 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param selected
      *            The selected panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
 
         // Case panel is not still selected and must enable this and disable
         // browser panel
         if (!isPanelSelected() && selected) {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .setSelectedPanel(false);
+            Main.get().mainPanel.desktop.browser.fileBrowser.setSelectedPanel(false);
         }
 
         // Before making other operation must change value of panel selected
@@ -1352,7 +1252,7 @@ public class FolderTree extends Composite implements OriginPanel {
      */
     public void evaluateSpecialTmpFolderCases() {
         if (folderAction == ACTION_CREATE) {
-            final FolderTextBox folder = (FolderTextBox) actualItem.getWidget();
+            FolderTextBox folder = (FolderTextBox) actualItem.getWidget();
             if (folder.getText().length() > 0) {
                 create(folder.getText());
             } else {
@@ -1367,7 +1267,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @return The boolean value if is folder creating
      */
     public boolean isFolderCreating() {
-        return folderAction == ACTION_CREATE;
+        return (folderAction == ACTION_CREATE);
     }
 
     /**
@@ -1376,7 +1276,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @return The boolean value if is folder renaming
      */
     public boolean isFolderRenaming() {
-        return folderAction == ACTION_RENAME;
+        return (folderAction == ACTION_RENAME);
     }
 
     /**
@@ -1405,7 +1305,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param folder
      *            The new folder values
      */
-    public void refreshChildValues(final GWTFolder folder) {
+    public void refreshChildValues(GWTFolder folder) {
         TreeItem tmpItem;
         GWTFolder gWTFolder;
 
@@ -1457,7 +1357,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param element
      * @return
      */
-    public TreeItem elementClicked(final Element element) {
+    public TreeItem elementClicked(Element element) {
         return tree.elementClicked(element);
     }
 
@@ -1471,14 +1371,12 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param itemToChange
      *            The tree item to change the path
      */
-    public void changePathBeforeRenaming(final String oldPath,
-            final String newPath, final TreeItem itemToChange) {
+    public void changePathBeforeRenaming(String oldPath, String newPath, TreeItem itemToChange) {
         for (int i = 0; i < itemToChange.getChildCount(); i++) {
-            final TreeItem tmpItem = itemToChange.getChild(i);
-            final GWTFolder gwtFolder = (GWTFolder) tmpItem.getUserObject();
+            TreeItem tmpItem = itemToChange.getChild(i);
+            GWTFolder gwtFolder = ((GWTFolder) tmpItem.getUserObject());
             gwtFolder.setPath(gwtFolder.getPath().replaceAll(oldPath, newPath));
-            gwtFolder.setParentPath(gwtFolder.getParentPath().replaceAll(
-                    oldPath, newPath));
+            gwtFolder.setParentPath(gwtFolder.getParentPath().replaceAll(oldPath, newPath));
             if (tmpItem.getChildCount() > 0) {
                 changePathBeforeRenaming(oldPath, newPath, tmpItem);
             }
@@ -1489,9 +1387,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * Sets the home
      */
     public void setHome() {
-        final GWTFolder folder = (GWTFolder) actualItem.getUserObject();
-        Main.get().mainPanel.topPanel.mainMenu.bookmark.confirmSetHome(
-                folder.getUuid(), folder.getPath(), false);
+        GWTFolder folder = (GWTFolder) actualItem.getUserObject();
+        Main.get().mainPanel.topPanel.mainMenu.bookmark.confirmSetHome(folder.getUuid(), folder.getPath(), false);
     }
 
     /**
@@ -1514,9 +1411,8 @@ public class FolderTree extends Composite implements OriginPanel {
      * Refresh asyncronous subtree branch after an item menu is purged
      */
     final AsyncCallback<Object> callbackPurge = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            final TreeItem tmpItem = actualItem;
+        public void onSuccess(Object result) {
+            TreeItem tmpItem = actualItem;
             actualItem = actualItem.getParentItem();
             actualItem.setSelected(true);
             actualItem.setState(true);
@@ -1527,8 +1423,7 @@ public class FolderTree extends Composite implements OriginPanel {
             refresh(true);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().mainPanel.desktop.navigator.status.unsetFlagPurge();
             Main.get().showError("Purge", caught);
         }
@@ -1538,8 +1433,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Refresh asyncronous subtree branch after all trash is purged
      */
     final AsyncCallback<Object> callbackPurgeTrash = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             actualItem = rootItem;
             actualItem.setSelected(true);
             actualItem.setState(true);
@@ -1554,8 +1448,7 @@ public class FolderTree extends Composite implements OriginPanel {
             Main.get().mainPanel.topPanel.toolBar.executeRefresh();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().mainPanel.desktop.navigator.status.unsetFlagPurgeTrash();
             Main.get().showError("PurgeTrash", caught);
         }
@@ -1565,7 +1458,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Purge folder on file browser ( only trash mode )
      */
     public void purge() {
-        final String path = ((GWTFolder) actualItem.getUserObject()).getPath();
+        String path = ((GWTFolder) actualItem.getUserObject()).getPath();
         folderService.purge(path, callbackPurge);
         Main.get().mainPanel.desktop.navigator.status.setFlagPurge();
     }
@@ -1582,8 +1475,7 @@ public class FolderTree extends Composite implements OriginPanel {
      * Restore folder on file browser ( only trash mode )
      */
     public void restore() {
-        final GWTFolder folderToRestore = (GWTFolder) actualItem
-                .getUserObject();
+        GWTFolder folderToRestore = (GWTFolder) actualItem.getUserObject();
         folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_TAXONOMY);
         folderSelectPopup.setToRestore(folderToRestore);
         showDirectorySelectPopup();
@@ -1595,17 +1487,15 @@ public class FolderTree extends Composite implements OriginPanel {
      * @param item
      *            The item to show visible
      */
-    private void centerActualItemOnScroll(final TreeItem item) {
-        Main.get().mainPanel.desktop.navigator.scrollTaxonomyPanel
-                .ensureVisible(item);
+    private void centerActualItemOnScroll(TreeItem item) {
+        Main.get().mainPanel.desktop.navigator.scrollTaxonomyPanel.ensureVisible(item);
     }
 
     /**
      * Centers the actualItem on scroll
      */
     public void centerActulItemOnScroll() {
-        Main.get().mainPanel.desktop.navigator.scrollTaxonomyPanel
-                .ensureVisible(actualItem);
+        Main.get().mainPanel.desktop.navigator.scrollTaxonomyPanel.ensureVisible(actualItem);
     }
 
     /**

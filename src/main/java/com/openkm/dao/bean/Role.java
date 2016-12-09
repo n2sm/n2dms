@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -25,16 +25,14 @@ import java.io.Serializable;
 
 public class Role implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String id = "";
-
     private boolean active = false;
 
     public String getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -42,20 +40,20 @@ public class Role implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         } else if (obj == this) {
             return true;
         } else if (this.getClass() == obj.getClass()) {
-            final Role other = (Role) obj;
+            Role other = (Role) obj;
 
-            if (getId().equals(other.getId())) {
+            if (this.getId().equals(other.getId())) {
                 return true;
             } else {
                 return false;
@@ -70,13 +68,12 @@ public class Role implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (active ? 1231 : 1237);
-        result = prime * result + (id == null ? 0 : id.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", active=").append(active);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,141 +39,115 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 public class IntegerMinValidator extends Validator<IntegerMinValidator> {
 
     private TextBoxBase text;
-
     private SuggestBox suggest;
-
     private int min;
 
-    public IntegerMinValidator(final TextBoxBase text) {
+    public IntegerMinValidator(TextBoxBase text) {
         this(text, null);
     }
 
-    public IntegerMinValidator(final TextBoxBase text, final String customMsgKey) {
+    public IntegerMinValidator(TextBoxBase text, String customMsgKey) {
         this(text, false);
     }
 
-    public IntegerMinValidator(final TextBoxBase text, final int min) {
+    public IntegerMinValidator(TextBoxBase text, int min) {
         this.text = text;
         this.min = min;
     }
 
-    public IntegerMinValidator(final TextBoxBase text, final int min,
-            final String customMsgKey) {
+    public IntegerMinValidator(TextBoxBase text, int min, String customMsgKey) {
         this.text = text;
         this.min = min;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public IntegerMinValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain) {
+    public IntegerMinValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain) {
         this(text, preventsPropagationOfValidationChain, null);
     }
 
-    public IntegerMinValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public IntegerMinValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new RuntimeException("text must not be null");
-        }
         this.text = text;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest) {
+    public IntegerMinValidator(SuggestBox suggest) {
         this(suggest, null);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest,
-            final String customMsgKey) {
+    public IntegerMinValidator(SuggestBox suggest, String customMsgKey) {
         this(suggest, false);
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest, final int min) {
+    public IntegerMinValidator(SuggestBox suggest, int min) {
         this(suggest, min, false);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain) {
+    public IntegerMinValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain) {
         this(suggest, preventsPropagationOfValidationChain, null);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public IntegerMinValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new RuntimeException("suggest must not be null");
-        }
         this.suggest = suggest;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest, final int min,
-            final boolean preventsPropagationOfValidationChain) {
+    public IntegerMinValidator(SuggestBox suggest, int min, boolean preventsPropagationOfValidationChain) {
         this(suggest, min, preventsPropagationOfValidationChain, null);
     }
 
-    public IntegerMinValidator(final SuggestBox suggest, final int min,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public IntegerMinValidator(SuggestBox suggest, int min, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new RuntimeException("suggest must not be null");
-        }
         this.suggest = suggest;
         this.min = min;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         String str;
-        if (text != null) {
+        if (text != null)
             str = text.getText();
-        } else {
+        else
             str = suggest.getText();
-        }
-        if (!isRequired() && str.equals("")) {
+        if (!isRequired() && str.equals(""))
             return null;
-        }
         str = str.trim();
-        if (str.equals("")) {
-            return new ValidationResult(getErrorMessage(allMessages,
-                    messages.notAnInteger()));
-        }
+        if (str.equals(""))
+            return new ValidationResult(getErrorMessage(allMessages, messages.notAnInteger()));
 
         //Integer in range
         try {
-            final long value = Long.parseLong(str);
-            if (value < min) {
-                return new ValidationResult(getErrorMessage(allMessages,
-                        messages.validator_min()));
+            long value = Long.parseLong(str);
+            if (value < this.min) {
+                return new ValidationResult(getErrorMessage(allMessages, messages.validator_min()));
             }
-        } catch (final NumberFormatException ex) {
-            return new ValidationResult(getErrorMessage(allMessages,
-                    messages.notAnInteger()));
+        } catch (NumberFormatException ex) {
+            return new ValidationResult(getErrorMessage(allMessages, messages.notAnInteger()));
         }
 
         return null;
     }
 
-    @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (text != null) {
-            for (final ValidationAction<TextBoxBase> action : getFailureActions()) {
+            for (ValidationAction<TextBoxBase> action : getFailureActions())
                 action.invoke(result, text);
-            }
         } else {
-            for (final ValidationAction<SuggestBox> action : getFailureActions()) {
+            for (ValidationAction<SuggestBox> action : getFailureActions())
                 action.invoke(result, suggest);
-            }
         }
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,7 +41,6 @@ import com.openkm.module.NoteModule;
  */
 public class OKMNote implements NoteModule {
     private static Logger log = LoggerFactory.getLogger(OKMNote.class);
-
     private static OKMNote instance = new OKMNote();
 
     private OKMNote() {
@@ -52,55 +51,50 @@ public class OKMNote implements NoteModule {
     }
 
     @Override
-    public Note add(final String token, final String nodePath, final String text)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public Note add(String token, String nodePath, String text) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("add({}, {}, {})", new Object[] { token, nodePath, text });
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final Note ret = nm.add(token, nodePath, text);
+        NoteModule nm = ModuleManager.getNoteModule();
+        Note ret = nm.add(token, nodePath, text);
         log.debug("add: {}", ret);
         return ret;
     }
 
     @Override
-    public Note get(final String token, final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public Note get(String token, String notePath) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("get({}, {})", token, notePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final Note ret = nm.get(token, notePath);
+        NoteModule nm = ModuleManager.getNoteModule();
+        Note ret = nm.get(token, notePath);
         log.debug("get: {}", ret);
         return ret;
     }
 
     @Override
-    public void delete(final String token, final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void delete(String token, String notePath) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("delete({}, {})", token, notePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
+        NoteModule nm = ModuleManager.getNoteModule();
         nm.delete(token, notePath);
         log.debug("delete: void");
     }
 
     @Override
-    public String set(final String token, final String notePath,
-            final String text) throws LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
+    public String set(String token, String notePath, String text) throws LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("set({}, {}, {})", new Object[] { token, notePath, text });
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final String ret = nm.set(token, notePath, text);
+        NoteModule nm = ModuleManager.getNoteModule();
+        String ret = nm.set(token, notePath, text);
         log.debug("set: {}", ret);
         return ret;
     }
 
     @Override
-    public List<Note> list(final String token, final String nodePath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Note> list(String token, String nodePath) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("list({}, {})", token, nodePath);
-        final NoteModule nm = ModuleManager.getNoteModule();
-        final List<Note> col = nm.list(token, nodePath);
+        NoteModule nm = ModuleManager.getNoteModule();
+        List<Note> col = nm.list(token, nodePath);
         log.debug("list: {}", col);
         return col;
     }

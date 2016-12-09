@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,7 +39,6 @@ import org.hibernate.annotations.Index;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class DatabaseMetadataValue implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private static final int MAX_LENGTH = 512;
 
     @Id
@@ -115,7 +114,7 @@ public class DatabaseMetadataValue implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -123,7 +122,7 @@ public class DatabaseMetadataValue implements Serializable {
         return table;
     }
 
-    public void setTable(final String table) {
+    public void setTable(String table) {
         this.table = table;
     }
 
@@ -131,7 +130,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col00;
     }
 
-    public void setCol00(final String col00) {
+    public void setCol00(String col00) {
         this.col00 = col00;
     }
 
@@ -139,7 +138,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col01;
     }
 
-    public void setCol01(final String col01) {
+    public void setCol01(String col01) {
         this.col01 = col01;
     }
 
@@ -147,7 +146,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col02;
     }
 
-    public void setCol02(final String col02) {
+    public void setCol02(String col02) {
         this.col02 = col02;
     }
 
@@ -155,7 +154,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col03;
     }
 
-    public void setCol03(final String col03) {
+    public void setCol03(String col03) {
         this.col03 = col03;
     }
 
@@ -163,7 +162,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col04;
     }
 
-    public void setCol04(final String col04) {
+    public void setCol04(String col04) {
         this.col04 = col04;
     }
 
@@ -171,7 +170,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col05;
     }
 
-    public void setCol05(final String col05) {
+    public void setCol05(String col05) {
         this.col05 = col05;
     }
 
@@ -179,7 +178,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col06;
     }
 
-    public void setCol06(final String col06) {
+    public void setCol06(String col06) {
         this.col06 = col06;
     }
 
@@ -187,7 +186,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col07;
     }
 
-    public void setCol07(final String col07) {
+    public void setCol07(String col07) {
         this.col07 = col07;
     }
 
@@ -195,7 +194,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col08;
     }
 
-    public void setCol08(final String col08) {
+    public void setCol08(String col08) {
         this.col08 = col08;
     }
 
@@ -203,7 +202,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col09;
     }
 
-    public void setCol09(final String col09) {
+    public void setCol09(String col09) {
         this.col09 = col09;
     }
 
@@ -211,7 +210,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col10;
     }
 
-    public void setCol10(final String col10) {
+    public void setCol10(String col10) {
         this.col10 = col10;
     }
 
@@ -219,7 +218,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col11;
     }
 
-    public void setCol11(final String col11) {
+    public void setCol11(String col11) {
         this.col11 = col11;
     }
 
@@ -227,7 +226,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col12;
     }
 
-    public void setCol12(final String col12) {
+    public void setCol12(String col12) {
         this.col12 = col12;
     }
 
@@ -235,7 +234,7 @@ public class DatabaseMetadataValue implements Serializable {
         return col13;
     }
 
-    public void setCol13(final String col13) {
+    public void setCol13(String col13) {
         this.col13 = col13;
     }
 
@@ -243,13 +242,12 @@ public class DatabaseMetadataValue implements Serializable {
         return col14;
     }
 
-    public void setCol14(final String col14) {
+    public void setCol14(String col14) {
         this.col14 = col14;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

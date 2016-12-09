@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -50,7 +50,7 @@
             <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
               <td width="20px">${row.index + 1}</td>
               <td>${ar.order}</td><td>${ar.name}</td>
-              <td>${ar.event}</td><td>${ar.at}</td>
+              <td>${events.get(ar.event)}</td><td>${ar.at}</td>
               <td align="center">${ar.validations.size()}</td><td align="center">${ar.actions.size()}</td>
               <td align="center">
                 <c:choose>

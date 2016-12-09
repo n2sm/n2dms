@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -37,8 +37,7 @@ import com.openkm.frontend.client.extension.widget.tabfolder.TabFolderExtension;
  * @author jllort
  * 
  */
-public class TabFolderExample extends TabFolderExtension implements
-        FolderHandlerExtension {
+public class TabFolderExample extends TabFolderExtension implements FolderHandlerExtension {
     VerticalPanel vPanel;
 
     public TabFolderExample() {
@@ -54,15 +53,15 @@ public class TabFolderExample extends TabFolderExtension implements
     }
 
     @Override
-    public void set(final GWTFolder doc) {
+    public void set(GWTFolder doc) {
     }
 
     @Override
-    public void setVisibleButtons(final boolean visible) {
+    public void setVisibleButtons(boolean visible) {
     }
 
     @Override
-    public void onChange(final FolderEventConstant event) {
+    public void onChange(FolderEventConstant event) {
         if (event.equals(HasFolderEvent.TAB_CHANGED)) {
             Window.alert("tab changed - " + event.getType());
         }

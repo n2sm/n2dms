@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,7 +36,6 @@ import com.openkm.webdav.WebDavService;
 
 public class WebDAVServlet extends BasicSecuredServlet {
     private static final long serialVersionUID = 1L;
-
     private ServletContext ctx = null;
 
     public WebDAVServlet() {
@@ -44,43 +43,33 @@ public class WebDAVServlet extends BasicSecuredServlet {
     }
 
     @Override
-    public void init(final ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) throws ServletException {
         ctx = config.getServletContext();
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doService(request, response);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doService(request, response);
     }
 
-    private void doService(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    private void doService(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Session session = null;
 
         try {
             session = getSession(request);
             WebDavService.get().handleRequest(request, response, ctx);
-        } catch (final LoginException e) {
-            response.setHeader("WWW-Authenticate",
-                    "Basic realm=\"OpenKM Syndication Server\"");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    e.getMessage());
-        } catch (final RepositoryException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+        } catch (LoginException e) {
+            response.setHeader("WWW-Authenticate", "Basic realm=\"OpenKM Syndication Server\"");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        } catch (RepositoryException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             if (session != null) {
                 session.logout();

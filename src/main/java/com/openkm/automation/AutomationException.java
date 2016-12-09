@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,15 +28,15 @@ public class AutomationException extends Exception {
         super();
     }
 
-    public AutomationException(final String message) {
+    public AutomationException(String message) {
         super(message);
     }
 
-    public AutomationException(final String message, final Throwable cause) {
+    public AutomationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public AutomationException(final Throwable arg0) {
+    public AutomationException(Throwable arg0) {
         super(arg0);
     }
 }

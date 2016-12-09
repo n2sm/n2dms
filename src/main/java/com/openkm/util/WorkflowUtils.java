@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -69,39 +69,30 @@ public class WorkflowUtils {
      * Get process instances which competes to a document or folder.
      */
     @SuppressWarnings("rawtypes")
-    public static List<ProcessInstance> findProcessInstancesByNode(
-            final String uuid) throws WorkflowException {
+    public static List<ProcessInstance> findProcessInstancesByNode(String uuid) throws WorkflowException {
         log.debug("findProcessInstanceByNode({})", uuid);
-        final JbpmContext jbpmContext = JBPMUtils.getConfig()
-                .createJbpmContext();
-        final List<ProcessInstance> al = new ArrayList<ProcessInstance>();
+        JbpmContext jbpmContext = JBPMUtils.getConfig().createJbpmContext();
+        List<ProcessInstance> al = new ArrayList<ProcessInstance>();
 
         try {
             if (uuid != null) {
-                final GraphSession graphSession = jbpmContext.getGraphSession();
-                final List procDefList = graphSession
-                        .findAllProcessDefinitions();
+                GraphSession graphSession = jbpmContext.getGraphSession();
+                List procDefList = graphSession.findAllProcessDefinitions();
 
-                for (final Iterator itPd = procDefList.iterator(); itPd
-                        .hasNext();) {
-                    final org.jbpm.graph.def.ProcessDefinition procDef = (org.jbpm.graph.def.ProcessDefinition) itPd
-                            .next();
-                    final List procInsList = graphSession
-                            .findProcessInstances(procDef.getId());
+                for (Iterator itPd = procDefList.iterator(); itPd.hasNext();) {
+                    org.jbpm.graph.def.ProcessDefinition procDef = (org.jbpm.graph.def.ProcessDefinition) itPd.next();
+                    List procInsList = graphSession.findProcessInstances(procDef.getId());
 
-                    for (final Iterator itPi = procInsList.iterator(); itPi
-                            .hasNext();) {
-                        final org.jbpm.graph.exe.ProcessInstance procIns = (org.jbpm.graph.exe.ProcessInstance) itPi
-                                .next();
+                    for (Iterator itPi = procInsList.iterator(); itPi.hasNext();) {
+                        org.jbpm.graph.exe.ProcessInstance procIns = (org.jbpm.graph.exe.ProcessInstance) itPi.next();
 
-                        if (uuid.equals(procIns.getContextInstance()
-                                .getVariable("uuid"))) {
+                        if (uuid.equals(procIns.getContextInstance().getVariable("uuid"))) {
                             al.add(WorkflowUtils.copy(procIns));
                         }
                     }
                 }
             }
-        } catch (final JbpmException e) {
+        } catch (JbpmException e) {
             throw new WorkflowException(e.getMessage(), e);
         } finally {
             jbpmContext.close();
@@ -115,59 +106,49 @@ public class WorkflowUtils {
      * Get log entries related to a process instance.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static List<WorkflowUtils.ProcessInstanceLogEntry> findLogsByProcessInstance(
-            final long processInstanceId) throws WorkflowException {
+    public static List<WorkflowUtils.ProcessInstanceLogEntry> findLogsByProcessInstance(long processInstanceId) throws WorkflowException {
         log.debug("findLogsByProcessInstance({})", processInstanceId);
-        final JbpmContext jbpmContext = JBPMUtils.getConfig()
-                .createJbpmContext();
-        final List<ProcessInstanceLogEntry> al = new ArrayList<ProcessInstanceLogEntry>();
+        JbpmContext jbpmContext = JBPMUtils.getConfig().createJbpmContext();
+        List<ProcessInstanceLogEntry> al = new ArrayList<ProcessInstanceLogEntry>();
 
         try {
-            final LoggingSession logSession = jbpmContext.getLoggingSession();
-            final Map<Object, List> logs = logSession
-                    .findLogsByProcessInstance(processInstanceId);
+            LoggingSession logSession = jbpmContext.getLoggingSession();
+            Map<Object, List> logs = logSession.findLogsByProcessInstance(processInstanceId);
 
-            for (final Entry<Object, List> entry : logs.entrySet()) {
-                final org.jbpm.graph.exe.Token token = (org.jbpm.graph.exe.Token) entry
-                        .getKey();
-                final org.jbpm.graph.exe.ProcessInstance processInstance = token
-                        .getProcessInstance();
-                final org.jbpm.graph.def.ProcessDefinition processDefinition = processInstance
-                        .getProcessDefinition();
+            for (Entry<Object, List> entry : logs.entrySet()) {
+                org.jbpm.graph.exe.Token token = (org.jbpm.graph.exe.Token) entry.getKey();
+                org.jbpm.graph.exe.ProcessInstance processInstance = token.getProcessInstance();
+                org.jbpm.graph.def.ProcessDefinition processDefinition = processInstance.getProcessDefinition();
 
-                for (final Object obj : entry.getValue()) {
-                    final ProcessLog pLog = (ProcessLog) obj;
-                    final String className = obj.getClass().getSimpleName();
-                    final String classInfo = pLog.toString();
+                for (Object obj : entry.getValue()) {
+                    ProcessLog pLog = (ProcessLog) obj;
+                    String className = obj.getClass().getSimpleName();
+                    String classInfo = pLog.toString();
                     String pType = null;
                     String pInfo = null;
 
                     if (className.endsWith("Log")) {
-                        pType = className
-                                .substring(0, className.indexOf("Log"));
+                        pType = className.substring(0, className.indexOf("Log"));
                     } else {
                         pType = className;
                     }
 
                     if (classInfo.endsWith("]")) {
-                        pInfo = classInfo.substring(classInfo.indexOf('[') + 1,
-                                classInfo.length() - 1);
+                        pInfo = classInfo.substring(classInfo.indexOf('[') + 1, classInfo.length() - 1);
                     } else {
                         pInfo = classInfo;
                     }
 
-                    final ProcessInstanceLogEntry pile = new ProcessInstanceLogEntry(
-                            processDefinition.getId(),
-                            processDefinition.getName(),
-                            processInstance.getId(), token.getFullName(),
-                            pLog.getDate(), pType, pInfo);
+                    final ProcessInstanceLogEntry pile =
+                            new ProcessInstanceLogEntry(processDefinition.getId(), processDefinition.getName(), processInstance.getId(),
+                                    token.getFullName(), pLog.getDate(), pType, pInfo);
                     al.add(pile);
                 }
             }
 
             // Sort results
             Collections.sort(al);
-        } catch (final JbpmException e) {
+        } catch (JbpmException e) {
             throw new WorkflowException(e.getMessage(), e);
         } finally {
             jbpmContext.close();
@@ -177,26 +158,17 @@ public class WorkflowUtils {
         return al;
     }
 
-    public static final class ProcessInstanceLogEntry implements
-            Comparable<ProcessInstanceLogEntry> {
+    public static final class ProcessInstanceLogEntry implements Comparable<ProcessInstanceLogEntry> {
         private long processInstanceId;
-
         private long processDefinitionId;
-
         private String processDefinitionName;
-
         private String token;
-
         private Date date;
-
         private String type;
-
         private String info;
 
-        public ProcessInstanceLogEntry(final long processDefinitionId,
-                final String processDefinitionName,
-                final long processInstanceId, final String token,
-                final Date date, final String type, final String info) {
+        public ProcessInstanceLogEntry(long processDefinitionId, String processDefinitionName, long processInstanceId, String token,
+                Date date, String type, String info) {
             this.processDefinitionId = processDefinitionId;
             this.processDefinitionName = processDefinitionName;
             this.processInstanceId = processInstanceId;
@@ -210,7 +182,7 @@ public class WorkflowUtils {
             return processInstanceId;
         }
 
-        public void setProcessInstanceId(final long processInstanceId) {
+        public void setProcessInstanceId(long processInstanceId) {
             this.processInstanceId = processInstanceId;
         }
 
@@ -218,7 +190,7 @@ public class WorkflowUtils {
             return processDefinitionId;
         }
 
-        public void setProcessDefinitionId(final long processDefinitionId) {
+        public void setProcessDefinitionId(long processDefinitionId) {
             this.processDefinitionId = processDefinitionId;
         }
 
@@ -226,7 +198,7 @@ public class WorkflowUtils {
             return processDefinitionName;
         }
 
-        public void setProcessDefinitionName(final String processDefinitionName) {
+        public void setProcessDefinitionName(String processDefinitionName) {
             this.processDefinitionName = processDefinitionName;
         }
 
@@ -234,7 +206,7 @@ public class WorkflowUtils {
             return token;
         }
 
-        public void setToken(final String token) {
+        public void setToken(String token) {
             this.token = token;
         }
 
@@ -242,7 +214,7 @@ public class WorkflowUtils {
             return date;
         }
 
-        public void setDate(final Date date) {
+        public void setDate(Date date) {
             this.date = date;
         }
 
@@ -250,7 +222,7 @@ public class WorkflowUtils {
             return type;
         }
 
-        public void setType(final String type) {
+        public void setType(String type) {
             this.type = type;
         }
 
@@ -258,14 +230,14 @@ public class WorkflowUtils {
             return info;
         }
 
-        public void setInfo(final String info) {
+        public void setInfo(String info) {
             this.info = info;
         }
 
         @Override
-        public int compareTo(final ProcessInstanceLogEntry o) {
-            if (date != null && o.getDate() != null) {
-                return date.compareTo(o.getDate());
+        public int compareTo(ProcessInstanceLogEntry o) {
+            if (this.date != null && o.getDate() != null) {
+                return this.date.compareTo(o.getDate());
             } else {
                 return 0;
             }
@@ -273,7 +245,7 @@ public class WorkflowUtils {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("{");
             sb.append("processDefinitionId=").append(processDefinitionId);
             sb.append(", processDefinitionName=").append(processDefinitionName);
@@ -291,18 +263,17 @@ public class WorkflowUtils {
      * Copy process definition
      */
     @SuppressWarnings("rawtypes")
-    public static ProcessDefinition copy(
-            final org.jbpm.graph.def.ProcessDefinition pd) {
-        final ProcessDefinition vo = new ProcessDefinition();
+    public static ProcessDefinition copy(org.jbpm.graph.def.ProcessDefinition pd) {
+        ProcessDefinition vo = new ProcessDefinition();
 
         vo.setName(pd.getName());
         vo.setDescription(pd.getDescription());
         vo.setId(pd.getId());
         vo.setVersion(pd.getVersion());
-        final ArrayList<String> al = new ArrayList<String>();
+        ArrayList<String> al = new ArrayList<String>();
 
-        for (final Object element : pd.getNodes()) {
-            final org.jbpm.graph.def.Node n = (org.jbpm.graph.def.Node) element;
+        for (Iterator it = pd.getNodes().iterator(); it.hasNext();) {
+            org.jbpm.graph.def.Node n = (org.jbpm.graph.def.Node) it.next();
             al.add(n.getName());
         }
 
@@ -315,18 +286,17 @@ public class WorkflowUtils {
      * Copy process instance
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static ProcessInstance copy(
-            final org.jbpm.graph.exe.ProcessInstance pi) {
-        final ProcessInstance vo = new ProcessInstance();
+    public static ProcessInstance copy(org.jbpm.graph.exe.ProcessInstance pi) {
+        ProcessInstance vo = new ProcessInstance();
 
         if (pi.getStart() != null) {
-            final Calendar start = Calendar.getInstance();
+            Calendar start = Calendar.getInstance();
             start.setTime(pi.getStart());
             vo.setStart(start);
         }
 
         if (pi.getEnd() != null) {
-            final Calendar end = Calendar.getInstance();
+            Calendar end = Calendar.getInstance();
             end.setTime(pi.getEnd());
             vo.setEnd(end);
         }
@@ -342,18 +312,17 @@ public class WorkflowUtils {
             vo.setVariables(pi.getContextInstance().getVariables());
 
             // Workaround for LazyInitializationException
-            for (final String key : vo.getVariables().keySet()) {
+            for (String key : vo.getVariables().keySet()) {
                 Hibernate.initialize(vo.getVariables().get(key));
             }
         } else {
             vo.setVariables(new HashMap<String, Object>());
         }
 
-        final ArrayList<Token> al = new ArrayList<Token>();
+        ArrayList<Token> al = new ArrayList<Token>();
 
-        for (final Iterator it = pi.findAllTokens().iterator(); it.hasNext();) {
-            final org.jbpm.graph.exe.Token tk = (org.jbpm.graph.exe.Token) it
-                    .next();
+        for (Iterator it = pi.findAllTokens().iterator(); it.hasNext();) {
+            org.jbpm.graph.exe.Token tk = (org.jbpm.graph.exe.Token) it.next();
             al.add(copy(tk));
         }
 
@@ -368,29 +337,29 @@ public class WorkflowUtils {
      * Copy task instance
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static TaskInstance copy(final org.jbpm.taskmgmt.exe.TaskInstance ti) {
-        final TaskInstance vo = new TaskInstance();
+    public static TaskInstance copy(org.jbpm.taskmgmt.exe.TaskInstance ti) {
+        TaskInstance vo = new TaskInstance();
 
         if (ti.getCreate() != null) {
-            final Calendar create = Calendar.getInstance();
+            Calendar create = Calendar.getInstance();
             create.setTime(ti.getCreate());
             vo.setCreate(create);
         }
 
         if (ti.getStart() != null) {
-            final Calendar start = Calendar.getInstance();
+            Calendar start = Calendar.getInstance();
             start.setTime(ti.getStart());
             vo.setStart(start);
         }
 
         if (ti.getEnd() != null) {
-            final Calendar end = Calendar.getInstance();
+            Calendar end = Calendar.getInstance();
             end.setTime(ti.getEnd());
             vo.setEnd(end);
         }
 
         if (ti.getDueDate() != null) {
-            final Calendar dueDate = Calendar.getInstance();
+            Calendar dueDate = Calendar.getInstance();
             dueDate.setTime(ti.getDueDate());
             vo.setDueDate(dueDate);
         }
@@ -399,15 +368,14 @@ public class WorkflowUtils {
         vo.setName(ti.getName());
         vo.setDescription(ti.getDescription());
         vo.setVariables(ti.getVariables());
-        final ArrayList<Comment> al = new ArrayList<Comment>();
+        ArrayList<Comment> al = new ArrayList<Comment>();
 
-        for (final Iterator it = ti.getComments().iterator(); it.hasNext();) {
-            final org.jbpm.graph.exe.Comment c = (org.jbpm.graph.exe.Comment) it
-                    .next();
-            final Comment tc = new Comment();
+        for (Iterator it = ti.getComments().iterator(); it.hasNext();) {
+            org.jbpm.graph.exe.Comment c = (org.jbpm.graph.exe.Comment) it.next();
+            Comment tc = new Comment();
             tc.setActorId(c.getActorId());
             tc.setMessage(c.getMessage());
-            final Calendar time = Calendar.getInstance();
+            Calendar time = Calendar.getInstance();
             time.setTime(c.getTime());
             tc.setTime(time);
             al.add(tc);
@@ -419,21 +387,19 @@ public class WorkflowUtils {
         vo.setLast(ti.isLast());
         vo.setSuspended(ti.isSuspended());
         vo.setStartTaskInstance(ti.isStartTaskInstance());
-        final HashSet<String> hs = new HashSet<String>();
+        HashSet<String> hs = new HashSet<String>();
 
-        for (final Object element : ti.getPooledActors()) {
-            hs.add(element.toString());
+        for (Iterator it = ti.getPooledActors().iterator(); it.hasNext();) {
+            hs.add(it.next().toString());
         }
 
         vo.setPooledActors(hs);
-        final ArrayList<Transition> alT = new ArrayList<Transition>();
+        ArrayList<Transition> alT = new ArrayList<Transition>();
 
         // TODO http://www.jboss.com/index.html?module=bb&op=viewtopic&t=144049
         if (ti.getEnd() == null) {
-            for (final Iterator it = ti.getAvailableTransitions().iterator(); it
-                    .hasNext();) {
-                final org.jbpm.graph.def.Transition tr = (org.jbpm.graph.def.Transition) it
-                        .next();
+            for (Iterator it = ti.getAvailableTransitions().iterator(); it.hasNext();) {
+                org.jbpm.graph.def.Transition tr = (org.jbpm.graph.def.Transition) it.next();
                 alT.add(copy(tr));
             }
         }
@@ -452,7 +418,7 @@ public class WorkflowUtils {
      * Copy token
      */
     @SuppressWarnings("rawtypes")
-    public static Token copy(final org.jbpm.graph.exe.Token t) {
+    public static Token copy(org.jbpm.graph.exe.Token t) {
         Token vo = null;
 
         if (t != null) {
@@ -460,13 +426,11 @@ public class WorkflowUtils {
             vo.setName(t.getName());
             vo.setId(t.getId());
             vo.setSuspended(t.isSuspended());
-            final ArrayList<Comment> alC = new ArrayList<Comment>();
+            ArrayList<Comment> alC = new ArrayList<Comment>();
 
             if (t.getComments() != null) {
-                for (final Iterator it = t.getComments().iterator(); it
-                        .hasNext();) {
-                    final org.jbpm.graph.exe.Comment c = (org.jbpm.graph.exe.Comment) it
-                            .next();
+                for (Iterator it = t.getComments().iterator(); it.hasNext();) {
+                    org.jbpm.graph.exe.Comment c = (org.jbpm.graph.exe.Comment) it.next();
                     alC.add(copy(c));
                 }
             }
@@ -479,27 +443,25 @@ public class WorkflowUtils {
             }
 
             if (t.getStart() != null) {
-                final Calendar start = Calendar.getInstance();
+                Calendar start = Calendar.getInstance();
                 start.setTime(t.getStart());
                 vo.setStart(start);
             }
 
             if (t.getEnd() != null) {
-                final Calendar end = Calendar.getInstance();
+                Calendar end = Calendar.getInstance();
                 end.setTime(t.getEnd());
                 vo.setEnd(end);
             }
 
-            final ArrayList<Transition> alT = new ArrayList<Transition>();
+            ArrayList<Transition> alT = new ArrayList<Transition>();
 
             try {
-                for (final Iterator it = t.getAvailableTransitions().iterator(); it
-                        .hasNext();) {
-                    final org.jbpm.graph.def.Transition tr = (org.jbpm.graph.def.Transition) it
-                            .next();
+                for (Iterator it = t.getAvailableTransitions().iterator(); it.hasNext();) {
+                    org.jbpm.graph.def.Transition tr = (org.jbpm.graph.def.Transition) it.next();
                     alT.add(copy(tr));
                 }
-            } catch (final JbpmException e) {
+            } catch (JbpmException e) {
                 log.warn("Trasition problem: {}", e.getMessage());
             }
 
@@ -517,12 +479,12 @@ public class WorkflowUtils {
     /**
      * Copy comment
      */
-    public static Comment copy(final org.jbpm.graph.exe.Comment c) {
-        final Comment vo = new Comment();
+    public static Comment copy(org.jbpm.graph.exe.Comment c) {
+        Comment vo = new Comment();
 
         vo.setActorId(c.getActorId());
         vo.setMessage(c.getMessage());
-        final Calendar time = Calendar.getInstance();
+        Calendar time = Calendar.getInstance();
         time.setTime(c.getTime());
         vo.setTime(time);
 
@@ -532,8 +494,8 @@ public class WorkflowUtils {
     /**
      * Copy transition
      */
-    public static Transition copy(final org.jbpm.graph.def.Transition t) {
-        final Transition vo = new Transition();
+    public static Transition copy(org.jbpm.graph.def.Transition t) {
+        Transition vo = new Transition();
 
         vo.setId(t.getId());
         vo.setName(t.getName());
@@ -546,65 +508,50 @@ public class WorkflowUtils {
     /**
      * Get diagram info
      */
-    public static WorkflowUtils.DiagramInfo getDiagramInfo(final InputStream is) {
+    public static WorkflowUtils.DiagramInfo getDiagramInfo(InputStream is) {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory
-                    .newInstance();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature("http://xml.org/sax/features/validation", false);
-            dbf.setFeature(
-                    "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-                    false);
-            final DocumentBuilder db = dbf.newDocumentBuilder();
+            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            DocumentBuilder db = dbf.newDocumentBuilder();
 
             if (is != null) {
-                final Document doc = db.parse(is);
+                Document doc = db.parse(is);
                 doc.getDocumentElement().normalize();
-                final Element processDiagramElement = doc.getDocumentElement();
-                final String widthString = processDiagramElement
-                        .getAttribute("width");
-                final String heightString = processDiagramElement
-                        .getAttribute("height");
+                Element processDiagramElement = doc.getDocumentElement();
+                final String widthString = processDiagramElement.getAttribute("width");
+                final String heightString = processDiagramElement.getAttribute("height");
                 final List<DiagramNodeInfo> diagramNodeInfoList = new ArrayList<DiagramNodeInfo>();
-                final NodeList nodeNodeList = processDiagramElement
-                        .getElementsByTagName("node");
+                final NodeList nodeNodeList = processDiagramElement.getElementsByTagName("node");
                 final int nodeNodeListLength = nodeNodeList.getLength();
 
                 for (int i = 0; i < nodeNodeListLength; i++) {
                     final Node nodeNode = nodeNodeList.item(i);
 
-                    if (nodeNode instanceof Node
-                            && nodeNode.getParentNode() == processDiagramElement) {
+                    if (nodeNode instanceof Node && nodeNode.getParentNode() == processDiagramElement) {
                         final Element nodeElement = (Element) nodeNode;
-                        final String nodeName = nodeElement
-                                .getAttribute("name");
-                        final String nodeXString = nodeElement
-                                .getAttribute("x");
-                        final String nodeYString = nodeElement
-                                .getAttribute("y");
-                        final String nodeWidthString = nodeElement
-                                .getAttribute("width");
-                        final String nodeHeightString = nodeElement
-                                .getAttribute("height");
-                        final DiagramNodeInfo nodeInfo = new DiagramNodeInfo(
-                                nodeName, Integer.parseInt(nodeXString),
-                                Integer.parseInt(nodeYString),
-                                Integer.parseInt(nodeWidthString),
-                                Integer.parseInt(nodeHeightString));
+                        final String nodeName = nodeElement.getAttribute("name");
+                        final String nodeXString = nodeElement.getAttribute("x");
+                        final String nodeYString = nodeElement.getAttribute("y");
+                        final String nodeWidthString = nodeElement.getAttribute("width");
+                        final String nodeHeightString = nodeElement.getAttribute("height");
+                        final DiagramNodeInfo nodeInfo =
+                                new DiagramNodeInfo(nodeName, Integer.parseInt(nodeXString), Integer.parseInt(nodeYString),
+                                        Integer.parseInt(nodeWidthString), Integer.parseInt(nodeHeightString));
                         diagramNodeInfoList.add(nodeInfo);
                     }
                 }
 
-                final DiagramInfo diagramInfo = new DiagramInfo(
-                        Integer.parseInt(heightString),
-                        Integer.parseInt(widthString), diagramNodeInfoList);
+                final DiagramInfo diagramInfo =
+                        new DiagramInfo(Integer.parseInt(heightString), Integer.parseInt(widthString), diagramNodeInfoList);
 
                 return diagramInfo;
             }
-        } catch (final ParserConfigurationException e) {
+        } catch (ParserConfigurationException e) {
             e.printStackTrace();
-        } catch (final SAXException e) {
+        } catch (SAXException e) {
             e.printStackTrace();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -618,17 +565,14 @@ public class WorkflowUtils {
         private static final long serialVersionUID = 1L;
 
         private final int width;
-
         private final int height;
-
         private final Map<String, DiagramNodeInfo> nodeMap;
 
-        public DiagramInfo(final int height, final int width,
-                final List<DiagramNodeInfo> nodeList) {
+        public DiagramInfo(final int height, final int width, final List<DiagramNodeInfo> nodeList) {
             this.height = height;
             this.width = width;
             final LinkedHashMap<String, DiagramNodeInfo> map = new LinkedHashMap<String, DiagramNodeInfo>();
-            for (final DiagramNodeInfo nodeInfo : nodeList) {
+            for (DiagramNodeInfo nodeInfo : nodeList) {
                 map.put(nodeInfo.getName(), nodeInfo);
             }
             nodeMap = Collections.unmodifiableMap(map);
@@ -643,8 +587,7 @@ public class WorkflowUtils {
         }
 
         public List<DiagramNodeInfo> getNodes() {
-            return Collections.unmodifiableList(new ArrayList<DiagramNodeInfo>(
-                    nodeMap.values()));
+            return Collections.unmodifiableList(new ArrayList<DiagramNodeInfo>(nodeMap.values()));
         }
 
         public int getWidth() {
@@ -659,17 +602,12 @@ public class WorkflowUtils {
         private static final long serialVersionUID = 1L;
 
         private final String name;
-
         private final int x;
-
         private final int y;
-
         private final int width;
-
         private final int height;
 
-        public DiagramNodeInfo(final String name, final int x, final int y,
-                final int width, final int height) {
+        public DiagramNodeInfo(final String name, final int x, final int y, final int width, final int height) {
             this.height = height;
             this.name = name;
             this.width = width;
@@ -697,9 +635,8 @@ public class WorkflowUtils {
             return y;
         }
 
-        @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("{");
             sb.append("name=").append(name);
             sb.append(", x=").append(x);

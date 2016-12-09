@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,10 +29,9 @@ import org.apache.jackrabbit.api.XASession;
 
 public class Transaction {
     XAResource xares = null;
-
     Xid xid = null;
 
-    public Transaction(final XASession session) {
+    public Transaction(XASession session) {
         xares = session.getXAResource();
         xid = XidFactory.createXid();
     }
@@ -43,7 +42,7 @@ public class Transaction {
     public void start() {
         try {
             xares.start(xid, XAResource.TMNOFLAGS);
-        } catch (final XAException e) {
+        } catch (XAException e) {
             e.printStackTrace();
         }
     }
@@ -54,7 +53,7 @@ public class Transaction {
     public void end() {
         try {
             xares.end(xid, XAResource.TMSUCCESS);
-        } catch (final XAException e) {
+        } catch (XAException e) {
             e.printStackTrace();
         }
     }
@@ -67,7 +66,7 @@ public class Transaction {
             if (xares.prepare(xid) == XAResource.XA_OK) {
                 xares.commit(xid, false);
             }
-        } catch (final XAException e) {
+        } catch (XAException e) {
             e.printStackTrace();
         }
     }
@@ -80,7 +79,7 @@ public class Transaction {
             if (xares.prepare(xid) == XAResource.XA_OK) {
                 xares.rollback(xid);
             }
-        } catch (final XAException e1) {
+        } catch (XAException e1) {
             e1.printStackTrace();
         }
     }

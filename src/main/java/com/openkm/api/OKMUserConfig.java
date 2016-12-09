@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,7 +37,6 @@ import com.openkm.module.UserConfigModule;
  */
 public class OKMUserConfig implements UserConfigModule {
     private static Logger log = LoggerFactory.getLogger(OKMUserConfig.class);
-
     private static OKMUserConfig instance = new OKMUserConfig();
 
     private OKMUserConfig() {
@@ -48,21 +47,18 @@ public class OKMUserConfig implements UserConfigModule {
     }
 
     @Override
-    public void setHome(final String token, final String path)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void setHome(String token, String path) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("setHome({}, {})", token, path);
-        final UserConfigModule ucm = ModuleManager.getUserConfigModule();
+        UserConfigModule ucm = ModuleManager.getUserConfigModule();
         ucm.setHome(token, path);
         log.debug("setHome: void");
     }
 
     @Override
-    public UserConfig getConfig(final String token) throws RepositoryException,
-            DatabaseException {
+    public UserConfig getConfig(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getConfig({})", token);
-        final UserConfigModule ucm = ModuleManager.getUserConfigModule();
-        final UserConfig userConfig = ucm.getConfig(token);
+        UserConfigModule ucm = ModuleManager.getUserConfigModule();
+        UserConfig userConfig = ucm.getConfig(token);
         log.debug("getConfig: {}", userConfig);
         return userConfig;
     }

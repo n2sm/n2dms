@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,8 +35,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -56,32 +55,21 @@ import com.openkm.frontend.client.util.Util;
  *
  */
 public class CategoriesWidget extends Composite {
-    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT
-            .create(OKMPropertyService.class);
+    private final OKMPropertyServiceAsync propertyService = (OKMPropertyServiceAsync) GWT.create(OKMPropertyService.class);
 
     private FlexTable table;
-
     private String docPath;
-
     private CellFormatter cellFormatter;
-
     private VerticalPanel vPanel;
-
     private ScrollPanel scrollDirectoryPanel;
-
     private VerticalPanel verticalDirectoryPanel;
-
     private FolderSelectTree folderSelectTree;
-
     private Button actionButton;
-
     private FlexTable tableSubscribedCategories;
-
     private Collection<GWTFolder> assignedCategories;
-
     private boolean remove = true;
 
-    public CategoriesWidget(final String docPath, final Widget widget) {
+    public CategoriesWidget(String docPath, Widget widget) {
         table = new FlexTable();
         tableSubscribedCategories = new FlexTable();
         assignedCategories = new ArrayList<GWTFolder>();
@@ -96,22 +84,20 @@ public class CategoriesWidget extends Composite {
         table.getFlexCellFormatter().setColSpan(0, 0, 2);
         cellFormatter.addStyleName(0, 0, "okm-Security-Title-RightBorder"); // Border and margins
 
-        final RowFormatter rowFormatter = table.getRowFormatter();
+        RowFormatter rowFormatter = table.getRowFormatter();
         rowFormatter.setStyleName(0, "okm-Security-Title");
 
         // Widget format
-        cellFormatter.setHorizontalAlignment(0, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        cellFormatter.setVerticalAlignment(0, 0,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        cellFormatter.setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
+        cellFormatter.setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
 
         // Categories
         vPanel = new VerticalPanel();
-        vPanel.setWidth("390");
-        vPanel.setHeight("175");
+        vPanel.setWidth("390px");
+        vPanel.setHeight("175px");
 
         scrollDirectoryPanel = new ScrollPanel();
-        scrollDirectoryPanel.setSize("380", "150");
+        scrollDirectoryPanel.setSize("380px", "150px");
         scrollDirectoryPanel.setStyleName("okm-Popup-text");
         verticalDirectoryPanel = new VerticalPanel();
         verticalDirectoryPanel.setSize("100%", "100%");
@@ -123,7 +109,7 @@ public class CategoriesWidget extends Composite {
 
         actionButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 addCategory(folderSelectTree.getCategory());
             }
         });
@@ -131,30 +117,23 @@ public class CategoriesWidget extends Composite {
         vPanel.add(scrollDirectoryPanel);
         vPanel.add(actionButton);
 
-        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(actionButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellVerticalAlignment(actionButton,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        vPanel.setCellHeight(scrollDirectoryPanel, "150");
-        vPanel.setCellHeight(actionButton, "25");
+        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(actionButton, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellVerticalAlignment(actionButton, HasAlignment.ALIGN_MIDDLE);
+        vPanel.setCellHeight(scrollDirectoryPanel, "150px");
+        vPanel.setCellHeight(actionButton, "25px");
 
         table.setWidget(1, 0, vPanel);
         table.getFlexCellFormatter().setColSpan(1, 0, 2);
-        cellFormatter.setHorizontalAlignment(1, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        cellFormatter.setHorizontalAlignment(1, 0, HasAlignment.ALIGN_CENTER);
 
-        table.setHTML(2, 0, "&nbsp;<b>" + Main.i18n("document.categories")
-                + "</b>");
+        table.setHTML(2, 0, "&nbsp;<b>" + Main.i18n("document.categories") + "</b>");
         table.getFlexCellFormatter().setColSpan(2, 0, 2);
-        cellFormatter.setHorizontalAlignment(2, 0,
-                HasHorizontalAlignment.ALIGN_LEFT);
+        cellFormatter.setHorizontalAlignment(2, 0, HasAlignment.ALIGN_LEFT);
 
         table.setWidget(3, 0, tableSubscribedCategories);
         table.getFlexCellFormatter().setColSpan(3, 0, 2);
-        cellFormatter.setHorizontalAlignment(3, 0,
-                HasHorizontalAlignment.ALIGN_LEFT);
+        cellFormatter.setHorizontalAlignment(3, 0, HasAlignment.ALIGN_LEFT);
 
         setRowWordWarp(0, 0, true, tableSubscribedCategories);
 
@@ -173,29 +152,28 @@ public class CategoriesWidget extends Composite {
      * 
      * @param enable
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 
     /**
      * addCategory document
      */
-    public void addCategory(final GWTFolder category) {
+    public void addCategory(GWTFolder category) {
         if (!existCategory(category.getUuid())) {
             assignedCategories.add(category);
             drawCategory(category, remove);
-            propertyService.addCategory(docPath, category.getUuid(),
-                    new AsyncCallback<Object>() {
-                        @Override
-                        public void onSuccess(final Object result) {
+            propertyService.addCategory(docPath, category.getUuid(), new AsyncCallback<Object>() {
+                @Override
+                public void onSuccess(Object result) {
 
-                        }
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("AddCategory", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("AddCategory", caught);
+                }
+            });
         }
     }
 
@@ -203,23 +181,22 @@ public class CategoriesWidget extends Composite {
      * removeCategory document
      */
     public void removeCategory(final String UUID) {
-        propertyService.removeCategory(docPath, UUID,
-                new AsyncCallback<Object>() {
-                    @Override
-                    public void onSuccess(final Object result) {
-                        for (final GWTFolder fld : assignedCategories) {
-                            if (fld.getUuid().equals(UUID)) {
-                                assignedCategories.remove(fld);
-                                break;
-                            }
-                        }
+        propertyService.removeCategory(docPath, UUID, new AsyncCallback<Object>() {
+            @Override
+            public void onSuccess(Object result) {
+                for (GWTFolder fld : assignedCategories) {
+                    if (fld.getUuid().equals(UUID)) {
+                        assignedCategories.remove(fld);
+                        break;
                     }
+                }
+            }
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        Main.get().showError("RemoveCategory", caught);
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                Main.get().showError("RemoveCategory", caught);
+            }
+        });
     }
 
     /**
@@ -228,9 +205,9 @@ public class CategoriesWidget extends Composite {
      * @param Uuid
      * @return
      */
-    private boolean existCategory(final String Uuid) {
+    private boolean existCategory(String Uuid) {
         boolean found = false;
-        for (final GWTFolder fld : assignedCategories) {
+        for (GWTFolder fld : assignedCategories) {
             if (fld.getUuid().equals(Uuid)) {
                 found = true;
                 break;
@@ -244,37 +221,34 @@ public class CategoriesWidget extends Composite {
      * 
      * @param category
      */
-    private void drawCategory(final GWTFolder category, final boolean remove) {
-        final int row = tableSubscribedCategories.getRowCount();
-        final Anchor anchor = new Anchor();
+    private void drawCategory(final GWTFolder category, boolean remove) {
+        int row = tableSubscribedCategories.getRowCount();
+        Anchor anchor = new Anchor();
 
         // Looks if must change icon on parent if now has no childs and properties with user security atention
-        final String path = category.getPath().substring(16); // Removes /okm:categories
+        String path = category.getPath().substring(16); // Removes /okm:categories
 
         if (category.isHasChildren()) {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_childs.gif", path, "top"));
         } else {
-            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path,
-                    "top"));
+            anchor.setHTML(Util.imageItemHTML("img/menuitem_empty.gif", path, "top"));
         }
 
         anchor.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent arg0) {
+            public void onClick(ClickEvent arg0) {
                 CommonUI.openPath(category.getPath(), null);
             }
         });
         anchor.setStyleName("okm-KeyMap-ImageHover");
 
-        final Image delete = new Image(OKMBundleResources.INSTANCE.deleteIcon());
+        Image delete = new Image(OKMBundleResources.INSTANCE.deleteIcon());
         delete.setStyleName("okm-KeyMap-ImageHover");
         delete.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 removeCategory(category.getUuid());
-                tableSubscribedCategories.removeRow(tableSubscribedCategories
-                        .getCellForEvent(event).getRowIndex());
+                tableSubscribedCategories.removeRow(tableSubscribedCategories.getCellForEvent(event).getRowIndex());
             }
         });
 
@@ -295,9 +269,8 @@ public class CategoriesWidget extends Composite {
      * @param warp
      * @param table The table to change word wrap
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp, final FlexTable table) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp, FlexTable table) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, warp);
         }

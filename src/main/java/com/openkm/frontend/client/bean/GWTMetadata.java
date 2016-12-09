@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,15 +27,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTMetadata implements IsSerializable {
     public static final int INPUT = 1;
-
     public static final int TEXT_AREA = 2;
-
     public static final int SELECT = 3;
-
     public static final int SELECT_MULTI = 4;
 
     private int type;
-
     private int order = 0;
 
     private Collection<String> values;
@@ -44,7 +40,7 @@ public class GWTMetadata implements IsSerializable {
         return type;
     }
 
-    public void setType(final int type) {
+    public void setType(int type) {
         this.type = type;
     }
 
@@ -52,7 +48,7 @@ public class GWTMetadata implements IsSerializable {
         return values;
     }
 
-    public void setValues(final Collection<String> values) {
+    public void setValues(Collection<String> values) {
         this.values = values;
     }
 
@@ -60,7 +56,7 @@ public class GWTMetadata implements IsSerializable {
         return order;
     }
 
-    public void setOrder(final int order) {
+    public void setOrder(int order) {
         this.order = order;
     }
 }

@@ -70,8 +70,7 @@ public class JackrabbitTextExtractor implements TextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger logger = LoggerFactory
-            .getLogger(JackrabbitTextExtractor.class);
+    private static final Logger logger = LoggerFactory.getLogger(JackrabbitTextExtractor.class);
 
     /**
      * Set of content types that are known to be supported by the
@@ -108,16 +107,15 @@ public class JackrabbitTextExtractor implements TextExtractor {
      *        class names (space- or comma-separated)
      */
     @SuppressWarnings({ "deprecation", "unchecked" })
-    public JackrabbitTextExtractor(final List<String> classes) {
+    public JackrabbitTextExtractor(List<String> classes) {
         logger.debug("JackrabbitTextExtractor({})", classes);
 
-        for (final String clazz : classes) {
+        for (String clazz : classes) {
             try {
-                final Object object = Class.forName(clazz).newInstance();
+                Object object = Class.forName(clazz).newInstance();
 
                 if (object instanceof DelegatingTextExtractor) {
-                    ((DelegatingTextExtractor) object)
-                            .setDelegateTextExtractor(this);
+                    ((DelegatingTextExtractor) object).setDelegateTextExtractor(this);
                 }
 
                 if (object instanceof TextExtractor) {
@@ -127,13 +125,13 @@ public class JackrabbitTextExtractor implements TextExtractor {
                 } else {
                     logger.warn("Unknown text extractor class: {}", clazz);
                 }
-            } catch (final ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 logger.warn("Extractor class not found: " + clazz, e);
-            } catch (final LinkageError e) {
+            } catch (LinkageError e) {
                 logger.warn("Extractor dependency not found: " + clazz, e);
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 logger.warn("Extractor constructor not accessible: " + clazz, e);
-            } catch (final InstantiationException e) {
+            } catch (InstantiationException e) {
                 logger.warn("Extractor instantiation failed: " + clazz, e);
             }
         }
@@ -149,7 +147,6 @@ public class JackrabbitTextExtractor implements TextExtractor {
      * 
      * @return supported content types
      */
-    @Override
     public String[] getContentTypes() {
         return extractor.getContentTypes(); // and then some
     }
@@ -173,28 +170,24 @@ public class JackrabbitTextExtractor implements TextExtractor {
      * @return reader for the text content of the binary stream
      * @throws IOException if the binary stream can not be read
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         logger.debug("extractText(stream, {}, {})", type, encoding);
         return getExtractor(type).extractText(stream, type, encoding);
     }
 
     @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
-    public CompositeTextExtractor getExtractor(final String type)
-            throws IOException {
+    public CompositeTextExtractor getExtractor(String type) throws IOException {
         logger.debug("getExtractor({})", type);
 
         if (!types.contains(type)) {
-            final Iterator iterator = filters.iterator();
+            Iterator iterator = filters.iterator();
 
             while (iterator.hasNext()) {
-                final TextFilter filter = (TextFilter) iterator.next();
+                TextFilter filter = (TextFilter) iterator.next();
 
                 if (filter.canFilter(type)) {
                     types.add(type);
-                    extractor.addTextExtractor(new TextFilterExtractor(type,
-                            filter));
+                    extractor.addTextExtractor(new TextFilterExtractor(type, filter));
                     break;
                 }
             }

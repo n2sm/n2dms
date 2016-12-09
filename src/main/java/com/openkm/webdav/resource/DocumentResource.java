@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -66,17 +66,13 @@ import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
 import com.openkm.util.PathUtils;
 
-public class DocumentResource implements CopyableResource, DeletableResource,
-        GetableResource, MoveableResource, PropFindableResource,
+public class DocumentResource implements CopyableResource, DeletableResource, GetableResource, MoveableResource, PropFindableResource,
         PropPatchableResource, LockableResource, QuotaResource {
-    private static final Logger log = LoggerFactory
-            .getLogger(DocumentResource.class);
-
+    private static final Logger log = LoggerFactory.getLogger(DocumentResource.class);
     private Document doc;
-
     private LockToken lt;
 
-    public DocumentResource(final Document doc) {
+    public DocumentResource(Document doc) {
         this.doc = ResourceUtils.fixResourcePath(doc);
     }
 
@@ -91,14 +87,13 @@ public class DocumentResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public Object authenticate(final String user, final String password) {
+    public Object authenticate(String user, String password) {
         // log.debug("authenticate({}, {})", new Object[] { user, password });
         return "OpenKM";
     }
 
     @Override
-    public boolean authorise(final Request request, final Method method,
-            final Auth auth) {
+    public boolean authorise(Request request, Method method, Auth auth) {
         // log.debug("authorise({}, {}, {})", new Object[] { request.getAbsolutePath(), method.toString(),
         // auth.getUser() });
         return true;
@@ -120,17 +115,17 @@ public class DocumentResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public String checkRedirect(final Request request) {
+    public String checkRedirect(Request request) {
         return null;
     }
 
     @Override
-    public Long getMaxAgeSeconds(final Auth auth) {
+    public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
 
     @Override
-    public String getContentType(final String accepts) {
+    public String getContentType(String accepts) {
         return doc.getMimeType();
     }
 
@@ -140,210 +135,177 @@ public class DocumentResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public void sendContent(final OutputStream out, final Range range,
-            final Map<String, String> params, final String contentType)
-            throws IOException, NotAuthorizedException, BadRequestException {
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException,
+            NotAuthorizedException, BadRequestException {
         log.debug("sendContent({}, {})", params, contentType);
         InputStream is = null;
 
         try {
-            final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                    .getPath());
-            is = OKMDocument.getInstance()
-                    .getContent(null, fixedDocPath, false);
+            String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
+            is = OKMDocument.getInstance().getContent(null, fixedDocPath, false);
             IOUtils.copy(is, out);
             out.flush();
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error("PathNotFoundException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + doc.getPath());
-        } catch (final AccessDeniedException e) {
+            throw new RuntimeException("Failed to update content: " + doc.getPath());
+        } catch (AccessDeniedException e) {
             log.error("AccessDeniedException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + doc.getPath());
-        } catch (final RepositoryException e) {
+            throw new RuntimeException("Failed to update content: " + doc.getPath());
+        } catch (RepositoryException e) {
             log.error("RepositoryException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + doc.getPath());
-        } catch (final DatabaseException e) {
+            throw new RuntimeException("Failed to update content: " + doc.getPath());
+        } catch (DatabaseException e) {
             log.error("DatabaseException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + doc.getPath());
+            throw new RuntimeException("Failed to update content: " + doc.getPath());
         } finally {
             IOUtils.closeQuietly(is);
         }
     }
 
     @Override
-    public void delete() throws NotAuthorizedException, ConflictException,
-            BadRequestException {
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         log.debug("delete()");
 
         try {
-            final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                    .getPath());
+            String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
             OKMDocument.getInstance().delete(null, fixedDocPath);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new ConflictException(this);
         }
     }
 
     @Override
-    public void setProperties(final Fields fields) {
+    public void setProperties(Fields fields) {
         // MIL-50: not implemented. Just to keep MS Office sweet
     }
 
     @Override
-    public void moveTo(final CollectionResource newParent, final String newName)
-            throws ConflictException, NotAuthorizedException,
-            BadRequestException {
+    public void moveTo(CollectionResource newParent, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
         log.debug("moveTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstFolder = newFldParent.getFolder().getPath();
-            final String srcFolder = PathUtils.getParent(doc.getPath());
-            final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                    .getPath());
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstFolder = newFldParent.getFolder().getPath();
+            String srcFolder = PathUtils.getParent(doc.getPath());
+            String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
 
             if (dstFolder.equals(srcFolder)) {
                 log.debug("moveTo - RENAME {} to {}", fixedDocPath, newName);
 
                 try {
-                    doc = OKMDocument.getInstance().rename(null, fixedDocPath,
-                            newName);
-                } catch (final Exception e) {
-                    throw new RuntimeException("Failed to rename to: "
-                            + newName);
+                    doc = OKMDocument.getInstance().rename(null, fixedDocPath, newName);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to rename to: " + newName);
                 }
             } else {
-                final String dstPath = newFldParent.getFolder().getPath();
-                final String fixedDstPath = ResourceUtils
-                        .fixRepositoryPath(dstPath);
-                log.debug("moveTo - MOVE from {} to {}", fixedDocPath,
-                        fixedDstPath);
+                String dstPath = newFldParent.getFolder().getPath();
+                String fixedDstPath = ResourceUtils.fixRepositoryPath(dstPath);
+                log.debug("moveTo - MOVE from {} to {}", fixedDocPath, fixedDstPath);
 
                 try {
-                    OKMDocument.getInstance().move(null, fixedDocPath,
-                            fixedDstPath);
+                    OKMDocument.getInstance().move(null, fixedDocPath, fixedDstPath);
                     doc.setPath(dstPath);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Failed to move to: " + dstPath);
                 }
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FsDirectoryResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
         }
     }
 
     @Override
-    public void copyTo(final CollectionResource newParent, final String newName)
-            throws NotAuthorizedException, BadRequestException,
-            ConflictException {
+    public void copyTo(CollectionResource newParent, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
         log.debug("copyTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstPath = newFldParent.getFolder().getPath() + "/"
-                    + newName;
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstPath = newFldParent.getFolder().getPath() + "/" + newName;
 
             try {
-                final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                        .getPath());
+                String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
                 OKMDocument.getInstance().copy(null, fixedDocPath, dstPath);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to copy to:" + dstPath, e);
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FolderResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FolderResource, is a: " + newParent.getClass());
         }
     }
 
     @Override
-    public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
-            throws NotAuthorizedException, PreConditionFailedException,
+    public LockResult lock(LockTimeout timeout, LockInfo lockInfo) throws NotAuthorizedException, PreConditionFailedException,
             LockedException {
-        final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                .getPath());
+        String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
 
         try {
             if (OKMDocument.getInstance().isLocked(null, fixedDocPath)) {
                 throw new LockedException(this);
             } else {
-                final com.openkm.bean.LockInfo lock = OKMDocument.getInstance()
-                        .lock(null, fixedDocPath);
+                com.openkm.bean.LockInfo lock = OKMDocument.getInstance().lock(null, fixedDocPath);
                 lt = new LockToken();
                 lt.tokenId = lock.getToken();
                 lt.tokenId = lock.getToken();
-                lt.info = new LockInfo(LockScope.EXCLUSIVE, LockType.WRITE,
-                        lock.getOwner(), LockDepth.INFINITY);
+                lt.info = new LockInfo(LockScope.EXCLUSIVE, LockType.WRITE, lock.getOwner(), LockDepth.INFINITY);
                 lt.timeout = new LockTimeout(Long.MAX_VALUE);
                 return LockResult.success(lt);
             }
-        } catch (final LockException e) {
+        } catch (LockException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
         }
     }
 
     @Override
-    public LockResult refreshLock(final String token)
-            throws NotAuthorizedException, PreConditionFailedException {
+    public LockResult refreshLock(String token) throws NotAuthorizedException, PreConditionFailedException {
         return LockResult.success(lt);
     }
 
     @Override
-    public void unlock(final String tokenId) throws NotAuthorizedException,
-            PreConditionFailedException {
-        final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                .getPath());
+    public void unlock(String tokenId) throws NotAuthorizedException, PreConditionFailedException {
+        String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
 
         try {
             OKMDocument.getInstance().unlock(null, fixedDocPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             throw new PreConditionFailedException(this);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
         }
     }
 
     @Override
     public LockToken getCurrentLock() {
-        final String fixedDocPath = ResourceUtils.fixRepositoryPath(doc
-                .getPath());
+        String fixedDocPath = ResourceUtils.fixRepositoryPath(doc.getPath());
 
         try {
             if (OKMDocument.getInstance().isLocked(null, fixedDocPath)) {
-                final com.openkm.bean.LockInfo lock = OKMDocument.getInstance()
-                        .getLockInfo(null, fixedDocPath);
+                com.openkm.bean.LockInfo lock = OKMDocument.getInstance().getLockInfo(null, fixedDocPath);
                 lt = new LockToken();
                 lt.tokenId = lock.getToken();
                 lt.tokenId = lock.getToken();
-                lt.info = new LockInfo(LockScope.EXCLUSIVE, LockType.WRITE,
-                        lock.getOwner(), LockDepth.INFINITY);
+                lt.info = new LockInfo(LockScope.EXCLUSIVE, LockType.WRITE, lock.getOwner(), LockDepth.INFINITY);
                 lt.timeout = new LockTimeout(Long.MAX_VALUE);
                 return lt;
             } else {
                 return null;
             }
-        } catch (final LockException e) {
+        } catch (LockException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final PathNotFoundException e) {
+        } catch (AccessDeniedException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final RepositoryException e) {
+        } catch (PathNotFoundException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
-        } catch (final DatabaseException e) {
+        } catch (RepositoryException e) {
+            throw new RuntimeException("Failed to lock: " + fixedDocPath);
+        } catch (DatabaseException e) {
             throw new RuntimeException("Failed to lock: " + fixedDocPath);
         }
     }
@@ -360,7 +322,7 @@ public class DocumentResource implements CopyableResource, DeletableResource,
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("doc=").append(doc);
         sb.append("}");

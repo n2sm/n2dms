@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,18 +43,17 @@ public class Serializer {
     /**
      * @param obj
      */
-    public static void write(final String filename, final Object obj) {
+    public static void write(String filename, Object obj) {
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
 
         try {
-            fos = new FileOutputStream(Config.HOME_DIR + File.separator
-                    + filename + ".ser");
+            fos = new FileOutputStream(Config.HOME_DIR + File.separator + filename + ".ser");
             oos = new ObjectOutputStream(fos);
             oos.writeObject(obj);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage());
         } finally {
             IOUtils.closeQuietly(oos);
@@ -65,7 +64,7 @@ public class Serializer {
     /**
      * @param obj
      */
-    public static byte[] write(final Object obj) throws IOException {
+    public static byte[] write(Object obj) throws IOException {
         ByteArrayOutputStream baos = null;
         ObjectOutputStream oos = null;
 
@@ -85,21 +84,20 @@ public class Serializer {
     /**
      * @param obj
      */
-    public static Object read(final String filename) {
+    public static Object read(String filename) {
         FileInputStream fis = null;
         ObjectInputStream ois = null;
         Object obj = null;
 
         try {
-            fis = new FileInputStream(Config.HOME_DIR + File.separator
-                    + filename + ".ser");
+            fis = new FileInputStream(Config.HOME_DIR + File.separator + filename + ".ser");
             ois = new ObjectInputStream(fis);
             obj = ois.readObject();
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error(e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage());
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             log.error(e.getMessage());
         } finally {
             IOUtils.closeQuietly(ois);
@@ -112,8 +110,7 @@ public class Serializer {
     /**
      * @param obj
      */
-    public static Object read(final byte[] data) throws IOException,
-            ClassNotFoundException {
+    public static Object read(byte[] data) throws IOException, ClassNotFoundException {
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;
 

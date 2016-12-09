@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,11 +35,10 @@ public class LazyFieldBridge implements FieldBridge {
     private static Logger log = LoggerFactory.getLogger(LazyFieldBridge.class);
 
     @Override
-    public void set(final String name, final Object value,
-            final Document document, final LuceneOptions luceneOptions) {
+    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value instanceof PersistentFile) {
-            final PersistentFile pf = (PersistentFile) value;
-            final LazyField field = new LazyField(name, pf, luceneOptions);
+            PersistentFile pf = (PersistentFile) value;
+            LazyField field = new LazyField(name, pf, luceneOptions);
             document.add(field);
         } else {
             log.warn("IllegalArgumentException: Support only String");

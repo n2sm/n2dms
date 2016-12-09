@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,8 +44,7 @@ public interface PropertyModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void addCategory(String token, String nodePath, String catId)
-            throws VersionException, LockException, PathNotFoundException,
+    public void addCategory(String token, String nodePath, String catId) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
@@ -62,8 +61,7 @@ public interface PropertyModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void removeCategory(String token, String nodePath, String catId)
-            throws VersionException, LockException, PathNotFoundException,
+    public void removeCategory(String token, String nodePath, String catId) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
@@ -80,8 +78,7 @@ public interface PropertyModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public String addKeyword(String token, String nodePath, String keyword)
-            throws VersionException, LockException, PathNotFoundException,
+    public String addKeyword(String token, String nodePath, String keyword) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
@@ -98,8 +95,6 @@ public interface PropertyModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void removeKeyword(String token, String nodePath, String keyword)
-            throws VersionException, LockException, PathNotFoundException,
+    public void removeKeyword(String token, String nodePath, String keyword) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException;
-
 }

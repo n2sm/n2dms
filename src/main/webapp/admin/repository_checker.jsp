@@ -1,7 +1,6 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.io.File" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
-<%@ page import="com.openkm.util.FormatUtil" %>
 <%@ page import="com.openkm.bean.Repository" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -16,7 +15,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
 		$dm = $('.ds').openDOMWindow({
-			height:200, width:300,
+			height:300, width:400,
 			eventType:'click',
 			overlayOpacity:'57',
 			windowSource:'iframe', windowPadding:0
@@ -30,7 +29,7 @@
   <title>Repository Checker</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -44,11 +43,18 @@
         <table class="form" align="center">
           <tr>
             <td>Path</td>
-            <td><input name="repoPath" id="repoPath" value="/<%=Repository.ROOT%>"/></td>
+            <td><input name="repoPath" id="repoPath" size="50" value="/<%=Repository.ROOT%>"/></td>
             <td><a class="ds" href="../extension/DataBrowser?action=repo&sel=fld&dst=repoPath&path=/<%=Repository.ROOT%>"><img src="img/action/browse_repo.png"/></a></td>
           </tr>
+          <tr><td>Fast</td><td colspan="2"><input name="fast" type="checkbox"/></td></tr>
           <tr><td>Versions</td><td colspan="2"><input name="versions" type="checkbox"/></td></tr>
-          <tr><td colspan="3" align="right"><input type="submit" value="Send"/></td></tr>
+          <tr><td>Checksum</td><td colspan="2"><input name="checksum" type="checkbox"/></td></tr>
+          <tr>
+            <td colspan="3" align="right">
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <input type="submit" value="Check" class="yesButton"/>
+            </td>
+          </tr>
         </table>
       </form>
     </c:when>

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,9 +35,8 @@ public class SearchComunicator {
     /**
      * setSavedSearch
      */
-    public static void setSavedSearch(final GWTQueryParams params) {
-        Main.get().mainPanel.search.searchBrowser.searchIn
-                .setSavedSearch(params);
+    public static void setSavedSearch(GWTQueryParams params) {
+        Main.get().mainPanel.search.searchBrowser.searchIn.setSavedSearch(params);
     }
 
     /**
@@ -60,8 +59,7 @@ public class SearchComunicator {
      * @return
      */
     public static int getSelectedRowSearchSaved() {
-        return Main.get().mainPanel.search.historySearch.searchSaved
-                .getSelectedRow();
+        return Main.get().mainPanel.search.historySearch.searchSaved.getSelectedRow();
     }
 
     /**
@@ -70,8 +68,7 @@ public class SearchComunicator {
      * @return
      */
     public static int getSelectedRowUserNews() {
-        return Main.get().mainPanel.search.historySearch.userNews
-                .getSelectedRow();
+        return Main.get().mainPanel.search.historySearch.userNews.getSelectedRow();
     }
 
     /**
@@ -80,8 +77,7 @@ public class SearchComunicator {
      * @return
      */
     public static GWTQueryParams getSavedSearch() {
-        return Main.get().mainPanel.search.historySearch.searchSaved
-                .getSavedSearch();
+        return Main.get().mainPanel.search.historySearch.searchSaved.getSavedSearch();
     }
 
     /**
@@ -90,7 +86,6 @@ public class SearchComunicator {
      * @return
      */
     public static GWTQueryParams getSavedUserNews() {
-        return Main.get().mainPanel.search.historySearch.userNews
-                .getSavedSearch();
+        return Main.get().mainPanel.search.historySearch.userNews.getSavedSearch();
     }
 }

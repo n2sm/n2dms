@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,46 +30,37 @@ import net.sourceforge.jiu.data.MemoryGray8Image;
  */
 public class SolidMark {
     Gray8Image grayimage;
-
     int markradX, markradY;
-
     double approxXscale, approxYscale;
-
     Gray8Image template;
 
     int x, y;
-
     double maxsim;
-
     int maxsimX, maxsimY;
 
     /**
      * SolidMark
      */
-    public SolidMark(final Gray8Image grayimage, final double approxXscale,
-            final double approxYscale) {
+    public SolidMark(Gray8Image grayimage, double approxXscale, double approxYscale) {
         this.grayimage = grayimage;
         this.approxXscale = approxXscale;
         this.approxYscale = approxYscale;
         markradX = (int) (ConcentricCircle.markDiam / 2 * approxXscale);
         markradY = (int) (ConcentricCircle.markDiam / 2 * approxYscale);
 
-        template = new MemoryGray8Image((int) (markradX * 2 * 1.15) + 1,
-                (int) (markradY * 2 * 1.15) + 1);
+        template = new MemoryGray8Image((int) (markradX * 2 * 1.15) + 1, (int) (markradY * 2 * 1.15) + 1);
         fillTemplate(template, markradX, approxXscale / approxYscale);
     }
 
     /**
      * fillTemplate
      */
-    private void fillTemplate(final Gray8Image templateimg, final int markradX,
-            final double aspect) {
-        final double centerX = templateimg.getWidth() / 2;
-        final double centerY = templateimg.getHeight() / 2;
+    private void fillTemplate(Gray8Image templateimg, int markradX, double aspect) {
+        double centerX = templateimg.getWidth() / 2;
+        double centerY = templateimg.getHeight() / 2;
         for (int i = 0; i < templateimg.getWidth(); i++) {
             for (int j = 0; j < templateimg.getHeight(); j++) {
-                final double dist = Math.sqrt((i - centerX) * (i - centerX)
-                        + (j - centerY) / aspect * (j - centerY) / aspect);
+                double dist = Math.sqrt((i - centerX) * (i - centerX) + (j - centerY) / aspect * (j - centerY) / aspect);
                 if (dist <= markradX) {
                     templateimg.putBlack(i, j);
                 } else {
@@ -82,18 +73,16 @@ public class SolidMark {
     /**
      * isMark
      */
-    public boolean isMark(final int x, final int y) {
+    public boolean isMark(int x, int y) {
         maxsim = -1;
         maxsimX = 0;
         maxsimY = 0;
 
-        for (int i = x - (int) (markradX * 1.2); i <= x
-                + (int) (markradX * 1.2); i += markradX / 5) {
-            for (int j = y - (int) (markradY * 1.2); j <= y
-                    + (int) (markradY * 1.2); j += markradX / 5) {
-                final double similarity = 1.0 - ConcentricCircle.templateXOR(
-                        grayimage, i - template.getWidth() / 2,
-                        y - template.getHeight() / 2, template, false);
+        for (int i = x - (int) (markradX * 1.2); i <= x + (int) (markradX * 1.2); i += (markradX / 5)) {
+            for (int j = y - (int) (markradY * 1.2); j <= y + (int) (markradY * 1.2); j += (markradX / 5)) {
+                double similarity =
+                        1.0 - ConcentricCircle.templateXOR(grayimage, i - template.getWidth() / 2, y - template.getHeight() / 2, template,
+                                false);
                 if (maxsim == -1 || maxsim < similarity) {
                     maxsim = similarity;
                     maxsimX = i;
@@ -113,7 +102,7 @@ public class SolidMark {
     /**
      * putMarkOnImage
      */
-    public void putMarkOnImage(final Gray8Image markedImage) {
+    public void putMarkOnImage(Gray8Image markedImage) {
         ImageUtil.putMark(markedImage, maxsimX, maxsimY, true);
         ImageUtil.putMark(markedImage, maxsimX + 3, maxsimY + 3, true);
         ImageUtil.putMark(markedImage, maxsimX - 3, maxsimY + 3, true);

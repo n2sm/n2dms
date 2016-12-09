@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.api.OKMAuth;
 import com.openkm.core.ChatManager;
+import com.openkm.core.Config;
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTUser;
 import com.openkm.frontend.client.constants.service.ErrorCode;
@@ -41,16 +42,11 @@ import com.openkm.principal.PrincipalAdapterException;
 /**
  * Chat Servlet Class
  */
-public class ChatServlet extends OKMRemoteServiceServlet implements
-        OKMChatService {
+public class ChatServlet extends OKMRemoteServiceServlet implements OKMChatService {
     private static Logger log = LoggerFactory.getLogger(ChatServlet.class);
-
     private static final long serialVersionUID = 3780857624687394918L;
-
     private static final int DELAY = 1000; // mseg
-
     private static final int CYCLES = 5; // number of seconds CYCLES*DELAY
-
     private static final ChatManager manager = new ChatManager();
 
     @Override
@@ -61,7 +57,7 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
     @Override
     public void login() throws OKMException {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
 
         if (user != null) {
             manager.login(user);
@@ -71,7 +67,7 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
     @Override
     public void logout() throws OKMException {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
 
         if (user != null) {
             manager.logout(user);
@@ -80,46 +76,43 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
 
     @Override
     public List<GWTUser> getLoggedUsers() throws OKMException {
-        final List<GWTUser> users = new ArrayList<GWTUser>();
+        List<GWTUser> users = new ArrayList<GWTUser>();
         updateSessionManager();
 
         try {
-            for (final String userId : manager.getLoggedUsers()) {
-                final GWTUser user = new GWTUser();
-                user.setId(userId);
-                user.setUsername(OKMAuth.getInstance().getName(null, userId));
-                users.add(user);
+            if (!Config.SYSTEM_MAINTENANCE) {
+                for (String userId : manager.getLoggedUsers()) {
+                    GWTUser user = new GWTUser();
+                    user.setId(userId);
+                    user.setUsername(OKMAuth.getInstance().getName(null, userId));
+                    users.add(user);
+                }
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
 
         return users;
     }
 
     @Override
-    public String createNewChatRoom(final String user) throws OKMException {
+    public String createNewChatRoom(String user) throws OKMException {
         updateSessionManager();
 
         try {
-            final String actualUser = getThreadLocalRequest().getRemoteUser();
+            String actualUser = getThreadLocalRequest().getRemoteUser();
             return manager.createNewChatRoom(actualUser, user);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 
     @Override
-    public List<String> getPendingMessage(final String room)
-            throws OKMException {
+    public List<String> getPendingMessage(String room) throws OKMException {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
         List<String> pendingMessages = new ArrayList<String>();
 
         try {
@@ -133,17 +126,14 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
 
                     try {
                         Thread.sleep(DELAY);
-                    } catch (final InterruptedException e) {
+                    } catch (InterruptedException e) {
                         // Ignore
                     }
-                } while (pendingMessages.isEmpty() && countCycle < CYCLES
-                        && manager.getLoggedUsers().contains(user));
+                } while (pendingMessages.isEmpty() && (countCycle < CYCLES) && manager.getLoggedUsers().contains(user));
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
 
         return pendingMessages;
@@ -152,7 +142,7 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
     @Override
     public List<String> getPendingChatRoomUser() {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
         List<String> pendingRooms = new ArrayList<String>();
 
         if (user != null) {
@@ -165,90 +155,78 @@ public class ChatServlet extends OKMRemoteServiceServlet implements
 
                 try {
                     Thread.sleep(DELAY);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     // Ignore
                 }
-            } while (pendingRooms.isEmpty() && countCycle < CYCLES
-                    && manager.getLoggedUsers().contains(user));
+            } while (pendingRooms.isEmpty() && (countCycle < CYCLES) && manager.getLoggedUsers().contains(user));
         }
 
         return pendingRooms;
     }
 
     @Override
-    public void addMessageToRoom(final String room, final String msg)
-            throws OKMException {
+    public void addMessageToRoom(String room, String msg) throws OKMException {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
 
         try {
             if (user != null) {
                 manager.addMessageToRoom(user, room, msg);
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 
     @Override
-    public void closeRoom(final String room) throws OKMException {
+    public void closeRoom(String room) throws OKMException {
         updateSessionManager();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
 
         try {
             if (user != null) {
                 manager.closeRoom(user, room);
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 
     @Override
-    public void addUserToChatRoom(final String room, final String user)
-            throws OKMException {
+    public void addUserToChatRoom(String room, String user) throws OKMException {
         updateSessionManager();
+
         try {
             manager.addUserToChatRoom(user, room);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 
     @Override
-    public String usersInRoom(final String room) throws OKMException {
+    public String usersInRoom(String room) throws OKMException {
         updateSessionManager();
 
         try {
             return String.valueOf(manager.getNumberOfUsersInRoom(room));
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 
     @Override
-    public List<String> getUsersInRoom(final String room) throws OKMException {
+    public List<String> getUsersInRoom(String room) throws OKMException {
         updateSessionManager();
 
         try {
             return manager.getUsersInRoom(room);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMChatService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMChatService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         }
     }
 

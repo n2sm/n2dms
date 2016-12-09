@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,6 +30,5 @@ import com.google.gwt.user.client.ui.Composite;
  *
  */
 
-public abstract class TabFolderExtension extends Composite implements
-        HasFolderExtension {
+public abstract class TabFolderExtension extends Composite implements HasFolderExtension {
 }

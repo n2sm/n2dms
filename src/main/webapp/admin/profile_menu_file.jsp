@@ -249,5 +249,18 @@
         </c:choose>
       </td>
     </tr>
+    <tr>
+      <td>Forward e-mail</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfMenu.prfFile.forwardMailVisible}">
+            <input name="prf_menu_file_forward_mail_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_menu_file_forward_mail_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
   </table>
 </fieldset>

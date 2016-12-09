@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,9 +22,11 @@
 package com.openkm.frontend.client.panel.left;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.StackPanel;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
 import com.openkm.frontend.client.constants.ui.UIDockPanelConstants;
@@ -32,48 +34,34 @@ import com.openkm.frontend.client.extension.event.HasNavigatorEvent;
 import com.openkm.frontend.client.extension.event.handler.NavigatorHandlerExtension;
 import com.openkm.frontend.client.extension.event.hashandler.HasNavigatorHandlerExtension;
 
-public class ExtendedStackPanel extends StackPanel implements
-        HasNavigatorEvent, HasNavigatorHandlerExtension {
+public class ExtendedStackPanel extends StackLayoutPanel implements HasNavigatorEvent, HasNavigatorHandlerExtension {
 
     private boolean startupFinished = false; // to indicate process starting up has finished
-
     private boolean taxonomyVisible = false;
-
     private boolean categoriesVisible = false;
-
+    private boolean metadataVisible = false;
     private boolean thesaurusVisible = false;
-
     private boolean templatesVisible = false;
-
     private boolean personalVisible = false;
-
     private boolean mailVisible = false;
-
     private boolean trashVisible = false;
-
-    private int hiddenStacks = 7;
-
+    private int hiddenStacks = 8;
     private int stackIndex = 0;
-
     private List<NavigatorHandlerExtension> navHandlerExtensionList;
 
     public ExtendedStackPanel() {
-        super();
+        super(Unit.PX);
         navHandlerExtensionList = new ArrayList<NavigatorHandlerExtension>();
     }
 
-    /* (non-Javadoc)
-     * @see com.google.gwt.user.client.ui.StackPanel#showStack(int)
-     */
     @Override
-    public void showStack(final int index) {
+    public void showWidget(int index) {
         stackIndex = index;
 
         if (startupFinished) {
             changeView(index, true);
         }
-
-        super.showStack(index);
+        super.showWidget(index);
     }
 
     /**
@@ -98,7 +86,7 @@ public class ExtendedStackPanel extends StackPanel implements
      * @param index The new stack index selected
      * @param refresh Enables or disables refreshing
      */
-    private void changeView(final int index, final boolean refresh) {
+    private void changeView(int index, boolean refresh) {
         if (startupFinished) {
             // If there's folder creating or renaming must cancel it before changing view
             if (Main.get().activeFolderTree.isFolderCreating()) {
@@ -110,107 +98,90 @@ public class ExtendedStackPanel extends StackPanel implements
             switch (indexCorrectedChangeViewIndex(index)) {
             case UIDesktopConstants.NAVIGATOR_TAXONOMY:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.taxonomyTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_TAXONOMY);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_TAXONOMY,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_TAXONOMY);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_TAXONOMY, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_TRASH:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.trashTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_TRASH);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_TRASH,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_TRASH);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_TRASH, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(false);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(false);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_CATEGORIES:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.categoriesTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_CATEGORIES);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_CATEGORIES,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_CATEGORIES);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_CATEGORIES, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_THESAURUS:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.thesaurusTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_THESAURUS);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_THESAURUS,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_THESAURUS);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_THESAURUS, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
+                break;
+
+            case UIDesktopConstants.NAVIGATOR_METADATA:
+                Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.metadataTree;
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_METADATA);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_METADATA, UIDockPanelConstants.DESKTOP);
+                if (refresh) {
+                    Main.get().activeFolderTree.forceSetSelectedPanel();
+                    Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
+                }
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_TEMPLATES:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.templateTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_TEMPLATES);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_TEMPLATES,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_TEMPLATES);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_TEMPLATES, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_PERSONAL:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.personalTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_PERSONAL);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_PERSONAL,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_PERSONAL);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_PERSONAL, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
 
             case UIDesktopConstants.NAVIGATOR_MAIL:
                 Main.get().activeFolderTree = Main.get().mainPanel.desktop.navigator.mailTree;
-                Main.get().mainPanel.desktop.browser.fileBrowser
-                        .changeView(UIDesktopConstants.NAVIGATOR_MAIL);
-                Main.get().mainPanel.topPanel.toolBar.changeView(
-                        UIDesktopConstants.NAVIGATOR_MAIL,
-                        UIDockPanelConstants.DESKTOP);
+                Main.get().mainPanel.desktop.browser.fileBrowser.changeView(UIDesktopConstants.NAVIGATOR_MAIL);
+                Main.get().mainPanel.topPanel.toolBar.changeView(UIDesktopConstants.NAVIGATOR_MAIL, UIDockPanelConstants.DESKTOP);
                 if (refresh) {
                     Main.get().activeFolderTree.forceSetSelectedPanel();
                     Main.get().activeFolderTree.refresh(true); // When opening a path document must not refreshing
                 }
-                Main.get().mainPanel.desktop.browser.tabMultiple
-                        .setVisibleButtons(true);
+                Main.get().mainPanel.desktop.browser.tabMultiple.setVisibleButtons(true);
                 break;
             }
             fireEvent(HasNavigatorEvent.STACK_CHANGED);
@@ -223,10 +194,10 @@ public class ExtendedStackPanel extends StackPanel implements
      * @param index The new stack index selected
      * @param refresh Enables or disables refreshing
      */
-    public void showStack(final int index, final boolean refresh) {
+    public void showStack(int index, boolean refresh) {
         stackIndex = correctedStackIndex(index);
         changeView(stackIndex, refresh);
-        super.showStack(stackIndex);
+        super.showWidget(stackIndex);
     }
 
     /**
@@ -245,6 +216,15 @@ public class ExtendedStackPanel extends StackPanel implements
      */
     public boolean isCategoriesVisible() {
         return categoriesVisible;
+    }
+
+    /**
+     * isMetadataVisible
+     * 
+     * @return
+     */
+    public boolean isMetadataVisible() {
+        return metadataVisible;
     }
 
     /**
@@ -311,6 +291,16 @@ public class ExtendedStackPanel extends StackPanel implements
     }
 
     /**
+     * showMetadata
+     * 
+     * @param 
+     */
+    public void showMetadata() {
+        hiddenStacks--;
+        metadataVisible = true;
+    }
+
+    /**
      * showThesaurus
      * 
      */
@@ -363,26 +353,24 @@ public class ExtendedStackPanel extends StackPanel implements
      * @param index
      * @return
      */
-    public int indexCorrectedChangeViewIndex(final int index) {
+    public int indexCorrectedChangeViewIndex(int index) {
         int corrected = index;
-        if (!taxonomyVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_TAXONOMY) {
+        if (!taxonomyVisible && corrected >= UIDesktopConstants.NAVIGATOR_TAXONOMY) {
             corrected++;
         }
-        if (!categoriesVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_CATEGORIES) {
+        if (!categoriesVisible && corrected >= UIDesktopConstants.NAVIGATOR_CATEGORIES) {
             corrected++;
         }
-        if (!thesaurusVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_THESAURUS) {
+        if (!metadataVisible && corrected >= UIDesktopConstants.NAVIGATOR_METADATA) {
             corrected++;
         }
-        if (!templatesVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_TEMPLATES) {
+        if (!thesaurusVisible && corrected >= UIDesktopConstants.NAVIGATOR_THESAURUS) {
             corrected++;
         }
-        if (!personalVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_PERSONAL) {
+        if (!templatesVisible && corrected >= UIDesktopConstants.NAVIGATOR_TEMPLATES) {
+            corrected++;
+        }
+        if (!personalVisible && corrected >= UIDesktopConstants.NAVIGATOR_PERSONAL) {
             corrected++;
         }
         if (!mailVisible && corrected >= UIDesktopConstants.NAVIGATOR_MAIL) {
@@ -402,7 +390,7 @@ public class ExtendedStackPanel extends StackPanel implements
      * @param index
      * @return
      */
-    private int correctedStackIndex(final int index) {
+    private int correctedStackIndex(int index) {
         int corrected = index;
         if (!trashVisible && corrected >= UIDesktopConstants.NAVIGATOR_TRASH) {
             corrected--;
@@ -410,24 +398,22 @@ public class ExtendedStackPanel extends StackPanel implements
         if (!mailVisible && corrected >= UIDesktopConstants.NAVIGATOR_MAIL) {
             corrected--;
         }
-        if (!personalVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_PERSONAL) {
+        if (!personalVisible && corrected >= UIDesktopConstants.NAVIGATOR_PERSONAL) {
             corrected--;
         }
-        if (!thesaurusVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_THESAURUS) {
+        if (!thesaurusVisible && corrected >= UIDesktopConstants.NAVIGATOR_THESAURUS) {
             corrected--;
         }
-        if (!templatesVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_TEMPLATES) {
+        if (!templatesVisible && corrected >= UIDesktopConstants.NAVIGATOR_TEMPLATES) {
             corrected--;
         }
-        if (!categoriesVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_CATEGORIES) {
+        if (!metadataVisible && corrected >= UIDesktopConstants.NAVIGATOR_METADATA) {
             corrected--;
         }
-        if (!taxonomyVisible
-                && corrected >= UIDesktopConstants.NAVIGATOR_TAXONOMY) {
+        if (!categoriesVisible && corrected >= UIDesktopConstants.NAVIGATOR_CATEGORIES) {
+            corrected--;
+        }
+        if (!taxonomyVisible && corrected >= UIDesktopConstants.NAVIGATOR_TAXONOMY) {
             corrected--;
         }
         return corrected;
@@ -443,15 +429,14 @@ public class ExtendedStackPanel extends StackPanel implements
     }
 
     @Override
-    public void addNavigatorHandlerExtension(
-            final NavigatorHandlerExtension handlerExtension) {
+    public void addNavigatorHandlerExtension(NavigatorHandlerExtension handlerExtension) {
         navHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final NavigatorEventConstant event) {
-        for (final NavigatorHandlerExtension navigatorHandlerExtension : navHandlerExtensionList) {
-            navigatorHandlerExtension.onChange(event);
+    public void fireEvent(NavigatorEventConstant event) {
+        for (Iterator<NavigatorHandlerExtension> it = navHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 }

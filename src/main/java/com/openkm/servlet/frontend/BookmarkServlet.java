@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,6 +24,7 @@ package com.openkm.servlet.frontend;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -45,47 +46,37 @@ import com.openkm.util.GWTUtil;
 /**
  * Servlet Class
  */
-public class BookmarkServlet extends OKMRemoteServiceServlet implements
-        OKMBookmarkService {
+public class BookmarkServlet extends OKMRemoteServiceServlet implements OKMBookmarkService {
     private static Logger log = LoggerFactory.getLogger(BookmarkServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     @Override
     public List<GWTBookmark> getAll() throws OKMException {
         log.debug("getAll()");
-        final List<GWTBookmark> bookmarkList = new ArrayList<GWTBookmark>();
+        List<GWTBookmark> bookmarkList = new ArrayList<GWTBookmark>();
         updateSessionManager();
 
         try {
-            final Collection<Bookmark> col = OKMBookmark.getInstance().getAll(
-                    null);
+            Collection<Bookmark> col = OKMBookmark.getInstance().getAll(null);
 
-            for (final Bookmark bookmark : col) {
+            for (Iterator<Bookmark> it = col.iterator(); it.hasNext();) {
+                Bookmark bookmark = it.next();
                 log.debug("Bookmark: {}", bookmark);
-                final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                        bookmark.getNode());
-                final GWTBookmark bookmarkClient = GWTUtil.copy(bookmark, path);
+                String path = NodeBaseDAO.getInstance().getPathFromUuid(bookmark.getNode());
+                GWTBookmark bookmarkClient = GWTUtil.copy(bookmark, path);
                 bookmarkList.add(bookmarkClient);
             }
 
-            Collections.sort(bookmarkList,
-                    BookmarkComparator.getInstance(getLanguage()));
-        } catch (final RepositoryException e) {
+            Collections.sort(bookmarkList, BookmarkComparator.getInstance(getLanguage()));
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getAll: {}", bookmarkList);
@@ -93,122 +84,89 @@ public class BookmarkServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public GWTBookmark add(final String nodePath, final String name)
-            throws OKMException {
+    public GWTBookmark add(String nodePath, String name) throws OKMException {
         log.debug("add({}, {})", nodePath, name);
         updateSessionManager();
 
         try {
-            final Bookmark bookmark = OKMBookmark.getInstance().add(null,
-                    nodePath, name);
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    bookmark.getNode());
+            Bookmark bookmark = OKMBookmark.getInstance().add(null, nodePath, name);
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(bookmark.getNode());
             return GWTUtil.copy(bookmark, path);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 
     @Override
-    public void remove(final int bmId) throws OKMException {
+    public void remove(int bmId) throws OKMException {
         log.debug("remove({})", bmId);
         updateSessionManager();
 
         try {
             OKMBookmark.getInstance().remove(null, bmId);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("remove: void");
     }
 
     @Override
-    public GWTBookmark rename(final int bmId, final String newName)
-            throws OKMException {
+    public GWTBookmark rename(int bmId, String newName) throws OKMException {
         log.debug("rename({}, {})", bmId, newName);
         updateSessionManager();
 
         try {
-            final Bookmark bookmark = OKMBookmark.getInstance().rename(null,
-                    bmId, newName);
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    bookmark.getNode());
+            Bookmark bookmark = OKMBookmark.getInstance().rename(null, bmId, newName);
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(bookmark.getNode());
             return GWTUtil.copy(bookmark, path);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 
     @Override
-    public GWTBookmark get(final int bmId) throws OKMException {
+    public GWTBookmark get(int bmId) throws OKMException {
         log.debug("get({})", bmId);
         updateSessionManager();
 
         try {
-            final Bookmark bookmark = OKMBookmark.getInstance().get(null, bmId);
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    bookmark.getNode());
+            Bookmark bookmark = OKMBookmark.getInstance().get(null, bmId);
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(bookmark.getNode());
             return GWTUtil.copy(bookmark, path);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMBookmarkService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMBookmarkService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 }

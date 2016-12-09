@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,30 +33,23 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTUINotification implements IsSerializable {
     public static final int ACTION_NONE = 0;
-
     public static final int ACTION_LOGOUT = 1;
 
     public static final int TYPE_TEMPORAL = 1;
-
     public static final int TYPE_PERMANENT = 2;
 
     private int id;
-
     private Date date;
-
     private int action = ACTION_NONE;
-
     private String message = "";
-
     private int type;
-
     private boolean show = false;
 
     public boolean isShow() {
         return show;
     }
 
-    public void setShow(final boolean show) {
+    public void setShow(boolean show) {
         this.show = show;
     }
 
@@ -64,7 +57,7 @@ public class GWTUINotification implements IsSerializable {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -72,7 +65,7 @@ public class GWTUINotification implements IsSerializable {
         return action;
     }
 
-    public void setAction(final int action) {
+    public void setAction(int action) {
         this.action = action;
     }
 
@@ -80,7 +73,7 @@ public class GWTUINotification implements IsSerializable {
         return message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
@@ -88,7 +81,7 @@ public class GWTUINotification implements IsSerializable {
         return id;
     }
 
-    public void setId(final int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -96,7 +89,7 @@ public class GWTUINotification implements IsSerializable {
         return type;
     }
 
-    public void setType(final int type) {
+    public void setType(int type) {
         this.type = type;
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,20 +37,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginContextFilter implements Filter {
-    private static Logger log = LoggerFactory
-            .getLogger(LoginContextFilter.class);
+    private static Logger log = LoggerFactory.getLogger(LoginContextFilter.class);
 
     @Override
-    public void init(final FilterConfig cfg) throws ServletException {
+    public void init(FilterConfig cfg) throws ServletException {
         log.info("Init filter");
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain) {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) {
         LoginContext ctx = null;
-        final HttpSession sess = ((HttpServletRequest) request)
-                .getSession(false);
+        HttpSession sess = (HttpSession) ((HttpServletRequest) request).getSession(false);
 
         if (sess != null) {
             ctx = (LoginContext) sess.getAttribute("ctx");
@@ -60,9 +57,9 @@ public class LoginContextFilter implements Filter {
         try {
             LoginContextHolder.set(ctx);
             chain.doFilter(request, response);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             e.printStackTrace();
         } finally {
             LoginContextHolder.set(null);

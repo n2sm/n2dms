@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,12 @@ import org.slf4j.LoggerFactory;
  * @author pavila
  */
 public class LowerCaseFieldBridge implements FieldBridge {
-    private static Logger log = LoggerFactory
-            .getLogger(LowerCaseFieldBridge.class);
+    private static Logger log = LoggerFactory.getLogger(LowerCaseFieldBridge.class);
 
     @Override
-    public void set(final String name, final Object value,
-            final Document document, final LuceneOptions luceneOptions) {
+    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value instanceof String) {
-            final String str = ((String) value).toLowerCase();
+            String str = ((String) value).toLowerCase();
             log.debug("Added field '{}' with value '{}'", name, str);
             luceneOptions.addFieldToDocument(name, str, document);
         } else {

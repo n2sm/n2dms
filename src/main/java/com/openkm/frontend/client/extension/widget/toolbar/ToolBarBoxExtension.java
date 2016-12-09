@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,8 +31,7 @@ import com.openkm.frontend.client.widget.dashboard.ToolBarBox;
  * @author jllort
  *
  */
-public abstract class ToolBarBoxExtension extends ToolBarBox implements
-        HasWidget, HasToolBarBoxExtension {
+public abstract class ToolBarBoxExtension extends ToolBarBox implements HasWidget, HasToolBarBoxExtension {
 
     /**
      * ToolBarBoxExtension
@@ -40,7 +39,7 @@ public abstract class ToolBarBoxExtension extends ToolBarBox implements
      * @param img
      * @param text
      */
-    public ToolBarBoxExtension(final Image img, final String text) {
+    public ToolBarBoxExtension(Image img, String text) {
         super(img, text);
     }
 }

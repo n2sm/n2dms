@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -36,16 +36,13 @@ import com.openkm.frontend.client.extension.widget.toolbar.ToolBarBoxExtension;
  */
 public class ToolBarBoxExample {
     public HorizontalPanel hPanel;
-
     public ToolBarBoxExtension toolBarBoxExtension;
 
     /**
      * ToolBarBoxExample
      */
     public ToolBarBoxExample() {
-        toolBarBoxExtension = new ToolBarBoxExtension(new Image(
-                OKMExtensionBundleExampleResources.INSTANCE.general()),
-                "new toolbar") {
+        toolBarBoxExtension = new ToolBarBoxExtension(new Image(OKMExtensionBundleExampleResources.INSTANCE.general()), "new toolbar") {
             @Override
             public Widget getWidget() {
                 return hPanel;

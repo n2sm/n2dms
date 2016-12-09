@@ -17,23 +17,19 @@ public class HibernateFilter implements Filter {
     private static Logger log = LoggerFactory.getLogger(HibernateFilter.class);
 
     @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) throws ServletException {
         log.info("Init filter");
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         //boolean action = false;
 
         if (request instanceof HttpServletRequest) {
-            final HttpServletRequest httpRequest = (HttpServletRequest) request;
-            final String req = httpRequest.getRequestURL().toString();
-            final String params = httpRequest.getQueryString();
-            if (!req.endsWith(".png") && !req.endsWith(".gif")
-                    && !req.endsWith(".ico") && !req.endsWith(".css")
-                    && !req.endsWith(".js")) {
+            HttpServletRequest httpRequest = (HttpServletRequest) request;
+            String req = httpRequest.getRequestURL().toString();
+            String params = httpRequest.getQueryString();
+            if (!req.endsWith(".png") && !req.endsWith(".gif") && !req.endsWith(".ico") && !req.endsWith(".css") && !req.endsWith(".js")) {
                 log.info("ACT: {}", req + (params == null ? "" : "?" + params));
                 //action = true;
             } else {

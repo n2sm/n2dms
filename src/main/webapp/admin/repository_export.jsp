@@ -1,17 +1,20 @@
-<%@ page import="java.io.FileNotFoundException"%>
-<%@ page import="java.io.IOException"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.io.FileNotFoundException" %>
+<%@ page import="java.io.IOException" %>
 <%@ page import="java.io.File" %>
+<%@ page import="java.util.concurrent.TimeUnit" %>
 <%@ page import="com.openkm.core.Config" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ page import="com.openkm.bean.ContentInfo" %>
 <%@ page import="com.openkm.api.OKMFolder" %>
-<%@ page import="com.openkm.util.WebUtils"%>
+<%@ page import="com.openkm.util.WebUtils" %>
 <%@ page import="com.openkm.util.FormatUtil" %>
 <%@ page import="com.openkm.util.impexp.RepositoryExporter" %>
 <%@ page import="com.openkm.util.impexp.HTMLInfoDecorator" %>
-<%@ page import="com.openkm.util.impexp.ImpExpStats"%>
-<%@ page import="com.openkm.bean.Repository"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.openkm.util.impexp.ImpExpStats" %>
+<%@ page import="com.openkm.bean.Repository" %>
+<%@ page import="org.slf4j.LoggerFactory" %>
+<%@ page import="org.slf4j.Logger" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -24,7 +27,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
 		$dm = $('.ds').openDOMWindow({
-			height:200, width:300,
+			height:300, width:400,
 			eventType:'click',
 			overlayOpacity:'57',
 			windowSource:'iframe', windowPadding:0
@@ -34,10 +37,17 @@
     function dialogClose() {
 		$dm.closeDOMWindow();
     }
+    
+    function keepSessionAlive() {
+    	$.ajax({ type:'GET', url:'../SessionKeepAlive', cache:false, async:false });
+    }
+    
+	window.setInterval('keepSessionAlive()', <%=TimeUnit.MINUTES.toMillis(Config.KEEP_SESSION_ALIVE_INTERVAL)%>);
   </script>
   <title>Repository Export</title>
 </head>
 <body>
+<%! private static Logger log = LoggerFactory.getLogger("repository_export.jsp"); %>
 <%
 	if (BaseServlet.isAdmin(request)) {
 		request.setCharacterEncoding("UTF-8");
@@ -65,7 +75,8 @@
 		out.println("<tr><td>Metadata</td><td><input type=\"checkbox\" name=\"metadata\" " + (metadata?"checked":"") + "/></td></tr>");
 		out.println("<tr><td>History</td><td><input type=\"checkbox\" name=\"history\" " + (history?"checked":"") + "/></td></tr>");
 		out.println("<tr><td colspan=\"3\" align=\"right\">");
-		out.println("<input type=\"submit\" value=\"Send\">");
+		out.println("<input type=\"button\" onclick=\"javascript:window.history.back()\" value=\"Cancel\" class=\"noButton\"/>");
+		out.println("<input type=\"submit\" value=\"Export\" class=\"yesButton\">");
 		out.println("</td></tr>");
 		out.println("</table>");
 		out.println("</form>");
@@ -80,7 +91,7 @@
 					out.println("<b>Files & directories to export:</b> "+(cInfo.getDocuments() + cInfo.getFolders())+"<br/>");
 					long begin = System.currentTimeMillis();
 					ImpExpStats stats = RepositoryExporter.exportDocuments(null, repoPath, dir, metadata, history, out,
-						new HTMLInfoDecorator((int) cInfo.getDocuments() + (int) cInfo.getFolders()));
+						 new HTMLInfoDecorator((int) cInfo.getDocuments() + (int) cInfo.getFolders()));
 					long end = System.currentTimeMillis();
 					out.println("<hr/>");
 					out.println("<div class=\"ok\">Folder '"+repoPath+"' exported to '"+new File(fsPath).getAbsolutePath()+"'</div>");
@@ -96,10 +107,13 @@
 			}
 		} catch (FileNotFoundException e) {
 			out.println("<div class=\"error\">File Not Found: "+e.getMessage()+"<div>");
+			log.error(e.getMessage(), e);
 		} catch (IOException e) {
 			out.println("<div class=\"error\">IO Error: "+e.getMessage()+"<div>");
+			log.error(e.getMessage(), e);
 		} catch (Exception e) {
 			out.println("<div class=\"error\">Error: "+e.getMessage()+"<div>");
+			log.error(e.getMessage(), e);
 		}
 	} else {
 		out.println("<div class=\"error\"><h3>Only admin users allowed</h3></div>");

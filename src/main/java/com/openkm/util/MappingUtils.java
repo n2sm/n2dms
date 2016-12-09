@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,8 +33,7 @@ import org.dozer.DozerBeanMapperSingletonWrapper;
 import org.dozer.Mapper;
 
 public class MappingUtils {
-    private static final Mapper mapper = DozerBeanMapperSingletonWrapper
-            .getInstance();
+    private static final Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();
 
     public static Mapper getMapper() {
         return mapper;
@@ -43,10 +42,10 @@ public class MappingUtils {
     /**
      * Initialize collection
      */
-    public static <E> List<E> map(final List<E> input) {
-        final List<E> ret = new ArrayList<E>();
+    public static <E> List<E> map(List<E> input) {
+        List<E> ret = new ArrayList<E>();
 
-        for (final E tmp : input) {
+        for (E tmp : input) {
             ret.add(tmp);
         }
 
@@ -56,10 +55,10 @@ public class MappingUtils {
     /**
      * Initialize set
      */
-    public static <E> Set<E> map(final Set<E> input) {
-        final Set<E> ret = new HashSet<E>();
+    public static <E> Set<E> map(Set<E> input) {
+        Set<E> ret = new HashSet<E>();
 
-        for (final E tmp : input) {
+        for (E tmp : input) {
             ret.add(tmp);
         }
 
@@ -69,10 +68,10 @@ public class MappingUtils {
     /**
      * Initialize map
      */
-    public static <K, V> Map<K, V> map(final Map<K, V> input) {
-        final Map<K, V> ret = new HashMap<K, V>();
+    public static <K, V> Map<K, V> map(Map<K, V> input) {
+        Map<K, V> ret = new HashMap<K, V>();
 
-        for (final Entry<K, V> tmp : input.entrySet()) {
+        for (Entry<K, V> tmp : input.entrySet()) {
             ret.put(tmp.getKey(), tmp.getValue());
         }
 

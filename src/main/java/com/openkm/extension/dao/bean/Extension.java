@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,16 +30,14 @@ import java.io.Serializable;
  */
 public class Extension implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String uuid = "";
-
     private String name = "";
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -47,13 +45,12 @@ public class Extension implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=");
         sb.append(uuid);

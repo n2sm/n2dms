@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -23,7 +23,6 @@ package com.openkm.frontend.client.widget.foldertree;
 
 import java.util.Vector;
 
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -34,7 +33,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.openkm.frontend.client.Main;
-import com.openkm.frontend.client.widget.Dragable;
+import com.openkm.frontend.client.widget.Draggable;
 import com.openkm.frontend.client.widget.OriginPanel;
 
 /**
@@ -43,21 +42,15 @@ import com.openkm.frontend.client.widget.OriginPanel;
  * @author jllort
  * 
  */
-public class ExtendedTree extends Tree implements
-        HasSelectionHandlers<TreeItem> {
+public class ExtendedTree extends Tree implements HasSelectionHandlers<TreeItem> {
     // Drag pixels sensibility
     private static final int DRAG_PIXELS_SENSIBILITY = 3;
 
     private boolean flagPopup = false;
-
     public int mouseX = 0;
-
     public int mouseY = 0;
-
     private boolean dragged = false;
-
     private int mouseDownX = 0;
-
     private int mouseDownY = 0;
 
     /**
@@ -95,7 +88,7 @@ public class ExtendedTree extends Tree implements
     }
 
     @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
 
         // When de button mouse is released
         if (DOM.eventGetType(event) == Event.ONMOUSEDOWN) {
@@ -104,10 +97,10 @@ public class ExtendedTree extends Tree implements
             mouseY = DOM.eventGetClientY(event);
 
             // remove dragable item
-            Main.get().dragable.clear();
+            Main.get().draggable.clear();
 
             switch (DOM.eventGetButton(event)) {
-            case NativeEvent.BUTTON_RIGHT:
+            case Event.BUTTON_RIGHT:
                 DOM.eventPreventDefault(event); // Prevent to fire event to browser
                 flagPopup = true;
                 mouseDownX = 0;
@@ -119,28 +112,22 @@ public class ExtendedTree extends Tree implements
             default:
                 flagPopup = false;
                 // dragging is enable only if cursor is inside actual item
-                dragged = isCursorInsideActualItem(elementClicked(DOM
-                        .eventGetTarget(event)));
+                dragged = isCursorInsideActualItem(elementClicked(DOM.eventGetTarget(event)));
                 mouseDownX = event.getScreenX();
                 mouseDownY = event.getClientY();
             }
         } else if (DOM.eventGetType(event) == Event.ONMOUSEMOVE) {
             mouseX = DOM.eventGetClientX(event);
             mouseY = DOM.eventGetClientY(event);
-            if (Main.get().activeFolderTree.canDrag() && dragged
-                    && mouseDownX > 0 && mouseDownY > 0
-                    && evalDragPixelSensibility()) {
-                final TreeItem actualItem = Main.get().activeFolderTree
-                        .getActualItem();
-                Main.get().dragable.show(actualItem.getHTML(),
-                        OriginPanel.TREE_ROOT);
+            if (Main.get().activeFolderTree.canDrag() && dragged && mouseDownX > 0 && mouseDownY > 0 && evalDragPixelSensibility()) {
+                TreeItem actualItem = Main.get().activeFolderTree.getActualItem();
+                Main.get().draggable.show(actualItem.getHTML(), OriginPanel.TREE_ROOT);
                 Main.get().activeFolderTree.fileBrowserRefreshDone();
                 mouseDownX = 0;
                 mouseDownY = 0;
                 dragged = false;
             }
-        } else if (DOM.eventGetType(event) == Event.ONMOUSEUP
-                || DOM.eventGetType(event) == Event.ONCLICK
+        } else if (DOM.eventGetType(event) == Event.ONMOUSEUP || DOM.eventGetType(event) == Event.ONCLICK
                 || DOM.eventGetType(event) == Event.ONDBLCLICK) {
             mouseDownX = 0;
             mouseDownY = 0;
@@ -148,10 +135,9 @@ public class ExtendedTree extends Tree implements
         }
 
         // Prevent folder creation or renaming propagate actions to other tree nodes
-        final int action = Main.get().activeFolderTree.getFolderAction();
+        int action = Main.get().activeFolderTree.getFolderAction();
 
-        if (action != FolderTree.ACTION_CREATE
-                && action != FolderTree.ACTION_RENAME) {
+        if (action != FolderTree.ACTION_CREATE && action != FolderTree.ACTION_RENAME) {
             super.onBrowserEvent(event);
         }
     }
@@ -166,15 +152,13 @@ public class ExtendedTree extends Tree implements
     /**
      * fire a change event
      */
-    private void fireSelection(final TreeItem treeItem) {
+    private void fireSelection(TreeItem treeItem) {
         // SelectElement nativeEvent = Document.get().createSelectElement();
         SelectionEvent.fire(this, treeItem);
         // setSelectedItem(treeItem); // Now is not necessary select treeItem here is done by capturing events
     }
 
-    @Override
-    public HandlerRegistration addSelectionHandler(
-            final SelectionHandler<TreeItem> handler) {
+    public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
         return addHandler(handler, SelectionEvent.getType());
     }
 
@@ -183,21 +167,19 @@ public class ExtendedTree extends Tree implements
      * 
      * Returns the treeItem when and element is clicked, used to capture drag and drop tree Item
      */
-    public TreeItem elementClicked(final Element element) {
-        final Vector<Element> chain = new Vector<Element>();
-        collectElementChain(chain, getElement(), element);
-        final TreeItem item = findItemByChain(chain, 0, null);
+    public TreeItem elementClicked(Element element) {
+        Vector<Element> chain = new Vector<Element>();
+        collectElementChain(chain, this.getElement(), element);
+        TreeItem item = findItemByChain(chain, 0, null);
         return item;
     }
 
     /**
      * collectElementChain
      */
-    private void collectElementChain(final Vector<Element> chain,
-            final Element elementRoot, final Element element) {
-        if (element == null || element == elementRoot) {
+    private void collectElementChain(Vector<Element> chain, Element elementRoot, Element element) {
+        if ((element == null) || element == elementRoot)
             return;
-        }
 
         collectElementChain(chain, elementRoot, DOM.getParent(element));
         chain.add(element);
@@ -206,35 +188,29 @@ public class ExtendedTree extends Tree implements
     /**
      * findItemByChain
      */
-    private TreeItem findItemByChain(final Vector<Element> chain,
-            final int idx, final TreeItem root) {
-        if (idx == chain.size()) {
+    private TreeItem findItemByChain(Vector<Element> chain, int idx, TreeItem root) {
+        if (idx == chain.size())
             return root;
-        }
 
-        final Element hCurElem = chain.get(idx);
+        Element hCurElem = (Element) chain.get(idx);
 
         if (root == null) {
-            for (int i = 0, n = getItemCount(); i < n; ++i) {
-                final TreeItem child = getItem(i);
+            for (int i = 0, n = this.getItemCount(); i < n; ++i) {
+                TreeItem child = this.getItem(i);
                 if (child.getElement() == hCurElem) {
-                    final TreeItem retItem = findItemByChain(chain, idx + 1,
-                            child);
-                    if (retItem == null) {
+                    TreeItem retItem = findItemByChain(chain, idx + 1, child);
+                    if (retItem == null)
                         return child;
-                    }
                     return retItem;
                 }
             }
         } else {
             for (int i = 0, n = root.getChildCount(); i < n; ++i) {
-                final TreeItem child = root.getChild(i);
+                TreeItem child = root.getChild(i);
                 if (child.getElement() == hCurElem) {
-                    final TreeItem retItem = findItemByChain(chain, idx + 1,
-                            root.getChild(i));
-                    if (retItem == null) {
+                    TreeItem retItem = findItemByChain(chain, idx + 1, root.getChild(i));
+                    if (retItem == null)
                         return child;
-                    }
                     return retItem;
                 }
             }
@@ -248,21 +224,18 @@ public class ExtendedTree extends Tree implements
      * 
      * @return returns true if mouse cursor is inside actual item
      */
-    private boolean isCursorInsideActualItem(final TreeItem clickedItem) {
+    private boolean isCursorInsideActualItem(TreeItem clickedItem) {
         if (clickedItem == null) {
             return false;
         }
 
-        final Element selectedElement = Dragable.getSelectedElement(clickedItem
-                .getElement());
+        Element selectedElement = Draggable.getSelectedElement(clickedItem.getElement());
 
         if (selectedElement == null) {
             return false;
         }
 
-        return mouseX >= selectedElement.getAbsoluteLeft()
-                && mouseX <= selectedElement.getAbsoluteRight()
-                && mouseY >= selectedElement.getAbsoluteTop()
-                && mouseY <= selectedElement.getAbsoluteBottom();
+        return mouseX >= selectedElement.getAbsoluteLeft() && mouseX <= selectedElement.getAbsoluteRight()
+                && mouseY >= selectedElement.getAbsoluteTop() && mouseY <= selectedElement.getAbsoluteBottom();
     }
 }

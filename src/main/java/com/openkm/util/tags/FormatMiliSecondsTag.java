@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,20 +30,15 @@ import com.openkm.util.FormatUtil;
 
 @SuppressWarnings("serial")
 public class FormatMiliSecondsTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private long time;
 
     @Override
     public int doStartTag() {
-        final String ret = FormatUtil.formatMiliSeconds(time);
+        String ret = FormatUtil.formatMiliSeconds(time);
 
         try {
             pageContext.getOut().write(ret);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -60,7 +55,7 @@ public class FormatMiliSecondsTag extends TagSupport {
         return time;
     }
 
-    public void setTime(final long time) {
+    public void setTime(long time) {
         this.time = time;
     }
 }

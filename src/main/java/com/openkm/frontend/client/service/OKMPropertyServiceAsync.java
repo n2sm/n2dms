@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,15 +28,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  *
  */
 public interface OKMPropertyServiceAsync {
-    public void addCategory(String nodePath, String category,
-            AsyncCallback<?> callback);
+    public void addCategory(String nodePath, String category, AsyncCallback<?> callback);
 
-    public void removeCategory(String nodePath, String category,
-            AsyncCallback<?> callback);
+    public void removeCategory(String nodePath, String category, AsyncCallback<?> callback);
 
-    public void addKeyword(String nodePath, String keyword,
-            AsyncCallback<?> callback);
+    public void addKeyword(String nodePath, String keyword, AsyncCallback<?> callback);
 
-    public void removeKeyword(String nodePath, String keyword,
-            AsyncCallback<?> callback);
+    public void removeKeyword(String nodePath, String keyword, AsyncCallback<?> callback);
 }

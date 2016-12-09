@@ -12,7 +12,7 @@
   <title>Repository Search</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
    <c:choose>
     <c:when test="${isAdmin}">
       <c:set var="root"><%=Repository.ROOT%></c:set>

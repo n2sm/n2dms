@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -29,6 +29,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openkm.util.FormatUtil;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.openkm.api.OKMDocument;
 import com.openkm.api.OKMRepository;
 import com.openkm.bean.Document;
+import com.openkm.core.Config;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
 import com.openkm.util.PathUtils;
@@ -46,56 +49,57 @@ import com.openkm.util.WebUtils;
  */
 public class DownloadServlet extends BasicSecuredServlet {
     private static Logger log = LoggerFactory.getLogger(DownloadServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         request.setCharacterEncoding("UTF-8");
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         String path = WebUtils.getString(request, "path");
-        final String uuid = WebUtils.getString(request, "uuid");
-        final boolean inline = WebUtils.getBoolean(request, "inline");
+        String uuid = WebUtils.getString(request, "uuid");
+        boolean inline = WebUtils.getBoolean(request, "inline");
         InputStream is = null;
 
         try {
             // Now an document can be located by UUID
-            if (uuid != null && !uuid.equals("")) {
+            if (uuid != null && !uuid.isEmpty()) {
+                uuid = FormatUtil.sanitizeInput(uuid);
                 path = OKMRepository.getInstance().getNodePath(null, uuid);
+            } else if (path != null && !path.isEmpty()) {
+                path = FormatUtil.sanitizeInput(path);
             }
 
             if (path != null) {
-                final Document doc = OKMDocument.getInstance().getProperties(
-                        null, path);
-                final String fileName = PathUtils.getName(doc.getPath());
-                log.info("Download {} by {} ({})", new Object[] { path, userId,
-                        inline ? "inline" : "attachment" });
+                Document doc = OKMDocument.getInstance().getProperties(null, path);
+                String fileName = PathUtils.getName(doc.getPath());
+
+                // Optinal append version to download ( not when doing checkout )
+                if (Config.VERSION_APPEND_DOWNLOAD) {
+                    String versionToAppend = " rev " + OKMDocument.getInstance().getProperties(null, uuid).getActualVersion().getName();
+                    String[] nameParts = fileName.split("\\.(?=[^\\.]+$)");
+                    fileName = nameParts[0] + versionToAppend + "." + nameParts[1];
+                }
+
+                log.info("Download {} by {} ({})", new Object[] { path, userId, (inline ? "inline" : "attachment") });
                 is = OKMDocument.getInstance().getContent(null, path, false);
-                WebUtils.sendFile(request, response, fileName,
-                        doc.getMimeType(), inline, is);
+                WebUtils.sendFile(request, response, fileName, doc.getMimeType(), inline, is);
             } else {
                 response.setContentType("text/plain; charset=UTF-8");
-                final PrintWriter out = response.getWriter();
+                PrintWriter out = response.getWriter();
                 out.println("Missing document reference");
                 out.close();
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "PathNotFoundException: " + e.getMessage());
-        } catch (final RepositoryException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "PathNotFoundException: " + e.getMessage());
+        } catch (RepositoryException e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "RepositoryException: " + e.getMessage());
-        } catch (final Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "RepositoryException: " + e.getMessage());
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             IOUtils.closeQuietly(is);
         }

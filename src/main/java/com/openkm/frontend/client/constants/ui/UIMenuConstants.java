@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,17 +28,11 @@ public class UIMenuConstants {
 
     // MENU CONTANTS
     public static final int NEW_MENU = -1;
-
     // MAIN MENU
     public static final int MAIN_MENU_FILE = 0;
-
     public static final int MAIN_MENU_EDIT = 1;
-
     public static final int MAIN_MENU_TOOLS = 2;
-
     public static final int MAIN_MENU_BOOKMARS = 3;
-
     public static final int MAIN_MENU_REPORTS = 4;
-
     public static final int MAIN_MENU_HELP = 5;
 }

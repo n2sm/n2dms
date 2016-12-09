@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,21 +34,20 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
 
 public class NetworkUtils {
-    public static String reverseDns(final String hostIp) throws IOException {
-        final Resolver res = new ExtendedResolver();
+    public static String reverseDns(String hostIp) throws IOException {
+        Resolver res = new ExtendedResolver();
 
-        final Name name = ReverseMap.fromAddress(hostIp);
-        final int type = Type.PTR;
-        final int dclass = DClass.IN;
-        final Record rec = Record.newRecord(name, type, dclass);
-        final Message query = Message.newQuery(rec);
-        final Message response = res.send(query);
+        Name name = ReverseMap.fromAddress(hostIp);
+        int type = Type.PTR;
+        int dclass = DClass.IN;
+        Record rec = Record.newRecord(name, type, dclass);
+        Message query = Message.newQuery(rec);
+        Message response = res.send(query);
 
-        final Record[] answers = response.getSectionArray(Section.ANSWER);
-        if (answers.length == 0) {
+        Record[] answers = response.getSectionArray(Section.ANSWER);
+        if (answers.length == 0)
             return hostIp;
-        } else {
+        else
             return answers[0].rdataToString();
-        }
     }
 }

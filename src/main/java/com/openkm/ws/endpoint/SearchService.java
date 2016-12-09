@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -24,6 +24,7 @@ package com.openkm.ws.endpoint;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.bean.Document;
 import com.openkm.bean.QueryResult;
+import com.openkm.bean.ResultSet;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.ParseException;
@@ -52,76 +54,98 @@ public class SearchService {
     private static Logger log = LoggerFactory.getLogger(SearchService.class);
 
     @WebMethod
-    public QueryResult[] findByContent(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "content") final String content)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException {
+    public QueryResult[] findByContent(@WebParam(name = "token") String token, @WebParam(name = "content") String content)
+            throws IOException, ParseException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("findByContent({}, {})", token, content);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<QueryResult> col = sm.findByContent(token, content);
-        final QueryResult[] result = col.toArray(new QueryResult[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<QueryResult> col = sm.findByContent(token, content);
+        QueryResult[] result = col.toArray(new QueryResult[col.size()]);
         log.debug("findByContent: {}", result);
         return result;
     }
 
     @WebMethod
-    public QueryResult[] findByName(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "name") final String name) throws IOException,
-            ParseException, RepositoryException, DatabaseException {
+    public QueryResult[] findByName(@WebParam(name = "token") String token, @WebParam(name = "name") String name) throws IOException,
+            ParseException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("findByName({}, {})", token, name);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<QueryResult> col = sm.findByName(token, name);
-        final QueryResult[] result = col.toArray(new QueryResult[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<QueryResult> col = sm.findByName(token, name);
+        QueryResult[] result = col.toArray(new QueryResult[col.size()]);
         log.debug("findByName: {}", result);
         return result;
     }
 
     @WebMethod
-    public QueryResult[] findByKeywords(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "keywords") final String[] keywords)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException {
+    public QueryResult[] findByKeywords(@WebParam(name = "token") String token, @WebParam(name = "keywords") String[] keywords)
+            throws IOException, ParseException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("findByKeywords({}, {})", token, keywords);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final Set<String> set = new HashSet<String>(Arrays.asList(keywords));
-        final List<QueryResult> col = sm.findByKeywords(token, set);
-        final QueryResult[] result = col.toArray(new QueryResult[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        Set<String> set = new HashSet<String>(Arrays.asList(keywords));
+        List<QueryResult> col = sm.findByKeywords(token, set);
+        QueryResult[] result = col.toArray(new QueryResult[col.size()]);
         log.debug("findByKeywords: {}", result);
         return result;
     }
 
     @WebMethod
-    public QueryResult[] find(@WebParam(name = "token") final String token,
-            @WebParam(name = "params") final QueryParams params)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException {
+    public QueryResult[] find(@WebParam(name = "token") String token, @WebParam(name = "params") QueryParams params) throws IOException,
+            ParseException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("find({}, {})", token, params);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<QueryResult> col = sm.find(token, params);
-        final QueryResult[] result = col.toArray(new QueryResult[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<QueryResult> col = sm.find(token, params);
+        QueryResult[] result = col.toArray(new QueryResult[col.size()]);
         log.debug("find: {}", result);
         return result;
     }
 
     @WebMethod
-    public IntegerPair[] getKeywordMap(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "filter") final String[] filter)
-            throws RepositoryException, DatabaseException {
+    public ResultSet findPaginated(@WebParam(name = "token") String token, @WebParam(name = "params") QueryParams params,
+            @WebParam(name = "offset") int offset, @WebParam(name = "limit") int limit) throws IOException, ParseException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("findPaginated({}, {}, {}, {})", new Object[] { token, params, offset, limit });
+        SearchModule sm = ModuleManager.getSearchModule();
+        ResultSet rs = sm.findPaginated(token, params, offset, limit);
+        log.debug("findPaginated: {}", rs);
+        return rs;
+    }
+
+    @WebMethod
+    public ResultSet findSimpleQueryPaginated(@WebParam(name = "token") String token, @WebParam(name = "statement") String statement,
+            @WebParam(name = "offset") int offset, @WebParam(name = "limit") int limit) throws IOException, ParseException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("findSimpleQueryPaginated({}, {}, {}, {})", new Object[] { token, statement, offset, limit });
+        SearchModule sm = ModuleManager.getSearchModule();
+        ResultSet rs = sm.findSimpleQueryPaginated(token, statement, offset, limit);
+        log.debug("findSimpleQueryPaginated: {}", rs);
+        return rs;
+    }
+
+    @WebMethod
+    public ResultSet findMoreLikeThis(@WebParam(name = "token") String token, @WebParam(name = "uuid") String uuid,
+            @WebParam(name = "max") int max) throws IOException, ParseException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("findMoreLikeThis({}, {}, {})", new Object[] { token, uuid, max });
+        SearchModule sm = ModuleManager.getSearchModule();
+        ResultSet rs = sm.findMoreLikeThis(token, uuid, max);
+        log.debug("findMoreLikeThis: {}", rs);
+        return rs;
+    }
+
+    @WebMethod
+    public IntegerPair[] getKeywordMap(@WebParam(name = "token") String token, @WebParam(name = "filter") String[] filter)
+            throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getKeywordMap({}, {})", token, filter);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<String> alFilter = Arrays.asList(filter);
-        final Map<String, Integer> map = sm.getKeywordMap(token, alFilter);
-        final Set<String> keys = map.keySet();
-        final IntegerPair[] result = new IntegerPair[keys.size()];
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<String> alFilter = Arrays.asList(filter);
+        Map<String, Integer> map = sm.getKeywordMap(token, alFilter);
+        Set<String> keys = map.keySet();
+        IntegerPair[] result = new IntegerPair[keys.size()];
         int i = 0;
 
         // Marshall HashMap
-        for (final String key : keys) {
-            final IntegerPair p = new IntegerPair();
+        for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+            String key = it.next();
+            IntegerPair p = new IntegerPair();
             p.setKey(key);
             p.setValue(map.get(key));
             result[i++] = p;
@@ -132,73 +156,61 @@ public class SearchService {
     }
 
     @WebMethod
-    public Document[] getCategorizedDocuments(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "categoryId") final String categoryId)
-            throws RepositoryException, DatabaseException {
+    public Document[] getCategorizedDocuments(@WebParam(name = "token") String token, @WebParam(name = "categoryId") String categoryId)
+            throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getCategorizedDocuments({}, {})", token, categoryId);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<Document> col = sm
-                .getCategorizedDocuments(token, categoryId);
-        final Document[] result = col.toArray(new Document[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<Document> col = sm.getCategorizedDocuments(token, categoryId);
+        Document[] result = col.toArray(new Document[col.size()]);
         log.debug("getCategorizedDocuments: {}", result);
         return result;
     }
 
     @WebMethod
-    public long saveSearch(@WebParam(name = "token") final String token,
-            @WebParam(name = "params") final QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public long saveSearch(@WebParam(name = "token") String token, @WebParam(name = "params") QueryParams params)
+            throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("saveSearch({}, {})", token, params);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final long id = sm.saveSearch(token, params);
+        SearchModule sm = ModuleManager.getSearchModule();
+        long id = sm.saveSearch(token, params);
         log.debug("saveSearch: {}", id);
         return id;
     }
 
     @WebMethod
-    public void updateSearch(@WebParam(name = "token") final String token,
-            @WebParam(name = "params") final QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void updateSearch(@WebParam(name = "token") String token, @WebParam(name = "params") QueryParams params)
+            throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("updateSearch({}, {})", token, params);
-        final SearchModule sm = ModuleManager.getSearchModule();
+        SearchModule sm = ModuleManager.getSearchModule();
         sm.saveSearch(token, params);
         log.debug("updateSearch: void");
     }
 
     @WebMethod
-    public QueryParams getSearch(@WebParam(name = "token") final String token,
-            @WebParam(name = "qpId") final int qpId)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public QueryParams getSearch(@WebParam(name = "token") String token, @WebParam(name = "qpId") int qpId) throws AccessDeniedException,
+            PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getSearch({}, {})", token, qpId);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final QueryParams qp = sm.getSearch(token, qpId);
+        SearchModule sm = ModuleManager.getSearchModule();
+        QueryParams qp = sm.getSearch(token, qpId);
         log.debug("getSearch: {}", qp);
         return qp;
     }
 
     @WebMethod
-    public QueryParams[] getAllSearchs(
-            @WebParam(name = "token") final String token)
-            throws RepositoryException, DatabaseException {
+    public QueryParams[] getAllSearchs(@WebParam(name = "token") String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getAllSearchs({})", token);
-        final SearchModule sm = ModuleManager.getSearchModule();
-        final List<QueryParams> col = sm.getAllSearchs(token);
-        final QueryParams[] result = col.toArray(new QueryParams[col.size()]);
+        SearchModule sm = ModuleManager.getSearchModule();
+        List<QueryParams> col = sm.getAllSearchs(token);
+        QueryParams[] result = col.toArray(new QueryParams[col.size()]);
         log.debug("getAllSearchs: {}", col);
         return result;
     }
 
     @WebMethod
-    public void deleteSearch(@WebParam(name = "token") final String token,
-            @WebParam(name = "qpId") final int qpId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void deleteSearch(@WebParam(name = "token") String token, @WebParam(name = "qpId") int qpId) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("deleteSearch({}, {})", token, qpId);
-        final SearchModule sm = ModuleManager.getSearchModule();
+        SearchModule sm = ModuleManager.getSearchModule();
         sm.deleteSearch(token, qpId);
         log.debug("deleteSearch: void");
     }

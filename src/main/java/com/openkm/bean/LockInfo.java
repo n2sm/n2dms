@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,20 +23,21 @@ package com.openkm.bean;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "lockInfo")
 public class LockInfo implements Serializable {
-    private static final long serialVersionUID = -8508210196484243712L;
+    private static final long serialVersionUID = 1L;
 
     private String owner;
-
     private String nodePath;
-
     private String token;
 
     public String getNodePath() {
         return nodePath;
     }
 
-    public void setNodePath(final String nodePath) {
+    public void setNodePath(String nodePath) {
         this.nodePath = nodePath;
     }
 
@@ -44,7 +45,7 @@ public class LockInfo implements Serializable {
         return owner;
     }
 
-    public void setOwner(final String owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
@@ -52,13 +53,12 @@ public class LockInfo implements Serializable {
         return token;
     }
 
-    public void setToken(final String token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("owner=");
         sb.append(owner);

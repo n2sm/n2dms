@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,19 +43,15 @@ import com.openkm.frontend.client.service.OKMDashboardServiceAsync;
  *
  */
 public class MailDashboard extends Composite {
-    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT
-            .create(OKMDashboardService.class);
+    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT.create(OKMDashboardService.class);
 
     private final int NUMBER_OF_COLUMNS = 2;
 
     private HorizontalPanel hPanel;
-
     private VerticalPanel vPanelLeft;
-
     private VerticalPanel vPanelRight;
 
     private DashboardWidget userLastImportedMails;
-
     private DashboardWidget userLastImportedAttachments;
 
     private boolean showStatus = false;
@@ -68,13 +64,12 @@ public class MailDashboard extends Composite {
         vPanelRight = new VerticalPanel();
         hPanel = new HorizontalPanel();
 
-        userLastImportedMails = new DashboardWidget("UserLastImportedMails",
-                "dashboard.mail.last.imported.mails", "img/email.gif", true,
-                "userLastImportedMails");
-        userLastImportedAttachments = new DashboardWidget(
-                "UserLastImportedMailAttachments",
-                "dashboard.mail.last.imported.attached.documents",
-                "img/email_attach.gif", true, "userLastImportedMailAttachments");
+        userLastImportedMails =
+                new DashboardWidget("UserLastImportedMails", "dashboard.mail.last.imported.mails", "img/email.gif", true,
+                        "userLastImportedMails");
+        userLastImportedAttachments =
+                new DashboardWidget("UserLastImportedMailAttachments", "dashboard.mail.last.imported.attached.documents",
+                        "img/email_attach.gif", true, "userLastImportedMailAttachments");
 
         vPanelLeft.add(userLastImportedMails);
         vPanelRight.add(userLastImportedAttachments);
@@ -98,8 +93,8 @@ public class MailDashboard extends Composite {
      * 
      * @param width
      */
-    public void setWidth(final int width) {
-        final int columnWidth = width / NUMBER_OF_COLUMNS;
+    public void setWidth(int width) {
+        int columnWidth = width / NUMBER_OF_COLUMNS;
 
         // Trying to distribute widgets on columns with max size
         userLastImportedMails.setWidth(columnWidth);
@@ -110,15 +105,13 @@ public class MailDashboard extends Composite {
      * Get last user imported mails callback
      */
     final AsyncCallback<List<GWTDashboardMailResult>> callbackGetUserLastImportedMails = new AsyncCallback<List<GWTDashboardMailResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardMailResult> result) {
+        public void onSuccess(List<GWTDashboardMailResult> result) {
             userLastImportedMails.setMails(result);
             userLastImportedMails.setHeaderResults(result.size());
             userLastImportedMails.unsetRefreshing();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getUserLastImportedMails", caught);
             userLastImportedMails.unsetRefreshing();
         }
@@ -127,20 +120,19 @@ public class MailDashboard extends Composite {
     /**
      * Gets last imported mail attachments documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastImportedMailAttachments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            userLastImportedAttachments.setDocuments(result);
-            userLastImportedAttachments.setHeaderResults(result.size());
-            userLastImportedAttachments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastImportedMailAttachments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    userLastImportedAttachments.setDocuments(result);
+                    userLastImportedAttachments.setHeaderResults(result.size());
+                    userLastImportedAttachments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserLastImportedMailAttachments", caught);
-            userLastImportedAttachments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserLastImportedMailAttachments", caught);
+                    userLastImportedAttachments.unsetRefreshing();
+                }
+            };
 
     /**
      * getLastWeekTopDownloadedDocuments
@@ -149,8 +141,7 @@ public class MailDashboard extends Composite {
         if (!showStatus) {
             userLastImportedMails.setRefreshing();
         }
-        dashboardService
-                .getUserLastImportedMails(callbackGetUserLastImportedMails);
+        dashboardService.getUserLastImportedMails(callbackGetUserLastImportedMails);
     }
 
     /**
@@ -160,17 +151,16 @@ public class MailDashboard extends Composite {
         if (!showStatus) {
             userLastImportedAttachments.setRefreshing();
         }
-        dashboardService
-                .getUserLastImportedMailAttachments(callbackGetUserLastImportedMailAttachments);
+        dashboardService.getUserLastImportedMailAttachments(callbackGetUserLastImportedMailAttachments);
     }
 
     /**
      * Refresh all panels
      */
     public void refreshAll() {
-        showStatus = Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD
-                && Main.get().mainPanel.dashboard.getActualView() == UIDashboardConstants.DASHBOARD_MAIL;
+        showStatus =
+                ((Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD) && (Main.get().mainPanel.dashboard
+                        .getActualView() == UIDashboardConstants.DASHBOARD_MAIL));
         getUserLastImportedMails();
         getUserLastImportedMailAttachments();
     }

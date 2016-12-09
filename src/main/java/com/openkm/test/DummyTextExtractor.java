@@ -33,17 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DummyTextExtractor {
-    private static Logger log = LoggerFactory
-            .getLogger(DummyTextExtractor.class);
-
+    private static Logger log = LoggerFactory.getLogger(DummyTextExtractor.class);
     private static String repHomeDir = "repository";
-
     private static Session systemSession = null;
-
     private static Repository repository = null;
 
-    public static void main(final String[] args) throws NamingException,
-            RepositoryException, FileNotFoundException, InterruptedException {
+    public static void main(String[] args) throws NamingException, RepositoryException, FileNotFoundException, InterruptedException {
         log.info("*** DESTROY REPOSITORY ***");
         removeRepository();
 
@@ -51,20 +46,19 @@ public class DummyTextExtractor {
         createRepository();
 
         log.info("*** USER LOGIN ***");
-        final Session userSession = login("paco", "pepe");
+        Session userSession = login("paco", "pepe");
 
         log.info("*** GET MY ROOT NODE ***");
-        final Node rootNode = userSession.getRootNode();
-        final Node myRoot = rootNode.getNode("my:root");
+        Node rootNode = userSession.getRootNode();
+        Node myRoot = rootNode.getNode("my:root");
 
         log.info("*** ADD A DOCUMENT NODE ***");
-        final Node fileNode = myRoot.addNode("perico.jpg", "nt:file");
-        final Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
+        Node fileNode = myRoot.addNode("perico.jpg", "nt:file");
+        Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
         contentNode.addMixin("mix:versionable");
 
         log.info("*** ADD DOCUMENT NODE PROPERTIES ***");
-        contentNode.setProperty("jcr:data", new ByteArrayInputStream(
-                "Texto de pruebas".getBytes()));
+        contentNode.setProperty("jcr:data", new ByteArrayInputStream("Texto de pruebas".getBytes()));
         contentNode.setProperty("jcr:mimeType", "image/jpeg");
         contentNode.setProperty("jcr:lastModified", Calendar.getInstance());
         myRoot.save();
@@ -86,7 +80,7 @@ public class DummyTextExtractor {
     private static void removeRepository() {
         try {
             FileUtils.deleteDirectory(new File(repHomeDir));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("No previous repo");
         }
     }
@@ -94,12 +88,10 @@ public class DummyTextExtractor {
     /**
      * 
      */
-    public static Session login(final String user, final String pass)
-            throws NamingException, RepositoryException, LoginException,
+    public static Session login(String user, String pass) throws NamingException, RepositoryException, LoginException,
             NoSuchWorkspaceException {
-        final Repository repository = getRepository();
-        final Session session = repository.login(new SimpleCredentials(user,
-                pass.toCharArray()), null);
+        Repository repository = getRepository();
+        Session session = repository.login(new SimpleCredentials(user, pass.toCharArray()), null);
         log.info("Session: " + session);
         return session;
     }
@@ -107,15 +99,13 @@ public class DummyTextExtractor {
     /**
      * 
      */
-    public static synchronized Repository getRepository()
-            throws RepositoryException {
+    public static synchronized Repository getRepository() throws RepositoryException {
         if (repository == null) {
             // Repository config
-            final String repositoryConfig = "repositoryTE.xml";
-            final String repositoryHome = repHomeDir;
+            String repositoryConfig = "repositoryTE.xml";
+            String repositoryHome = repHomeDir;
 
-            final RepositoryConfig config = RepositoryConfig.create(
-                    repositoryConfig, repositoryHome);
+            RepositoryConfig config = RepositoryConfig.create(repositoryConfig, repositoryHome);
             repository = RepositoryImpl.create(config);
             log.info("*** System repository created " + repository);
         }
@@ -126,13 +116,10 @@ public class DummyTextExtractor {
     /**
      * 
      */
-    public static synchronized Session getSystemSession()
-            throws LoginException, NoSuchWorkspaceException,
-            RepositoryException {
+    public static synchronized Session getSystemSession() throws LoginException, NoSuchWorkspaceException, RepositoryException {
         if (systemSession == null) {
             // System User Session
-            systemSession = repository.login(
-                    new SimpleCredentials("system", "".toCharArray()), null);
+            systemSession = repository.login(new SimpleCredentials("system", "".toCharArray()), null);
             log.info("*** System user created " + systemSession.getUserID());
         }
 
@@ -142,23 +129,20 @@ public class DummyTextExtractor {
     /**
      * 
      */
-    public static Node createRepository() throws NamespaceException,
-            UnsupportedRepositoryOperationException, AccessDeniedException,
-            RepositoryException, ItemExistsException, PathNotFoundException,
-            NoSuchNodeTypeException, LockException, VersionException,
+    public static Node createRepository() throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException,
+            RepositoryException, ItemExistsException, PathNotFoundException, NoSuchNodeTypeException, LockException, VersionException,
             ConstraintViolationException, InvalidItemStateException {
         // Initialize repository
         // Repository repository = getRepository();
-        final Session systemSession = getSystemSession();
+        Session systemSession = getSystemSession();
 
         // Namespace registration
-        final Workspace ws = systemSession.getWorkspace();
-        ws.getNamespaceRegistry().registerNamespace("my",
-                "http://www.guia-ubuntu.org/1.0");
+        Workspace ws = systemSession.getWorkspace();
+        ws.getNamespaceRegistry().registerNamespace("my", "http://www.guia-ubuntu.org/1.0");
 
         // Node creation
-        final Node root = systemSession.getRootNode();
-        final Node okmRoot = root.addNode("my:root", "nt:folder");
+        Node root = systemSession.getRootNode();
+        Node okmRoot = root.addNode("my:root", "nt:folder");
         okmRoot.addMixin("mix:referenceable");
         systemSession.save();
         log.info("****** Repository created *******");

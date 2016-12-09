@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,18 +30,15 @@ import java.io.Serializable;
  */
 public class TranslationId implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String module = "";
-
     private String key = "";
-
     private String language = "";
 
     public String getModule() {
         return module;
     }
 
-    public void setModule(final String module) {
+    public void setModule(String module) {
         this.module = module;
     }
 
@@ -49,7 +46,7 @@ public class TranslationId implements Serializable {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -57,47 +54,38 @@ public class TranslationId implements Serializable {
         return language;
     }
 
-    public void setLanguage(final String language) {
+    public void setLanguage(String language) {
         this.language = language;
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(Object o) {
+        if (this == o)
             return true;
-        }
-        if (o == null) {
+        if (o == null)
             return false;
-        }
-        if (!(o instanceof TranslationId)) {
+        if (!(o instanceof TranslationId))
             return false;
-        }
 
         final TranslationId transId = (TranslationId) o;
 
-        if (!module.equals(transId.getModule())) {
+        if (!module.equals(transId.getModule()))
             return false;
-        }
 
-        if (!key.equals(transId.getKey())) {
+        if (!key.equals(transId.getKey()))
             return false;
-        }
 
-        if (!language.equals(transId.getLanguage())) {
+        if (!language.equals(transId.getLanguage()))
             return false;
-        }
 
         return true;
     }
 
-    @Override
     public int hashCode() {
         return (module + key + language).hashCode();
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("module=");
         sb.append(module);

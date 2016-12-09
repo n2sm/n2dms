@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,14 +35,12 @@ public class UUIDGenerator {
         int ipadd;
         try {
             ipadd = toInt(InetAddress.getLocalHost().getAddress());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             ipadd = 0;
         }
         IP = ipadd;
     }
-
     private static short counter = (short) 0;
-
     private static final int JVM = (int) (System.currentTimeMillis() >>> 8);
 
     /**
@@ -59,9 +57,8 @@ public class UUIDGenerator {
      */
     private static short getCount() {
         synchronized (UUIDGenerator.class) {
-            if (counter < 0) {
+            if (counter < 0)
                 counter = 0;
-            }
             return counter++;
         }
     }
@@ -84,10 +81,9 @@ public class UUIDGenerator {
         return (int) System.currentTimeMillis();
     }
 
-    public static String generate(final Object obj) {
-        final StringBuffer buffer = new StringBuffer(36).append(getIP())
-                .append(getJVM()).append(getHiTime()).append(getLoTime())
-                .append(getCount());
+    public static String generate(Object obj) {
+        StringBuffer buffer =
+                new StringBuffer(36).append(getIP()).append(getJVM()).append(getHiTime()).append(getLoTime()).append(getCount());
 
         if (buffer.charAt(0) == '-') {
             buffer.deleteCharAt(0);
@@ -95,10 +91,10 @@ public class UUIDGenerator {
         return buffer.toString();
     }
 
-    public static int toInt(final byte[] bytes) {
+    public static int toInt(byte[] bytes) {
         int result = 0;
         for (int i = 0; i < 4; i++) {
-            result = (result << 8) - Byte.MIN_VALUE + bytes[i];
+            result = (result << 8) - Byte.MIN_VALUE + (int) bytes[i];
         }
         return result;
     }

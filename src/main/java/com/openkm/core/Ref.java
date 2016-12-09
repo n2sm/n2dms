@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,7 +28,7 @@ package com.openkm.core;
 public class Ref<T> {
     private T value;
 
-    public Ref(final T value) {
+    public Ref(T value) {
         this.value = value;
     }
 
@@ -36,7 +36,7 @@ public class Ref<T> {
         return value;
     }
 
-    public void set(final T anotherValue) {
+    public void set(T anotherValue) {
         value = anotherValue;
     }
 
@@ -46,7 +46,7 @@ public class Ref<T> {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (value == null) {
             return obj == null;
         }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,19 +30,14 @@ import net.sourceforge.jiu.data.Gray8Image;
 public class BestFitCoords {
 
     int x, y;
-
     double approxCircleOuterX, approxCircleInnerX, aspectScale;
-
     Gray8Image template;
-
     double maxsim = -1;
 
     /**
      * BestFitCoords
      */
-    public BestFitCoords(final int x, final int y, final Gray8Image template,
-            final double approxCircleOuterX, final double approxCircleInnerX,
-            final double aspectScale) {
+    public BestFitCoords(int x, int y, Gray8Image template, double approxCircleOuterX, double approxCircleInnerX, double aspectScale) {
         this.x = x;
         this.y = y;
         this.template = template;
@@ -79,31 +74,31 @@ public class BestFitCoords {
         return maxsim;
     }
 
-    public void setX(final int x) {
+    public void setX(int x) {
         this.x = x;
     }
 
-    public void setY(final int y) {
+    public void setY(int y) {
         this.y = y;
     }
 
-    public void setApproxCircleOuterX(final double approxCircleOuterX) {
+    public void setApproxCircleOuterX(double approxCircleOuterX) {
         this.approxCircleOuterX = approxCircleOuterX;
     }
 
-    public void setApproxCircleInnerX(final double approxCircleInnerX) {
+    public void setApproxCircleInnerX(double approxCircleInnerX) {
         this.approxCircleInnerX = approxCircleInnerX;
     }
 
-    public void setAspectScale(final double aspectscale) {
-        aspectScale = aspectscale;
+    public void setAspectScale(double aspectscale) {
+        this.aspectScale = aspectscale;
     }
 
-    public void setTemplate(final Gray8Image template) {
+    public void setTemplate(Gray8Image template) {
         this.template = template;
     }
 
-    public void setSim(final double maxsim) {
+    public void setSim(double maxsim) {
         this.maxsim = maxsim;
     }
 }

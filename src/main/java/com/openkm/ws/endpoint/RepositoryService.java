@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -40,140 +40,141 @@ import com.openkm.module.RepositoryModule;
 
 @WebService(name = "OKMRepository", serviceName = "OKMRepository", targetNamespace = "http://ws.openkm.com")
 public class RepositoryService {
-    private static Logger log = LoggerFactory
-            .getLogger(RepositoryService.class);
+    private static Logger log = LoggerFactory.getLogger(RepositoryService.class);
 
     @WebMethod
-    public Folder getRootFolder(@WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getRootFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getRootFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder root = rm.getRootFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder root = rm.getRootFolder(token);
         log.debug("getRootFolder: {}", root);
         return root;
     }
 
     @WebMethod
-    public Folder getTrashFolder(@WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getTrashFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getTrashFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder trash = rm.getTrashFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder trash = rm.getTrashFolder(token);
         log.debug("getTrashFolder: {}", trash);
         return trash;
     }
 
     @WebMethod
-    public Folder getTemplatesFolder(
-            @WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getTemplatesFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getTemplatesFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder templatesFolder = rm.getTemplatesFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder templatesFolder = rm.getTemplatesFolder(token);
         log.debug("getTemplatesFolder: {}", templatesFolder);
         return templatesFolder;
     }
 
     @WebMethod
-    public Folder getPersonalFolder(@WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getPersonalFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getPersonalFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder personalFolder = rm.getPersonalFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder personalFolder = rm.getPersonalFolder(token);
         log.debug("getPersonalFolder: {}", personalFolder);
         return personalFolder;
     }
 
     @WebMethod
-    public Folder getMailFolder(@WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getMailFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getMailFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder mailFolder = rm.getMailFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder mailFolder = rm.getMailFolder(token);
         log.debug("getMailFolder: {}", mailFolder);
         return mailFolder;
     }
 
     @WebMethod
-    public Folder getThesaurusFolder(
-            @WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getThesaurusFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getThesaurusFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder thesaurusFolder = rm.getThesaurusFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder thesaurusFolder = rm.getThesaurusFolder(token);
         log.debug("getThesaurusFolder: {}", thesaurusFolder);
         return thesaurusFolder;
     }
 
     @WebMethod
-    public Folder getCategoriesFolder(
-            @WebParam(name = "token") final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getCategoriesFolder(@WebParam(name = "token") String token) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("getCategoriesFolder({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final Folder categoriesFolder = rm.getCategoriesFolder(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        Folder categoriesFolder = rm.getCategoriesFolder(token);
         log.debug("getCategoriesFolder: {}", categoriesFolder);
         return categoriesFolder;
     }
 
     @WebMethod
-    public void purgeTrash(@WebParam(name = "token") final String token)
-            throws PathNotFoundException, AccessDeniedException, LockException,
+    public void purgeTrash(@WebParam(name = "token") String token) throws PathNotFoundException, AccessDeniedException, LockException,
             RepositoryException, DatabaseException {
         log.debug("purgeTrash({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
         rm.purgeTrash(token);
         log.debug("purgeTrash: void");
     }
 
     @WebMethod
-    public boolean hasNode(@WebParam(name = "token") final String token,
-            @WebParam(name = "path") final String path)
-            throws RepositoryException, DatabaseException {
+    public String getUpdateMessage(@WebParam(name = "token") String token) throws RepositoryException, DatabaseException {
+        log.debug("getUpdateMessage({})", token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        String msg = rm.getUpdateMessage(null);
+        log.debug("getUpdateMessage: void");
+        return msg;
+    }
+
+    @WebMethod
+    public String getRepositoryUuid() throws RepositoryException, DatabaseException {
+        log.debug("getRepositoryUuid({})");
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        String uuid = rm.getRepositoryUuid(null);
+        log.debug("getRepositoryUuid: void");
+        return uuid;
+    }
+
+    @WebMethod
+    public boolean hasNode(@WebParam(name = "token") String token, @WebParam(name = "path") String path) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("hasNode({}, {})", token, path);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final boolean ret = rm.hasNode(token, path);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        boolean ret = rm.hasNode(token, path);
         log.debug("hasNode: {}", ret);
         return ret;
     }
 
     @WebMethod
-    public String getNodePath(@WebParam(name = "token") final String token,
-            @WebParam(name = "uuid") final String uuid)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public String getNodePath(@WebParam(name = "token") String token, @WebParam(name = "uuid") String uuid) throws AccessDeniedException,
+            PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getNodePath({}, {})", token, uuid);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final String path = rm.getNodePath(token, uuid);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        String path = rm.getNodePath(token, uuid);
         log.debug("getNodePath: {}", path);
         return path;
     }
 
     @WebMethod
-    public String getNodeUuid(@WebParam(name = "token") final String token,
-            @WebParam(name = "path") final String path)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public String getNodeUuid(@WebParam(name = "token") String token, @WebParam(name = "path") String path) throws AccessDeniedException,
+            PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getNodeUuid({}, {})", token, path);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final String uuid = rm.getNodeUuid(token, path);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        String uuid = rm.getNodeUuid(token, path);
         log.debug("getNodeUuid: {}", uuid);
         return uuid;
     }
 
     @WebMethod
-    public AppVersion getAppVersion(@WebParam(name = "token") final String token)
-            throws RepositoryException, DatabaseException {
+    public AppVersion getAppVersion(@WebParam(name = "token") String token) throws AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getAppVersion({})", token);
-        final RepositoryModule rm = ModuleManager.getRepositoryModule();
-        final AppVersion appVer = rm.getAppVersion(token);
+        RepositoryModule rm = ModuleManager.getRepositoryModule();
+        AppVersion appVer = rm.getAppVersion(token);
         log.debug("getAppVersion: {}", appVer);
         return appVer;
     }

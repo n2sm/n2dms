@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,20 +41,18 @@ import com.openkm.frontend.client.service.OKMTestService;
  * @author jllort
  *
  */
-public class TestServlet extends OKMRemoteServiceServlet implements
-        OKMTestService {
+public class TestServlet extends OKMRemoteServiceServlet implements OKMTestService {
     private static final long serialVersionUID = 5955080308631192466L;
-
     private static Logger log = LoggerFactory.getLogger(TestServlet.class);
 
     @Override
-    public String StringTest(final int size) {
+    public String StringTest(int size) {
         log.debug("size:" + size);
         updateSessionManager();
         String text = "";
         while (text.length() < size) {
-            final Random randomGenerator = new Random();
-            final int value = randomGenerator.nextInt(25);
+            Random randomGenerator = new Random();
+            int value = randomGenerator.nextInt(25);
             text += (char) (65 + value);
         }
         log.debug(text);
@@ -62,12 +60,12 @@ public class TestServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTFolder> folderText(final int size) {
+    public List<GWTFolder> folderText(int size) {
         log.debug("folderText({})", size);
         updateSessionManager();
-        final List<GWTFolder> folderList = new ArrayList<GWTFolder>();
+        List<GWTFolder> folderList = new ArrayList<GWTFolder>();
         for (int i = 0; i < size; i++) {
-            final GWTFolder folder = new GWTFolder();
+            GWTFolder folder = new GWTFolder();
             folder.setPath("some path");
             folder.setParentPath("some parent path");
             folder.setAuthor("author");
@@ -84,12 +82,12 @@ public class TestServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTDocument> documentText(final int size) {
+    public List<GWTDocument> documentText(int size) {
         log.debug("documentText({})", size);
         updateSessionManager();
-        final List<GWTDocument> documentList = new ArrayList<GWTDocument>();
+        List<GWTDocument> documentList = new ArrayList<GWTDocument>();
         for (int i = 0; i < size; i++) {
-            final GWTDocument doc = new GWTDocument();
+            GWTDocument doc = new GWTDocument();
             doc.setPath("some path");
             doc.setAuthor("author");
             doc.setActualVersion(new GWTVersion());
@@ -113,10 +111,10 @@ public class TestServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void RPCTimeout(final int seconds) {
+    public void RPCTimeout(int seconds) {
         try {
             Thread.sleep(1000 * seconds);
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

@@ -15,7 +15,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
 		$dm = $('.ds').openDOMWindow({
-			height:200, width:300,
+			height:300, width:400,
 			eventType:'click',
 			overlayOpacity:'57',
 			windowSource:'iframe', windowPadding:0
@@ -29,7 +29,7 @@
   <title>Check Text Extraction</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -72,7 +72,14 @@
         <br/>
         <table class="results" width="80%">
           <tr><th width="50%">${mimeType}</th><th width="50%">${extractor}</th></tr>
-          <tr class="even"><td colspan="2">${text}</td></tr>
+          <c:choose>
+            <c:when test="${empty error}">
+              <tr class="even"><td colspan="2">${text}</td></tr>
+            </c:when>
+            <c:otherwise>
+              <tr class="warn"><td colspan="2">${error}</td></tr>  
+            </c:otherwise>
+          </c:choose>
         </table>
       </c:if>
     </c:when>

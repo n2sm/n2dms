@@ -7,7 +7,7 @@ package com.openkm.frontend.client.util;
 public class WindowUtils {
 
     public static Location getLocation() {
-        final Location result = new Location();
+        Location result = new Location();
         result.setHash(getHash());
         result.setHost(getHost());
         result.setHostName(getHostName());

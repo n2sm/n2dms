@@ -1,33 +1,34 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.jcr;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.jcr.Node;
@@ -62,7 +63,6 @@ import com.openkm.bean.ResultSet;
 import com.openkm.bean.form.FormElement;
 import com.openkm.bean.form.Input;
 import com.openkm.bean.form.Select;
-import com.openkm.cache.UserNodeKeywordsManager;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
@@ -72,7 +72,6 @@ import com.openkm.core.RepositoryException;
 import com.openkm.dao.DashboardDAO;
 import com.openkm.dao.QueryParamsDAO;
 import com.openkm.dao.bean.QueryParams;
-import com.openkm.dao.bean.cache.UserNodeKeywords;
 import com.openkm.module.SearchModule;
 import com.openkm.module.jcr.base.BaseDocumentModule;
 import com.openkm.module.jcr.base.BaseFolderModule;
@@ -86,65 +85,56 @@ public class JcrSearchModule implements SearchModule {
     private static Logger log = LoggerFactory.getLogger(JcrSearchModule.class);
 
     @Override
-    public List<QueryResult> findByContent(final String token,
-            final String words) throws IOException, ParseException,
-            RepositoryException, DatabaseException {
+    public List<QueryResult> findByContent(String token, String words) throws IOException, ParseException, RepositoryException,
+            DatabaseException {
         log.debug("findByContent({}, {})", token, words);
-        final QueryParams params = new QueryParams();
+        QueryParams params = new QueryParams();
         params.setContent(words);
-        final List<QueryResult> ret = find(token, params);
+        List<QueryResult> ret = find(token, params);
         log.debug("findByContent: {}", ret);
         return ret;
     }
 
     @Override
-    public List<QueryResult> findByName(final String token, final String words)
-            throws IOException, ParseException, RepositoryException,
+    public List<QueryResult> findByName(String token, String words) throws IOException, ParseException, RepositoryException,
             DatabaseException {
         log.debug("findByName({}, {})", token, words);
-        final QueryParams params = new QueryParams();
+        QueryParams params = new QueryParams();
         params.setName(words);
-        final List<QueryResult> ret = find(token, params);
+        List<QueryResult> ret = find(token, params);
         log.debug("findByName: {}", ret);
         return ret;
     }
 
     @Override
-    public List<QueryResult> findByKeywords(final String token,
-            final Set<String> words) throws IOException, ParseException,
-            RepositoryException, DatabaseException {
+    public List<QueryResult> findByKeywords(String token, Set<String> words) throws IOException, ParseException, RepositoryException,
+            DatabaseException {
         log.debug("findByKeywords({}, {})", token, words);
-        final QueryParams params = new QueryParams();
+        QueryParams params = new QueryParams();
         params.setKeywords(words);
-        final List<QueryResult> ret = find(token, params);
+        List<QueryResult> ret = find(token, params);
         log.debug("findByKeywords: {}", ret);
         return ret;
     }
 
     @Override
-    public List<QueryResult> find(final String token, final QueryParams params)
-            throws IOException, ParseException, RepositoryException,
+    public List<QueryResult> find(String token, QueryParams params) throws IOException, ParseException, RepositoryException,
             DatabaseException {
         log.debug("find({}, {})", token, params);
-        final List<QueryResult> ret = findPaginated(token, params, 0,
-                Config.MAX_SEARCH_RESULTS).getResults();
+        List<QueryResult> ret = findPaginated(token, params, 0, Config.MAX_SEARCH_RESULTS).getResults();
         log.debug("find: {}", ret);
         return ret;
     }
 
     @Override
-    public ResultSet findPaginated(final String token,
-            final QueryParams params, final int offset, final int limit)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException {
-        log.debug("findPaginated({}, {}, {}, {})", new Object[] { token,
-                params, offset, limit });
+    public ResultSet findPaginated(String token, QueryParams params, int offset, int limit) throws IOException, ParseException,
+            RepositoryException, DatabaseException {
+        log.debug("findPaginated({}, {}, {}, {})", new Object[] { token, params, offset, limit });
         String type = null;
         String query = null;
 
         if (!"".equals(params.getStatementQuery())
-                && (Query.XPATH.equals(params.getStatementType()) || Query.SQL
-                        .equals(params.getStatementType()))) {
+                && (Query.XPATH.equals(params.getStatementType()) || Query.SQL.equals(params.getStatementType()))) {
             query = params.getStatementQuery();
             type = params.getStatementType();
         } else {
@@ -152,8 +142,7 @@ public class JcrSearchModule implements SearchModule {
             type = Query.XPATH;
         }
 
-        final ResultSet rs = findByStatementPaginated(token, query, type,
-                offset, limit);
+        ResultSet rs = findByStatementPaginated(token, query, type, offset, limit);
         log.debug("findPaginated: {}", rs);
         return rs;
     }
@@ -161,21 +150,21 @@ public class JcrSearchModule implements SearchModule {
     /**
      * Escape jcr:contains searchExp (view 6.6.5.2) Text.escapeIllegalXpathSearchChars(searchTerm).replaceAll("'", "''")
      * 
-     * @see http 
-     *      ://svn.apache.org/repos/asf/jackrabbit/branches/2.2/jackrabbit-jcr-commons/src/main/java/org/apache/jackrabbit
+     * @see http
+     *      ://svn.apache.org/repos/asf/jackrabbit/branches/2.2/jackrabbit-jcr-commons/src/main/java/org/apache/
+     *      jackrabbit
      *      /util/Text.java
      * @see http://wiki.apache.org/jackrabbit/EncodingAndEscaping
      * @param str The String to be escaped.
      * @return The escaped String.
      */
-    private String escapeContains(final String str) {
-        final StringBuilder sb = new StringBuilder();
+    private String escapeContains(String str) {
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < str.length(); i++) {
-            final char c = str.charAt(i);
+            char c = str.charAt(i);
 
-            if (c == '!' || c == '(' || c == ':' || c == '^' || c == '"'
-                    || c == '[' || c == ']' || c == '{' || c == '}' || c == '?') {
+            if (c == '!' || c == '(' || c == ':' || c == '^' || c == '"' || c == '[' || c == ']' || c == '{' || c == '}' || c == '?') {
                 sb.append('\\');
             }
 
@@ -192,47 +181,36 @@ public class JcrSearchModule implements SearchModule {
      * @param str The String to be escaped.
      * @return The escaped String.
      */
-    private String escapeXPath(final String str) {
-        final String ret = str.replace("'", "''");
+    private String escapeXPath(String str) {
+        String ret = str.replace("'", "''");
         return ret;
     }
 
     /**
      * Prepare statement
      */
-    public String prepareStatement(final QueryParams params)
-            throws IOException, ParseException {
+    public String prepareStatement(QueryParams params) throws IOException, ParseException {
         log.debug("prepareStatement({})", params);
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         // Clean params
         params.setName(params.getName() != null ? params.getName().trim() : "");
-        params.setContent(params.getContent() != null ? params.getContent()
-                .trim() : "");
-        params.setKeywords(params.getKeywords() != null ? params.getKeywords()
-                : new HashSet<String>());
-        params.setCategories(params.getCategories() != null ? params
-                .getCategories() : new HashSet<String>());
-        params.setMimeType(params.getMimeType() != null ? params.getMimeType()
-                .trim() : "");
-        params.setAuthor(params.getAuthor() != null ? params.getAuthor().trim()
-                : "");
+        params.setContent(params.getContent() != null ? params.getContent().trim() : "");
+        params.setKeywords(params.getKeywords() != null ? params.getKeywords() : new HashSet<String>());
+        params.setCategories(params.getCategories() != null ? params.getCategories() : new HashSet<String>());
+        params.setMimeType(params.getMimeType() != null ? params.getMimeType().trim() : "");
+        params.setAuthor(params.getAuthor() != null ? params.getAuthor().trim() : "");
         params.setPath(params.getPath() != null ? params.getPath().trim() : "");
-        params.setMailSubject(params.getMailSubject() != null ? params
-                .getMailSubject().trim() : "");
-        params.setMailFrom(params.getMailFrom() != null ? params.getMailFrom()
-                .trim() : "");
-        params.setMailTo(params.getMailTo() != null ? params.getMailTo().trim()
-                : "");
-        params.setProperties(params.getProperties() != null ? params
-                .getProperties() : new HashMap<String, String>());
+        params.setMailSubject(params.getMailSubject() != null ? params.getMailSubject().trim() : "");
+        params.setMailFrom(params.getMailFrom() != null ? params.getMailFrom().trim() : "");
+        params.setMailTo(params.getMailTo() != null ? params.getMailTo().trim() : "");
+        params.setProperties(params.getProperties() != null ? params.getProperties() : new HashMap<String, String>());
 
         // Domains
-        final boolean document = (params.getDomain() & QueryParams.DOCUMENT) != 0;
-        final boolean folder = (params.getDomain() & QueryParams.FOLDER) != 0;
-        final boolean mail = (params.getDomain() & QueryParams.MAIL) != 0;
-        log.debug("doc={}, fld={}, mail={}", new Object[] { document, folder,
-                mail });
+        boolean document = (params.getDomain() & QueryParams.DOCUMENT) != 0;
+        boolean folder = (params.getDomain() & QueryParams.FOLDER) != 0;
+        boolean mail = (params.getDomain() & QueryParams.MAIL) != 0;
+        log.debug("doc={}, fld={}, mail={}", new Object[] { document, folder, mail });
 
         // Escape
         if (!params.getName().equals("")) {
@@ -243,20 +221,13 @@ public class JcrSearchModule implements SearchModule {
             params.setContent(escapeContains(params.getContent()));
         }
 
-        if (!params.getContent().isEmpty() || !params.getName().isEmpty()
-                || !params.getKeywords().isEmpty()
-                || !params.getMimeType().isEmpty()
-                || !params.getAuthor().isEmpty()
-                || !params.getProperties().isEmpty()
-                || !params.getMailSubject().isEmpty()
-                || !params.getMailFrom().isEmpty()
-                || !params.getMailTo().isEmpty()
-                || params.getLastModifiedFrom() != null
-                && params.getLastModifiedTo() != null) {
+        if (!params.getContent().isEmpty() || !params.getName().isEmpty() || !params.getKeywords().isEmpty()
+                || !params.getMimeType().isEmpty() || !params.getAuthor().isEmpty() || !params.getProperties().isEmpty()
+                || !params.getMailSubject().isEmpty() || !params.getMailFrom().isEmpty() || !params.getMailTo().isEmpty()
+                || (params.getLastModifiedFrom() != null && params.getLastModifiedTo() != null)) {
 
             // Construct the query
-            sb.append("/jcr:root" + ISO9075.encodePath(params.getPath())
-                    + "//*[@jcr:primaryType eq 'okm:void'");
+            sb.append("/jcr:root" + ISO9075.encodePath(params.getPath()) + "//*[@jcr:primaryType eq 'okm:void'");
 
             /**
              * DOCUMENT
@@ -266,53 +237,44 @@ public class JcrSearchModule implements SearchModule {
 
                 if (!params.getContent().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(okm:content,'"
-                            + params.getContent() + "')");
+                    sb.append("jcr:contains(okm:content,'" + params.getContent() + "')");
                 }
 
                 if (!params.getName().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(@okm:name,'" + params.getName()
-                            + "')");
+                    sb.append("jcr:contains(@okm:name,'" + params.getName() + "')");
                 }
 
                 if (!params.getKeywords().isEmpty()) {
-                    for (final String string : params.getKeywords()) {
+                    for (Iterator<String> it = params.getKeywords().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:keywords='" + escapeContains(string)
-                                + "'");
+                        sb.append("@okm:keywords='" + escapeContains(it.next()) + "'");
                     }
                 }
 
                 if (!params.getCategories().isEmpty()) {
-                    for (final String string : params.getCategories()) {
+                    for (Iterator<String> it = params.getCategories().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:categories='" + string + "'");
+                        sb.append("@okm:categories='" + it.next() + "'");
                     }
                 }
 
                 if (!params.getMimeType().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("@okm:content/jcr:mimeType='"
-                            + params.getMimeType() + "'");
+                    sb.append("@okm:content/jcr:mimeType='" + params.getMimeType() + "'");
                 }
 
                 if (!params.getAuthor().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("@okm:content/okm:author='" + params.getAuthor()
-                            + "'");
+                    sb.append("@okm:content/okm:author='" + params.getAuthor() + "'");
                 }
 
-                if (params.getLastModifiedFrom() != null
-                        && params.getLastModifiedTo() != null) {
+                if (params.getLastModifiedFrom() != null && params.getLastModifiedTo() != null) {
                     sb.append(" " + params.getOperator() + " ");
                     sb.append("(");
-                    sb.append("@okm:content/jcr:lastModified >= xs:dateTime('"
-                            + ISO8601.format(params.getLastModifiedFrom())
-                            + "')");
+                    sb.append("@okm:content/jcr:lastModified >= xs:dateTime('" + ISO8601.format(params.getLastModifiedFrom()) + "')");
                     sb.append(" and ");
-                    sb.append("@okm:content/jcr:lastModified <= xs:dateTime('"
-                            + ISO8601.format(params.getLastModifiedTo()) + "')");
+                    sb.append("@okm:content/jcr:lastModified <= xs:dateTime('" + ISO8601.format(params.getLastModifiedTo()) + "')");
                     sb.append(")");
                 }
 
@@ -328,35 +290,29 @@ public class JcrSearchModule implements SearchModule {
 
                 if (!params.getName().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(@okm:name,'" + params.getName()
-                            + "')");
+                    sb.append("jcr:contains(@okm:name,'" + params.getName() + "')");
                 }
 
                 if (!params.getKeywords().isEmpty()) {
-                    for (final String string : params.getKeywords()) {
+                    for (Iterator<String> it = params.getKeywords().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:keywords='" + escapeContains(string)
-                                + "'");
+                        sb.append("@okm:keywords='" + escapeContains(it.next()) + "'");
                     }
                 }
 
                 if (!params.getCategories().isEmpty()) {
-                    for (final String string : params.getCategories()) {
+                    for (Iterator<String> it = params.getCategories().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:categories='" + string + "'");
+                        sb.append("@okm:categories='" + it.next() + "'");
                     }
                 }
 
-                if (params.getLastModifiedFrom() != null
-                        && params.getLastModifiedTo() != null) {
+                if (params.getLastModifiedFrom() != null && params.getLastModifiedTo() != null) {
                     sb.append(" " + params.getOperator() + " ");
                     sb.append("(");
-                    sb.append("@jcr:created >= xs:dateTime('"
-                            + ISO8601.format(params.getLastModifiedFrom())
-                            + "')");
+                    sb.append("@jcr:created >= xs:dateTime('" + ISO8601.format(params.getLastModifiedFrom()) + "')");
                     sb.append(" and ");
-                    sb.append("@jcr:created <= xs:dateTime('"
-                            + ISO8601.format(params.getLastModifiedTo()) + "')");
+                    sb.append("@jcr:created <= xs:dateTime('" + ISO8601.format(params.getLastModifiedTo()) + "')");
                     sb.append(")");
                 }
 
@@ -371,46 +327,40 @@ public class JcrSearchModule implements SearchModule {
                 sb.append(" or (@jcr:primaryType eq 'okm:mail'");
 
                 if (!params.getContent().equals("")) {
-                    sb.append(" and jcr:contains(.,'" + params.getContent()
-                            + "')");
+                    sb.append(" and jcr:contains(.,'" + params.getContent() + "')");
                 }
 
                 if (!params.getMailSubject().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(@okm:subject,'"
-                            + params.getMailSubject() + "')");
+                    sb.append("jcr:contains(@okm:subject,'" + params.getMailSubject() + "')");
                 }
 
                 if (!params.getMailFrom().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(@okm:from,'" + params.getMailFrom()
-                            + "')");
+                    sb.append("jcr:contains(@okm:from,'" + params.getMailFrom() + "')");
                 }
 
                 if (!params.getMailTo().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("jcr:contains(@okm:to,'" + params.getMailTo()
-                            + "')");
+                    sb.append("jcr:contains(@okm:to,'" + params.getMailTo() + "')");
                 }
 
                 if (!params.getMimeType().equals("")) {
                     sb.append(" " + params.getOperator() + " ");
-                    sb.append("@okm:content/jcr:mimeType='"
-                            + params.getMimeType() + "'");
+                    sb.append("@okm:content/jcr:mimeType='" + params.getMimeType() + "'");
                 }
 
                 if (!params.getKeywords().isEmpty()) {
-                    for (final String string : params.getKeywords()) {
+                    for (Iterator<String> it = params.getKeywords().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:keywords='" + escapeContains(string)
-                                + "'");
+                        sb.append("@okm:keywords='" + escapeContains(it.next()) + "'");
                     }
                 }
 
                 if (!params.getCategories().isEmpty()) {
-                    for (final String string : params.getCategories()) {
+                    for (Iterator<String> it = params.getCategories().iterator(); it.hasNext();) {
                         sb.append(" " + params.getOperator() + " ");
-                        sb.append("@okm:categories='" + string + "'");
+                        sb.append("@okm:categories='" + it.next() + "'");
                     }
                 }
 
@@ -428,43 +378,34 @@ public class JcrSearchModule implements SearchModule {
     /**
      * Create XPath related to property groups.
      */
-    private Object preparePropertyGroups(final QueryParams params)
-            throws IOException, ParseException {
-        final StringBuilder sb = new StringBuilder();
+    private Object preparePropertyGroups(QueryParams params) throws IOException, ParseException {
+        StringBuilder sb = new StringBuilder();
 
         if (!params.getProperties().isEmpty()) {
-            final Map<PropertyGroup, List<FormElement>> formsElements = FormUtils
-                    .parsePropertyGroupsForms(Config.PROPERTY_GROUPS_XML);
+            Map<PropertyGroup, List<FormElement>> formsElements = FormUtils.parsePropertyGroupsForms(Config.PROPERTY_GROUPS_XML);
 
-            for (final Map.Entry<String, String> ent : params.getProperties()
-                    .entrySet()) {
-                final FormElement fe = FormUtils.getFormElement(formsElements,
-                        ent.getKey());
+            for (Iterator<Entry<String, String>> it = params.getProperties().entrySet().iterator(); it.hasNext();) {
+                Entry<String, String> ent = it.next();
+                FormElement fe = FormUtils.getFormElement(formsElements, ent.getKey());
 
                 if (fe != null && ent.getValue() != null) {
-                    final String valueTrimmed = ent.getValue().trim();
+                    String valueTrimmed = ent.getValue().trim();
 
                     if (!valueTrimmed.equals("")) {
                         sb.append(" " + params.getOperator() + " ");
 
                         if (fe instanceof Select) {
-                            sb.append("@" + ent.getKey() + "='"
-                                    + escapeXPath(valueTrimmed) + "'");
-                        } else if (fe instanceof Input
-                                && ((Input) fe).getType().equals(
-                                        Input.TYPE_DATE)) {
-                            final String[] date = valueTrimmed.split(",");
+                            sb.append("@" + ent.getKey() + "='" + escapeXPath(valueTrimmed) + "'");
+                        } else if (fe instanceof Input && ((Input) fe).getType().equals(Input.TYPE_DATE)) {
+                            String[] date = valueTrimmed.split(",");
 
                             if (date.length == 2) {
-                                sb.append("@" + ent.getKey() + " >= '"
-                                        + date[0] + "'");
+                                sb.append("@" + ent.getKey() + " >= '" + date[0] + "'");
                                 sb.append(" and ");
-                                sb.append("@" + ent.getKey() + " <= '"
-                                        + date[1] + "'");
+                                sb.append("@" + ent.getKey() + " <= '" + date[1] + "'");
                             }
                         } else {
-                            sb.append("jcr:contains(@" + ent.getKey() + ",'"
-                                    + escapeContains(valueTrimmed) + "')");
+                            sb.append("jcr:contains(@" + ent.getKey() + ",'" + escapeContains(valueTrimmed) + "')");
                         }
                     }
                 }
@@ -474,21 +415,16 @@ public class JcrSearchModule implements SearchModule {
         return sb.toString();
     }
 
-    public List<QueryResult> findByStatement(final String token,
-            final String statement, final String type)
-            throws RepositoryException, DatabaseException {
+    public List<QueryResult> findByStatement(String token, String statement, String type) throws RepositoryException, DatabaseException {
         log.debug("findByStatement({}, {})", token, statement);
-        final List<QueryResult> ret = findByStatementPaginated(token,
-                statement, type, 0, Config.MAX_SEARCH_RESULTS).getResults();
+        List<QueryResult> ret = findByStatementPaginated(token, statement, type, 0, Config.MAX_SEARCH_RESULTS).getResults();
         log.debug("findByStatement: {}", ret);
         return ret;
     }
 
-    public ResultSet findByStatementPaginated(final String token,
-            final String statement, final String type, final int offset,
-            final int limit) throws RepositoryException, DatabaseException {
-        log.debug("findByStatement({}, {}, {}, {}, {})", new Object[] { token,
-                statement, type, offset, limit });
+    public ResultSet findByStatementPaginated(String token, String statement, String type, int offset, int limit)
+            throws RepositoryException, DatabaseException {
+        log.debug("findByStatement({}, {}, {}, {}, {})", new Object[] { token, statement, type, offset, limit });
         ResultSet rs = new ResultSet();
         Session session = null;
 
@@ -500,16 +436,15 @@ public class JcrSearchModule implements SearchModule {
             }
 
             if (statement != null && !statement.equals("")) {
-                final Workspace workspace = session.getWorkspace();
-                final QueryManager queryManager = workspace.getQueryManager();
-                final Query query = queryManager.createQuery(statement, type);
+                Workspace workspace = session.getWorkspace();
+                QueryManager queryManager = workspace.getQueryManager();
+                Query query = queryManager.createQuery(statement, type);
                 rs = executeQuery(session, query, offset, limit);
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "FIND_BY_STATEMENT", null,
-                    null, type + ", " + statement);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "FIND_BY_STATEMENT", null, null, type + ", " + statement);
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -525,30 +460,28 @@ public class JcrSearchModule implements SearchModule {
     /**
      * Execute query
      */
-    private ResultSet executeQuery(final Session session, final Query query,
-            final int offset, final int limit) throws RepositoryException {
-        log.debug("executeQuery({}, {}, {}, {})", new Object[] { session,
-                query, offset, limit });
-        final ResultSet rs = new ResultSet();
+    private ResultSet executeQuery(Session session, Query query, int offset, int limit) throws RepositoryException {
+        log.debug("executeQuery({}, {}, {}, {})", new Object[] { session, query, offset, limit });
+        ResultSet rs = new ResultSet();
 
         try {
-            final ArrayList<QueryResult> al = new ArrayList<QueryResult>();
+            ArrayList<QueryResult> al = new ArrayList<QueryResult>();
 
             // http://n4.nabble.com/Query-performance-for-large-query-results-td531360.html
             ((QueryImpl) query).setLimit(limit);
             ((QueryImpl) query).setOffset(offset);
-            final QueryResultImpl result = (QueryResultImpl) query.execute();
-            final RowIterator rit = result.getRows();
+            QueryResultImpl result = (QueryResultImpl) query.execute();
+            RowIterator rit = result.getRows();
             rs.setTotal(result.getTotalSize());
 
             while (rit.hasNext()) {
-                final Row row = rit.nextRow();
-                final QueryResult qr = queryRowResultDigester(session, row);
+                Row row = rit.nextRow();
+                QueryResult qr = queryRowResultDigester(session, row);
                 al.add(qr);
             }
 
             rs.setResults(al);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         }
@@ -560,40 +493,35 @@ public class JcrSearchModule implements SearchModule {
     /**
      * Execute simple query
      */
-    private ResultSet executeSimpleQuery(final Session session,
-            String statement, final int offset, final int limit)
-            throws RepositoryException {
-        log.debug("executeSimpleQuery({}, {}, {}, {})", new Object[] { session,
-                statement, offset, limit });
-        final ResultSet rs = new ResultSet();
+    private ResultSet executeSimpleQuery(Session session, String statement, int offset, int limit) throws RepositoryException {
+        log.debug("executeSimpleQuery({}, {}, {}, {})", new Object[] { session, statement, offset, limit });
+        ResultSet rs = new ResultSet();
 
         if (statement != null && !statement.equals("")) {
             if (!statement.contains("path:")) {
                 statement = "path:\"/" + Repository.ROOT + "\" " + statement;
             }
 
-            if (!statement.contains("limit:")
-                    && limit < Config.MAX_SEARCH_RESULTS) {
-                final StringBuilder sb = new StringBuilder();
-                sb.append("limit:").append(offset).append("..")
-                        .append(offset + limit);
+            if (!statement.contains("limit:") && limit < Config.MAX_SEARCH_RESULTS) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("limit:").append(offset).append("..").append(offset + limit);
                 statement = statement.concat(" ").concat(sb.toString());
             }
 
             try {
-                final ArrayList<QueryResult> al = new ArrayList<QueryResult>();
+                ArrayList<QueryResult> al = new ArrayList<QueryResult>();
                 log.info("Statement: {}", statement);
-                final RowIterator rit = GQL.execute(statement, session);
+                RowIterator rit = GQL.execute(statement, session);
                 rs.setTotal(rit.getSize());
 
                 while (rit.hasNext()) {
-                    final Row row = rit.nextRow();
-                    final QueryResult qr = queryRowResultDigester(session, row);
+                    Row row = rit.nextRow();
+                    QueryResult qr = queryRowResultDigester(session, row);
                     al.add(qr);
                 }
 
                 rs.setResults(al);
-            } catch (final javax.jcr.RepositoryException e) {
+            } catch (javax.jcr.RepositoryException e) {
                 log.error(e.getMessage(), e);
                 throw new RepositoryException(e.getMessage(), e);
             }
@@ -606,21 +534,18 @@ public class JcrSearchModule implements SearchModule {
     /**
      * Convert Row to QueryResult
      */
-    private QueryResult queryRowResultDigester(final Session session,
-            final Row row) throws javax.jcr.PathNotFoundException,
+    private QueryResult queryRowResultDigester(Session session, Row row) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException {
-        final String path = row.getValue(JcrConstants.JCR_PATH).getString();
+        String path = row.getValue(JcrConstants.JCR_PATH).getString();
         log.debug("queryRowResultDigester: {}", path);
-        final Node node = session.getRootNode().getNode(path.substring(1));
-        final QueryResult qr = new QueryResult();
+        Node node = session.getRootNode().getNode(path.substring(1));
+        QueryResult qr = new QueryResult();
 
         if (node.isNodeType(Document.CONTENT_TYPE)) {
-            final Document doc = BaseDocumentModule.getProperties(session,
-                    node.getParent());
+            Document doc = BaseDocumentModule.getProperties(session, node.getParent());
             qr.setDocument(doc);
         } else if (node.isNodeType(Document.TYPE)) {
-            final Document doc = BaseDocumentModule
-                    .getProperties(session, node);
+            Document doc = BaseDocumentModule.getProperties(session, node);
 
             try {
                 if (node.getParent().isNodeType(Mail.TYPE)) {
@@ -628,19 +553,19 @@ public class JcrSearchModule implements SearchModule {
                 } else {
                     qr.setDocument(doc);
                 }
-            } catch (final javax.jcr.AccessDeniedException e) {
+            } catch (javax.jcr.AccessDeniedException e) {
                 qr.setDocument(doc);
             }
         } else if (node.isNodeType(Folder.TYPE)) {
-            final Folder fld = BaseFolderModule.getProperties(session, node);
+            Folder fld = BaseFolderModule.getProperties(session, node);
             qr.setFolder(fld);
         } else if (node.isNodeType(Mail.TYPE)) {
-            final Mail mail = BaseMailModule.getProperties(session, node);
+            Mail mail = BaseMailModule.getProperties(session, node);
             qr.setMail(mail);
         }
 
         qr.setScore(row.getValue(JcrConstants.JCR_SCORE).getLong());
-        final Value excerpt = row.getValue("rep:excerpt(okm:content)");
+        Value excerpt = row.getValue("rep:excerpt(okm:content)");
 
         if (excerpt != null) {
             qr.setExcerpt(excerpt.getString());
@@ -650,9 +575,7 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public long saveSearch(final String token, final QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public long saveSearch(String token, QueryParams params) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("saveSearch({}, {})", token, params);
         Session session = null;
         long id = 0;
@@ -673,11 +596,10 @@ public class JcrSearchModule implements SearchModule {
             id = QueryParamsDAO.create(params);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SAVE_SEARCH",
-                    params.getName(), null, params.toString());
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "SAVE_SEARCH", params.getName(), null, params.toString());
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token == null) {
@@ -690,9 +612,7 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public void updateSearch(final String token, final QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void updateSearch(String token, QueryParams params) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("updateSearch({}, {})", token, params);
         Session session = null;
 
@@ -712,11 +632,10 @@ public class JcrSearchModule implements SearchModule {
             QueryParamsDAO.update(params);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "UPDATE_SEARCH",
-                    params.getName(), null, params.toString());
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "UPDATE_SEARCH", params.getName(), null, params.toString());
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token == null) {
@@ -728,9 +647,7 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public QueryParams getSearch(final String token, final int qpId)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public QueryParams getSearch(String token, int qpId) throws PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getSearch({}, {})", token, qpId);
         QueryParams qp = new QueryParams();
         Session session = null;
@@ -752,12 +669,11 @@ public class JcrSearchModule implements SearchModule {
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_SAVED_SEARCH",
-                    Integer.toString(qpId), null, qp.toString());
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "GET_SAVED_SEARCH", Integer.toString(qpId), null, qp.toString());
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -771,10 +687,9 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public List<QueryParams> getAllSearchs(final String token)
-            throws RepositoryException, DatabaseException {
+    public List<QueryParams> getAllSearchs(String token) throws RepositoryException, DatabaseException {
         log.debug("getAllSearchs({})", token);
-        final List<QueryParams> ret = new ArrayList<QueryParams>();
+        List<QueryParams> ret = new ArrayList<QueryParams>();
         Session session = null;
 
         try {
@@ -785,21 +700,21 @@ public class JcrSearchModule implements SearchModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final List<QueryParams> qParams = QueryParamsDAO.findByUser(session
-                    .getUserID());
+            List<QueryParams> qParams = QueryParamsDAO.findByUser(session.getUserID());
 
-            for (final QueryParams qp : qParams) {
+            for (Iterator<QueryParams> it = qParams.iterator(); it.hasNext();) {
+                QueryParams qp = it.next();
+
                 if (!qp.isDashboard()) {
                     ret.add(qp);
                 }
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_ALL_SEARCHS", null,
-                    null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "GET_ALL_SEARCHS", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token == null) {
@@ -812,9 +727,7 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public void deleteSearch(final String token, final long qpId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void deleteSearch(String token, long qpId) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("deleteSearch({}, {})", token, qpId);
         Session session = null;
 
@@ -830,22 +743,20 @@ public class JcrSearchModule implements SearchModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final QueryParams qp = QueryParamsDAO.findByPk(qpId);
+            QueryParams qp = QueryParamsDAO.findByPk(qpId);
             QueryParamsDAO.delete(qpId);
 
             // Purge visited nodes table
             if (qp.isDashboard()) {
-                DashboardDAO.deleteVisitedNodes(session.getUserID(),
-                        qp.getName());
+                DashboardDAO.deleteVisitedNodes(session.getUserID(), qp.getName());
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "DELETE_SAVED_SEARCH",
-                    Long.toString(qpId), null, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(session.getUserID(), "DELETE_SAVED_SEARCH", Long.toString(qpId), null, null);
+        } catch (DatabaseException e) {
             log.warn(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -858,132 +769,62 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public Map<String, Integer> getKeywordMap(final String token,
-            final List<String> filter) throws RepositoryException,
-            DatabaseException {
+    public Map<String, Integer> getKeywordMap(String token, List<String> filter) throws RepositoryException, DatabaseException {
         log.debug("getKeywordMap({}, {})", token, filter);
-        Map<String, Integer> cloud = null;
+        String statement =
+                "/jcr:root//*[@jcr:primaryType eq 'okm:document' or @jcr:primaryType eq 'okm:mail' or @jcr:primaryType eq 'okm:folder']";
+        HashMap<String, Integer> cloud = new HashMap<String, Integer>();
+        Session session = null;
 
-        if (Config.USER_KEYWORDS_CACHE) {
-            cloud = getKeywordMapCached(token, filter);
-        } else {
-            cloud = getKeywordMapLive(token, filter);
+        try {
+            if (token == null) {
+                session = JCRUtils.getSession();
+            } else {
+                session = JcrSessionManager.getInstance().get(token);
+            }
+
+            Workspace workspace = session.getWorkspace();
+            QueryManager queryManager = workspace.getQueryManager();
+            Query query = queryManager.createQuery(statement, Query.XPATH);
+            javax.jcr.query.QueryResult qResult = query.execute();
+
+            for (NodeIterator nit = qResult.getNodes(); nit.hasNext();) {
+                Node doc = nit.nextNode();
+                Value[] keywordsValue = doc.getProperty(com.openkm.bean.Property.KEYWORDS).getValues();
+                ArrayList<String> keywordCollection = new ArrayList<String>();
+
+                for (int i = 0; i < keywordsValue.length; i++) {
+                    keywordCollection.add(keywordsValue[i].getString());
+                }
+
+                if (filter != null && keywordCollection.containsAll(filter)) {
+                    for (Iterator<String> it = keywordCollection.iterator(); it.hasNext();) {
+                        String keyword = it.next();
+
+                        if (!filter.contains(keyword)) {
+                            Integer occurs = cloud.get(keyword) != null ? cloud.get(keyword) : 0;
+                            cloud.put(keyword, occurs + 1);
+                        }
+                    }
+                }
+            }
+        } catch (javax.jcr.RepositoryException e) {
+            log.error(e.getMessage(), e);
+            throw new RepositoryException(e.getMessage(), e);
+        } finally {
+            if (token == null) {
+                JCRUtils.logout(session);
+            }
         }
 
         log.debug("getKeywordMap: {}", cloud);
         return cloud;
     }
 
-    /**
-     * Get keyword map
-     */
-    private Map<String, Integer> getKeywordMapLive(final String token,
-            final List<String> filter) throws RepositoryException,
-            DatabaseException {
-        log.debug("getKeywordMapLive({}, {})", token, filter);
-        final String statement = "/jcr:root//*[@jcr:primaryType eq 'okm:document' or @jcr:primaryType eq 'okm:mail' or @jcr:primaryType eq 'okm:folder']";
-        final HashMap<String, Integer> cloud = new HashMap<String, Integer>();
-        Session session = null;
-
-        try {
-            if (token == null) {
-                session = JCRUtils.getSession();
-            } else {
-                session = JcrSessionManager.getInstance().get(token);
-            }
-
-            final Workspace workspace = session.getWorkspace();
-            final QueryManager queryManager = workspace.getQueryManager();
-            final Query query = queryManager
-                    .createQuery(statement, Query.XPATH);
-            final javax.jcr.query.QueryResult qResult = query.execute();
-
-            for (final NodeIterator nit = qResult.getNodes(); nit.hasNext();) {
-                final Node doc = nit.nextNode();
-                final Value[] keywordsValue = doc.getProperty(
-                        com.openkm.bean.Property.KEYWORDS).getValues();
-                final ArrayList<String> keywordCollection = new ArrayList<String>();
-
-                for (final Value element : keywordsValue) {
-                    keywordCollection.add(element.getString());
-                }
-
-                if (filter != null && keywordCollection.containsAll(filter)) {
-                    for (final String keyword : keywordCollection) {
-                        if (!filter.contains(keyword)) {
-                            final Integer occurs = cloud.get(keyword) != null ? cloud
-                                    .get(keyword) : 0;
-                            cloud.put(keyword, occurs + 1);
-                        }
-                    }
-                }
-            }
-        } catch (final javax.jcr.RepositoryException e) {
-            log.error(e.getMessage(), e);
-            throw new RepositoryException(e.getMessage(), e);
-        } finally {
-            if (token == null) {
-                JCRUtils.logout(session);
-            }
-        }
-
-        log.debug("getKeywordMapLive: {}", cloud);
-        return cloud;
-    }
-
-    /**
-     * Get keyword map
-     */
-    private Map<String, Integer> getKeywordMapCached(final String token,
-            final List<String> filter) throws RepositoryException,
-            DatabaseException {
-        log.debug("getKeywordMapCached({}, {})", token, filter);
-        final HashMap<String, Integer> keywordMap = new HashMap<String, Integer>();
-        Session session = null;
-
-        try {
-            // TODO This JCR Session could be removed
-            if (token == null) {
-                session = JCRUtils.getSession();
-            } else {
-                session = JcrSessionManager.getInstance().get(token);
-            }
-
-            final Collection<UserNodeKeywords> userDocKeywords = UserNodeKeywordsManager
-                    .get(session.getUserID()).values();
-
-            for (final UserNodeKeywords userNodeKeywords : userDocKeywords) {
-                final Set<String> docKeywords = userNodeKeywords.getKeywords();
-
-                if (filter != null && docKeywords.containsAll(filter)) {
-                    for (final String keyword : docKeywords) {
-                        if (!filter.contains(keyword)) {
-                            final Integer occurs = keywordMap.get(keyword) != null ? keywordMap
-                                    .get(keyword) : 0;
-                            keywordMap.put(keyword, occurs + 1);
-                        }
-                    }
-                }
-            }
-        } catch (final javax.jcr.RepositoryException e) {
-            log.error(e.getMessage(), e);
-            throw new RepositoryException(e.getMessage(), e);
-        } finally {
-            if (token == null) {
-                JCRUtils.logout(session);
-            }
-        }
-
-        log.debug("getKeywordMapCached: {}", keywordMap);
-        return keywordMap;
-    }
-
     @Override
-    public List<Document> getCategorizedDocuments(final String token,
-            final String categoryId) throws RepositoryException,
-            DatabaseException {
+    public List<Document> getCategorizedDocuments(String token, String categoryId) throws RepositoryException, DatabaseException {
         log.debug("getCategorizedDocuments({}, {})", token, categoryId);
-        final List<Document> documents = new ArrayList<Document>();
+        List<Document> documents = new ArrayList<Document>();
         Session session = null;
 
         try {
@@ -993,24 +834,21 @@ public class JcrSearchModule implements SearchModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node category = session.getNodeByUUID(categoryId);
+            Node category = session.getNodeByUUID(categoryId);
 
-            for (final PropertyIterator it = category.getReferences(); it
-                    .hasNext();) {
-                final Property refProp = it.nextProperty();
+            for (PropertyIterator it = category.getReferences(); it.hasNext();) {
+                Property refProp = it.nextProperty();
 
-                if (com.openkm.bean.Property.CATEGORIES.equals(refProp
-                        .getName())) {
-                    final Node node = refProp.getParent();
+                if (com.openkm.bean.Property.CATEGORIES.equals(refProp.getName())) {
+                    Node node = refProp.getParent();
 
                     if (node.isNodeType(Document.TYPE)) {
-                        final Document doc = BaseDocumentModule.getProperties(
-                                session, node);
+                        Document doc = BaseDocumentModule.getProperties(session, node);
                         documents.add(doc);
                     }
                 }
             }
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -1024,11 +862,9 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public List<Folder> getCategorizedFolders(final String token,
-            final String categoryId) throws RepositoryException,
-            DatabaseException {
+    public List<Folder> getCategorizedFolders(String token, String categoryId) throws RepositoryException, DatabaseException {
         log.debug("getCategorizedFolders({}, {})", token, categoryId);
-        final List<Folder> folders = new ArrayList<Folder>();
+        List<Folder> folders = new ArrayList<Folder>();
         Session session = null;
 
         try {
@@ -1038,24 +874,21 @@ public class JcrSearchModule implements SearchModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node category = session.getNodeByUUID(categoryId);
+            Node category = session.getNodeByUUID(categoryId);
 
-            for (final PropertyIterator it = category.getReferences(); it
-                    .hasNext();) {
-                final Property refProp = it.nextProperty();
+            for (PropertyIterator it = category.getReferences(); it.hasNext();) {
+                Property refProp = it.nextProperty();
 
-                if (com.openkm.bean.Property.CATEGORIES.equals(refProp
-                        .getName())) {
-                    final Node node = refProp.getParent();
+                if (com.openkm.bean.Property.CATEGORIES.equals(refProp.getName())) {
+                    Node node = refProp.getParent();
 
                     if (node.isNodeType(Folder.TYPE)) {
-                        final Folder fld = BaseFolderModule.getProperties(
-                                session, node);
+                        Folder fld = BaseFolderModule.getProperties(session, node);
                         folders.add(fld);
                     }
                 }
             }
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -1069,11 +902,9 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public List<Mail> getCategorizedMails(final String token,
-            final String categoryId) throws RepositoryException,
-            DatabaseException {
+    public List<Mail> getCategorizedMails(String token, String categoryId) throws RepositoryException, DatabaseException {
         log.debug("getCategorizedMails({}, {})", token, categoryId);
-        final List<Mail> mails = new ArrayList<Mail>();
+        List<Mail> mails = new ArrayList<Mail>();
         Session session = null;
 
         try {
@@ -1083,24 +914,21 @@ public class JcrSearchModule implements SearchModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node category = session.getNodeByUUID(categoryId);
+            Node category = session.getNodeByUUID(categoryId);
 
-            for (final PropertyIterator it = category.getReferences(); it
-                    .hasNext();) {
-                final Property refProp = it.nextProperty();
+            for (PropertyIterator it = category.getReferences(); it.hasNext();) {
+                Property refProp = it.nextProperty();
 
-                if (com.openkm.bean.Property.CATEGORIES.equals(refProp
-                        .getName())) {
-                    final Node node = refProp.getParent();
+                if (com.openkm.bean.Property.CATEGORIES.equals(refProp.getName())) {
+                    Node node = refProp.getParent();
 
                     if (node.isNodeType(Mail.TYPE)) {
-                        final Mail mail = BaseMailModule.getProperties(session,
-                                node);
+                        Mail mail = BaseMailModule.getProperties(session, node);
                         mails.add(mail);
                     }
                 }
             }
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -1114,62 +942,51 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public List<Document> getDocumentsByKeyword(final String token,
-            final String keyword) throws RepositoryException, DatabaseException {
+    public List<Document> getDocumentsByKeyword(String token, String keyword) throws RepositoryException, DatabaseException {
         throw new NotImplementedException("getDocumentsByKeyword");
     }
 
     @Override
-    public List<Folder> getFoldersByKeyword(final String token,
-            final String keyword) throws RepositoryException, DatabaseException {
+    public List<Folder> getFoldersByKeyword(String token, String keyword) throws RepositoryException, DatabaseException {
         throw new NotImplementedException("getFoldersByKeyword");
     }
 
     @Override
-    public List<Mail> getMailsByKeyword(final String token, final String keyword)
-            throws RepositoryException, DatabaseException {
+    public List<Mail> getMailsByKeyword(String token, String keyword) throws RepositoryException, DatabaseException {
         throw new NotImplementedException("getMailsByKeyword");
     }
 
     @Override
-    public List<Document> getDocumentsByPropertyValue(final String token,
-            final String group, final String property, final String value)
+    public List<Document> getDocumentsByPropertyValue(String token, String group, String property, String value)
             throws RepositoryException, DatabaseException {
         throw new NotImplementedException("getDocumentsByPropertyValue");
     }
 
     @Override
-    public List<Folder> getFoldersByPropertyValue(final String token,
-            final String group, final String property, final String value)
-            throws RepositoryException, DatabaseException {
+    public List<Folder> getFoldersByPropertyValue(String token, String group, String property, String value) throws RepositoryException,
+            DatabaseException {
         throw new NotImplementedException("getFoldersByPropertyValue");
     }
 
     @Override
-    public List<Mail> getMailsByPropertyValue(final String token,
-            final String group, final String property, final String value)
-            throws RepositoryException, DatabaseException {
+    public List<Mail> getMailsByPropertyValue(String token, String group, String property, String value) throws RepositoryException,
+            DatabaseException {
         throw new NotImplementedException("getMailsByPropertyValue");
     }
 
     @Override
-    public List<QueryResult> findSimpleQuery(final String token,
-            final String statement) throws RepositoryException,
-            DatabaseException {
+    public List<QueryResult> findSimpleQuery(String token, String statement) throws RepositoryException, DatabaseException {
         log.debug("findSimpleQuery({}, {})", token, statement);
-        final List<QueryResult> ret = findSimpleQueryPaginated(token,
-                statement, 0, Config.MAX_SEARCH_RESULTS).getResults();
+        List<QueryResult> ret = findSimpleQueryPaginated(token, statement, 0, Config.MAX_SEARCH_RESULTS).getResults();
         log.debug("findSimpleQuery: {}", ret);
         return ret;
 
     }
 
     @Override
-    public ResultSet findSimpleQueryPaginated(final String token,
-            final String statement, final int offset, final int limit)
-            throws RepositoryException, DatabaseException {
-        log.debug("findSimpleQueryPaginated({}, {}, {}, {})", new Object[] {
-                token, statement, offset, limit });
+    public ResultSet findSimpleQueryPaginated(String token, String statement, int offset, int limit) throws RepositoryException,
+            DatabaseException {
+        log.debug("findSimpleQueryPaginated({}, {}, {}, {})", new Object[] { token, statement, offset, limit });
         ResultSet rs = new ResultSet();
         Session session = null;
 
@@ -1181,7 +998,7 @@ public class JcrSearchModule implements SearchModule {
             }
 
             rs = executeSimpleQuery(session, statement, offset, limit);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -1195,8 +1012,7 @@ public class JcrSearchModule implements SearchModule {
     }
 
     @Override
-    public ResultSet findMoreLikeThis(final String token, final String uuid,
-            final int maxResults) throws RepositoryException, DatabaseException {
+    public ResultSet findMoreLikeThis(String token, String uuid, int maxResults) throws RepositoryException, DatabaseException {
         throw new NotImplementedException("findMoreLikeThis");
     }
 }

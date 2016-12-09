@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,7 +38,6 @@ import com.openkm.core.Config;
  */
 public class QueryBank {
     private static Logger log = LoggerFactory.getLogger(QueryBank.class);
-
     private static QueryBank instance;
 
     /**
@@ -64,7 +63,7 @@ public class QueryBank {
      * 
      * @return
      */
-    public TupleQuery getTreeTopQuery(final RepositoryConnection con) {
+    public TupleQuery getTreeTopQuery(RepositoryConnection con) {
         try {
 
             // query = "SELECT C, tipus FROM {C} rdfs:subClassOf {tipus} ";
@@ -92,11 +91,10 @@ public class QueryBank {
             // "dc=<http://purl.org/dc/elements/1.1/> ";
             //
             // log.info(query);
-            return con.prepareTupleQuery(QueryLanguage.SERQL,
-                    Config.KEA_THESAURUS_TREE_ROOT);
-        } catch (final RepositoryException e) {
+            return con.prepareTupleQuery(QueryLanguage.SERQL, Config.KEA_THESAURUS_TREE_ROOT);
+        } catch (RepositoryException e) {
             log.error("Error preparing tree top query", e);
-        } catch (final MalformedQueryException e) {
+        } catch (MalformedQueryException e) {
             log.error("malformed rMap query", e);
         }
         return null;
@@ -110,8 +108,7 @@ public class QueryBank {
      * 
      * @return
      */
-    public TupleQuery getTreeNextLayerQuery(final String RDFparentID,
-            final RepositoryConnection con) {
+    public TupleQuery getTreeNextLayerQuery(String RDFparentID, RepositoryConnection con) {
         try {
             // String query = "SELECT DISTINCT UID, TEXT FROM {UID} rdfs:subClassOf {CLAZZ}, {UID} rdfs:label {TEXT} "+
             // "where xsd:string(CLAZZ) = \"RDFparentID\" and lang(TEXT)=\"es\" "+
@@ -125,12 +122,10 @@ public class QueryBank {
             // "dc=<http://purl.org/dc/elements/1.1/> ";
             //
             // query = query.replace("RDFparentID", RDFparentID);
-            return con.prepareTupleQuery(QueryLanguage.SERQL,
-                    Config.KEA_THESAURUS_TREE_CHILDS.replace("RDFparentID",
-                            RDFparentID));
-        } catch (final RepositoryException e) {
+            return con.prepareTupleQuery(QueryLanguage.SERQL, Config.KEA_THESAURUS_TREE_CHILDS.replace("RDFparentID", RDFparentID));
+        } catch (RepositoryException e) {
             log.error("Error preparing rMap query", e);
-        } catch (final MalformedQueryException e) {
+        } catch (MalformedQueryException e) {
             log.error("malformed next tree layer query", e);
         }
 

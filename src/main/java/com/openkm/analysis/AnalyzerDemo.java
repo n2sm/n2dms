@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  * 
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,19 +43,15 @@ import com.openkm.core.Config;
  */
 public class AnalyzerDemo {
     private static Logger log = LoggerFactory.getLogger(AnalyzerDemo.class);
-
     private static String[] strings = { "专项信息管理" };
 
-    private static Analyzer[] analyzers = {
-            new SimpleAnalyzer(Config.LUCENE_VERSION),
-            new StandardAnalyzer(Config.LUCENE_VERSION),
-            new CJKAnalyzer(Config.LUCENE_VERSION),
-            new SmartChineseAnalyzer(Config.LUCENE_VERSION),
+    private static Analyzer[] analyzers = { new SimpleAnalyzer(Config.LUCENE_VERSION), new StandardAnalyzer(Config.LUCENE_VERSION),
+            new CJKAnalyzer(Config.LUCENE_VERSION), new SmartChineseAnalyzer(Config.LUCENE_VERSION),
             new WhitespaceAnalyzer(Config.LUCENE_VERSION) };
 
-    public static void main(final String args[]) throws Exception {
-        for (final String string : strings) {
-            for (final Analyzer analyzer : analyzers) {
+    public static void main(String args[]) throws Exception {
+        for (String string : strings) {
+            for (Analyzer analyzer : analyzers) {
                 analyze(string, analyzer);
             }
         }
@@ -64,13 +60,10 @@ public class AnalyzerDemo {
     /**
      * Analyze and display tokens
      */
-    private static void analyze(final String string, final Analyzer analyzer)
-            throws IOException {
-        final StringBuffer buffer = new StringBuffer();
-        final TokenStream stream = analyzer.tokenStream("contents",
-                new StringReader(string));
-        final CharTermAttribute term = stream
-                .addAttribute(CharTermAttribute.class);
+    private static void analyze(String string, Analyzer analyzer) throws IOException {
+        StringBuffer buffer = new StringBuffer();
+        TokenStream stream = analyzer.tokenStream("contents", new StringReader(string));
+        CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);
         buffer.append(analyzer.getClass().getName());
         buffer.append(" -> ");
 
@@ -80,7 +73,7 @@ public class AnalyzerDemo {
             buffer.append("]");
         }
 
-        final String output = buffer.toString();
+        String output = buffer.toString();
         log.info(output);
     }
 }

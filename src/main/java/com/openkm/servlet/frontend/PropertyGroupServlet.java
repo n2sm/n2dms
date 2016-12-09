@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.api.OKMPropertyGroup;
 import com.openkm.bean.PropertyGroup;
+import com.openkm.bean.Repository;
 import com.openkm.bean.form.FormElement;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
@@ -42,6 +43,8 @@ import com.openkm.core.RepositoryException;
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTPropertyGroup;
 import com.openkm.frontend.client.bean.form.GWTFormElement;
+import com.openkm.frontend.client.bean.form.GWTOption;
+import com.openkm.frontend.client.bean.form.GWTSelect;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMPropertyGroupService;
 import com.openkm.servlet.frontend.util.PropertyGroupComparator;
@@ -50,44 +53,33 @@ import com.openkm.util.GWTUtil;
 /**
  * PropertyGroup Servlet Class
  */
-public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
-        OKMPropertyGroupService {
-    private static Logger log = LoggerFactory
-            .getLogger(PropertyGroupServlet.class);
-
+public class PropertyGroupServlet extends OKMRemoteServiceServlet implements OKMPropertyGroupService {
+    private static Logger log = LoggerFactory.getLogger(PropertyGroupServlet.class);
     private static final long serialVersionUID = 2638205115826644606L;
 
     @Override
     public List<GWTPropertyGroup> getAllGroups() throws OKMException {
         log.debug("getAllGroups()");
-        final List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
+        List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
         updateSessionManager();
 
         try {
-            for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                    .getAllGroups(null)) {
+            for (PropertyGroup pg : OKMPropertyGroup.getInstance().getAllGroups(null)) {
                 if (pg.isVisible()) {
-                    final GWTPropertyGroup group = GWTUtil.copy(pg);
+                    GWTPropertyGroup group = GWTUtil.copy(pg);
                     groupList.add(group);
                 }
             }
-            Collections.sort(groupList,
-                    PropertyGroupComparator.getInstance(getLanguage()));
-        } catch (final RepositoryException e) {
+            Collections.sort(groupList, PropertyGroupComparator.getInstance(getLanguage()));
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getAllGroups: {}", groupList);
@@ -95,26 +87,24 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTPropertyGroup> getAllGroups(final String path)
-            throws OKMException {
+    public List<GWTPropertyGroup> getAllGroups(String path) throws OKMException {
         log.debug("getAllGroups({})", path);
-        final List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
+        List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
         updateSessionManager();
 
         try {
-            final List<GWTPropertyGroup> actualGroupsList = getGroups(path);
-            for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                    .getAllGroups(null)) {
+            List<GWTPropertyGroup> actualGroupsList = getGroups(path);
+            for (PropertyGroup pg : OKMPropertyGroup.getInstance().getAllGroups(null)) {
                 if (pg.isVisible()) {
-                    final GWTPropertyGroup group = GWTUtil.copy(pg);
+                    GWTPropertyGroup group = GWTUtil.copy(pg);
                     groupList.add(group);
                 }
             }
 
             // Purge from list values that are assigned to document
             if (!actualGroupsList.isEmpty()) {
-                for (final GWTPropertyGroup group : actualGroupsList) {
-                    for (final GWTPropertyGroup groupListElement : groupList) {
+                for (GWTPropertyGroup group : actualGroupsList) {
+                    for (GWTPropertyGroup groupListElement : groupList) {
                         if (groupListElement.getName().equals(group.getName())) {
                             groupList.remove(groupListElement);
                             break;
@@ -122,26 +112,19 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
                     }
                 }
             }
-            Collections.sort(groupList,
-                    PropertyGroupComparator.getInstance(getLanguage()));
-        } catch (final RepositoryException e) {
+            Collections.sort(groupList, PropertyGroupComparator.getInstance(getLanguage()));
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final OKMException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (OKMException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getAllGroups: {}", groupList);
@@ -149,90 +132,67 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void addGroup(final String path, final String grpName)
-            throws OKMException {
+    public void addGroup(String path, String grpName) throws OKMException {
         log.debug("addGroup({}, {})", path, grpName);
         updateSessionManager();
 
         try {
             OKMPropertyGroup.getInstance().addGroup(null, path, grpName);
-        } catch (final NoSuchGroupException e) {
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Lock), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("addGroup: void");
     }
 
     @Override
-    public List<GWTPropertyGroup> getGroups(final String path)
-            throws OKMException {
+    public List<GWTPropertyGroup> getGroups(String path) throws OKMException {
         log.debug("getGroups({})", path);
-        final List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
+        List<GWTPropertyGroup> groupList = new ArrayList<GWTPropertyGroup>();
         updateSessionManager();
 
         try {
-            for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                    .getGroups(null, path)) {
-                if (pg.isVisible()) {
-                    final GWTPropertyGroup group = GWTUtil.copy(pg);
-                    groupList.add(group);
+            if (!path.startsWith("/" + Repository.METADATA)) {
+                for (PropertyGroup pg : OKMPropertyGroup.getInstance().getGroups(null, path)) {
+                    if (pg.isVisible()) {
+                        GWTPropertyGroup group = GWTUtil.copy(pg);
+                        groupList.add(group);
+                    }
                 }
             }
-            Collections.sort(groupList,
-                    PropertyGroupComparator.getInstance(getLanguage()));
-        } catch (final PathNotFoundException e) {
+
+            Collections.sort(groupList, PropertyGroupComparator.getInstance(getLanguage()));
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getGroups: {}", groupList);
@@ -240,42 +200,43 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTFormElement> getProperties(final String path,
-            final String grpName) throws OKMException {
-        log.debug("getProperties({}, {})", path, grpName);
-        final List<GWTFormElement> properties = new ArrayList<GWTFormElement>();
+    public List<GWTFormElement> getProperties(String path, String grpName, boolean suggestion) throws OKMException {
+        log.debug("getProperties({}, {}, {})", new Object[] { path, grpName, suggestion });
+        List<GWTFormElement> properties = new ArrayList<GWTFormElement>();
         updateSessionManager();
 
         try {
-            for (final FormElement formElement : OKMPropertyGroup.getInstance()
-                    .getProperties(null, path, grpName)) {
-                properties.add(GWTUtil.copy(formElement));
+            for (FormElement formElement : OKMPropertyGroup.getInstance().getProperties(null, path, grpName)) {
+                GWTFormElement gWTFormElement = GWTUtil.copy(formElement);
+                if (gWTFormElement instanceof GWTSelect) {
+                    GWTSelect select = (GWTSelect) gWTFormElement;
+                    if (suggestion && !select.getSuggestion().equals("")) {
+                        for (String suggestedValue : OKMPropertyGroup.getInstance().getSuggestions(null, path, grpName, select.getName())) {
+                            for (GWTOption option : select.getOptions()) {
+                                if (option.getValue().equals(suggestedValue)) {
+                                    option.setSuggested(true);
+                                }
+                            }
+                        }
+                    }
+                }
+                properties.add(gWTFormElement);
             }
-        } catch (final NoSuchGroupException e) {
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getProperties: {}", properties);
@@ -283,37 +244,27 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTFormElement> getPropertyGroupForm(final String grpName)
-            throws OKMException {
+    public List<GWTFormElement> getPropertyGroupForm(String grpName) throws OKMException {
         log.debug("getPropertyGroupForm({})", grpName);
-        final List<GWTFormElement> gwtProperties = new ArrayList<GWTFormElement>();
+        List<GWTFormElement> gwtProperties = new ArrayList<GWTFormElement>();
         updateSessionManager();
 
         try {
-            for (final FormElement formElement : OKMPropertyGroup.getInstance()
-                    .getPropertyGroupForm(null, grpName)) {
+            for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
                 gwtProperties.add(GWTUtil.copy(formElement));
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_IO), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getPropertyGroupForm: {}", gwtProperties);
@@ -321,104 +272,113 @@ public class PropertyGroupServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void setProperties(final String path, final String grpName,
-            final List<GWTFormElement> formProperties) throws OKMException {
-        log.debug("setProperties({}, {}, {})", new Object[] { path, grpName,
-                formProperties });
+    public List<GWTFormElement> getPropertyGroupForm(String grpName, String path, boolean suggestion) throws OKMException {
+        log.debug("getPropertyGroupForm({},{},{})", new Object[] { grpName, path, suggestion });
+        List<GWTFormElement> gwtProperties = new ArrayList<GWTFormElement>();
         updateSessionManager();
 
         try {
-            final List<FormElement> properties = new ArrayList<FormElement>();
+            for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                GWTFormElement gWTFormElement = GWTUtil.copy(formElement);
+                if (gWTFormElement instanceof GWTSelect) {
+                    GWTSelect select = (GWTSelect) gWTFormElement;
+                    if (suggestion && !select.getSuggestion().equals("")) {
+                        for (String suggestedValue : OKMPropertyGroup.getInstance().getSuggestions(null, path, grpName, select.getName())) {
+                            for (GWTOption option : select.getOptions()) {
+                                if (option.getValue().equals(suggestedValue)) {
+                                    option.setSuggested(true);
+                                }
+                            }
+                        }
+                    }
+                }
+                gwtProperties.add(gWTFormElement);
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (RepositoryException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
+        }
 
-            for (final GWTFormElement gWTformElement : formProperties) {
+        log.debug("getPropertyGroupForm: {}", gwtProperties);
+        return gwtProperties;
+    }
+
+    @Override
+    public void setProperties(String path, String grpName, List<GWTFormElement> formProperties) throws OKMException {
+        log.debug("setProperties({}, {}, {})", new Object[] { path, grpName, formProperties });
+        updateSessionManager();
+
+        try {
+            List<FormElement> properties = new ArrayList<FormElement>();
+
+            for (GWTFormElement gWTformElement : formProperties) {
                 properties.add(GWTUtil.copy(gWTformElement));
             }
 
-            OKMPropertyGroup.getInstance().setProperties(null, path, grpName,
-                    properties);
-        } catch (final NoSuchPropertyException e) {
+            OKMPropertyGroup.getInstance().setProperties(null, path, grpName, properties);
+        } catch (NoSuchPropertyException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Lock), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("setProperties: void");
     }
 
     @Override
-    public void removeGroup(final String path, final String grpName)
-            throws OKMException {
+    public void removeGroup(String path, String grpName) throws OKMException {
         log.debug("removeGroup({}, {})", path, grpName);
         updateSessionManager();
 
         try {
             OKMPropertyGroup.getInstance().removeGroup(null, path, grpName);
-        } catch (final NoSuchGroupException e) {
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Lock), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyGroupService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyGroupService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("removeGroup: void");

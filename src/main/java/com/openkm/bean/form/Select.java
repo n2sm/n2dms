@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.bean.form;
@@ -30,32 +30,23 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.dao.KeyValueDAO;
 import com.openkm.dao.bean.KeyValue;
+import com.openkm.util.cl.ClassLoaderUtils;
 
 public class Select extends FormElement {
     private static Logger log = LoggerFactory.getLogger(Select.class);
-
     private static final long serialVersionUID = 1L;
-
     public static final String TYPE_SIMPLE = "simple";
-
     public static final String TYPE_MULTIPLE = "multiple";
-
     private List<Validator> validators = new ArrayList<Validator>();
-
     private List<Option> options = new ArrayList<Option>();
-
     private String type = TYPE_SIMPLE;
-
     private String value = "";
-
     private String data = "";
-
     private String optionsData = "";
-
     private String table = "";
-
     private String optionsQuery = "";
-
+    private String suggestion = "";
+    private String className = "";
     private boolean readonly = false;
 
     public Select() {
@@ -66,15 +57,15 @@ public class Select extends FormElement {
         return options;
     }
 
-    public void setOptions(final List<Option> options) {
-        handleDbOptions(options);
+    public void setOptions(List<Option> options) {
+        handleClassOptions(handleDbOptions(options));
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -82,7 +73,7 @@ public class Select extends FormElement {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -90,7 +81,7 @@ public class Select extends FormElement {
         return validators;
     }
 
-    public void setValidators(final List<Validator> validators) {
+    public void setValidators(List<Validator> validators) {
         this.validators = validators;
     }
 
@@ -98,7 +89,7 @@ public class Select extends FormElement {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
@@ -106,7 +97,7 @@ public class Select extends FormElement {
         return optionsData;
     }
 
-    public void setOptionsData(final String optionsData) {
+    public void setOptionsData(String optionsData) {
         this.optionsData = optionsData;
     }
 
@@ -114,7 +105,7 @@ public class Select extends FormElement {
         return table;
     }
 
-    public void setTable(final String table) {
+    public void setTable(String table) {
         this.table = table;
     }
 
@@ -122,37 +113,32 @@ public class Select extends FormElement {
         return optionsQuery;
     }
 
-    public void setOptionsQuery(final String optionsQuery) {
+    public void setOptionsQuery(String optionsQuery) {
         this.optionsQuery = optionsQuery;
+    }
+
+    public String getSuggestion() {
+        return suggestion;
+    }
+
+    public void setSuggestion(String suggestion) {
+        this.suggestion = suggestion;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public boolean isReadonly() {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("label=").append(label);
-        sb.append(", name=").append(name);
-        sb.append(", width=").append(width);
-        sb.append(", height=").append(height);
-        sb.append(", readonly=").append(readonly);
-        sb.append(", type=").append(type);
-        sb.append(", value=").append(value);
-        sb.append(", data=").append(data);
-        sb.append(", optionsData=").append(optionsData);
-        sb.append(", options=").append(options);
-        sb.append(", validators=").append(validators);
-        sb.append(", table=").append(table);
-        sb.append(", optionsQuery=").append(optionsQuery);
-        sb.append("}");
-        return sb.toString();
     }
 
     /**
@@ -164,33 +150,32 @@ public class Select extends FormElement {
      * 
      * @param options list of options
      */
-    private List<Option> handleDbOptions(final List<Option> options) {
+    private List<Option> handleDbOptions(List<Option> options) {
         // read options from DB?
         if (optionsQuery == null || optionsQuery.isEmpty()) {
             // no -> set options from parameter
             this.options = options;
         } else {
             // read options from DB:
-            final List<Option> dbOptions = getOptionsFromDb();
+            List<Option> dbOptions = getOptionsFromDb();
 
             // creates hashed options (key is value) from internal option list
-            final HashMap<String, Option> hashedOptions = new HashMap<String, Option>();
+            HashMap<String, Option> hashedOptions = new HashMap<String, Option>();
 
             if (this.options != null) {
-                for (final Option option : this.options) {
+                for (Option option : this.options) {
                     hashedOptions.put(option.getValue(), option);
                 }
             }
 
             // iterates DB options and set option if value is matched
-            for (final Option dbOption : dbOptions) {
+            for (Option dbOption : dbOptions) {
                 if (dbOption == null) {
                     continue;
                 }
 
-                final Option option = hashedOptions.get(dbOption.getValue());
-                dbOption.setSelected(option != null ? option.isSelected()
-                        : false);
+                Option option = hashedOptions.get(dbOption.getValue());
+                dbOption.setSelected(option != null ? option.isSelected() : false);
             }
 
             this.options = dbOptions;
@@ -205,26 +190,110 @@ public class Select extends FormElement {
      * @return list of options from meta table, empty list on error.
      */
     private List<Option> getOptionsFromDb() {
-        final List<Option> dbOptions = new ArrayList<Option>();
+        List<Option> dbOptions = new ArrayList<Option>();
 
         try {
-            log.debug("Getting options from DB (table={}, query={})",
-                    new Object[] { table, optionsQuery });
-            final List<KeyValue> keyValues = KeyValueDAO.getKeyValues(table,
-                    optionsQuery);
+            log.debug("Getting options from DB (table={}, query={})", new Object[] { table, optionsQuery });
+            List<KeyValue> keyValues = KeyValueDAO.getKeyValues(table, optionsQuery);
 
-            for (final KeyValue keyValue : keyValues) {
-                final Option option = new Option();
+            for (KeyValue keyValue : keyValues) {
+                Option option = new Option();
                 option.setValue(keyValue.getKey());
                 option.setLabel(keyValue.getValue());
                 dbOptions.add(option);
             }
 
             log.debug("Got {} options from DB", dbOptions.size());
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             log.error("Unable to get key values for Select", t);
         }
 
         return dbOptions;
+    }
+
+    /**
+     * If Select reads options from Class, it gets options from DB and set into internal list {@see Select#options}.
+     * It is assumed that each option in list has different Value. New options are matched by Value with old
+     * options (by temporal hash) and selected if old option is also selected.
+     * 
+     * If {@see Select#className} is not specified, it replace internal list of options with parameter options.
+     * 
+     * @param options list of options
+     */
+    private List<Option> handleClassOptions(List<Option> options) {
+        // read options from DB?
+        if (className == null || className.isEmpty()) {
+            // no -> set options from parameter
+            this.options = options;
+        } else {
+            // read options from DB:
+            List<Option> classOptions = getOptionsFromClass();
+
+            // creates hashed options (key is value) from internal option list
+            HashMap<String, Option> hashedOptions = new HashMap<String, Option>();
+
+            if (this.options != null) {
+                for (Option option : this.options) {
+                    hashedOptions.put(option.getValue(), option);
+                }
+            }
+
+            // iterates DB options and set option if value is matched
+            for (Option classOption : classOptions) {
+                if (classOption == null) {
+                    continue;
+                }
+
+                Option option = hashedOptions.get(classOption.getValue());
+                classOption.setSelected(option != null ? option.isSelected() : false);
+            }
+
+            this.options = classOptions;
+        }
+
+        return this.options;
+    }
+
+    /**
+     * Return list of Select's Options from class 
+     * 
+     * @return list of options from class, empty list on error.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Option> getOptionsFromClass() {
+        List<Option> classOptions = new ArrayList<Option>();
+
+        try {
+            log.debug("Getting options from Class (className={})", className);
+            ClassLoader cl = getClass().getClassLoader();
+            classOptions = (List<Option>) ClassLoaderUtils.invokeMethodFromClass(className, "getOptions", cl);
+            log.debug("Got {} options from DB", classOptions.size());
+        } catch (Throwable t) {
+            log.error("Unable to get key values for Select", t);
+        }
+
+        return classOptions;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("label=").append(label);
+        sb.append(", name=").append(name);
+        sb.append(", width=").append(width);
+        sb.append(", height=").append(height);
+        sb.append(", readonly=").append(readonly);
+        sb.append(", type=").append(type);
+        sb.append(", value=").append(value);
+        sb.append(", data=").append(data);
+        sb.append(", optionsData=").append(optionsData);
+        sb.append(", options=").append(options);
+        sb.append(", validators=").append(validators);
+        sb.append(", table=").append(table);
+        sb.append(", optionsQuery=").append(optionsQuery);
+        sb.append(", suggestion=").append(suggestion);
+        sb.append(", class=").append(className);
+        sb.append("}");
+        return sb.toString();
     }
 }

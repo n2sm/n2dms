@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,6 +32,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.spell.Dictionary;
 import org.apache.lucene.search.spell.LuceneDictionary;
@@ -56,19 +57,16 @@ import com.openkm.dao.bean.NodeDocumentVersion;
 
 public class IndexHelper {
     private static Logger log = LoggerFactory.getLogger(IndexHelper.class);
-
     private EntityManager entityManager;
 
     public void checkIndexOnStartup() {
         //log.info("Observed event {1} from Thread {0}", Thread.currentThread().getName(), App.INIT_SUCCESS);
 
         // See if we need to rebuild the index during startup ...
-        final FullTextEntityManager ftEm = Search
-                .getFullTextEntityManager(entityManager);
-        final SearchFactory searchFactory = ftEm.getSearchFactory();
-        final ReaderProvider readerProvider = searchFactory.getReaderProvider();
-        final IndexReader reader = readerProvider.openReader(searchFactory
-                .getDirectoryProviders(NodeDocumentVersion.class)[0]);
+        FullTextEntityManager ftEm = Search.getFullTextEntityManager(entityManager);
+        SearchFactory searchFactory = ftEm.getSearchFactory();
+        ReaderProvider readerProvider = searchFactory.getReaderProvider();
+        IndexReader reader = readerProvider.openReader(searchFactory.getDirectoryProviders(NodeDocumentVersion.class)[0]);
         int maxDoc = 0;
 
         try {
@@ -80,15 +78,13 @@ public class IndexHelper {
         if (maxDoc == 0) {
             log.warn("No objects indexed ... rebuilding Lucene search index from database ...");
             long _exit = 0L;
-            final long _entr = System.currentTimeMillis();
+            long _entr = System.currentTimeMillis();
 
             try {
-                final int docs = doRebuildIndex();
+                int docs = doRebuildIndex();
                 _exit = System.currentTimeMillis();
-                log.info("Took " + (_exit - _entr)
-                        + " (ms) to re-build the index containing " + docs
-                        + " documents.");
-            } catch (final Exception exc) {
+                log.info("Took " + (_exit - _entr) + " (ms) to re-build the index containing " + docs + " documents.");
+            } catch (Exception exc) {
                 if (exc instanceof RuntimeException) {
                     throw (RuntimeException) exc;
                 } else {
@@ -101,22 +97,20 @@ public class IndexHelper {
         }
     }
 
-    public void updateSpellCheckerIndex(final NodeDocumentVersion nDocVer) {
-        log.info("Observed Wine added/updated event for {1} from Thread {0}",
-                Thread.currentThread().getName(), String.valueOf(nDocVer));
-        final String text = nDocVer != null ? nDocVer.getText() : null;
+    public void updateSpellCheckerIndex(NodeDocumentVersion nDocVer) {
+        log.info("Observed Wine added/updated event for {1} from Thread {0}", Thread.currentThread().getName(), String.valueOf(nDocVer));
+        String text = (nDocVer != null) ? nDocVer.getText() : null;
 
         if (text != null) {
             Dictionary dictionary = null;
 
             try {
-                final FullTextEntityManager ftEm = (FullTextEntityManager) entityManager;
-                final SearchFactory searchFactory = ftEm.getSearchFactory();
-                dictionary = new SetDictionary(text,
-                        searchFactory.getAnalyzer("wine_en"));
-            } catch (final IOException ioExc) {
-                log.error("Failed to analyze dictionary text {0} from Wine {1} to update spell checker due to: {2}"
-                        + text + nDocVer.getUuid() + ioExc.toString());
+                FullTextEntityManager ftEm = (FullTextEntityManager) entityManager;
+                SearchFactory searchFactory = ftEm.getSearchFactory();
+                dictionary = new SetDictionary(text, searchFactory.getAnalyzer("wine_en"));
+            } catch (IOException ioExc) {
+                log.error("Failed to analyze dictionary text {0} from Wine {1} to update spell checker due to: {2}" + text
+                        + nDocVer.getUuid() + ioExc.toString());
             }
 
             if (dictionary != null) {
@@ -128,21 +122,18 @@ public class IndexHelper {
                 // is application-scoped
                 synchronized (this) {
                     try {
-                        dir = FSDirectory.open(new File(
-                                "lucene_index/spellcheck"));
-                        final SpellChecker spell = new SpellChecker(dir);
+                        dir = FSDirectory.open(new File("lucene_index/spellcheck"));
+                        SpellChecker spell = new SpellChecker(dir);
                         spell.indexDictionary(dictionary);
                         spell.close();
                         log.info("Successfully updated the spell checker index after Document added/updated.");
-                    } catch (final Exception exc) {
-                        log.error("Failed to update the spell checker index!",
-                                exc);
+                    } catch (Exception exc) {
+                        log.error("Failed to update the spell checker index!", exc);
                     } finally {
                         if (dir != null) {
                             try {
                                 dir.close();
-                            } catch (final Exception zzz) {
-                            }
+                            } catch (Exception zzz) {}
                         }
                     }
                 }
@@ -155,13 +146,12 @@ public class IndexHelper {
         private Set<String> wordSet;
 
         @SuppressWarnings("unused")
-        SetDictionary(final String words, final Analyzer analyzer)
-                throws IOException {
+        SetDictionary(String words, Analyzer analyzer) throws IOException {
             wordSet = new HashSet<String>();
             if (words != null) {
-                analyzer.tokenStream(NodeDocument.TEXT_FIELD, new StringReader(
-                        words));
-                new Token();
+                TokenStream tokenStream = analyzer.tokenStream(NodeDocument.TEXT_FIELD, new StringReader(words));
+                Token reusableToken = new Token();
+                Token nextToken = null;
 
                 //while ((nextToken = tokenStream.next(reusableToken)) != null) {
                 //String term = nextToken.term();
@@ -172,45 +162,39 @@ public class IndexHelper {
             }
         }
 
-        @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public Iterator getWordsIterator() {
             return wordSet.iterator();
         }
     }
 
-    protected void buildSpellCheckerIndex(final SearchFactory searchFactory) {
+    protected void buildSpellCheckerIndex(SearchFactory searchFactory) {
         IndexReader reader = null;
         Directory dir = null;
-        final long _entr = System.currentTimeMillis();
-        final File spellCheckIndexDir = new File("lucene_index/spellcheck");
-        log.info("Building SpellChecker index in {0}",
-                spellCheckIndexDir.getAbsolutePath());
-        final ReaderProvider readerProvider = searchFactory.getReaderProvider();
+        long _entr = System.currentTimeMillis();
+        File spellCheckIndexDir = new File("lucene_index/spellcheck");
+        log.info("Building SpellChecker index in {0}", spellCheckIndexDir.getAbsolutePath());
+        ReaderProvider readerProvider = searchFactory.getReaderProvider();
 
         try {
-            reader = readerProvider.openReader(searchFactory
-                    .getDirectoryProviders(NodeDocumentVersion.class)[0]);
+            reader = readerProvider.openReader(searchFactory.getDirectoryProviders(NodeDocumentVersion.class)[0]);
             dir = FSDirectory.open(spellCheckIndexDir);
-            final SpellChecker spell = new SpellChecker(dir);
+            SpellChecker spell = new SpellChecker(dir);
             spell.clearIndex();
-            spell.indexDictionary(new LuceneDictionary(reader,
-                    NodeDocument.TEXT_FIELD));
+            spell.indexDictionary(new LuceneDictionary(reader, NodeDocument.TEXT_FIELD));
             spell.close();
             dir.close();
             dir = null;
-            final long _exit = System.currentTimeMillis();
-            log.info("Took {1} (ms) to build SpellChecker index in {0}",
-                    spellCheckIndexDir.getAbsolutePath(),
-                    String.valueOf(_exit - _entr));
-        } catch (final Exception exc) {
+            long _exit = System.currentTimeMillis();
+            log.info("Took {1} (ms) to build SpellChecker index in {0}", spellCheckIndexDir.getAbsolutePath(),
+                    String.valueOf((_exit - _entr)));
+        } catch (Exception exc) {
             log.error("Failed to build spell checker index!", exc);
         } finally {
             if (dir != null) {
                 try {
                     dir.close();
-                } catch (final Exception zzz) {
-                }
+                } catch (Exception zzz) {}
             }
             if (reader != null) {
                 readerProvider.closeReader(reader);
@@ -219,22 +203,20 @@ public class IndexHelper {
     }
 
     protected int doRebuildIndex() throws Exception {
-        final FullTextSession fullTextSession = (FullTextSession) entityManager
-                .getDelegate();
+        FullTextSession fullTextSession = (FullTextSession) entityManager.getDelegate();
         fullTextSession.setFlushMode(org.hibernate.FlushMode.MANUAL);
         fullTextSession.setCacheMode(org.hibernate.CacheMode.IGNORE);
         fullTextSession.purgeAll(NodeDocumentVersion.class);
         fullTextSession.getSearchFactory().optimize(NodeDocumentVersion.class);
 
-        final String query = "select ndv from NodeDocumentVersion ndv";
-        final ScrollableResults cursor = fullTextSession.createQuery(query)
-                .scroll();
+        String query = "select ndv from NodeDocumentVersion ndv";
+        ScrollableResults cursor = fullTextSession.createQuery(query).scroll();
         cursor.last();
-        final int count = cursor.getRowNumber() + 1;
+        int count = cursor.getRowNumber() + 1;
         log.warn("Re-building Wine index for " + count + " objects.");
 
         if (count > 0) {
-            final int batchSize = 300;
+            int batchSize = 300;
             cursor.first(); // Reset to first result row
             int i = 0;
 
@@ -244,8 +226,7 @@ public class IndexHelper {
                 if (++i % batchSize == 0) {
                     fullTextSession.flushToIndexes();
                     fullTextSession.clear(); // Clear persistence context for each batch
-                    log.info("Flushed index update " + i + " from Thread "
-                            + Thread.currentThread().getName());
+                    log.info("Flushed index update " + i + " from Thread " + Thread.currentThread().getName());
                 }
 
                 if (cursor.isLast()) {

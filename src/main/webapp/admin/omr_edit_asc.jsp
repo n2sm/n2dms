@@ -8,8 +8,8 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="Shortcut icon" href="favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
-  <script src="../js/jquery-1.7.1.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css?v=%{TIMESTAMP}%" />
+  <script src="../js/jquery-1.8.3.min.js" type="text/javascript"></script>
   <script src="../js/vanadium-min.js" type="text/javascript"></script>
   <title>OMR Template Template</title>
 </head>
@@ -48,8 +48,8 @@
           <tr>
             <td colspan="2" align="right">
               <div id="buttons">
-              	<input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              	<input type="submit" value="Send"/>
+              	<input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              	<input type="submit" value="Upload" class="yesButton"/>
               </div>
             </td>
           </tr>

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,25 +34,20 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUploadListener implements ProgressListener, Serializable {
     @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory
-            .getLogger(FileUploadListener.class);
-
+    private static Logger log = LoggerFactory.getLogger(FileUploadListener.class);
     private static final long serialVersionUID = -4945332468806137001L;
-
     private volatile long bytesRead = 0L, contentLength = 0L, item = 0L;
-
     private boolean uploadFinish = false;
 
     /**
      * FileUploadListener
      */
-    public FileUploadListener(final long contentLength) {
+    public FileUploadListener(long contentLength) {
         this.contentLength = contentLength;
     }
 
     @Override
-    public void update(final long aBytesRead, final long aContentLength,
-            final int anItem) {
+    public void update(long aBytesRead, long aContentLength, int anItem) {
         // log.info("Uploaded: {}, Total: {}", FormatUtil.formatSize(aBytesRead), FormatUtil.formatSize(aContentLength));
         bytesRead = aBytesRead;
         // contentLength = aContentLength;
@@ -75,7 +70,7 @@ public class FileUploadListener implements ProgressListener, Serializable {
         return uploadFinish;
     }
 
-    public void setUploadFinish(final boolean uploadFinish) {
+    public void setUploadFinish(boolean uploadFinish) {
         this.uploadFinish = uploadFinish;
     }
 }

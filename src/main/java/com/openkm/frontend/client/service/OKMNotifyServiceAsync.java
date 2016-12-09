@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,6 +34,6 @@ public interface OKMNotifyServiceAsync {
 
     public void unsubscribe(String nodePath, AsyncCallback<?> callback);
 
-    public void notify(String docPath, String users, String roles,
-            String message, boolean attachment, AsyncCallback<?> callback);
+    public void notify(String docPath, String mails, String users, String roles, String message, boolean attachment,
+            AsyncCallback<?> callback);
 }

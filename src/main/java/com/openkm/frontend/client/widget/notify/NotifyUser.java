@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,8 +29,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -48,19 +46,13 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  */
 public class NotifyUser extends Composite {
 
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     private HorizontalPanel hPanel;
-
     private UserScrollTable notifyUsersTable;
-
     private UserScrollTable userTable;
-
     private VerticalPanel buttonPanel;
-
     private Image addButton;
-
     private Image removeButton;
 
     /**
@@ -75,25 +67,25 @@ public class NotifyUser extends Composite {
         addButton = new Image(OKMBundleResources.INSTANCE.add());
         removeButton = new Image(OKMBundleResources.INSTANCE.remove());
 
-        final HTML space = new HTML("");
+        HTML space = new HTML("");
         buttonPanel.add(addButton);
         buttonPanel.add(space); // separator
         buttonPanel.add(removeButton);
 
-        buttonPanel.setCellHeight(space, "40");
+        buttonPanel.setCellHeight(space, "40px");
 
         addButton.addClickHandler(addButtonHandler);
         removeButton.addClickHandler(removeButtonHandler);
+        addButton.setStyleName("okm-Hyperlink");
+        removeButton.setStyleName("okm-Hyperlink");
 
-        hPanel.setSize("374", "140");
+        hPanel.setSize("374px", "140px");
         hPanel.add(userTable);
         hPanel.add(buttonPanel);
         hPanel.add(notifyUsersTable);
-        hPanel.setCellVerticalAlignment(buttonPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(buttonPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        hPanel.setCellWidth(buttonPanel, "20");
+        hPanel.setCellVerticalAlignment(buttonPanel, VerticalPanel.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(buttonPanel, HorizontalPanel.ALIGN_CENTER);
+        hPanel.setCellWidth(buttonPanel, "20px");
 
         userTable.addStyleName("okm-Border-Left");
         userTable.addStyleName("okm-Border-Right");
@@ -112,7 +104,7 @@ public class NotifyUser extends Composite {
      */
     public void correcIEBug() {
         // TODO:Solves minor bug with IE ( UI defect extra size needed )
-        hPanel.setCellWidth(buttonPanel, "25");
+        hPanel.setCellWidth(buttonPanel, "25px");
     }
 
     /**
@@ -143,7 +135,7 @@ public class NotifyUser extends Composite {
      */
     ClickHandler addButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (userTable.getUser() != null) {
                 notifyUsersTable.addRow(userTable.getUser());
                 notifyUsersTable.selectLastRow();
@@ -159,7 +151,7 @@ public class NotifyUser extends Composite {
      */
     ClickHandler removeButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (notifyUsersTable.getUser() != null) {
                 userTable.addRow(notifyUsersTable.getUser());
                 userTable.selectLastRow();
@@ -172,15 +164,13 @@ public class NotifyUser extends Composite {
      * Call back get all users
      */
     final AsyncCallback<List<GWTUser>> callbackAllUsers = new AsyncCallback<List<GWTUser>>() {
-        @Override
-        public void onSuccess(final List<GWTUser> result) {
-            for (final GWTUser user : result) {
+        public void onSuccess(List<GWTUser> result) {
+            for (GWTUser user : result) {
                 userTable.addRow(user);
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetAllUsers", caught);
         }
     };
@@ -195,9 +185,8 @@ public class NotifyUser extends Composite {
     /**
      * Gets the all users by filter
      */
-    public void getFilteredAllUsers(final String filter) {
-        authService.getFilteredAllUsers(filter,
-                notifyUsersTable.getUsersToNotifyList(), callbackAllUsers);
+    public void getFilteredAllUsers(String filter) {
+        authService.getFilteredAllUsers(filter, notifyUsersTable.getUsersToNotifyList(), callbackAllUsers);
     }
 
     /**

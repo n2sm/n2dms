@@ -3,15 +3,15 @@ package com.openkm.frontend.client.widget;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.openkm.frontend.client.Main;
@@ -28,81 +28,45 @@ import com.openkm.frontend.client.widget.chat.ChatRoomPopup;
 import com.openkm.frontend.client.widget.chat.OnlineUsersPopup;
 
 public class UserInfo extends Composite {
-    private final OKMChatServiceAsync chatService = (OKMChatServiceAsync) GWT
-            .create(OKMChatService.class);
+    private final OKMChatServiceAsync chatService = (OKMChatServiceAsync) GWT.create(OKMChatService.class);
 
     public static final int USERS_IN_ROOM_REFRESHING_TIME = 1000;
-
-    private static final int NEW_ROOM_REFRESHING_TIME = 200;
+    private static final int NEW_ROOM_REFRESHING_TIME = 1000;
 
     private HorizontalPanel panel;
-
     private Image advertisement;
-
     private HTML user;
-
     private Image img;
-
     private HTML userRepositorySize;
-
     private Image imgRepositorySize;
-
     private HTML lockedDocuments;
-
     private Image imgLockedDocuments;
-
     private HTML checkoutDocuments;
-
     private Image imgCheckoutDocuments;
-
     private HTML subscriptions;
-
     private Image imgSubscriptions;
-
     private HTML newDocuments;
-
     private Image imgNewsDocuments;
-
     private HTML newWorkflowTasks;
-
     private Image imgWorkflowTasks;
-
     private HTML newWorkflowPooledTasks;
-
     private Image imgWorkflowPooledTasks;
-
     private Image imgChat;
-
     private Image imgNewChatRoom;
-
     private Image imgChatSeparator;
-
     private boolean chatConnected = false;
-
     private HTML usersConnected;
-
     private List<GWTUser> connectUsersList;
-
     private List<ChatRoomDialogBox> chatRoomList;
-
     private Image imgUserQuota;
-
     private boolean userQuota = false;
-
     private long quotaLimit = 0;
-
     private boolean quotaExceeded = false;
-
     private HTML quotaUsed;
-
     private int percent = 0;
-
     private List<UserInfoExtension> widgetExtensionList;
-
     private boolean getLoggedUsers = false;
-
     private boolean getPendingChatRoomUser = false;
-
     private boolean logoutDone = true;
 
     /**
@@ -114,8 +78,8 @@ public class UserInfo extends Composite {
         chatRoomList = new ArrayList<ChatRoomDialogBox>();
         img = new Image(OKMBundleResources.INSTANCE.openkmConnected());
         panel = new HorizontalPanel();
-        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        panel.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        panel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         user = new HTML("");
         userRepositorySize = new HTML("");
         usersConnected = new HTML("");
@@ -133,8 +97,7 @@ public class UserInfo extends Composite {
         newDocuments.setVisible(false);
         newWorkflowTasks.setVisible(false);
         newWorkflowPooledTasks.setVisible(false);
-        imgRepositorySize = new Image(
-                OKMBundleResources.INSTANCE.repositorySize());
+        imgRepositorySize = new Image(OKMBundleResources.INSTANCE.repositorySize());
         imgUserQuota = new Image(OKMBundleResources.INSTANCE.quota1());
         imgChat = new Image(OKMBundleResources.INSTANCE.chatDisconnected());
         imgChatSeparator = new Image(OKMBundleResources.INSTANCE.separator());
@@ -143,10 +106,8 @@ public class UserInfo extends Composite {
         imgCheckoutDocuments = new Image(OKMBundleResources.INSTANCE.checkout());
         imgSubscriptions = new Image(OKMBundleResources.INSTANCE.subscribed());
         imgNewsDocuments = new Image(OKMBundleResources.INSTANCE.news());
-        imgWorkflowTasks = new Image(
-                OKMBundleResources.INSTANCE.workflowTasks());
-        imgWorkflowPooledTasks = new Image(
-                OKMBundleResources.INSTANCE.workflowPooledTasks());
+        imgWorkflowTasks = new Image(OKMBundleResources.INSTANCE.workflowTasks());
+        imgWorkflowPooledTasks = new Image(OKMBundleResources.INSTANCE.workflowPooledTasks());
         imgRepositorySize.setVisible(false);
         imgUserQuota.setVisible(false);
         imgChat.setVisible(false);
@@ -166,70 +127,60 @@ public class UserInfo extends Composite {
         imgCheckoutDocuments.setTitle(Main.i18n("user.info.checkout.actual"));
         imgSubscriptions.setTitle(Main.i18n("user.info.subscription.actual"));
         imgNewsDocuments.setTitle(Main.i18n("user.info.news.new"));
-        imgWorkflowTasks
-                .setTitle(Main.i18n("user.info.workflow.pending.tasks"));
-        imgWorkflowPooledTasks.setTitle(Main
-                .i18n("user.info.workflow.pending.pooled.tasks"));
+        imgWorkflowTasks.setTitle(Main.i18n("user.info.workflow.pending.tasks"));
+        imgWorkflowPooledTasks.setTitle(Main.i18n("user.info.workflow.pending.pooled.tasks"));
 
         imgLockedDocuments.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
                 Main.get().mainPanel.dashboard.horizontalToolBar.showUserView();
             }
         });
 
         imgCheckoutDocuments.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
                 Main.get().mainPanel.dashboard.horizontalToolBar.showUserView();
             }
         });
 
         imgSubscriptions.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
                 Main.get().mainPanel.dashboard.horizontalToolBar.showUserView();
             }
         });
 
         imgNewsDocuments.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
                 Main.get().mainPanel.dashboard.horizontalToolBar.showNewsView();
             }
         });
 
         imgWorkflowTasks.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
-                Main.get().mainPanel.dashboard.horizontalToolBar
-                        .showWorkflowView();
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+                Main.get().mainPanel.dashboard.horizontalToolBar.showWorkflowView();
             }
         });
 
         imgWorkflowPooledTasks.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().mainPanel.topPanel.tabWorkspace
-                        .changeSelectedTab(UIDockPanelConstants.DASHBOARD);
-                Main.get().mainPanel.dashboard.horizontalToolBar
-                        .showWorkflowView();
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.DASHBOARD);
+                Main.get().mainPanel.dashboard.horizontalToolBar.showWorkflowView();
             }
         });
 
         imgChat.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (!isPendingToClose()) {
                     loginChat(false);
                 } else {
@@ -240,9 +191,8 @@ public class UserInfo extends Composite {
 
         imgNewChatRoom.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().onlineUsersPopup
-                        .setAction(OnlineUsersPopup.ACTION_NEW_CHAT);
+            public void onClick(ClickEvent event) {
+                Main.get().onlineUsersPopup.setAction(OnlineUsersPopup.ACTION_NEW_CHAT);
                 Main.get().onlineUsersPopup.center();
                 Main.get().onlineUsersPopup.refreshOnlineUsers();
             }
@@ -253,8 +203,8 @@ public class UserInfo extends Composite {
 
         advertisement.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                Main.get().msgPopup.center();
+            public void onClick(ClickEvent event) {
+                Main.get().msgPopup.show();
             }
         });
 
@@ -322,18 +272,18 @@ public class UserInfo extends Composite {
      * 
      * @param username The user value
      */
-    public void setUser(final String username, final boolean isAdmin) {
-        user.setHTML("&nbsp;" + Main.i18n("general.connected") + " " + username
-                + "&nbsp;");
+    public void setUser(String username, boolean isAdmin) {
+        this.user.setHTML("&nbsp;" + Main.i18n("general.connected") + " " + username + "&nbsp;");
+
         if (isAdmin) {
-            user.addStyleName("okm-Input-System");
+            this.user.addStyleName("okm-Input-System");
         }
     }
 
     /**
      * Sets the repository size
      */
-    public void setUserRepositorySize(final double size) {
+    public void setUserRepositorySize(double size) {
         imgRepositorySize.setVisible(true);
         userRepositorySize.setHTML("&nbsp;" + Util.formatSize(size) + "&nbsp;");
         if (userQuota) {
@@ -341,11 +291,10 @@ public class UserInfo extends Composite {
                 if (size >= quotaLimit) {
                     quotaExceeded = true;
                     percent = 100;
-                    imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                            .quota6());
+                    imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota6());
                 } else {
                     // Calculating %
-                    percent = new Double(size * 100 / quotaLimit).intValue();
+                    percent = new Double((size * 100) / quotaLimit).intValue();
 
                     if (percent == 0) {
                         percent = 1;
@@ -354,20 +303,15 @@ public class UserInfo extends Composite {
                     }
 
                     if (percent <= 20) {
-                        imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                                .quota1());
+                        imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota1());
                     } else if (percent <= 40) {
-                        imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                                .quota2());
+                        imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota2());
                     } else if (percent <= 60) {
-                        imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                                .quota3());
+                        imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota3());
                     } else if (percent <= 80) {
-                        imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                                .quota4());
+                        imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota4());
                     } else {
-                        imgUserQuota.setResource(OKMBundleResources.INSTANCE
-                                .quota5());
+                        imgUserQuota.setResource(OKMBundleResources.INSTANCE.quota5());
                     }
                 }
             } else {
@@ -381,7 +325,7 @@ public class UserInfo extends Composite {
     /**
      * Sets the locked documents
      */
-    public void setLockedDocuments(final int value) {
+    public void setLockedDocuments(int value) {
         lockedDocuments.setHTML("&nbsp;" + value + "&nbsp;");
     }
 
@@ -389,25 +333,24 @@ public class UserInfo extends Composite {
      * e
      * Sets the checkout documents
      */
-    public void setCheckoutDocuments(final int value) {
+    public void setCheckoutDocuments(int value) {
         checkoutDocuments.setHTML("&nbsp;" + value + "&nbsp;");
     }
 
     /**
      * Sets the subscriptions documents and folders
      */
-    public void setSubscriptions(final int value) {
+    public void setSubscriptions(int value) {
         subscriptions.setHTML("&nbsp;" + value + "&nbsp;");
     }
 
     /**
      * Sets the news documents
      */
-    public void setNewsDocuments(final int value) {
+    public void setNewsDocuments(int value) {
         newDocuments.setHTML("&nbsp;" + value + "&nbsp;");
         if (value > 0) {
-            imgNewsDocuments.setResource(OKMBundleResources.INSTANCE
-                    .newsAlert());
+            imgNewsDocuments.setResource(OKMBundleResources.INSTANCE.newsAlert());
         } else {
             imgNewsDocuments.setResource(OKMBundleResources.INSTANCE.news());
         }
@@ -416,38 +359,27 @@ public class UserInfo extends Composite {
     /**
      * Sets the news workflows
      */
-    public void setNewsWorkflows(final int value) {
+    public void setNewsWorkflows(int value) {
         newWorkflowTasks.setHTML("&nbsp;" + value + "&nbsp;");
 
         if (value > 0) {
-            imgWorkflowTasks.setResource(OKMBundleResources.INSTANCE
-                    .workflowTasksAlert());
+            imgWorkflowTasks.setResource(OKMBundleResources.INSTANCE.workflowTasksAlert());
         } else {
-            imgWorkflowTasks.setResource(OKMBundleResources.INSTANCE
-                    .workflowTasks());
+            imgWorkflowTasks.setResource(OKMBundleResources.INSTANCE.workflowTasks());
         }
     }
 
     /**
      * Sets the pooled task instances
      */
-    public void setPooledTaskInstances(final int value) {
+    public void setPooledTaskInstances(int value) {
         newWorkflowPooledTasks.setHTML("&nbsp;" + value + "&nbsp;");
 
         if (value > 0) {
-            imgWorkflowPooledTasks.setResource(OKMBundleResources.INSTANCE
-                    .workflowPooledTasksAlert());
+            imgWorkflowPooledTasks.setResource(OKMBundleResources.INSTANCE.workflowPooledTasksAlert());
         } else {
-            imgWorkflowPooledTasks.setResource(OKMBundleResources.INSTANCE
-                    .workflowPooledTasks());
+            imgWorkflowPooledTasks.setResource(OKMBundleResources.INSTANCE.workflowPooledTasks());
         }
-    }
-
-    /**
-     * reset
-     */
-    public void reset() {
-        Main.get().msgPopup.reset();
     }
 
     /**
@@ -455,7 +387,7 @@ public class UserInfo extends Composite {
      * 
      * Sets the msg value
      */
-    public void addUINotification(final GWTUINotification uin) {
+    public void addUINotification(GWTUINotification uin) {
         advertisement.setVisible(true);
         Main.get().msgPopup.add(uin);
     }
@@ -465,7 +397,7 @@ public class UserInfo extends Composite {
      * 
      * @param id
      */
-    public void setLastUIId(final int id) {
+    public void setLastUIId(int id) {
         Main.get().msgPopup.setLastUIId(id);
     }
 
@@ -473,10 +405,8 @@ public class UserInfo extends Composite {
      * langRefresh
      */
     public void langRefresh() {
-        final String usr = Main.get().workspaceUserProperties.getUser()
-                .getUsername();
-        user.setHTML("&nbsp;" + Main.i18n("general.connected") + " " + usr
-                + "&nbsp;");
+        String usr = Main.get().workspaceUserProperties.getUser().getUsername();
+        user.setHTML("&nbsp;" + Main.i18n("general.connected") + " " + usr + "&nbsp;");
 
         if (chatConnected) {
             imgChat.setTitle(Main.i18n("user.info.chat.disconnect"));
@@ -492,14 +422,12 @@ public class UserInfo extends Composite {
         imgCheckoutDocuments.setTitle(Main.i18n("user.info.checkout.actual"));
         imgSubscriptions.setTitle(Main.i18n("user.info.subscription.actual"));
         imgNewsDocuments.setTitle(Main.i18n("user.info.news.new"));
-        imgWorkflowTasks
-                .setTitle(Main.i18n("user.info.workflow.pending.tasks"));
-        imgWorkflowPooledTasks.setTitle(Main
-                .i18n("user.info.workflow.pending.pooled.tasks"));
+        imgWorkflowTasks.setTitle(Main.i18n("user.info.workflow.pending.tasks"));
+        imgWorkflowPooledTasks.setTitle(Main.i18n("user.info.workflow.pending.pooled.tasks"));
         quotaUsed.setHTML(percent + "%");
 
         // Resfreshing actual chatrooms
-        for (final ChatRoomDialogBox chatRoomDialogBox : chatRoomList) {
+        for (ChatRoomDialogBox chatRoomDialogBox : chatRoomList) {
             chatRoomDialogBox.langRefresh();
         }
     }
@@ -509,27 +437,38 @@ public class UserInfo extends Composite {
      */
     private void refreshConnectedUsers() {
         getLoggedUsers = true;
+
         if (chatConnected) {
             chatService.getLoggedUsers(new AsyncCallback<List<GWTUser>>() {
                 @Override
-                public void onSuccess(final List<GWTUser> result) {
+                public void onSuccess(List<GWTUser> result) {
                     connectUsersList = result;
                     usersConnected.setHTML(connectUsersList.size() + "");
-                    final Timer timer = new Timer() {
+                    getLoggedUsers = false;
+
+                    new Timer() {
                         @Override
                         public void run() {
                             refreshConnectedUsers();
                         }
-                    };
-
-                    getLoggedUsers = false;
-                    timer.schedule(USERS_IN_ROOM_REFRESHING_TIME); // Each minute seconds refreshing connected users
+                    }.schedule(USERS_IN_ROOM_REFRESHING_TIME);
                 }
 
                 @Override
-                public void onFailure(final Throwable caught) {
+                public void onFailure(Throwable caught) {
+                    Log.error(UserInfo.class + ".refreshConnectedUsers().onFailure(" + caught + ")");
                     getLoggedUsers = false;
-                    Main.get().showError("GetLoggedUsers", caught);
+
+                    if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
+                        new Timer() {
+                            @Override
+                            public void run() {
+                                refreshConnectedUsers();
+                            }
+                        }.schedule(USERS_IN_ROOM_REFRESHING_TIME);
+                    } else {
+                        Main.get().showError("UserInfo.refreshConnectedUsers", caught);
+                    }
                 }
             });
         } else {
@@ -542,36 +481,45 @@ public class UserInfo extends Composite {
      */
     private void getPendingChatRoomUser() {
         getPendingChatRoomUser = true;
+
         if (chatConnected) {
-            chatService
-                    .getPendingChatRoomUser(new AsyncCallback<List<String>>() {
+            chatService.getPendingChatRoomUser(new AsyncCallback<List<String>>() {
+                @Override
+                public void onSuccess(List<String> result) {
+                    for (String room : result) {
+                        ChatRoomPopup chatRoomPopup = new ChatRoomPopup("", room);
+                        chatRoomPopup.center();
+                        chatRoomPopup.getPendingMessage(room);
+                        addChatRoom(chatRoomPopup);
+                    }
+
+                    getPendingChatRoomUser = false;
+
+                    new Timer() {
                         @Override
-                        public void onSuccess(final List<String> result) {
-                            for (final String room : result) {
-                                final ChatRoomPopup chatRoomPopup = new ChatRoomPopup(
-                                        "", room);
-                                chatRoomPopup.center();
-                                chatRoomPopup.getPendingMessage(room);
-                                addChatRoom(chatRoomPopup);
+                        public void run() {
+                            getPendingChatRoomUser();
+                        }
+                    }.schedule(NEW_ROOM_REFRESHING_TIME);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Log.error(UserInfo.class + ".getPendingChatRoomUser().onFailure(" + caught + ")");
+                    getPendingChatRoomUser = false;
+
+                    if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {
+                        new Timer() {
+                            @Override
+                            public void run() {
+                                getPendingChatRoomUser();
                             }
-
-                            final Timer timer = new Timer() {
-                                @Override
-                                public void run() {
-                                    getPendingChatRoomUser();
-                                }
-                            };
-
-                            getPendingChatRoomUser = false;
-                            timer.schedule(NEW_ROOM_REFRESHING_TIME); // Each minute seconds refreshing connected users
-                        }
-
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            getPendingChatRoomUser = false;
-                            Main.get().showError("GetLoggedUsers", caught);
-                        }
-                    });
+                        }.schedule(NEW_ROOM_REFRESHING_TIME);
+                    } else {
+                        Main.get().showError("UserInfo.getPendingChatRoomUser", caught);
+                    }
+                }
+            });
         } else {
             getPendingChatRoomUser = false;
         }
@@ -587,7 +535,7 @@ public class UserInfo extends Composite {
     /**
      * addChatRoom
      */
-    public void addChatRoom(final ChatRoomDialogBox chatRoom) {
+    public void addChatRoom(ChatRoomDialogBox chatRoom) {
         if (!chatRoomList.contains(chatRoom)) {
             chatRoomList.add(chatRoom);
         }
@@ -596,7 +544,7 @@ public class UserInfo extends Composite {
     /**
      * removeChatRoom
      */
-    public void removeChatRoom(final ChatRoomDialogBox chatRoom) {
+    public void removeChatRoom(ChatRoomDialogBox chatRoom) {
         if (chatRoomList.contains(chatRoom)) {
             chatRoomList.remove(chatRoom);
         }
@@ -636,23 +584,22 @@ public class UserInfo extends Composite {
         if (getChatRoomList().size() > 0) {
             final ChatRoomDialogBox chatRoom = getChatRoomList().get(0);
             chatRoom.setChatRoomActive(false);
-            chatService.closeRoom(chatRoom.getRoom(),
-                    new AsyncCallback<Object>() {
-                        @Override
-                        public void onSuccess(final Object arg0) {
-                            removeChatRoom(chatRoom);
-                            logoutChat(); // Recursive call
-                        }
+            chatService.closeRoom(chatRoom.getRoom(), new AsyncCallback<Object>() {
+                @Override
+                public void onSuccess(Object arg0) {
+                    removeChatRoom(chatRoom);
+                    logoutChat(); // Recursive call
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("CloseRoom", caught);
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("CloseRoom", caught);
 
-                            // If happens some problem always we try continue disconnecting chat rooms
-                            removeChatRoom(chatRoom);
-                            logoutChat(); // Recursive call
-                        }
-                    });
+                    // If happens some problem always we try continue disconnecting chat rooms
+                    removeChatRoom(chatRoom);
+                    logoutChat(); // Recursive call
+                }
+            });
         } else {
             realLogoutChat();
         }
@@ -664,20 +611,19 @@ public class UserInfo extends Composite {
     private void realLogoutChat() {
         disconnectChat(); // Only used to change view and disabling some RPC
         logoutDone = false;
-        final Timer timer = new Timer() {
+        Timer timer = new Timer() {
             @Override
             public void run() {
                 if (!getLoggedUsers && !getPendingChatRoomUser) {
                     chatService.logout(new AsyncCallback<Object>() {
                         @Override
-                        public void onSuccess(final Object result) {
+                        public void onSuccess(Object result) {
                             logoutDone = true;
-                            Main.get().mainPanel.bottomPanel.setStatus(Main
-                                    .i18n("chat.disconnected"));
+                            Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("chat.disconnected"));
                         }
 
                         @Override
-                        public void onFailure(final Throwable caught) {
+                        public void onFailure(Throwable caught) {
                             Main.get().showError("GetLogoutChat", caught);
                         }
                     });
@@ -701,7 +647,7 @@ public class UserInfo extends Composite {
     /**
      * enableUserQuota
      */
-    public void enableUserQuota(final long quotaLimit) {
+    public void enableUserQuota(long quotaLimit) {
         this.quotaLimit = quotaLimit;
         imgUserQuota.setVisible(true);
         quotaUsed.setVisible(true);
@@ -717,12 +663,10 @@ public class UserInfo extends Composite {
         }
         chatService.getLoggedUsers(new AsyncCallback<List<GWTUser>>() {
             @Override
-            public void onSuccess(final List<GWTUser> result) {
+            public void onSuccess(List<GWTUser> result) {
                 boolean logged = false;
-                for (final GWTUser user : result) {
-                    if (user.getId().equals(
-                            Main.get().workspaceUserProperties.getUser()
-                                    .getId())) {
+                for (GWTUser user : result) {
+                    if (user.getId().equals(Main.get().workspaceUserProperties.getUser().getId())) {
                         logged = true;
                         break;
                     }
@@ -730,33 +674,27 @@ public class UserInfo extends Composite {
 
                 if (logged) {
                     if (!autologin) {
-                        Main.get()
-                                .showError(
-                                        "GetLoginChat",
-                                        new Throwable(
-                                                Main.i18n("user.info.chat.user.yet.logged")));
+                        Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_FORCE_CHAT_LOGIN);
+                        Main.get().confirmPopup.show();
                     }
                 } else {
                     chatService.login(new AsyncCallback<Object>() {
                         @Override
-                        public void onSuccess(final Object result) {
+                        public void onSuccess(Object result) {
                             chatConnected = true;
-                            imgChat.setResource(OKMBundleResources.INSTANCE
-                                    .chatConnected());
-                            imgChat.setTitle(Main
-                                    .i18n("user.info.chat.disconnect"));
+                            imgChat.setResource(OKMBundleResources.INSTANCE.chatConnected());
+                            imgChat.setTitle(Main.i18n("user.info.chat.disconnect"));
                             usersConnected.setVisible(true);
                             imgNewChatRoom.setVisible(true);
                             refreshConnectedUsers();
                             getPendingChatRoomUser();
                             if (!autologin) {
-                                Main.get().mainPanel.bottomPanel.setStatus(Main
-                                        .i18n("chat.connected"));
+                                Main.get().mainPanel.bottomPanel.setStatus(Main.i18n("chat.connected"));
                             }
                         }
 
                         @Override
-                        public void onFailure(final Throwable caught) {
+                        public void onFailure(Throwable caught) {
                             Main.get().showError("GetLoginChat", caught);
                         }
                     });
@@ -764,7 +702,7 @@ public class UserInfo extends Composite {
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("getLoggedUsers", caught);
             }
         });
@@ -814,7 +752,7 @@ public class UserInfo extends Composite {
         if (widgetExtensionList.size() > 0) {
             panel.add(new Image(OKMBundleResources.INSTANCE.separator()));
             panel.add(new HTML("&nbsp;"));
-            for (final UserInfoExtension extension : widgetExtensionList) {
+            for (UserInfoExtension extension : widgetExtensionList) {
                 panel.add(extension);
                 panel.add(new HTML("&nbsp;"));
             }
@@ -824,7 +762,7 @@ public class UserInfo extends Composite {
     /**
      * addUserInfoExtension
      */
-    public void addUserInfoExtension(final UserInfoExtension extension) {
+    public void addUserInfoExtension(UserInfoExtension extension) {
         widgetExtensionList.add(extension);
     }
 
@@ -834,6 +772,23 @@ public class UserInfo extends Composite {
      * @return
      */
     public boolean isPendingToClose() {
-        return chatConnected || !logoutDone;
+        return (chatConnected || !logoutDone);
+    }
+
+    /**
+     * forceLogin
+     */
+    public void forceLogin() {
+        chatService.logout(new AsyncCallback<Object>() {
+            @Override
+            public void onSuccess(Object result) {
+                loginChat(false);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Main.get().showError("logout", caught);
+            }
+        });
     }
 }

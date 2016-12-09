@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,7 +45,6 @@ import org.hibernate.search.annotations.Store;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NodeDocument extends NodeBase {
     private static final long serialVersionUID = 1L;
-
     public static final String TEXT_FIELD = "text";
 
     @Column(name = "NDC_LAST_MODIFIED")
@@ -71,21 +70,21 @@ public class NodeDocument extends NodeBase {
 
     @Column(name = "NDC_TEXT")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Type(type = "org.hibernate.type.StringClobType")
     @Field(index = Index.TOKENIZED, store = Store.NO)
     private String text;
 
-    @Column(name = "NDC_CHECKED_OUT")
+    @Column(name = "NDC_CHECKED_OUT", nullable = false)
     @Type(type = "true_false")
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     private boolean checkedOut;
 
-    @Column(name = "NDC_TEXT_EXTRACTED")
+    @Column(name = "NDC_TEXT_EXTRACTED", nullable = false)
     @Type(type = "true_false")
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     private boolean textExtracted;
 
-    @Column(name = "NDC_LOCKED")
+    @Column(name = "NDC_LOCKED", nullable = false)
     @Type(type = "true_false")
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     private boolean locked;
@@ -97,7 +96,7 @@ public class NodeDocument extends NodeBase {
         return lastModified;
     }
 
-    public void setLastModified(final Calendar lastModified) {
+    public void setLastModified(Calendar lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -105,7 +104,7 @@ public class NodeDocument extends NodeBase {
         return language;
     }
 
-    public void setLanguage(final String language) {
+    public void setLanguage(String language) {
         this.language = language;
     }
 
@@ -113,7 +112,7 @@ public class NodeDocument extends NodeBase {
         return title;
     }
 
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 
@@ -121,7 +120,7 @@ public class NodeDocument extends NodeBase {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -129,7 +128,7 @@ public class NodeDocument extends NodeBase {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -137,7 +136,7 @@ public class NodeDocument extends NodeBase {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -145,7 +144,7 @@ public class NodeDocument extends NodeBase {
         return checkedOut;
     }
 
-    public void setCheckedOut(final boolean checkedOut) {
+    public void setCheckedOut(boolean checkedOut) {
         this.checkedOut = checkedOut;
     }
 
@@ -153,7 +152,7 @@ public class NodeDocument extends NodeBase {
         return textExtracted;
     }
 
-    public void setTextExtracted(final boolean textExtracted) {
+    public void setTextExtracted(boolean textExtracted) {
         this.textExtracted = textExtracted;
     }
 
@@ -161,7 +160,7 @@ public class NodeDocument extends NodeBase {
         return locked;
     }
 
-    public void setLocked(final boolean locked) {
+    public void setLocked(boolean locked) {
         this.locked = locked;
     }
 
@@ -169,23 +168,21 @@ public class NodeDocument extends NodeBase {
         return lock;
     }
 
-    public void setLock(final NodeLock lock) {
+    public void setLock(NodeLock lock) {
         this.lock = lock;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", context=").append(context);
+        sb.append(", path=").append(path);
         sb.append(", parent=").append(parent);
         sb.append(", author=").append(author);
         sb.append(", name=").append(name);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
-        sb.append(", lastModified=").append(
-                lastModified == null ? null : lastModified.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
+        sb.append(", lastModified=").append(lastModified == null ? null : lastModified.getTime());
         sb.append(", language=").append(language);
         sb.append(", title=").append(title);
         sb.append(", description=").append(description);

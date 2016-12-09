@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,11 +34,8 @@ public class ReaderInputStream extends InputStream {
 
     /** Source Reader */
     private Reader in;
-
     private String encoding = "UTF-8";
-
     private byte[] slack;
-
     private int begin;
 
     /**
@@ -46,7 +43,7 @@ public class ReaderInputStream extends InputStream {
      * 
      * @param reader <CODE>Reader</CODE>. Must not be <code>null</code>.
      */
-    public ReaderInputStream(final Reader reader) {
+    public ReaderInputStream(Reader reader) {
         in = reader;
     }
 
@@ -57,7 +54,7 @@ public class ReaderInputStream extends InputStream {
      * @param reader non-null <CODE>Reader</CODE>.
      * @param encoding non-null <CODE>String</CODE> encoding.
      */
-    public ReaderInputStream(final Reader reader, final String encoding) {
+    public ReaderInputStream(Reader reader, String encoding) {
         this(reader);
 
         if (encoding == null) {
@@ -74,7 +71,6 @@ public class ReaderInputStream extends InputStream {
      * 
      * @exception IOException if the original <code>Reader</code> fails to be read
      */
-    @Override
     public synchronized int read() throws IOException {
         if (in == null) {
             throw new IOException("Stream Closed");
@@ -89,7 +85,7 @@ public class ReaderInputStream extends InputStream {
                 slack = null;
             }
         } else {
-            final byte[] buf = new byte[1];
+            byte[] buf = new byte[1];
 
             if (read(buf, 0, 1) <= 0) {
                 result = -1;
@@ -113,16 +109,14 @@ public class ReaderInputStream extends InputStream {
      * @return the actual number read into the byte array, -1 at the end of the stream
      * @exception IOException if an error occurs
      */
-    @Override
-    public synchronized int read(final byte[] b, final int off, int len)
-            throws IOException {
+    public synchronized int read(byte[] b, int off, int len) throws IOException {
         if (in == null) {
             throw new IOException("Stream Closed");
         }
 
         while (slack == null) {
-            final char[] buf = new char[len]; // might read too much
-            final int n = in.read(buf);
+            char[] buf = new char[len]; // might read too much
+            int n = in.read(buf);
 
             if (n == -1) {
                 return -1;
@@ -153,11 +147,10 @@ public class ReaderInputStream extends InputStream {
      * @param limit the maximum limit of bytes that can be read before the
      *        mark position becomes invalid
      */
-    @Override
     public synchronized void mark(final int limit) {
         try {
             in.mark(limit);
-        } catch (final IOException ioe) {
+        } catch (IOException ioe) {
             throw new RuntimeException(ioe.getMessage());
         }
     }
@@ -166,7 +159,6 @@ public class ReaderInputStream extends InputStream {
      * @return the current number of bytes ready for reading
      * @exception IOException if an error occurs
      */
-    @Override
     public synchronized int available() throws IOException {
         if (in == null) {
             throw new IOException("Stream Closed");
@@ -186,7 +178,6 @@ public class ReaderInputStream extends InputStream {
     /**
      * @return false - mark is not supported
      */
-    @Override
     public boolean markSupported() {
         return false; // would be imprecise
     }
@@ -196,7 +187,6 @@ public class ReaderInputStream extends InputStream {
      * 
      * @exception IOException if the StringReader fails to be reset
      */
-    @Override
     public synchronized void reset() throws IOException {
         if (in == null) {
             throw new IOException("Stream Closed");
@@ -211,7 +201,6 @@ public class ReaderInputStream extends InputStream {
      * 
      * @exception IOException if the original StringReader fails to be closed
      */
-    @Override
     public synchronized void close() throws IOException {
         if (in != null) {
             in.close();

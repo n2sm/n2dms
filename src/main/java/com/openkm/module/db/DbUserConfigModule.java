@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,13 +38,10 @@ import com.openkm.spring.PrincipalUtils;
 import com.openkm.util.UserActivity;
 
 public class DbUserConfigModule implements UserConfigModule {
-    private static Logger log = LoggerFactory
-            .getLogger(DbUserConfigModule.class);
+    private static Logger log = LoggerFactory.getLogger(DbUserConfigModule.class);
 
     @Override
-    public void setHome(final String token, final String nodePath)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void setHome(String token, String nodePath) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("setHome({}, {})", token, nodePath);
         Authentication auth = null, oldAuth = null;
 
@@ -60,11 +57,9 @@ public class DbUserConfigModule implements UserConfigModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    nodePath);
-            final String nodeType = NodeBaseDAO.getInstance()
-                    .getNodeTypeByUuid(nodeUuid);
-            final UserConfig uc = new UserConfig();
+            String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(nodePath);
+            String nodeType = NodeBaseDAO.getInstance().getNodeTypeByUuid(nodeUuid);
+            UserConfig uc = new UserConfig();
             uc.setHomePath(nodePath);
             uc.setHomeNode(nodeUuid);
             uc.setHomeType(nodeType);
@@ -72,11 +67,10 @@ public class DbUserConfigModule implements UserConfigModule {
             UserConfigDAO.setHome(uc);
 
             // Activity log
-            UserActivity.log(auth.getName(), "USER_CONFIG_SET_HOME", nodeUuid,
-                    nodePath, null);
-        } catch (final PathNotFoundException e) {
+            UserActivity.log(auth.getName(), "USER_CONFIG_SET_HOME", nodeUuid, nodePath, null);
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -88,8 +82,7 @@ public class DbUserConfigModule implements UserConfigModule {
     }
 
     @Override
-    public UserConfig getConfig(final String token) throws RepositoryException,
-            DatabaseException {
+    public UserConfig getConfig(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getConfig({})", token);
         UserConfig ret = new UserConfig();
         Authentication auth = null, oldAuth = null;
@@ -105,9 +98,8 @@ public class DbUserConfigModule implements UserConfigModule {
             ret = UserConfigDAO.findByPk(auth.getName());
 
             // Activity log
-            UserActivity.log(auth.getName(), "USER_CONFIG_GET_CONFIG", null,
-                    null, null);
-        } catch (final PathNotFoundException e) {
+            UserActivity.log(auth.getName(), "USER_CONFIG_GET_CONFIG", null, null, null);
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token != null) {

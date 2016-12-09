@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,24 +21,23 @@
 
 package com.openkm.bean;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "appVersion")
 public class AppVersion {
     public static final String EXTENSION_COM = "Community";
 
     private String major = "0";
-
     private String minor = "0";
-
     private String maintenance = "0";
-
     private String build = "0";
-
     private String extension = EXTENSION_COM;
 
     public String getMajor() {
         return major;
     }
 
-    public void setMajor(final String major) {
+    public void setMajor(String major) {
         this.major = major;
     }
 
@@ -46,7 +45,7 @@ public class AppVersion {
         return minor;
     }
 
-    public void setMinor(final String minor) {
+    public void setMinor(String minor) {
         this.minor = minor;
     }
 
@@ -54,7 +53,7 @@ public class AppVersion {
         return maintenance;
     }
 
-    public void setMaintenance(final String maintenance) {
+    public void setMaintenance(String maintenance) {
         this.maintenance = maintenance;
     }
 
@@ -62,7 +61,7 @@ public class AppVersion {
         return build;
     }
 
-    public void setBuild(final String build) {
+    public void setBuild(String build) {
         this.build = build;
     }
 
@@ -70,7 +69,7 @@ public class AppVersion {
         return extension;
     }
 
-    public void setExtension(final String extension) {
+    public void setExtension(String extension) {
         this.extension = extension;
     }
 
@@ -78,9 +77,7 @@ public class AppVersion {
         return major + "." + minor + "." + maintenance;
     }
 
-    @Override
     public String toString() {
-        return major + "." + minor + "." + maintenance + " (build: " + build
-                + ")";
+        return major + "." + minor + "." + maintenance + " (build: " + build + ")";
     }
 }

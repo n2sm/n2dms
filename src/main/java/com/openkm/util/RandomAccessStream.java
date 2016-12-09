@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,28 +35,21 @@ import java.util.Vector;
  */
 public final class RandomAccessStream extends InputStream {
     private static final int BLOCK_SIZE = 512;
-
     private static final int BLOCK_MASK = 511;
-
     private static final int BLOCK_SHIFT = 9;
 
     private InputStream src;
-
     private RandomAccessFile ras;
-
     private long pointer;
-
     private Vector<byte[]> data;
-
     private int length;
-
     private boolean foundEOS;
 
     /**
      * Constructs a RandomAccessStream from an InputStream. Seeking backwards is
      * supported using a memory cache.
      */
-    public RandomAccessStream(final InputStream inputstream) {
+    public RandomAccessStream(InputStream inputstream) {
         pointer = 0L;
         data = new Vector<byte[]>();
         length = 0;
@@ -65,104 +58,85 @@ public final class RandomAccessStream extends InputStream {
     }
 
     /** Constructs a RandomAccessStream from an RandomAccessFile. */
-    public RandomAccessStream(final RandomAccessFile ras) {
+    public RandomAccessStream(RandomAccessFile ras) {
         this.ras = ras;
     }
 
     public int getFilePointer() throws IOException {
-        if (ras != null) {
+        if (ras != null)
             return (int) ras.getFilePointer();
-        } else {
+        else
             return (int) pointer;
-        }
     }
 
     public long getLongFilePointer() throws IOException {
-        if (ras != null) {
+        if (ras != null)
             return ras.getFilePointer();
-        } else {
+        else
             return pointer;
-        }
     }
 
-    @Override
     public int read() throws IOException {
-        if (ras != null) {
+        if (ras != null)
             return ras.read();
-        }
-        final long l = pointer + 1L;
-        final long l1 = readUntil(l);
+        long l = pointer + 1L;
+        long l1 = readUntil(l);
         if (l1 >= l) {
-            final byte abyte0[] = data
-                    .elementAt((int) (pointer >> BLOCK_SHIFT));
+            byte abyte0[] = data.elementAt((int) (pointer >> BLOCK_SHIFT));
             return abyte0[(int) (pointer++ & BLOCK_MASK)] & 0xff;
-        } else {
+        } else
             return -1;
-        }
     }
 
-    @Override
-    public int read(final byte[] bytes, final int off, final int len)
-            throws IOException {
-        if (bytes == null) {
+    public int read(byte[] bytes, int off, int len) throws IOException {
+        if (bytes == null)
             throw new NullPointerException();
-        }
-        if (ras != null) {
+        if (ras != null)
             return ras.read(bytes, off, len);
-        }
-        if (off < 0 || len < 0 || off + len > bytes.length) {
+        if (off < 0 || len < 0 || off + len > bytes.length)
             throw new IndexOutOfBoundsException();
-        }
-        if (len == 0) {
+        if (len == 0)
             return 0;
-        }
-        final long l = readUntil(pointer + len);
-        if (l <= pointer) {
+        long l = readUntil(pointer + len);
+        if (l <= pointer)
             return -1;
-        } else {
-            final byte abyte1[] = data
-                    .elementAt((int) (pointer >> BLOCK_SHIFT));
-            final int k = Math.min(len, BLOCK_SIZE
-                    - (int) (pointer & BLOCK_MASK));
-            System.arraycopy(abyte1, (int) (pointer & BLOCK_MASK), bytes, off,
-                    k);
+        else {
+            byte abyte1[] = data.elementAt((int) (pointer >> BLOCK_SHIFT));
+            int k = Math.min(len, BLOCK_SIZE - (int) (pointer & BLOCK_MASK));
+            System.arraycopy(abyte1, (int) (pointer & BLOCK_MASK), bytes, off, k);
             pointer += k;
             return k;
         }
     }
 
-    public final void readFully(final byte[] bytes) throws IOException {
+    public final void readFully(byte[] bytes) throws IOException {
         readFully(bytes, bytes.length);
     }
 
-    public final void readFully(final byte[] bytes, final int len)
-            throws IOException {
+    public final void readFully(byte[] bytes, int len) throws IOException {
         int read = 0;
         do {
-            final int l = read(bytes, read, len - read);
-            if (l < 0) {
+            int l = read(bytes, read, len - read);
+            if (l < 0)
                 break;
-            }
             read += l;
         } while (read < len);
     }
 
-    private long readUntil(final long l) throws IOException {
-        if (l < length) {
+    private long readUntil(long l) throws IOException {
+        if (l < length)
             return l;
-        }
-        if (foundEOS) {
+        if (foundEOS)
             return length;
-        }
-        final int i = (int) (l >> BLOCK_SHIFT);
-        final int j = length >> BLOCK_SHIFT;
+        int i = (int) (l >> BLOCK_SHIFT);
+        int j = length >> BLOCK_SHIFT;
         for (int k = j; k <= i; k++) {
-            final byte abyte0[] = new byte[BLOCK_SIZE];
+            byte abyte0[] = new byte[BLOCK_SIZE];
             data.addElement(abyte0);
             int i1 = BLOCK_SIZE;
             int j1 = 0;
             while (i1 > 0) {
-                final int k1 = src.read(abyte0, j1, i1);
+                int k1 = src.read(abyte0, j1, i1);
                 if (k1 == -1) {
                     foundEOS = true;
                     return length;
@@ -177,44 +151,41 @@ public final class RandomAccessStream extends InputStream {
         return length;
     }
 
-    public void seek(final long loc) throws IOException {
+    public void seek(long loc) throws IOException {
         if (ras != null) {
             ras.seek(loc);
             return;
         }
-        if (loc < 0L) {
+        if (loc < 0L)
             pointer = 0L;
-        } else {
+        else
             pointer = loc;
-        }
     }
 
-    public void seek(final int loc) throws IOException {
+    public void seek(int loc) throws IOException {
         if (ras != null) {
             ras.seek(loc & 0xffffffff);
             return;
         }
-        if (loc < 0) {
+        if (loc < 0)
             pointer = 0L;
-        } else {
+        else
             pointer = loc;
-        }
     }
 
     public final int readInt() throws IOException {
-        final int i = read();
-        final int j = read();
-        final int k = read();
-        final int l = read();
-        if ((i | j | k | l) < 0) {
+        int i = read();
+        int j = read();
+        int k = read();
+        int l = read();
+        if ((i | j | k | l) < 0)
             throw new EOFException();
-        } else {
+        else
             return (i << 24) + (j << 16) + (k << 8) + l;
-        }
     }
 
     public final long readLong() throws IOException {
-        return ((long) readInt() << 32) + (readInt() & 0xffffffffL);
+        return ((long) readInt() << 32) + ((long) readInt() & 0xffffffffL);
     }
 
     public final double readDouble() throws IOException {
@@ -222,25 +193,23 @@ public final class RandomAccessStream extends InputStream {
     }
 
     public final short readShort() throws IOException {
-        final int i = read();
-        final int j = read();
-        if ((i | j) < 0) {
+        int i = read();
+        int j = read();
+        if ((i | j) < 0)
             throw new EOFException();
-        } else {
+        else
             return (short) ((i << 8) + j);
-        }
     }
 
     public final float readFloat() throws IOException {
         return Float.intBitsToFloat(readInt());
     }
 
-    @Override
     public void close() throws IOException {
         // if (ij.IJ.debugMode) ij.IJ.log("close: "+(data!=null?""+data.size():""));
-        if (ras != null) {
+        if (ras != null)
             ras.close();
-        } else {
+        else {
             data.removeAllElements();
             src.close();
         }

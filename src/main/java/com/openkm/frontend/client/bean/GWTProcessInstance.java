@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,23 +35,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTProcessInstance implements IsSerializable {
 
     private double id;
-
     private int version;
-
     private String key = "";
-
     private Date start;
-
     private Date end;
-
     private boolean ended;
-
     private boolean suspended;
-
     private Map<String, Object> variables;
-
     private GWTProcessDefinition processDefinition;
-
     private GWTToken rootToken;
 
     /**
@@ -64,7 +55,7 @@ public class GWTProcessInstance implements IsSerializable {
         return id;
     }
 
-    public void setId(final double id) {
+    public void setId(double id) {
         this.id = id;
     }
 
@@ -72,7 +63,7 @@ public class GWTProcessInstance implements IsSerializable {
         return version;
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
@@ -80,7 +71,7 @@ public class GWTProcessInstance implements IsSerializable {
         return ended;
     }
 
-    public void setEnded(final boolean ended) {
+    public void setEnded(boolean ended) {
         this.ended = ended;
     }
 
@@ -88,7 +79,7 @@ public class GWTProcessInstance implements IsSerializable {
         return suspended;
     }
 
-    public void setSuspended(final boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 
@@ -96,7 +87,7 @@ public class GWTProcessInstance implements IsSerializable {
         return variables;
     }
 
-    public void setVariables(final Map<String, Object> variables) {
+    public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
     }
 
@@ -104,8 +95,7 @@ public class GWTProcessInstance implements IsSerializable {
         return processDefinition;
     }
 
-    public void setProcessDefinition(
-            final GWTProcessDefinition processDefinition) {
+    public void setProcessDefinition(GWTProcessDefinition processDefinition) {
         this.processDefinition = processDefinition;
     }
 
@@ -113,7 +103,7 @@ public class GWTProcessInstance implements IsSerializable {
         return start;
     }
 
-    public void setStart(final Date start) {
+    public void setStart(Date start) {
         this.start = start;
     }
 
@@ -121,7 +111,7 @@ public class GWTProcessInstance implements IsSerializable {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -129,7 +119,7 @@ public class GWTProcessInstance implements IsSerializable {
         return rootToken;
     }
 
-    public void setRootToken(final GWTToken rootToken) {
+    public void setRootToken(GWTToken rootToken) {
         this.rootToken = rootToken;
     }
 
@@ -137,7 +127,7 @@ public class GWTProcessInstance implements IsSerializable {
         return end;
     }
 
-    public void setEnd(final Date end) {
+    public void setEnd(Date end) {
         this.end = end;
     }
 }

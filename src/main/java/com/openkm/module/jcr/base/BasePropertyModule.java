@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,22 +36,18 @@ import com.openkm.bean.Property;
 import com.openkm.core.Config;
 
 public class BasePropertyModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BasePropertyModule.class);
+    private static Logger log = LoggerFactory.getLogger(BasePropertyModule.class);
 
     /**
      * Add category 
      */
-    public static void addCategory(final Session session, final Node node,
-            final String catId) throws ValueFormatException,
-            javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
-        log.debug("addCategory({}, {}, {})", new Object[] { session, node,
-                catId });
+    public static void addCategory(Session session, Node node, String catId) throws ValueFormatException, javax.jcr.PathNotFoundException,
+            javax.jcr.RepositoryException {
+        log.debug("addCategory({}, {}, {})", new Object[] { session, node, catId });
 
         synchronized (node) {
-            final Value[] property = node.getProperty(Property.CATEGORIES)
-                    .getValues();
-            final Value[] newProperty = new Value[property.length + 1];
+            Value[] property = node.getProperty(Property.CATEGORIES).getValues();
+            Value[] newProperty = new Value[property.length + 1];
             boolean alreadyAdded = false;
 
             for (int i = 0; i < property.length; i++) {
@@ -63,11 +59,9 @@ public class BasePropertyModule {
             }
 
             if (!alreadyAdded) {
-                final Node reference = session.getNodeByUUID(catId);
-                newProperty[newProperty.length - 1] = session.getValueFactory()
-                        .createValue(reference);
-                node.setProperty(Property.CATEGORIES, newProperty,
-                        PropertyType.REFERENCE);
+                Node reference = session.getNodeByUUID(catId);
+                newProperty[newProperty.length - 1] = session.getValueFactory().createValue(reference);
+                node.setProperty(Property.CATEGORIES, newProperty, PropertyType.REFERENCE);
                 node.save();
             }
         }
@@ -78,17 +72,14 @@ public class BasePropertyModule {
     /**
      * Remove category
      */
-    public static void removeCategory(final Session session, final Node node,
-            final String catId) throws ValueFormatException,
+    public static void removeCategory(Session session, Node node, String catId) throws ValueFormatException,
             javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
-        log.debug("removeCategory({}, {}, {})", new Object[] { session, node,
-                catId });
+        log.debug("removeCategory({}, {}, {})", new Object[] { session, node, catId });
         boolean removed = false;
 
         synchronized (node) {
-            final Value[] property = node.getProperty(Property.CATEGORIES)
-                    .getValues();
-            final ArrayList<Value> newProperty = new ArrayList<Value>();
+            Value[] property = node.getProperty(Property.CATEGORIES).getValues();
+            ArrayList<Value> newProperty = new ArrayList<Value>();
 
             for (int i = 0; i < property.length; i++) {
                 if (!property[i].getString().equals(catId)) {
@@ -99,9 +90,7 @@ public class BasePropertyModule {
             }
 
             if (removed) {
-                node.setProperty(Property.CATEGORIES,
-                        newProperty.toArray(new Value[newProperty.size()]),
-                        PropertyType.REFERENCE);
+                node.setProperty(Property.CATEGORIES, (Value[]) newProperty.toArray(new Value[newProperty.size()]), PropertyType.REFERENCE);
                 node.save();
             }
         }
@@ -112,16 +101,13 @@ public class BasePropertyModule {
     /**
      * Add keyword
      */
-    public static String addKeyword(final Session session, final Node node,
-            String keyword) throws ValueFormatException,
+    public static String addKeyword(Session session, Node node, String keyword) throws ValueFormatException,
             javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
-        log.debug("addKeyword({}, {}, {})", new Object[] { session, node,
-                keyword });
+        log.debug("addKeyword({}, {}, {})", new Object[] { session, node, keyword });
 
         synchronized (node) {
-            final Value[] property = node.getProperty(Property.KEYWORDS)
-                    .getValues();
-            final Value[] newProperty = new Value[property.length + 1];
+            Value[] property = node.getProperty(Property.KEYWORDS).getValues();
+            Value[] newProperty = new Value[property.length + 1];
             boolean alreadyAdded = false;
 
             if (Config.SYSTEM_KEYWORD_LOWERCASE) {
@@ -137,8 +123,7 @@ public class BasePropertyModule {
             }
 
             if (!alreadyAdded) {
-                newProperty[newProperty.length - 1] = session.getValueFactory()
-                        .createValue(keyword);
+                newProperty[newProperty.length - 1] = session.getValueFactory().createValue(keyword);
                 node.setProperty(Property.KEYWORDS, newProperty);
                 node.save();
             }
@@ -151,17 +136,14 @@ public class BasePropertyModule {
     /**
      * Remove keyword
      */
-    public static void removeKeyword(final Session session, final Node node,
-            final String keyword) throws ValueFormatException,
+    public static void removeKeyword(Session session, Node node, String keyword) throws ValueFormatException,
             javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
-        log.debug("removeKeyword({}, {}, {})", new Object[] { session, node,
-                keyword });
+        log.debug("removeKeyword({}, {}, {})", new Object[] { session, node, keyword });
         boolean removed = false;
 
         synchronized (node) {
-            final Value[] property = node.getProperty(Property.KEYWORDS)
-                    .getValues();
-            final ArrayList<Value> newProperty = new ArrayList<Value>();
+            Value[] property = node.getProperty(Property.KEYWORDS).getValues();
+            ArrayList<Value> newProperty = new ArrayList<Value>();
 
             for (int i = 0; i < property.length; i++) {
                 if (!property[i].getString().equals(keyword)) {
@@ -172,8 +154,7 @@ public class BasePropertyModule {
             }
 
             if (removed) {
-                node.setProperty(Property.KEYWORDS,
-                        newProperty.toArray(new Value[newProperty.size()]));
+                node.setProperty(Property.KEYWORDS, (Value[]) newProperty.toArray(new Value[newProperty.size()]));
                 node.save();
             }
         }

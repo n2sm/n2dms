@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,6 +34,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,16 +73,13 @@ import com.openkm.util.WebUtils;
  */
 public class LanguageServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(LanguageServlet.class);
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (isAdmin(request)) {
+        if (checkMultipleInstancesAccess(request, response)) {
             if (method.equals(METHOD_GET)) {
                 doGet(request, response);
             } else if (method.equals(METHOD_POST)) {
@@ -91,13 +89,11 @@ public class LanguageServlet extends BaseServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
@@ -120,7 +116,7 @@ public class LanguageServlet extends BaseServlet {
             if (action.equals("") || WebUtils.getBoolean(request, "persist")) {
                 list(userId, request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -128,27 +124,27 @@ public class LanguageServlet extends BaseServlet {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doPost({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         String action = WebUtils.getString(request, "action");
         boolean persist = WebUtils.getBoolean(request, "persist");
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         Session dbSession = null;
         updateSessionManager(request);
 
         try {
             if (ServletFileUpload.isMultipartContent(request)) {
                 InputStream is = null;
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
-                final List<FileItem> items = upload.parseRequest(request);
-                final Language lang = new Language();
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> items = upload.parseRequest(request);
+                Language lang = new Language();
                 byte data[] = null;
 
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (item.isFormField()) {
                         if (item.getFieldName().equals("action")) {
                             action = item.getString("UTF-8");
@@ -162,8 +158,7 @@ public class LanguageServlet extends BaseServlet {
                     } else {
                         is = item.getInputStream();
                         data = IOUtils.toByteArray(is);
-                        lang.setImageMime(MimeTypeConfig.mimeTypes
-                                .getContentType(item.getName()));
+                        lang.setImageMime(MimeTypeConfig.mimeTypes.getContentType(item.getName()));
                         is.close();
                     }
                 }
@@ -173,30 +168,24 @@ public class LanguageServlet extends BaseServlet {
                     LanguageDAO.create(lang);
 
                     // Activity log
-                    UserActivity.log(request.getRemoteUser(),
-                            "ADMIN_LANGUAGE_CREATE", lang.getId(), null,
-                            lang.toString());
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_LANGUAGE_CREATE", lang.getId(), null, lang.toString());
                 } else if (action.equals("edit")) {
                     lang.setImageContent(SecureStore.b64Encode(data));
                     LanguageDAO.update(lang);
 
                     // Activity log
-                    UserActivity.log(request.getRemoteUser(),
-                            "ADMIN_LANGUAGE_EDIT", lang.getId(), null,
-                            lang.toString());
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_LANGUAGE_EDIT", lang.getId(), null, lang.toString());
                 } else if (action.equals("delete")) {
                     LanguageDAO.delete(lang.getId());
 
                     // Activity log
-                    UserActivity.log(request.getRemoteUser(),
-                            "ADMIN_LANGUAGE_DELETE", lang.getId(), null, null);
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_LANGUAGE_DELETE", lang.getId(), null, null);
                 } else if (action.equals("import")) {
                     dbSession = HibernateUtil.getSessionFactory().openSession();
                     importLanguage(userId, request, response, data, dbSession);
 
                     // Activity log
-                    UserActivity.log(request.getRemoteUser(),
-                            "ADMIN_LANGUAGE_IMPORT", null, null, null);
+                    UserActivity.log(request.getRemoteUser(), "ADMIN_LANGUAGE_IMPORT", null, null, null);
                 }
             } else if (action.equals("translate")) {
                 translate(userId, request, response);
@@ -204,17 +193,16 @@ public class LanguageServlet extends BaseServlet {
                 addTranslation(userId, request, response);
             }
 
-            if (!action.equals("addTranslation")
-                    && (action.equals("") || action.equals("import") || persist)) {
+            if (!action.equals("addTranslation") && (action.equals("") || action.equals("import") || persist)) {
                 list(userId, request, response);
             }
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         } finally {
@@ -227,36 +215,29 @@ public class LanguageServlet extends BaseServlet {
      * 
      * Translations reference is english
      */
-    private void list(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("list({}, {}, {})",
-                new Object[] { userId, request, response });
-        final ServletContext sc = getServletContext();
+    private void list(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("list({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
         sc.setAttribute("langs", LanguageDAO.findAll());
-        sc.setAttribute("max", LanguageDAO.findByPk(Language.DEFAULT)
-                .getTranslations().size());
-        sc.getRequestDispatcher("/admin/language_list.jsp").forward(request,
-                response);
+        sc.setAttribute("max", LanguageDAO.findByPk(Language.DEFAULT).getTranslations().size());
+        sc.getRequestDispatcher("/admin/language_list.jsp").forward(request, response);
         log.debug("list: void");
     }
 
     /**
      * Delete language
      */
-    private void delete(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("delete({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void delete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("delete({}, {}, {})", new Object[] { userId, request, response });
 
-        final ServletContext sc = getServletContext();
-        final String lgId = WebUtils.getString(request, "lg_id");
+        ServletContext sc = getServletContext();
+        String lgId = WebUtils.getString(request, "lg_id");
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("lg", LanguageDAO.findByPk(lgId));
-        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request, response);
 
         log.debug("delete: void");
     }
@@ -264,19 +245,16 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Edit language
      */
-    private void edit(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("edit({}, {}, {})",
-                new Object[] { userId, request, response });
+    private void edit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("edit({}, {}, {})", new Object[] { userId, request, response });
 
-        final ServletContext sc = getServletContext();
-        final String lgId = WebUtils.getString(request, "lg_id");
+        ServletContext sc = getServletContext();
+        String lgId = WebUtils.getString(request, "lg_id");
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("lg", LanguageDAO.findByPk(lgId));
-        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request, response);
 
         log.debug("edit: void");
     }
@@ -284,18 +262,15 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Create language
      */
-    private void create(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("edit({}, {}, {})",
-                new Object[] { userId, request, response });
+    private void create(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("edit({}, {}, {})", new Object[] { userId, request, response });
 
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("lg", null);
-        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/language_edit.jsp").forward(request, response);
 
         log.debug("edit: void");
     }
@@ -303,38 +278,33 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Create language
      */
-    private void addTranslation(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        log.debug("addTranslation({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void addTranslation(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException {
+        log.debug("addTranslation({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final Language lang = LanguageDAO.findByPk(Language.DEFAULT);
-            final Translation trans = new Translation();
-            trans.getTranslationId().setModule(
-                    WebUtils.getString(request, "tr_module"));
-            trans.getTranslationId().setKey(
-                    WebUtils.getString(request, "tr_key"));
+            Language lang = LanguageDAO.findByPk(Language.DEFAULT);
+            Translation trans = new Translation();
+            trans.getTranslationId().setModule(WebUtils.getString(request, "tr_module"));
+            trans.getTranslationId().setKey(WebUtils.getString(request, "tr_key"));
             trans.getTranslationId().setLanguage(lang.getId());
             trans.setText(WebUtils.getString(request, "tr_text"));
             lang.getTranslations().add(trans);
             LanguageDAO.update(lang);
         }
 
-        final List<String> modules = new ArrayList<String>();
+        List<String> modules = new ArrayList<String>();
         modules.add(Translation.MODULE_FRONTEND);
         modules.add(Translation.MODULE_EXTENSION);
         modules.add(Translation.MODULE_ADMINISTRATION);
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("tr_module", modules);
         sc.setAttribute("tr_key", "");
         sc.setAttribute("tr_text", "");
         sc.setAttribute("lang", LanguageDAO.findByPk(Language.DEFAULT));
-        sc.getRequestDispatcher("/admin/translation_add.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/translation_add.jsp").forward(request, response);
 
         log.debug("addTranslation: void");
     }
@@ -342,28 +312,24 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Translate language
      */
-    private void translate(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        log.debug("translate({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void translate(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("translate({}, {}, {})", new Object[] { userId, request, response });
+        Language langBase = LanguageDAO.findByPk(Language.DEFAULT); // English always it'll be used as a translations base
+        Set<Translation> translationsBase = langBase.getTranslations();
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final Set<Translation> newTranslations = new HashSet<Translation>();
-            final Language langBase = LanguageDAO.findByPk(Language.DEFAULT);
-            final Language lang = LanguageDAO.findByPk(request
-                    .getParameter("lg_id"));
+            Set<Translation> newTranslations = new HashSet<Translation>();
+            Language lang = LanguageDAO.findByPk(request.getParameter("lg_id"));
 
-            for (final Translation translation : langBase.getTranslations()) {
-                final String text = request.getParameter(translation
-                        .getTranslationId().getKey());
+            for (Translation translation : translationsBase) {
+                String text =
+                        request.getParameter(translation.getTranslationId().getModule() + "-" + translation.getTranslationId().getKey());
 
                 if (text != null && !text.equals("")) {
-                    final Translation newTranslation = new Translation();
-                    newTranslation.getTranslationId().setModule(
-                            translation.getTranslationId().getModule());
-                    newTranslation.getTranslationId().setKey(
-                            translation.getTranslationId().getKey());
+                    Translation newTranslation = new Translation();
+                    newTranslation.getTranslationId().setModule(translation.getTranslationId().getModule());
+                    newTranslation.getTranslationId().setKey(translation.getTranslationId().getKey());
                     newTranslation.getTranslationId().setLanguage(lang.getId());
                     newTranslation.setText(text);
                     newTranslations.add(newTranslation);
@@ -373,25 +339,46 @@ public class LanguageServlet extends BaseServlet {
             lang.setTranslations(newTranslations);
             LanguageDAO.update(lang);
         } else {
-            final ServletContext sc = getServletContext();
-            final String lgId = WebUtils.getString(request, "lg_id");
-            final Language langToTranslate = LanguageDAO.findByPk(lgId);
-            final Map<String, String> translations = new HashMap<String, String>();
+            ServletContext sc = getServletContext();
+            String lgId = WebUtils.getString(request, "lg_id");
+            String filter = WebUtils.getString(request, "filter");
+            Language langToTranslate = LanguageDAO.findByPk(lgId);
+            Map<String, String> translations = new HashMap<String, String>();
 
-            for (final Translation translation : langToTranslate
-                    .getTranslations()) {
-                translations.put(translation.getTranslationId().getKey(),
-                        translation.getText());
+            if (filter.isEmpty()) {
+                for (Translation translation : langToTranslate.getTranslations()) {
+                    translations.put(translation.getTranslationId().getModule() + "-" + translation.getTranslationId().getKey(),
+                            translation.getText());
+                }
+            } else {
+                // Filter translationsBase
+                Set<Translation> translationsToRemove = new HashSet<Translation>();
+                for (Translation translation : translationsBase) {
+                    if (!translation.getTranslationId().getKey().contains(filter)) {
+                        translationsToRemove.add(translation);
+                    }
+                }
+                translationsBase.removeAll(translationsToRemove);
+
+                // Filter others translations
+                for (Translation translation : langToTranslate.getTranslations()) {
+                    if (translation.getTranslationId().getKey().contains(filter)) {
+                        translations.put(translation.getTranslationId().getModule() + "-" + translation.getTranslationId().getKey(),
+                                translation.getText());
+                    }
+                }
             }
 
+            sc.setAttribute("filter", filter);
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("lg_id", lgId);
             sc.setAttribute("langToTranslateName", langToTranslate.getName());
+            sc.setAttribute("langBaseName", langBase.getName());
             sc.setAttribute("translations", translations);
+            sc.setAttribute("translationsBase", translationsBase);
             sc.setAttribute("langBase", LanguageDAO.findByPk(Language.DEFAULT)); // English always it'll be used as a translations base
-            sc.getRequestDispatcher("/admin/translation_edit.jsp").forward(
-                    request, response);
+            sc.getRequestDispatcher("/admin/translation_edit.jsp").forward(request, response);
         }
 
         log.debug("translate: void");
@@ -400,16 +387,12 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Show language flag icon
      */
-    private void flag(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws DatabaseException,
-            IOException {
-        log.debug("flag({}, {}, {})",
-                new Object[] { userId, request, response });
-        final String lgId = WebUtils.getString(request, "lg_id");
-        final ServletOutputStream out = response.getOutputStream();
-        final Language language = LanguageDAO.findByPk(lgId);
-        final byte[] img = SecureStore.b64Decode(new String(language
-                .getImageContent()));
+    private void flag(String userId, HttpServletRequest request, HttpServletResponse response) throws DatabaseException, IOException {
+        log.debug("flag({}, {}, {})", new Object[] { userId, request, response });
+        String lgId = WebUtils.getString(request, "lg_id");
+        ServletOutputStream out = response.getOutputStream();
+        Language language = LanguageDAO.findByPk(lgId);
+        byte[] img = SecureStore.b64Decode(new String(language.getImageContent()));
 
         response.setContentType(language.getImageMime());
         response.setContentLength(img.length);
@@ -418,50 +401,36 @@ public class LanguageServlet extends BaseServlet {
         log.debug("flag: void");
     }
 
-    private void export(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws DatabaseException,
-            IOException {
-        log.debug("export({}, {}, {})", new Object[] { userId, request,
-                response });
-        final String lgId = WebUtils.getString(request, "lg_id");
-        final Language language = LanguageDAO.findByPk(lgId);
+    private void export(String userId, HttpServletRequest request, HttpServletResponse response) throws DatabaseException, IOException {
+        log.debug("export({}, {}, {})", new Object[] { userId, request, response });
+        String lgId = WebUtils.getString(request, "lg_id");
+        Language language = LanguageDAO.findByPk(lgId);
 
         // Disable browser cache
         response.setHeader("Expires", "Sat, 6 May 1971 12:00:00 GMT");
         response.setHeader("Cache-Control", "max-age=0, must-revalidate");
         response.addHeader("Cache-Control", "post-check=0, pre-check=0");
-        final String fileName = "OpenKM_"
-                + WarUtils.getAppVersion().getVersion() + "_"
-                + language.getId() + ".sql";
+        String fileName = "OpenKM_" + WarUtils.getAppVersion().getVersion() + "_" + language.getId() + ".sql";
 
-        response.setHeader("Content-disposition", "inline; filename=\""
-                + fileName + "\"");
+        response.setHeader("Content-disposition", "inline; filename=\"" + fileName + "\"");
         response.setContentType("text/x-sql; charset=UTF-8");
-        final PrintWriter out = new PrintWriter(new OutputStreamWriter(
-                response.getOutputStream(), "UTF8"), true);
-        out.println("DELETE FROM OKM_TRANSLATION WHERE TR_LANGUAGE='"
-                + language.getId() + "';");
-        out.println("DELETE FROM OKM_LANGUAGE WHERE LG_ID='" + language.getId()
-                + "';");
-        final StringBuffer insertLang = new StringBuffer(
-                "INSERT INTO OKM_LANGUAGE (LG_ID, LG_NAME, LG_IMAGE_CONTENT, LG_IMAGE_MIME) VALUES ('");
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF8"), true);
+        out.println("DELETE FROM OKM_TRANSLATION WHERE TR_LANGUAGE='" + language.getId() + "';");
+        out.println("DELETE FROM OKM_LANGUAGE WHERE LG_ID='" + language.getId() + "';");
+        StringBuffer insertLang = new StringBuffer("INSERT INTO OKM_LANGUAGE (LG_ID, LG_NAME, LG_IMAGE_CONTENT, LG_IMAGE_MIME) VALUES ('");
         insertLang.append(language.getId()).append("', '");
         insertLang.append(language.getName()).append("', '");
         insertLang.append(language.getImageContent()).append("', '");
         insertLang.append(language.getImageMime()).append("');");
         out.println(insertLang);
 
-        for (final Translation translation : language.getTranslations()) {
-            final StringBuffer insertTranslation = new StringBuffer(
-                    "INSERT INTO OKM_TRANSLATION (TR_MODULE, TR_KEY, TR_TEXT, TR_LANGUAGE) VALUES (");
+        for (Translation translation : language.getTranslations()) {
+            StringBuffer insertTranslation =
+                    new StringBuffer("INSERT INTO OKM_TRANSLATION (TR_MODULE, TR_KEY, TR_TEXT, TR_LANGUAGE) VALUES (");
             insertTranslation.append("'");
-            insertTranslation
-                    .append(translation.getTranslationId().getModule()).append(
-                            "', '");
-            insertTranslation.append(translation.getTranslationId().getKey())
-                    .append("', '");
-            insertTranslation.append(
-                    translation.getText().replaceAll("'", "''")).append("', '"); // replace ' to '' in translation text
+            insertTranslation.append(translation.getTranslationId().getModule()).append("', '");
+            insertTranslation.append(translation.getTranslationId().getKey()).append("', '");
+            insertTranslation.append(translation.getText().replaceAll("'", "''")).append("', '"); // replace ' to '' in translation text
             insertTranslation.append(language.getId()).append("');");
             out.println(insertTranslation);
         }
@@ -473,28 +442,23 @@ public class LanguageServlet extends BaseServlet {
     /**
      * Import a new language into database
      */
-    private void importLanguage(final String userId,
-            final HttpServletRequest request,
-            final HttpServletResponse response, final byte[] data,
-            final Session dbSession) throws DatabaseException, IOException,
-            SQLException {
-        log.debug("importLanguage({}, {}, {}, {}, {})", new Object[] { userId,
-                request, response, data, dbSession });
+    private void importLanguage(String userId, HttpServletRequest request, HttpServletResponse response, final byte[] data,
+            Session dbSession) throws DatabaseException, IOException, SQLException {
+        log.debug("importLanguage({}, {}, {}, {}, {})", new Object[] { userId, request, response, data, dbSession });
 
         dbSession.doWork(new Work() {
             @Override
-            public void execute(final Connection con) throws SQLException {
-                final Statement stmt = con.createStatement();
-                final InputStreamReader is = new InputStreamReader(
-                        new ByteArrayInputStream(data));
-                final BufferedReader br = new BufferedReader(is);
+            public void execute(Connection con) throws SQLException {
+                Statement stmt = con.createStatement();
+                InputStreamReader is = new InputStreamReader(new ByteArrayInputStream(data));
+                BufferedReader br = new BufferedReader(is);
                 String query;
 
                 try {
                     while ((query = br.readLine()) != null) {
                         stmt.executeUpdate(query);
                     }
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     throw new SQLException(e.getMessage(), e);
                 }
 

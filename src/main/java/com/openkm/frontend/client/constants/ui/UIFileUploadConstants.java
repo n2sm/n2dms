@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,7 @@ public class UIFileUploadConstants {
 
     // Navigator file upload constants
     public static final int ACTION_NONE = -1;
-
     public static final int ACTION_INSERT = 0;
-
     public static final int ACTION_UPDATE = 1;
-
     public static final int ACTION_FOLDER = 2;
-
-    public static final int ACTION_DIGITAL_SIGNATURE_INSERT = 3;
-
-    public static final int ACTION_DIGITAL_SIGNATURE_UPDATE = 4;
 }

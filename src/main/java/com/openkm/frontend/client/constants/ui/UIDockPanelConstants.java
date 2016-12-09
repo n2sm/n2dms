@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,12 +30,8 @@ package com.openkm.frontend.client.constants.ui;
 public class UIDockPanelConstants {
 
     public static final int DESKTOP = 0;
-
     public static final int SEARCH = 1;
-
     public static final int DASHBOARD = 2;
-
     public static final int ADMINISTRATION = 3;
-
     public static final int EXTENSIONS = 4;
 }

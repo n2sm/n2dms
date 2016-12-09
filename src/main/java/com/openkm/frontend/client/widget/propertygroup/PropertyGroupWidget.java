@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.frontend.client.widget.propertygroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.openkm.frontend.client.Main;
@@ -54,42 +54,18 @@ import eu.maydu.gwt.validation.client.ValidationProcessor;
  * @author jllort
  *
  */
-public class PropertyGroupWidget extends Composite implements
-        HasPropertyGroupEvent, HasPropertyGroupHandlerExtension {
+public class PropertyGroupWidget extends Composite implements HasPropertyGroupEvent, HasPropertyGroupHandlerExtension {
 
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
 
     private String path;
-
     private CellFormatter cellFormatter;
-
     private PropertyGroupWidgetToFire propertyGroupWidgetToFire;
-
     private List<PropertyGroupHandlerExtension> propertyGroupHandlerExtensionList;
-
     private Map<String, GWTFormElement> propertyGroupVariablesMap = new HashMap<String, GWTFormElement>();
-
     private GWTPropertyGroup propertyGroup;
-
     private FormManager manager;
-
-    /**
-     * PropertyGroup
-     * 
-     * @param path The document path
-     * @param propertyGroup The group
-     * @param widget Widget at first row
-     * @param PropertyGroupWidgetToFire widget with methods to be fired
-     * @param valuesMap map of initial values
-     */
-    public PropertyGroupWidget(final String path,
-            final GWTPropertyGroup propertyGroup, final Widget widget,
-            final PropertyGroupWidgetToFire propertyGroupWidgetToFire,
-            final Map<String, GWTFormElement> valuesMap) {
-        propertyGroupVariablesMap = valuesMap;
-        start(path, propertyGroup, widget, propertyGroupWidgetToFire);
-    }
 
     /**
      * PropertyGroup
@@ -99,9 +75,8 @@ public class PropertyGroupWidget extends Composite implements
      * @param widget Widget at first row
      * @param PropertyGroupWidgetToFire widget with methods to be fired
      */
-    public PropertyGroupWidget(final String path,
-            final GWTPropertyGroup propertyGroup, final Widget widget,
-            final PropertyGroupWidgetToFire propertyGroupWidgetToFire) {
+    public PropertyGroupWidget(String path, GWTPropertyGroup propertyGroup, Widget widget,
+            PropertyGroupWidgetToFire propertyGroupWidgetToFire) {
         start(path, propertyGroup, widget, propertyGroupWidgetToFire);
     }
 
@@ -113,22 +88,20 @@ public class PropertyGroupWidget extends Composite implements
      * @param widget
      * @param propertyGroupWidgetToFire
      */
-    private void start(final String path, final GWTPropertyGroup propertyGroup,
-            final Widget widget,
-            final PropertyGroupWidgetToFire propertyGroupWidgetToFire) {
+    private void start(String path, GWTPropertyGroup propertyGroup, Widget widget, PropertyGroupWidgetToFire propertyGroupWidgetToFire) {
         propertyGroupHandlerExtensionList = new ArrayList<PropertyGroupHandlerExtension>();
         manager = new FormManager();
         this.path = path;
         this.propertyGroup = propertyGroup;
         this.propertyGroupWidgetToFire = propertyGroupWidgetToFire;
 
-        final VerticalPanel vPanel = new VerticalPanel();
+        VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("100%");
 
-        final FlexTable table = manager.getTable();
+        FlexTable table = manager.getTable();
         table.setWidth("100%");
 
-        final FlexTable widgetTable = new FlexTable();
+        FlexTable widgetTable = new FlexTable();
         widgetTable.setCellPadding(0);
         widgetTable.setCellSpacing(0);
         widgetTable.setWidth("100%");
@@ -136,12 +109,10 @@ public class PropertyGroupWidget extends Composite implements
         widgetTable.getFlexCellFormatter().setColSpan(0, 0, 2);
 
         // Widget format
-        widgetTable.getCellFormatter().setHorizontalAlignment(0, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        widgetTable.getCellFormatter().setVerticalAlignment(0, 0,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        widgetTable.getCellFormatter().setHorizontalAlignment(0, 0, HasAlignment.ALIGN_CENTER);
+        widgetTable.getCellFormatter().setVerticalAlignment(0, 0, HasAlignment.ALIGN_MIDDLE);
 
-        final RowFormatter rowFormatter = widgetTable.getRowFormatter();
+        RowFormatter rowFormatter = widgetTable.getRowFormatter();
         rowFormatter.setStyleName(0, "okm-Security-Title");
 
         cellFormatter = widgetTable.getCellFormatter(); // Gets the cell formatter
@@ -159,8 +130,7 @@ public class PropertyGroupWidget extends Composite implements
      * Gets asyncronous to group properties
      */
     final AsyncCallback<List<GWTFormElement>> callbackGetProperties = new AsyncCallback<List<GWTFormElement>>() {
-        @Override
-        public void onSuccess(final List<GWTFormElement> result) {
+        public void onSuccess(List<GWTFormElement> result) {
             manager.setFormElements(result);
             if (!propertyGroupVariablesMap.isEmpty()) {
                 manager.loadDataFromPropertyGroupVariables(propertyGroupVariablesMap);
@@ -174,8 +144,7 @@ public class PropertyGroupWidget extends Composite implements
             fireEvent(HasPropertyGroupEvent.PROPERTYGROUP_GET_PROPERTIES);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getMetaData", caught);
 
             if (propertyGroupWidgetToFire != null) {
@@ -188,16 +157,14 @@ public class PropertyGroupWidget extends Composite implements
      * Gets asyncronous to set properties
      */
     final AsyncCallback<Object> callbackSetProperties = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             if (propertyGroupWidgetToFire != null) {
                 propertyGroupWidgetToFire.finishedSetProperties();
             }
             fireEvent(HasPropertyGroupEvent.PROPERTYGROUP_CHANGED);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             if (propertyGroupWidgetToFire != null) {
                 propertyGroupWidgetToFire.finishedSetProperties();
             }
@@ -209,16 +176,14 @@ public class PropertyGroupWidget extends Composite implements
      * Gets asyncronous to remove document group properties
      */
     final AsyncCallback<Object> callbackRemoveGroup = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             if (propertyGroupWidgetToFire != null) {
                 propertyGroupWidgetToFire.finishedRemoveGroup();
             }
             fireEvent(HasPropertyGroupEvent.PROPERTYGROUP_REMOVED);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("callbackRemoveGroup", caught);
         }
     };
@@ -246,8 +211,7 @@ public class PropertyGroupWidget extends Composite implements
     public void setProperties() {
         manager.updateFormElementsValuesWithNewer();
         manager.draw(propertyGroup.isReadonly());
-        propertyGroupService.setProperties(path, propertyGroup.getName(),
-                manager.updateFormElementsValuesWithNewer(),
+        propertyGroupService.setProperties(path, propertyGroup.getName(), manager.updateFormElementsValuesWithNewer(),
                 callbackSetProperties);
     }
 
@@ -262,17 +226,15 @@ public class PropertyGroupWidget extends Composite implements
     /**
      * Gets all group properties 
      */
-    public void getProperties() {
-        propertyGroupService.getProperties(path, propertyGroup.getName(),
-                callbackGetProperties);
+    public void getProperties(boolean suggestion) {
+        propertyGroupService.getProperties(path, propertyGroup.getName(), suggestion, callbackGetProperties);
     }
 
     /**
      * Remove the document property group
      */
     public void removeGroup() {
-        propertyGroupService.removeGroup(path, propertyGroup.getName(),
-                callbackRemoveGroup);
+        propertyGroupService.removeGroup(path, propertyGroup.getName(), callbackRemoveGroup);
     }
 
     /**
@@ -303,15 +265,14 @@ public class PropertyGroupWidget extends Composite implements
     }
 
     @Override
-    public void fireEvent(final PropertyGroupEventConstant event) {
-        for (final PropertyGroupHandlerExtension propertyGroupHandlerExtension : propertyGroupHandlerExtensionList) {
-            propertyGroupHandlerExtension.onChange(event);
+    public void fireEvent(PropertyGroupEventConstant event) {
+        for (Iterator<PropertyGroupHandlerExtension> it = propertyGroupHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 
     @Override
-    public void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
+    public void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
         propertyGroupHandlerExtensionList.add(handlerExtension);
     }
 }

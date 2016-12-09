@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -50,7 +50,7 @@ public class DropboxToken implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -58,7 +58,7 @@ public class DropboxToken implements Serializable {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -66,13 +66,12 @@ public class DropboxToken implements Serializable {
         return secret;
     }
 
-    public void setSecret(final String secret) {
+    public void setSecret(String secret) {
         this.secret = secret;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("user=").append(user);
         sb.append(", key=").append(key);

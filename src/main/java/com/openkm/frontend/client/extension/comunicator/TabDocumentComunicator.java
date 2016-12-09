@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,8 +43,7 @@ public class TabDocumentComunicator {
      * @return
      */
     public static int getSelectedTab() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .getSelectedTab();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.getSelectedTab();
     }
 
     /**
@@ -53,8 +52,7 @@ public class TabDocumentComunicator {
      * @return
      */
     public static GWTDocument getDocument() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .getDocument();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.getDocument();
     }
 
     /**
@@ -62,9 +60,8 @@ public class TabDocumentComunicator {
      * 
      * @param keyword
      */
-    public static void addKeyword(final String keyword) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                .addKeyword(keyword);
+    public static void addKeyword(String keyword) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.addKeyword(keyword);
     }
 
     /**
@@ -72,9 +69,8 @@ public class TabDocumentComunicator {
      * 
      * @param keyword
      */
-    public static void removeKeyword(final String keyword) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                .removeKey(keyword);
+    public static void removeKeyword(String keyword) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.removeKey(keyword);
     }
 
     /**
@@ -82,9 +78,8 @@ public class TabDocumentComunicator {
      * 
      * @param keyword
      */
-    public static void addCategory(final GWTFolder category) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                .addCategory(category);
+    public static void addCategory(GWTFolder category) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.addCategory(category);
     }
 
     /**
@@ -92,9 +87,8 @@ public class TabDocumentComunicator {
      * 
      * @param keyword
      */
-    public static void removeCategory(final String UUID) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                .removeCategory(UUID);
+    public static void removeCategory(String UUID) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.removeCategory(UUID);
     }
 
     /**
@@ -103,8 +97,7 @@ public class TabDocumentComunicator {
      * @return
      */
     public static Collection<String> getKeywords() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                .getKeywords();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.getKeywords();
     }
 
     /**
@@ -113,8 +106,7 @@ public class TabDocumentComunicator {
      * @return
      */
     public static Collection<GWTNote> getNotes() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.notes
-                .getNotes();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.notes.getNotes();
     }
 
     /**
@@ -123,32 +115,28 @@ public class TabDocumentComunicator {
      * @return
      */
     public static boolean isVisibleButton() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .isVisibleButton();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.isVisibleButton();
     }
 
     /**
      * setRefreshingStyle
      */
     public static void setRefreshingStyle() {
-        Main.get().mainPanel.desktop.browser.tabMultiple
-                .setStyleName("okm-PanelRefreshing");
+        Main.get().mainPanel.desktop.browser.tabMultiple.setStyleName("okm-PanelRefreshing");
     }
 
     /**
      * unsetRefreshingStyle
      */
     public static void unsetRefreshingStyle() {
-        Main.get().mainPanel.desktop.browser.tabMultiple
-                .removeStyleName("okm-PanelRefreshing");
+        Main.get().mainPanel.desktop.browser.tabMultiple.removeStyleName("okm-PanelRefreshing");
     }
 
     /**
      * refreshPreviewDocument
      */
     public static void refreshPreviewDocument() {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .refreshPreviewDocument();
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.refreshPreviewDocument();
     }
 
     /**
@@ -157,8 +145,7 @@ public class TabDocumentComunicator {
      * @param widget
      * @return
      */
-    public static boolean isWidgetExtensionVisible(final Widget widget) {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                .isWidgetExtensionVisible(widget);
+    public static boolean isWidgetExtensionVisible(Widget widget) {
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.isWidgetExtensionVisible(widget);
     }
 }

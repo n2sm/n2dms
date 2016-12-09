@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -46,6 +46,7 @@ import com.openkm.api.OKMRepository;
 import com.openkm.api.OKMSearch;
 import com.openkm.automation.AutomationException;
 import com.openkm.bean.Document;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.PropertyGroup;
 import com.openkm.bean.Repository;
 import com.openkm.bean.Version;
@@ -72,10 +73,12 @@ import com.openkm.dao.bean.NodeDocument;
 import com.openkm.extension.core.ExtensionException;
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTDocument;
+import com.openkm.frontend.client.bean.GWTExtendedAttributes;
 import com.openkm.frontend.client.bean.GWTVersion;
 import com.openkm.frontend.client.bean.form.GWTFormElement;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMDocumentService;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 import com.openkm.module.db.base.BaseDocumentModule;
 import com.openkm.principal.PrincipalAdapterException;
 import com.openkm.servlet.frontend.util.DocumentComparator;
@@ -87,80 +90,80 @@ import com.openkm.util.OOUtils;
 import com.openkm.util.PDFUtils;
 import com.openkm.util.PathUtils;
 import com.openkm.util.TemplateUtils;
+import com.openkm.util.pagination.FilterUtils;
 
 import freemarker.template.TemplateException;
 
 /**
  * Directory tree service
  */
-public class DocumentServlet extends OKMRemoteServiceServlet implements
-        OKMDocumentService {
+public class DocumentServlet extends OKMRemoteServiceServlet implements OKMDocumentService {
     private static Logger log = LoggerFactory.getLogger(DocumentServlet.class);
-
     private static final long serialVersionUID = 5746570509074299745L;
 
     @Override
-    public List<GWTDocument> getChilds(String fldPath) throws OKMException {
+    public List<GWTDocument> getChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException {
         log.debug("getChilds({})", fldPath);
-        final List<GWTDocument> docList = new ArrayList<GWTDocument>();
+        List<GWTDocument> docList = new ArrayList<GWTDocument>();
         updateSessionManager();
 
         try {
             if (fldPath == null) {
-                fldPath = OKMRepository.getInstance().getRootFolder(null)
-                        .getPath();
+                fldPath = OKMRepository.getInstance().getRootFolder(null).getPath();
             }
 
             // Case thesaurus view must search documents in keywords
             if (fldPath.startsWith("/" + Repository.THESAURUS)) {
-                final String keyword = fldPath.substring(
-                        fldPath.lastIndexOf("/") + 1).replace(" ", "_");
-                final List<Document> results = OKMSearch.getInstance()
-                        .getDocumentsByKeyword(null, keyword);
+                String keyword = fldPath.substring(fldPath.lastIndexOf("/") + 1).replace(" ", "_");
+                List<Document> results = OKMSearch.getInstance().getDocumentsByKeyword(null, keyword);
 
-                for (final Document doc : results) {
+                for (Document doc : results) {
                     docList.add(GWTUtil.copy(doc, getUserWorkspaceSession()));
                 }
             } else if (fldPath.startsWith("/" + Repository.CATEGORIES)) {
                 // Case categories view
-                final String uuid = OKMFolder.getInstance()
-                        .getProperties(null, fldPath).getUuid();
-                final List<Document> results = OKMSearch.getInstance()
-                        .getCategorizedDocuments(null, uuid);
+                String uuid = OKMFolder.getInstance().getProperties(null, fldPath).getUuid();
+                List<Document> results = OKMSearch.getInstance().getCategorizedDocuments(null, uuid);
 
-                for (final Document doc : results) {
+                for (Document doc : results) {
                     docList.add(GWTUtil.copy(doc, getUserWorkspaceSession()));
+                }
+            } else if (fldPath.startsWith("/" + Repository.METADATA)) {
+                // Case metadata at value level
+                if (fldPath.split("/").length - 1 == 4) {
+                    String subFolder[] = fldPath.split("/");
+                    String group = subFolder[2];
+                    String property = subFolder[3];
+                    String value = subFolder[4];
+                    List<Document> results = OKMSearch.getInstance().getDocumentsByPropertyValue(null, group, property, value);
+
+                    for (Document doc : results) {
+                        docList.add(GWTUtil.copy(doc, getUserWorkspaceSession()));
+                    }
                 }
             } else {
                 log.debug("ParentFolder: {}", fldPath);
-                for (final Document doc : OKMDocument.getInstance()
-                        .getChildren(null, fldPath)) {
+                for (Document doc : OKMDocument.getInstance().getChildren(null, fldPath)) {
                     log.debug("Document: {}", doc);
                     docList.add(GWTUtil.copy(doc, getUserWorkspaceSession()));
                 }
             }
-            Collections.sort(docList,
-                    DocumentComparator.getInstance(getLanguage()));
-        } catch (final PathNotFoundException e) {
+            if (mapFilter != null) {
+                FilterUtils.filter(getUserWorkspaceSession(), docList, mapFilter);
+            }
+            Collections.sort(docList, DocumentComparator.getInstance(getLanguage()));
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getChilds: {}", docList);
@@ -168,38 +171,28 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTVersion> getVersionHistory(final String docPath)
-            throws OKMException {
+    public List<GWTVersion> getVersionHistory(String docPath) throws OKMException {
         log.debug("getVersionHistory({})", docPath);
-        final List<GWTVersion> versionList = new ArrayList<GWTVersion>();
+        List<GWTVersion> versionList = new ArrayList<GWTVersion>();
         updateSessionManager();
 
         try {
-            for (final Version version : OKMDocument.getInstance()
-                    .getVersionHistory(null, docPath)) {
+            for (Version version : OKMDocument.getInstance().getVersionHistory(null, docPath)) {
                 log.debug("version: {}", version);
                 versionList.add(GWTUtil.copy(version));
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getVersionHistory: {}", versionList);
@@ -207,256 +200,181 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void delete(final String docPath) throws OKMException {
+    public void delete(String docPath) throws OKMException {
         log.debug("delete({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().delete(null, docPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("delete: void");
     }
 
     @Override
-    public void checkout(final String docPath) throws OKMException {
+    public void checkout(String docPath) throws OKMException {
         log.debug("checkout({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().checkout(null, docPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("checkout: void");
     }
 
     @Override
-    public void cancelCheckout(final String docPath) throws OKMException {
+    public void cancelCheckout(String docPath) throws OKMException {
         log.debug("cancelCheckout({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().cancelCheckout(null, docPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("cancelCheckout: void");
     }
 
     @Override
-    public void lock(final String docPath) throws OKMException {
+    public void lock(String docPath) throws OKMException {
         log.debug("lock({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().lock(null, docPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("lock: void");
     }
 
     @Override
-    public void unlock(final String docPath) throws OKMException {
+    public void unlock(String docPath) throws OKMException {
         log.debug("lock({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().unlock(null, docPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_UnLock), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_UnLock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("lock: void");
     }
 
     @Override
-    public GWTDocument rename(final String docPath, final String newName)
-            throws OKMException {
+    public GWTDocument rename(String docPath, String newName) throws OKMException {
         log.debug("rename({}, {})", docPath, newName);
         GWTDocument gWTDocument = new GWTDocument();
         updateSessionManager();
 
         try {
-            gWTDocument = GWTUtil.copy(
-                    OKMDocument.getInstance().rename(null, docPath, newName),
-                    getUserWorkspaceSession());
-        } catch (final PathNotFoundException e) {
+            gWTDocument = GWTUtil.copy(OKMDocument.getInstance().rename(null, docPath, newName), getUserWorkspaceSession());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("rename: {}", gWTDocument);
@@ -464,148 +382,106 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void move(final String docPath, final String destPath)
-            throws OKMException {
+    public void move(String docPath, String destPath) throws OKMException {
         log.debug("move({}, {})", docPath, destPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().move(null, docPath, destPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("move: void");
     }
 
     @Override
-    public void purge(final String docPath) throws OKMException {
+    public void purge(String docPath) throws OKMException {
         log.debug("purge({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().purge(null, docPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("purge: void");
     }
 
     @Override
-    public void restoreVersion(final String docPath, final String versionId)
-            throws OKMException {
+    public void restoreVersion(String docPath, String versionId) throws OKMException {
         log.debug("restoreVersion({}, {})", docPath, versionId);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().restoreVersion(null, docPath, versionId);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("restoreVersion: void");
     }
 
     @Override
-    public GWTDocument get(final String docPath) throws OKMException {
+    public GWTDocument get(String docPath) throws OKMException {
         log.debug("get({})", docPath);
         GWTDocument gWTDocument = new GWTDocument();
         updateSessionManager();
 
         try {
-            gWTDocument = GWTUtil.copy(
-                    OKMDocument.getInstance().getProperties(null, docPath),
-                    getUserWorkspaceSession());
-        } catch (final PathNotFoundException e) {
+            gWTDocument = GWTUtil.copy(OKMDocument.getInstance().getProperties(null, docPath), getUserWorkspaceSession());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("get: {}", gWTDocument);
@@ -613,242 +489,176 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void copy(final String docPath, final String fldPath)
-            throws OKMException {
+    public void copy(String docPath, String fldPath) throws OKMException {
         log.debug("copy({}, {})", docPath, fldPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().copy(null, docPath, fldPath);
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("copy: void");
     }
 
     @Override
-    public Boolean isValid(final String docPath) throws OKMException {
+    public Boolean isValid(String docPath) throws OKMException {
         log.debug("isValid({})", docPath);
         updateSessionManager();
 
         try {
             return new Boolean(OKMDocument.getInstance().isValid(null, docPath));
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 
     @Override
-    public Long getVersionHistorySize(final String docPath) throws OKMException {
+    public Long getVersionHistorySize(String docPath) throws OKMException {
         log.debug("getVersionHistorySize({})", docPath);
         updateSessionManager();
 
         try {
-            return new Long(OKMDocument.getInstance().getVersionHistorySize(
-                    null, docPath));
-        } catch (final PathNotFoundException e) {
+            return new Long(OKMDocument.getInstance().getVersionHistorySize(null, docPath));
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 
     @Override
-    public void purgeVersionHistory(final String docPath) throws OKMException {
+    public void purgeVersionHistory(String docPath) throws OKMException {
         log.debug("purgeVersionHistory({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().purgeVersionHistory(null, docPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("purgeVersionHistory: void");
     }
 
     @Override
-    public void forceUnlock(final String docPath) throws OKMException {
+    public void forceUnlock(String docPath) throws OKMException {
         log.debug("forceUnlock({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().forceUnlock(null, docPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("forceUnlock: void");
     }
 
     @Override
-    public void forceCancelCheckout(final String docPath) throws OKMException {
+    public void forceCancelCheckout(String docPath) throws OKMException {
         log.debug("forceCancelCheckout({})", docPath);
         updateSessionManager();
 
         try {
             OKMDocument.getInstance().forceCancelCheckout(null, docPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("forceCancelCheckout: void");
     }
 
     @Override
-    public GWTDocument createFromTemplate(final String tplPath,
-            String destinationPath, final List<GWTFormElement> formProperties,
-            final Map<String, List<Map<String, String>>> tableProperties)
-            throws OKMException {
-        log.debug("createFromTemplate({}, {}, {}, {})", new Object[] { tplPath,
-                destinationPath, formProperties, tableProperties });
+    public GWTDocument createFromTemplate(String tplPath, String destinationPath, List<GWTFormElement> formProperties,
+            Map<String, List<Map<String, String>>> tableProperties) throws OKMException {
+        log.debug("createFromTemplate({}, {}, {}, {})", new Object[] { tplPath, destinationPath, formProperties, tableProperties });
         updateSessionManager();
         File tmp = null;
         InputStream fis = null;
         GWTDocument doc = null;
 
         try {
-            final Document docTpl = OKMDocument.getInstance().getProperties(
-                    null, tplPath);
+            Document docTpl = OKMDocument.getInstance().getProperties(null, tplPath);
             tmp = tmpFromTemplate(docTpl, formProperties, tableProperties);
 
             // Change fileName after conversion
             if (docTpl.getMimeType().equals("text/html")) {
-                destinationPath = destinationPath.substring(0,
-                        destinationPath.lastIndexOf("."))
-                        + ".pdf";
+                destinationPath = destinationPath.substring(0, destinationPath.lastIndexOf(".")) + ".pdf";
             }
 
             // Create document
@@ -858,134 +668,88 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
             newDoc = OKMDocument.getInstance().create(null, newDoc, fis);
 
             // Set property groups ( metadata )
-            for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                    .getGroups(null, tplPath)) {
-                OKMPropertyGroup.getInstance().addGroup(null, newDoc.getPath(),
-                        pg.getName());
+            for (PropertyGroup pg : OKMPropertyGroup.getInstance().getGroups(null, tplPath)) {
+                OKMPropertyGroup.getInstance().addGroup(null, newDoc.getPath(), pg.getName());
 
                 // Get group properties
-                final List<FormElement> properties = new ArrayList<FormElement>();
+                List<FormElement> properties = new ArrayList<FormElement>();
 
-                for (final FormElement fe : OKMPropertyGroup.getInstance()
-                        .getProperties(null, newDoc.getPath(), pg.getName())) {
+                for (FormElement fe : OKMPropertyGroup.getInstance().getProperties(null, newDoc.getPath(), pg.getName())) {
                     // Iterates all properties because can have more than one group
-                    for (final GWTFormElement fp : formProperties) {
+                    for (GWTFormElement fp : formProperties) {
                         if (fe.getName().equals(fp.getName())) {
                             properties.add(GWTUtil.copy(fp));
                         }
                     }
                 }
 
-                OKMPropertyGroup.getInstance().setProperties(null,
-                        newDoc.getPath(), pg.getName(), properties);
+                OKMPropertyGroup.getInstance().setProperties(null, newDoc.getPath(), pg.getName(), properties);
             }
 
             doc = GWTUtil.copy(newDoc, getUserWorkspaceSession()); // return document
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final DocumentException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (DocumentException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Document), e.getMessage());
-        } catch (final UnsupportedMimeTypeException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Document), e.getMessage());
+        } catch (UnsupportedMimeTypeException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
-        } catch (final FileSizeExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
+        } catch (FileSizeExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
-        } catch (final UserQuotaExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
+        } catch (UserQuotaExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_QuotaExceed), e.getMessage());
-        } catch (final VirusDetectedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_QuotaExceed), e.getMessage());
+        } catch (VirusDetectedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Virus), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Virus), e.getMessage());
+        } catch (ItemExistsException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final DocumentTemplateException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (DocumentTemplateException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_DocumentTemplate), e.getMessage());
-        } catch (final ConversionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_DocumentTemplate), e.getMessage());
+        } catch (ConversionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Conversion), e.getMessage());
-        } catch (final TemplateException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Conversion), e.getMessage());
+        } catch (TemplateException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Template), e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Template), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Parse), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final NoSuchPropertyException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (NoSuchPropertyException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Automation), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
         } finally {
             FileUtils.deleteQuietly(tmp);
             IOUtils.closeQuietly(fis);
@@ -996,141 +760,94 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public String updateFromTemplate(final String tplPath,
-            final String destinationPath,
-            final List<GWTFormElement> formProperties,
-            final Map<String, List<Map<String, String>>> tableProperties)
-            throws OKMException {
-        log.debug("updateFromTemplate({}, {}, {}, {})", new Object[] { tplPath,
-                destinationPath, formProperties, tableProperties });
+    public String updateFromTemplate(String tplPath, String destinationPath, List<GWTFormElement> formProperties,
+            Map<String, List<Map<String, String>>> tableProperties) throws OKMException {
+        log.debug("updateFromTemplate({}, {}, {}, {})", new Object[] { tplPath, destinationPath, formProperties, tableProperties });
         updateSessionManager();
         InputStream fis = null;
         File tmp = null;
 
         try {
-            final Document docTpl = OKMDocument.getInstance().getProperties(
-                    null, tplPath);
+            Document docTpl = OKMDocument.getInstance().getProperties(null, tplPath);
             tmp = tmpFromTemplate(docTpl, formProperties, tableProperties);
 
             // Update document
             fis = new FileInputStream(tmp);
             OKMDocument.getInstance().checkout(null, destinationPath);
-            OKMDocument.getInstance().checkin(null, destinationPath, fis,
-                    "Updated from template");
+            OKMDocument.getInstance().checkin(null, destinationPath, fis, "Updated from template");
 
             // Set property groups ( metadata )
-            for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                    .getGroups(null, destinationPath)) {
-                final List<FormElement> properties = new ArrayList<FormElement>();
+            for (PropertyGroup pg : OKMPropertyGroup.getInstance().getGroups(null, destinationPath)) {
+                List<FormElement> properties = new ArrayList<FormElement>();
 
-                for (final FormElement fe : OKMPropertyGroup.getInstance()
-                        .getProperties(null, destinationPath, pg.getName())) {
+                for (FormElement fe : OKMPropertyGroup.getInstance().getProperties(null, destinationPath, pg.getName())) {
                     // Iterates all properties because can have more than one group
-                    for (final GWTFormElement fp : formProperties) {
+                    for (GWTFormElement fp : formProperties) {
                         if (fe.getName().equals(fp.getName())) {
                             properties.add(GWTUtil.copy(fp));
                         }
                     }
                 }
 
-                OKMPropertyGroup.getInstance().setProperties(null,
-                        destinationPath, pg.getName(), properties);
+                OKMPropertyGroup.getInstance().setProperties(null, destinationPath, pg.getName(), properties);
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final DocumentException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (DocumentException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Document), e.getMessage());
-        } catch (final FileSizeExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Document), e.getMessage());
+        } catch (FileSizeExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
-        } catch (final UserQuotaExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
+        } catch (UserQuotaExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_QuotaExceed), e.getMessage());
-        } catch (final VirusDetectedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_QuotaExceed), e.getMessage());
+        } catch (VirusDetectedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Virus), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Virus), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final DocumentTemplateException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (DocumentTemplateException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_DocumentTemplate), e.getMessage());
-        } catch (final ConversionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_DocumentTemplate), e.getMessage());
+        } catch (ConversionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Conversion), e.getMessage());
-        } catch (final TemplateException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Conversion), e.getMessage());
+        } catch (TemplateException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Template), e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Template), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Parse), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final NoSuchPropertyException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (NoSuchPropertyException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
-        } catch (final VersionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
+        } catch (VersionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Version), e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Version), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Automation), e.getMessage());
         } finally {
             FileUtils.deleteQuietly(tmp);
             IOUtils.closeQuietly(fis);
@@ -1143,55 +860,47 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     /**
      * Create a document from a template and store it in a temporal file.
      */
-    private File tmpFromTemplate(final Document docTpl,
-            final List<GWTFormElement> formProperties,
-            final Map<String, List<Map<String, String>>> tableProperties)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, IOException, DatabaseException,
-            DocumentException, TemplateException, DocumentTemplateException,
+    private File tmpFromTemplate(Document docTpl, List<GWTFormElement> formProperties,
+            Map<String, List<Map<String, String>>> tableProperties) throws PathNotFoundException, AccessDeniedException,
+            RepositoryException, IOException, DatabaseException, DocumentException, TemplateException, DocumentTemplateException,
             ConversionException {
-        log.debug("tmpFromTemplate({}, {}, {})", new Object[] { docTpl,
-                formProperties, tableProperties });
+        log.debug("tmpFromTemplate({}, {}, {})", new Object[] { docTpl, formProperties, tableProperties });
         FileOutputStream fos = null;
         InputStream fis = null;
         File tmpResult = null;
 
         try {
             // Reading original document
-            fis = OKMDocument.getInstance().getContent(null, docTpl.getPath(),
-                    false);
+            fis = OKMDocument.getInstance().getContent(null, docTpl.getPath(), false);
 
             // Save content to temporary file
-            final String fileName = PathUtils.getName(docTpl.getPath());
-            tmpResult = File.createTempFile("okm",
-                    "." + FileUtils.getFileExtension(fileName));
+            String fileName = PathUtils.getName(docTpl.getPath());
+            tmpResult = File.createTempFile("okm", "." + FileUtils.getFileExtension(fileName));
             fos = new FileOutputStream(tmpResult);
 
             // Setting values to document
-            final Map<String, Object> values = new HashMap<String, Object>();
+            Map<String, Object> values = new HashMap<String, Object>();
 
-            for (final GWTFormElement formElement : formProperties) {
-                final String key = formElement.getName().replace(".", "_")
-                        .replace(":", "_");
-                final Object value = GWTUtil.getFormElementValue(formElement);
+            for (GWTFormElement formElement : formProperties) {
+                String key = formElement.getName().replace(".", "_").replace(":", "_");
+                Object value = GWTUtil.getFormElementValue(formElement);
                 values.put(key, value);
             }
 
-            for (final String key : tableProperties.keySet()) {
+            for (String key : tableProperties.keySet()) {
                 values.put(key, tableProperties.get(key));
             }
 
             // Fill document by mime type
             if (docTpl.getMimeType().equals("application/pdf")) {
                 PDFUtils.fillForm(fis, values, fos);
-            } else if (docTpl.getMimeType().equals(
-                    "application/vnd.oasis.opendocument.text")) {
+            } else if (docTpl.getMimeType().equals("application/vnd.oasis.opendocument.text")) {
                 OOUtils.fillTemplate(fis, values, fos);
             } else if (docTpl.getMimeType().equals("text/html")) {
                 TemplateUtils.replace(fileName, fis, values, fos);
 
                 // Converting to PDF
-                final File tmpPdf = File.createTempFile("okm", ".pdf");
+                File tmpPdf = File.createTempFile("okm", ".pdf");
                 DocConverter.getInstance().html2pdf(tmpResult, tmpPdf);
                 tmpResult.delete();
                 tmpResult = tmpPdf;
@@ -1206,23 +915,20 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public String convertToPdf(final String docPath) throws OKMException {
+    public String convertToPdf(String docPath) throws OKMException {
         log.debug("convertToPdf({})", docPath);
         updateSessionManager();
         String destinationPath = "";
         InputStream is = null;
 
         try {
-            final String uuid = OKMRepository.getInstance().getNodeUuid(null,
-                    docPath);
+            String uuid = OKMRepository.getInstance().getNodeUuid(null, docPath);
 
             // Now an document can be located by UUID
             if (!uuid.equals("")) {
-                final File pdfCache = new File(Config.REPOSITORY_CACHE_PDF
-                        + File.separator + uuid + ".pdf");
-                Document doc = OKMDocument.getInstance().getProperties(null,
-                        docPath);
-                final DocConverter converter = DocConverter.getInstance();
+                File pdfCache = new File(Config.REPOSITORY_CACHE_PDF + File.separator + uuid + ".pdf");
+                Document doc = OKMDocument.getInstance().getProperties(null, docPath);
+                DocConverter converter = DocConverter.getInstance();
 
                 // Getting content
                 is = OKMDocument.getInstance().getContent(null, docPath, false);
@@ -1230,17 +936,15 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
                 // Convert to PDF
                 if (!pdfCache.exists()) {
                     try {
-                        final File tmp = FileUtils.createTempFileFromMime(doc
-                                .getMimeType());
+                        File tmp = FileUtils.createTempFileFromMime(doc.getMimeType());
                         FileUtils.copy(is, tmp);
                         converter.doc2pdf(tmp, doc.getMimeType(), pdfCache);
                         tmp.delete();
-                    } catch (final ConversionException e) {
+                    } catch (ConversionException e) {
                         pdfCache.delete();
                         log.error(e.getMessage(), e);
-                        throw new OKMException(ErrorCode.get(
-                                ErrorCode.ORIGIN_OKMDocumentService,
-                                ErrorCode.CAUSE_Conversion), e.getMessage());
+                        throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Conversion),
+                                e.getMessage());
                     }
                 }
 
@@ -1249,281 +953,250 @@ public class DocumentServlet extends OKMRemoteServiceServlet implements
 
                 // create new document
                 doc = new Document();
-                doc.setPath(PathUtils.getParent(docPath) + "/"
-                        + FileUtils.getFileName(PathUtils.getName(docPath))
-                        + ".pdf");
-                destinationPath = OKMDocument.getInstance()
-                        .create(null, doc, is).getPath();
+                doc.setPath(PathUtils.getParent(docPath) + "/" + FileUtils.getFileName(PathUtils.getName(docPath)) + ".pdf");
+                destinationPath = OKMDocument.getInstance().create(null, doc, is).getPath();
                 is.close();
 
                 // Set property groups ( metadata ) from original document to converted
-                for (final PropertyGroup pg : OKMPropertyGroup.getInstance()
-                        .getGroups(null, docPath)) {
+                for (PropertyGroup pg : OKMPropertyGroup.getInstance().getGroups(null, docPath)) {
                     // Add group
-                    OKMPropertyGroup.getInstance().addGroup(null,
-                            destinationPath, pg.getName());
+                    OKMPropertyGroup.getInstance().addGroup(null, destinationPath, pg.getName());
 
                     // Properties to be saved from original document
-                    final List<FormElement> properties = OKMPropertyGroup
-                            .getInstance().getProperties(null, docPath,
-                                    pg.getName());
+                    List<FormElement> properties = OKMPropertyGroup.getInstance().getProperties(null, docPath, pg.getName());
 
                     // Set properties
-                    OKMPropertyGroup.getInstance().setProperties(null,
-                            destinationPath, pg.getName(), properties);
+                    OKMPropertyGroup.getInstance().setProperties(null, destinationPath, pg.getName(), properties);
                 }
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final UnsupportedMimeTypeException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (UnsupportedMimeTypeException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
-        } catch (final FileSizeExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
+        } catch (FileSizeExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
-        } catch (final UserQuotaExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
+        } catch (UserQuotaExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_QuotaExceed), e.getMessage());
-        } catch (final VirusDetectedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_QuotaExceed), e.getMessage());
+        } catch (VirusDetectedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Virus), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Virus), e.getMessage());
+        } catch (ItemExistsException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Parse), e.getMessage());
-        } catch (final NoSuchPropertyException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchPropertyException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Automation), e.getMessage());
         }
 
         log.debug("convertToPdf: {}", destinationPath);
         return destinationPath;
     }
 
+    /*
+     * ========================
+     * LiveEdit methods ends
+     * =========================
+     */
+
+    @Override
+    public void mergePdf(String docName, List<String> paths) throws OKMException {
+        log.debug("mergePdf({},{})", docName, paths);
+        updateSessionManager();
+
+        List<InputStream> inputs = new ArrayList<InputStream>();
+        FileOutputStream fos = null;
+        FileInputStream fis = null;
+        File tmp = null;
+        try {
+            // Ensure docName ends with .pdf
+            if (!docName.endsWith(".pdf")) {
+                docName += ".pdf";
+            }
+
+            // Create temporal file to store merged pdf
+            tmp = File.createTempFile("okm", "." + docName);
+            fos = new FileOutputStream(tmp);
+
+            // Open document
+            for (String docPath : paths) {
+                inputs.add(OKMDocument.getInstance().getContent(null, docPath, false));
+            }
+
+            // Merge document
+            PDFUtils.merge(inputs, fos);
+
+            // Create document in repository
+            String fldPath = PathUtils.getParent(paths.get(0)); // all documents are in same path
+            String docPath = fldPath + "/" + docName;
+            Document doc = new Document();
+            doc.setPath(docPath);
+            fis = new FileInputStream(tmp);
+            OKMDocument.getInstance().create(null, doc, fis);
+
+        } catch (PathNotFoundException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Document), e.getMessage());
+        } catch (DatabaseException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (DocumentException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Document), e.getMessage());
+        } catch (UnsupportedMimeTypeException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
+        } catch (FileSizeExceededException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
+        } catch (UserQuotaExceededException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_QuotaExceed), e.getMessage());
+        } catch (VirusDetectedException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Virus), e.getMessage());
+        } catch (ItemExistsException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ExtensionException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (AutomationException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Automation), e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(fos);
+            IOUtils.closeQuietly(fis);
+            FileUtils.deleteQuietly(tmp);
+
+            // Close documents
+            for (InputStream input : inputs) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                    throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+                }
+            }
+        }
+    }
+
     @Override
     public List<GWTDocument> getAllTemplates() throws OKMException {
-        final List<GWTDocument> docs = new ArrayList<GWTDocument>();
-        final String user = getThreadLocalRequest().getRemoteUser();
+        List<GWTDocument> docs = new ArrayList<GWTDocument>();
+        String user = getThreadLocalRequest().getRemoteUser();
         try {
-            final String tmplUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    "/" + Repository.TEMPLATES);
+            String tmplUuid = NodeBaseDAO.getInstance().getUuidFromPath("/" + Repository.TEMPLATES);
 
-            for (final NodeDocument nDoc : NodeDocumentDAO.getInstance()
-                    .findFromParent(tmplUuid)) {
-                final Document doc = BaseDocumentModule.getProperties(user,
-                        nDoc);
+            for (NodeDocument nDoc : NodeDocumentDAO.getInstance().findFromParent(tmplUuid)) {
+                Document doc = BaseDocumentModule.getProperties(user, nDoc);
                 docs.add(GWTUtil.copy(doc, null));
             }
 
-            Collections.sort(docs,
-                    PathDocumentComparator.getInstance(getLanguage()));
-        } catch (final IOException e) {
+            Collections.sort(docs, PathDocumentComparator.getInstance(getLanguage()));
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Parse), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (PathNotFoundException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
         }
 
         return docs;
     }
 
     @Override
-    public GWTDocument createFromTemplate(final String tplPath,
-            final String fldPath, final String newName) throws OKMException {
-        log.debug("createFromTemplate({}, {}, {})", new Object[] { tplPath,
-                fldPath, newName });
+    public void createFromTemplate(String docPath, String fldPath, String name, GWTExtendedAttributes attributes) throws OKMException {
+        log.debug("createFromTemplate({}, {}, {})", new Object[] { docPath, fldPath, name });
         updateSessionManager();
-        File tmp = null;
-        InputStream fis = null;
-        GWTDocument doc = null;
 
         try {
-            // Copy file
-            fis = OKMDocument.getInstance().getContent(null, tplPath, false);
-            tmp = File.createTempFile("okm", "." + newName);
-            FileUtils.copy(fis, tmp);
-            fis.close();
-
-            // Create document
-            fis = new FileInputStream(tmp);
-            final Document newDoc = new Document();
-            newDoc.setPath(fldPath + "/" + newName);
-            doc = GWTUtil.copy(
-                    OKMDocument.getInstance().create(null, newDoc, fis), null);
-
-        } catch (final RepositoryException e) {
+            ExtendedAttributes extAttr = GWTUtil.copy(attributes);
+            OKMDocument.getInstance().extendedCopy(null, docPath, fldPath, name, extAttr);
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (UserQuotaExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_QuotaExceed), e.getMessage());
+        } catch (ItemExistsException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Parse), e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final UnsupportedMimeTypeException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
-        } catch (final FileSizeExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
-        } catch (final UserQuotaExceededException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_QuotaExceed), e.getMessage());
-        } catch (final VirusDetectedException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService,
-                            ErrorCode.CAUSE_Virus), e.getMessage());
-        } catch (final ItemExistsException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final AccessDeniedException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final ExtensionException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final AutomationException e) {
-            log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDocumentService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
-        } finally {
-            if (fis != null) {
-                IOUtils.closeQuietly(fis);
-            }
-            if (tmp != null) {
-                tmp.deleteOnExit();
-            }
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDocumentService, ErrorCode.CAUSE_Automation), e.getMessage());
         }
-
-        return doc;
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -25,6 +25,7 @@ import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.dao.bean.NodeBase;
+import com.openkm.principal.PrincipalAdapterException;
 
 /**
  * Check user permissions on documents and folders.
@@ -33,10 +34,9 @@ import com.openkm.dao.bean.NodeBase;
  */
 public interface DbAccessManager {
 
-    public void checkPermission(NodeBase node, int permissions)
-            throws AccessDeniedException, PathNotFoundException,
-            DatabaseException;
+    public void checkPermission(NodeBase node, int permissions) throws AccessDeniedException, PathNotFoundException, DatabaseException;
 
-    public boolean isGranted(NodeBase node, int permissions)
-            throws DatabaseException;
+    public boolean isGranted(NodeBase node, int permissions) throws DatabaseException;
+
+    public boolean isGranted(NodeBase node, String user, int permissions) throws PrincipalAdapterException, DatabaseException;
 }

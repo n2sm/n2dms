@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -37,18 +37,16 @@ public class TimeHelper {
     /**
      * changeControlTime
      */
-    public static void changeControlTime(final String key) {
+    public static void changeControlTime(String key) {
         timeMap.put(key, new Date());
     }
 
     /**
      * hasElapsedEnoughtTime
      */
-    public static boolean hasElapsedEnoughtTime(final String key,
-            final int milis, final boolean reset) {
+    public static boolean hasElapsedEnoughtTime(String key, int milis, boolean reset) {
         if (timeMap.containsKey(key)) {
-            final boolean enought = new Date().getTime()
-                    - timeMap.get(key).getTime() > milis;
+            boolean enought = ((new Date().getTime() - timeMap.get(key).getTime()) > milis);
             if (reset && !enought) {
                 timeMap.put(key, new Date()); // Start again
             }
@@ -62,22 +60,21 @@ public class TimeHelper {
     /**
      * hasElapsedEnoughtTime
      */
-    public static boolean hasElapsedEnoughtTime(final String key,
-            final int milis) {
+    public static boolean hasElapsedEnoughtTime(String key, int milis) {
         return hasElapsedEnoughtTime(key, milis, false);
     }
 
     /**
      * hasControlTime
      */
-    public static boolean hasControlTime(final String key) {
+    public static boolean hasControlTime(String key) {
         return timeMap.containsKey(key);
     }
 
     /**
      * clean
      */
-    public static void removeControlTime(final String key) {
+    public static void removeControlTime(String key) {
         timeMap.remove(key);
     }
 }

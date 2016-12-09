@@ -1,6 +1,6 @@
 /**
 *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.panel.center;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.user.client.Timer;
@@ -49,53 +50,31 @@ import com.openkm.frontend.client.widget.dashboard.workflow.WorkflowDashboard;
  * @author jllort
  *
  */
-public class Dashboard extends Composite implements
-        HasDashboardHandlerExtension, HasDashboardEvent {
+public class Dashboard extends Composite implements HasDashboardHandlerExtension, HasDashboardEvent {
 
     private boolean userVisible = false;
-
     private boolean mailVisible = false;
-
     private boolean newsVisible = false;
-
     private boolean generalVisible = false;
-
     private boolean workflowVisible = false;
-
     private boolean keywordsVisible = false;
 
     private VerticalPanel panel;
-
     private SimplePanel sp;
-
     private ScrollPanel scrollPanel;
-
     public HorizontalToolBar horizontalToolBar;
-
     public UserDashboard userDashboard;
-
     public MailDashboard mailDashboard;
-
     public NewsDashboard newsDashboard;
-
     public GeneralDashboard generalDashboard;
-
     public WorkflowDashboard workflowDashboard;
-
     public KeyMapDashboard keyMapDashboard;
-
     private Widget actualWidgetExtension;
-
     private int actualView = 0;
-
     private Timer dashboardRefreshing;
-
     private List<ToolBarBoxExtension> toolBarBoxExtensionList;
-
     private List<DashboardHandlerExtension> dashboardHandlerExtensionList;
-
     private int width = 0;
-
     private int height = 0;
 
     /**
@@ -133,26 +112,25 @@ public class Dashboard extends Composite implements
      * @param width The max width of the widget
      * @param height The max height of the widget
      */
-    public void setSize(final int width, final int height) {
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
         panel.setPixelSize(width - 2, height - 2);
-        panel.setCellHeight(sp, "" + (height - 60 - 2));
-        panel.setCellHeight(horizontalToolBar, "" + 60);
+        panel.setCellHeight(sp, "" + (height - 60 - 2) + "px");
+        panel.setCellHeight(horizontalToolBar, "" + 60 + "px");
         sp.setPixelSize(width - 2, height - 60 - 2);
         scrollPanel.setPixelSize(width - 2, height - (60 + 2));
         userDashboard.setWidth(width - 2);
         mailDashboard.setWidth(width - 2);
         newsDashboard.setWidth(width - 2);
         generalDashboard.setWidth(width - 2);
-        workflowDashboard.setWidth(width - 2);
+        workflowDashboard.setWidth(width - 2, (height - (60 + 2)));
         keyMapDashboard.setSize("" + (width - 2), "" + (height - (60 + 2)));
-        horizontalToolBar.setHeight("60");
+        horizontalToolBar.setHeight("60px");
         horizontalToolBar.setWidth("100%");
 
-        for (final ToolBarBoxExtension toolBarBoxExtension : toolBarBoxExtensionList) {
-            toolBarBoxExtension.getWidget().setPixelSize(width - 2,
-                    height - (60 + 2));
+        for (Iterator<ToolBarBoxExtension> it = toolBarBoxExtensionList.iterator(); it.hasNext();) {
+            it.next().getWidget().setPixelSize(width - 2, height - (60 + 2));
         }
 
         newsDashboard.getUserSearchs(true); // Here must get all searchs to set correct width size
@@ -176,7 +154,7 @@ public class Dashboard extends Composite implements
      * 
      * @param view
      */
-    public void changeView(final int view) {
+    public void changeView(int view) {
 
         switch (actualView) {
         case UIDashboardConstants.DASHBOARD_USER:
@@ -234,8 +212,7 @@ public class Dashboard extends Composite implements
             break;
 
         case UIDashboardConstants.DASHBOARD_EXTENSION:
-            actualWidgetExtension = toolBarBoxExtensionList.get(
-                    horizontalToolBar.getSelectedExtension()).getWidget();
+            actualWidgetExtension = toolBarBoxExtensionList.get(horizontalToolBar.getSelectedExtension()).getWidget();
             scrollPanel.add(actualWidgetExtension);
             break;
         }
@@ -255,9 +232,8 @@ public class Dashboard extends Composite implements
      * @param widget
      * @return
      */
-    public boolean isWidgetExtensionVisible(final Widget widget) {
-        if (actualView == UIDashboardConstants.DASHBOARD_EXTENSION
-                && actualWidgetExtension.equals(widget)) {
+    public boolean isWidgetExtensionVisible(Widget widget) {
+        if (actualView == UIDashboardConstants.DASHBOARD_EXTENSION && actualWidgetExtension.equals(widget)) {
             return true;
         } else {
             return false;
@@ -292,16 +268,14 @@ public class Dashboard extends Composite implements
      * 
      * @param scheduleTime
      */
-    public void startRefreshingDashboard(final double scheduleTime) {
+    public void startRefreshingDashboard(double scheduleTime) {
         dashboardRefreshing = new Timer() {
-            @Override
             public void run() {
                 refreshAll();
             }
         };
 
-        dashboardRefreshing.scheduleRepeating(new Double(scheduleTime)
-                .intValue());
+        dashboardRefreshing.scheduleRepeating(new Double(scheduleTime).intValue());
     }
 
     /**
@@ -379,21 +353,20 @@ public class Dashboard extends Composite implements
      * 
      * @param extension
      */
-    public void addToolBarBoxExtension(final ToolBarBoxExtension extension) {
+    public void addToolBarBoxExtension(ToolBarBoxExtension extension) {
         toolBarBoxExtensionList.add(extension);
         horizontalToolBar.addToolBarBoxExtension(extension);
         extension.getWidget().setPixelSize(width - 2, height - (60 + 2));
     }
 
     @Override
-    public void addDashboardHandlerExtension(
-            final DashboardHandlerExtension handlerExtension) {
+    public void addDashboardHandlerExtension(DashboardHandlerExtension handlerExtension) {
         dashboardHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final DashboardEventConstant event) {
-        for (final DashboardHandlerExtension handlerExtension : dashboardHandlerExtensionList) {
+    public void fireEvent(DashboardEventConstant event) {
+        for (DashboardHandlerExtension handlerExtension : dashboardHandlerExtensionList) {
             handlerExtension.onChange(event);
         }
     }

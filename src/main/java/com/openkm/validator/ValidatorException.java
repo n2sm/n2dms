@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,15 +29,15 @@ public class ValidatorException extends Exception {
         super();
     }
 
-    public ValidatorException(final String message) {
+    public ValidatorException(String message) {
         super(message);
     }
 
-    public ValidatorException(final String message, final Throwable source) {
+    public ValidatorException(String message, Throwable source) {
         super(message, source);
     }
 
-    public ValidatorException(final Throwable source) {
+    public ValidatorException(Throwable source) {
         super(source);
     }
 }

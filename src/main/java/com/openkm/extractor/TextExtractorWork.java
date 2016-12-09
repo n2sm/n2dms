@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,18 +28,15 @@ import java.util.Calendar;
  */
 public class TextExtractorWork {
     private String docUuid;
-
     private String docPath;
-
     private String docVerUuid;
-
     private Calendar date = Calendar.getInstance();
 
     public String getDocUuid() {
         return docUuid;
     }
 
-    public void setDocUuid(final String docUuid) {
+    public void setDocUuid(String docUuid) {
         this.docUuid = docUuid;
     }
 
@@ -47,7 +44,7 @@ public class TextExtractorWork {
         return docPath;
     }
 
-    public void setDocPath(final String docPath) {
+    public void setDocPath(String docPath) {
         this.docPath = docPath;
     }
 
@@ -55,7 +52,7 @@ public class TextExtractorWork {
         return docVerUuid;
     }
 
-    public void setDocVerUuid(final String docVerUuid) {
+    public void setDocVerUuid(String docVerUuid) {
         this.docVerUuid = docVerUuid;
     }
 
@@ -63,13 +60,12 @@ public class TextExtractorWork {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("docUuid=").append(docUuid);
         sb.append(", docPath=").append(docPath);

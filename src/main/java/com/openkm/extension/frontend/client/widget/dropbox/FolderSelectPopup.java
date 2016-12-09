@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -26,7 +26,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -41,19 +41,12 @@ import com.openkm.frontend.client.widget.searchin.HasPropertyHandler;
  */
 public class FolderSelectPopup extends DialogBox {
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private ScrollPanel scrollDirectoryPanel;
-
     private VerticalPanel verticalDirectoryPanel;
-
     private FolderSelectTree folderSelectTree;
-
     private Button cancelButton;
-
     private Button actionButton;
-
     private HasPropertyHandler propertyHandler;
 
     /**
@@ -64,14 +57,14 @@ public class FolderSelectPopup extends DialogBox {
         super(false, true);
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("450");
-        vPanel.setHeight("350");
+        vPanel.setWidth("450px");
+        vPanel.setHeight("350px");
         hPanel = new HorizontalPanel();
 
         setText(Main.i18n("search.folder.filter"));
 
         scrollDirectoryPanel = new ScrollPanel();
-        scrollDirectoryPanel.setSize("440", "300");
+        scrollDirectoryPanel.setSize("440px", "300px");
         scrollDirectoryPanel.setStyleName("okm-Popup-text");
         verticalDirectoryPanel = new VerticalPanel();
         verticalDirectoryPanel.setSize("100%", "100%");
@@ -81,42 +74,37 @@ public class FolderSelectPopup extends DialogBox {
         verticalDirectoryPanel.add(folderSelectTree);
         scrollDirectoryPanel.add(verticalDirectoryPanel);
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
-        actionButton = new Button(Main.i18n("button.select"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (propertyHandler != null) {
-                            propertyHandler.metadataValueChanged();
-                        }
-                        Dropbox.get().subMenuDropbox.export(folderSelectTree
-                                .getActualPath());
-                        hide();
-                    }
-                });
+        actionButton = new Button(Main.i18n("button.select"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (propertyHandler != null) {
+                    propertyHandler.metadataValueChanged();
+                }
+                Dropbox.get().subMenuDropbox.export(folderSelectTree.getActualPath());
+                hide();
+            }
+        });
 
         vPanel.add(scrollDirectoryPanel);
         vPanel.add(new HTML("<br>"));
         hPanel.add(cancelButton);
-        final HTML space = new HTML();
-        space.setWidth("50");
+        HTML space = new HTML();
+        space.setWidth("50px");
         hPanel.add(space);
         hPanel.add(actionButton);
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(scrollDirectoryPanel, "300");
+        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(scrollDirectoryPanel, "300px");
 
         cancelButton.setStyleName("okm-NoButton");
         actionButton.setStyleName("okm-YesButton");
@@ -137,10 +125,9 @@ public class FolderSelectPopup extends DialogBox {
     /**
      * Shows the popup
      */
-    @Override
     public void show() {
-        final int left = (Window.getClientWidth() - 450) / 2;
-        final int top = (Window.getClientHeight() - 350) / 2;
+        int left = (Window.getClientWidth() - 450) / 2;
+        int top = (Window.getClientHeight() - 350) / 2;
         setPopupPosition(left, top);
 
         super.show();
@@ -151,7 +138,7 @@ public class FolderSelectPopup extends DialogBox {
     /**
      * Enables or disables move button
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 }

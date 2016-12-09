@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.util.OKMBundleResources;
 
@@ -39,23 +40,14 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  */
 public class ControlSearchIn extends Composite {
     private VerticalPanel controlPanel;
-
     private HTML textResults;
-
     private Image previous;
-
     private Image next;
-
     private FlexTable table;
-
     private int offset = 0;
-
     private int limit = 10;
-
     private boolean previousEnabled = false; // Indicates if button is enabled
-
     private boolean nextEnabled = false; // Indicates if button is enabled
-
     private long total = 0;
 
     public ControlSearchIn() {
@@ -67,22 +59,20 @@ public class ControlSearchIn extends Composite {
 
         previous.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (previousEnabled) {
                     offset -= limit;
-                    Main.get().mainPanel.dashboard.keyMapDashboard
-                            .findPaginated(offset, limit);
+                    Main.get().mainPanel.dashboard.keyMapDashboard.findPaginated(offset, limit);
                 }
             }
         });
 
         next.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (nextEnabled) {
                     offset += limit;
-                    Main.get().mainPanel.dashboard.keyMapDashboard
-                            .findPaginated(offset, limit);
+                    Main.get().mainPanel.dashboard.keyMapDashboard.findPaginated(offset, limit);
                 }
             }
         });
@@ -106,11 +96,10 @@ public class ControlSearchIn extends Composite {
     /**
      * Executes the search
      */
-    public void executeSearch(final int limit) {
+    public void executeSearch(int limit) {
         this.limit = limit;
         offset = 0;
-        Main.get().mainPanel.dashboard.keyMapDashboard.findPaginated(offset,
-                limit);
+        Main.get().mainPanel.dashboard.keyMapDashboard.findPaginated(offset, limit);
     }
 
     /**
@@ -118,7 +107,7 @@ public class ControlSearchIn extends Composite {
      * 
      * @param total 
      */
-    public void refreshControl(final long total) {
+    public void refreshControl(long total) {
         this.total = total;
         textResults.setHTML(Main.i18n("search.results") + " : " + total);
 
@@ -135,16 +124,12 @@ public class ControlSearchIn extends Composite {
                 previousEnabled = true;
             }
 
-            if (offset + limit >= total) {
+            if ((offset + limit) >= total) {
                 nextEnabled = false;
-                table.setHTML(0, 3,
-                        offset + 1 + "&nbsp;" + Main.i18n("search.to")
-                                + "&nbsp;" + total);
+                table.setHTML(0, 3, (offset + 1) + "&nbsp;" + Main.i18n("search.to") + "&nbsp;" + total);
             } else {
                 nextEnabled = true;
-                table.setHTML(0, 3,
-                        offset + 1 + "&nbsp;" + Main.i18n("search.to")
-                                + "&nbsp;" + (offset + limit));
+                table.setHTML(0, 3, (offset + 1) + "&nbsp;" + Main.i18n("search.to") + "&nbsp;" + (offset + limit));
             }
             setVisible(true);
         }

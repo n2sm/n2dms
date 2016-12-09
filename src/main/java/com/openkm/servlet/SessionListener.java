@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,23 +41,20 @@ public class SessionListener implements HttpSessionListener {
     private static Logger log = LoggerFactory.getLogger(SessionListener.class);
 
     @Override
-    public void sessionCreated(final HttpSessionEvent se) {
+    public void sessionCreated(HttpSessionEvent se) {
         //log.debug("New session created on {} with id {}", new Date(), se.getSession().getId());
     }
 
     @Override
-    public void sessionDestroyed(final HttpSessionEvent se) {
-        log.debug("Session destroyed on {} with id {}", new Date(), se
-                .getSession().getId());
-        final HttpSession session = se.getSession();
-        final HttpSessionInfo si = HttpSessionManager.getInstance().getSession(
-                session.getId());
+    public void sessionDestroyed(HttpSessionEvent se) {
+        log.debug("Session destroyed on {} with id {}", new Date(), se.getSession().getId());
+        HttpSession session = se.getSession();
+        HttpSessionInfo si = HttpSessionManager.getInstance().getSession(session.getId());
         HttpSessionManager.getInstance().remove(session.getId());
 
         // Activity log
         if (si != null) {
-            UserActivity.log(si.getUser(), "SESSION_DESTROYED", si.getId(),
-                    null, null);
+            UserActivity.log(si.getUser(), "SESSION_DESTROYED", si.getId(), null, null);
         }
     }
 }

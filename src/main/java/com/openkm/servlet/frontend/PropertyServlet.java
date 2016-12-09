@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,137 +38,96 @@ import com.openkm.frontend.client.service.OKMPropertyService;
 /**
  * Servlet Class
  */
-public class PropertyServlet extends OKMRemoteServiceServlet implements
-        OKMPropertyService {
+public class PropertyServlet extends OKMRemoteServiceServlet implements OKMPropertyService {
     private static Logger log = LoggerFactory.getLogger(PropertyServlet.class);
-
     private static final long serialVersionUID = 1138063389446959876L;
 
     @Override
-    public void addCategory(final String nodePath, final String category)
-            throws OKMException {
+    public void addCategory(String nodePath, String category) throws OKMException {
         log.debug("addCategory({}, {})", nodePath, category);
         updateSessionManager();
 
         try {
             OKMProperty.getInstance().addCategory(null, nodePath, category);
-        } catch (final VersionException e) {
+        } catch (VersionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Version), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Version), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         log.debug("addCategory: void");
     }
 
     @Override
-    public void removeCategory(final String nodePath, final String category)
-            throws OKMException {
+    public void removeCategory(String nodePath, String category) throws OKMException {
         log.debug("removeCategory({}, {})", nodePath, category);
         updateSessionManager();
 
         try {
             OKMProperty.getInstance().removeCategory(null, nodePath, category);
-        } catch (final VersionException e) {
+        } catch (VersionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Version), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Version), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         log.debug("removeCategory: void");
     }
 
     @Override
-    public String addKeyword(final String nodePath, final String keyword)
-            throws OKMException {
+    public String addKeyword(String nodePath, String keyword) throws OKMException {
         log.debug("addKeyword({}, {})", nodePath, keyword);
         String ret = null;
         updateSessionManager();
 
         try {
             ret = OKMProperty.getInstance().addKeyword(null, nodePath, keyword);
-        } catch (final VersionException e) {
+        } catch (VersionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Version), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Version), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         log.debug("addKeyword: {}", ret);
@@ -176,43 +135,30 @@ public class PropertyServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void removeKeyword(final String nodePath, final String keyword)
-            throws OKMException {
+    public void removeKeyword(String nodePath, String keyword) throws OKMException {
         log.debug("removeKeyword({}, {})", nodePath, keyword);
         updateSessionManager();
 
         try {
             OKMProperty.getInstance().removeKeyword(null, nodePath, keyword);
-        } catch (final VersionException e) {
+        } catch (VersionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Version), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Version), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMPropertyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMPropertyService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         log.debug("addKeyword: void");

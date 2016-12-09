@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,62 +29,58 @@ package com.openkm.frontend.client.bean;
  */
 public class Coordenates {
     private int x = 0;
-
     private int y = 0;
-
     private int width = 0;
-
     private int height = 0;
 
     public Coordenates() {
     }
 
-    public Coordenates(final int x, final int y, final int width,
-            final int height) {
+    public Coordenates(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
     }
 
-    public void setX(final int x) {
+    public void setX(int x) {
         this.x = x;
     }
 
-    public void setY(final int y) {
+    public void setY(int y) {
         this.y = y;
     }
 
-    public void setWidth(final int width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
-    public void setHeight(final int height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 
     public int getX() {
-        return x;
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
     public int getWidth() {
-        return width;
+        return this.width;
     }
 
     public int getHeight() {
-        return height;
+        return this.height;
     }
 
-    public void setPos(final int x, final int y) {
+    public void setPos(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public void setDimension(final int width, final int height) {
+    public void setDimension(int width, int height) {
         this.width = width;
         this.height = height;
     }

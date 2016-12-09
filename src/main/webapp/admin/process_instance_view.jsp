@@ -1,7 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -71,8 +71,8 @@
               </c:choose>
             </b>
           </td>
-          <td><fmt:formatDate value="${processInstance.start.time}" type="both"/></td>
-          <td><fmt:formatDate value="${processInstance.end.time}" type="both"/></td>
+          <td><u:formatDate calendar="${processInstance.start}"/></td>
+          <td><u:formatDate calendar="${processInstance.end}"/></td>
         </tr>
       </table>
       <h2>Tasks Instances</h2>
@@ -142,8 +142,8 @@
                 </c:choose>
               </b>
             </td>
-            <td><fmt:formatDate value="${ti.start.time}" type="both"/></td>
-            <td><fmt:formatDate value="${ti.end.time}" type="both"/></td>
+            <td><u:formatDate calendar="${ti.start}"/></td>
+            <td><u:formatDate calendar="${ti.end}"/></td>
             <td>
               <a href="${urlTaskInstanceView}"><img src="img/action/examine.png" alt="Examine" title="Examine"/></a>
               <c:if test="${!ti.suspended && ti.end == null}">
@@ -171,7 +171,7 @@
         <tr><th>Actor ID</th><th>Time</th><th>Comment</th></tr>
         <c:forEach var="cmt" items="${processInstance.rootToken.comments}" varStatus="row">
           <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
-            <td>${cmt.actorId}</td><td><fmt:formatDate value="${cmt.time.time}" type="both"/></td><td>${cmt.message}</td>
+            <td>${cmt.actorId}</td><td><u:formatDate calendar="${cmt.time}"/></td><td>${cmt.message}</td>
           </tr>
         </c:forEach>
       </table>
@@ -223,8 +223,8 @@
                 </c:choose>
               </b>
             </td>
-            <td><fmt:formatDate value="${tk.start.time}" type="both"/></td>
-            <td><fmt:formatDate value="${tk.end.time}" type="both"/></td>
+            <td><u:formatDate calendar="${tk.start}"/></td>
+            <td><u:formatDate calendar="${tk.end}"/></td>
             <td>
               <a href="${urlTokenView}"><img src="img/action/examine.png" alt="Examine" title="Examine"/></a>
               <c:if test="${tk.end == null}">

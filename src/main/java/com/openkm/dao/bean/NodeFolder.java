@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -47,16 +47,16 @@ public class NodeFolder extends NodeBase {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", context=").append(context);
+        sb.append(", path=").append(path);
         sb.append(", parent=").append(parent);
         sb.append(", author=").append(author);
         sb.append(", name=").append(name);

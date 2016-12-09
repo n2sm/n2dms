@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,6 +29,6 @@ import com.openkm.validator.ValidatorException;
 public class NoPasswordValidator implements PasswordValidator {
 
     @Override
-    public void Validate(final String password) throws ValidatorException {
+    public void Validate(String password) throws ValidatorException {
     }
 }

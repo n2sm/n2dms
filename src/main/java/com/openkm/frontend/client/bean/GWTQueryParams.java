@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,67 +34,42 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTQueryParams implements IsSerializable, Cloneable {
     public static final int DOCUMENT = 1;
-
     public static final int FOLDER = 2;
-
     public static final int MAIL = 4;
-
     public static final String OPERATOR_AND = "and";
-
     public static final String OPERATOR_OR = "or";
 
     private long id;
-
     private String queryName;
-
     private String name;
-
     private String keywords;
-
     private String content;
-
     private String path;
-
     private String mimeType;
-
     private String author;
-
     private Date lastModifiedFrom;
-
     private Date lastModifiedTo;
-
     private boolean isDashboard = false;
-
     private long domain = 0;
-
     private String mailFrom = "";
-
     private String mailTo = "";
-
     private String mailSubject = "";
-
     private String categoryUuid = "";
-
     private String categoryPath = "";
-
     private String operator = OPERATOR_AND;
-
     private Map<String, GWTPropertyParams> properties = new HashMap<String, GWTPropertyParams>();
-
-    private String grpName;
 
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
     public GWTQueryParams clone() {
-        final GWTQueryParams newParans = new GWTQueryParams();
+        GWTQueryParams newParans = new GWTQueryParams();
         newParans.setAuthor(getAuthor());
         newParans.setCategoryPath(getCategoryPath());
         newParans.setCategoryUuid(getCategoryUuid());
         newParans.setContent(getContent());
         newParans.setDashboard(isDashboard());
         newParans.setDomain(getDomain());
-        newParans.setGrpName(getGrpName());
         newParans.setId(getId());
         newParans.setKeywords(getKeywords());
         newParans.setLastModifiedFrom(getLastModifiedFrom());
@@ -106,9 +81,9 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         newParans.setName(getName());
         newParans.setOperator(getOperator());
         newParans.setPath(getPath());
-        final Map<String, GWTPropertyParams> newProperties = new HashMap<String, GWTPropertyParams>();
+        Map<String, GWTPropertyParams> newProperties = new HashMap<String, GWTPropertyParams>();
 
-        for (final String key : properties.keySet()) {
+        for (String key : properties.keySet()) {
             newProperties.put(key, properties.get(key));
         }
 
@@ -121,7 +96,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -129,7 +104,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return keywords;
     }
 
-    public void setKeywords(final String keywords) {
+    public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
 
@@ -137,7 +112,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -145,7 +120,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -153,24 +128,15 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return properties;
     }
 
-    public void setProperties(
-            final Map<String, GWTPropertyParams> finalProperties) {
-        properties = finalProperties;
-    }
-
-    public String getGrpName() {
-        return grpName;
-    }
-
-    public void setGrpName(final String grpName) {
-        this.grpName = grpName;
+    public void setProperties(Map<String, GWTPropertyParams> finalProperties) {
+        this.properties = finalProperties;
     }
 
     public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -178,7 +144,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return lastModifiedFrom;
     }
 
-    public void setLastModifiedFrom(final Date lastModifiedFrom) {
+    public void setLastModifiedFrom(Date lastModifiedFrom) {
         this.lastModifiedFrom = lastModifiedFrom;
     }
 
@@ -186,7 +152,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return lastModifiedTo;
     }
 
-    public void setLastModifiedTo(final Date lastModifiedTo) {
+    public void setLastModifiedTo(Date lastModifiedTo) {
         this.lastModifiedTo = lastModifiedTo;
     }
 
@@ -194,7 +160,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return isDashboard;
     }
 
-    public void setDashboard(final boolean isDashboard) {
+    public void setDashboard(boolean isDashboard) {
         this.isDashboard = isDashboard;
     }
 
@@ -202,7 +168,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -210,7 +176,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return domain;
     }
 
-    public void setDomain(final long domain) {
+    public void setDomain(long domain) {
         this.domain = domain;
     }
 
@@ -218,7 +184,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return mailFrom;
     }
 
-    public void setMailFrom(final String mailFrom) {
+    public void setMailFrom(String mailFrom) {
         this.mailFrom = mailFrom;
     }
 
@@ -226,7 +192,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return mailTo;
     }
 
-    public void setMailTo(final String mailTo) {
+    public void setMailTo(String mailTo) {
         this.mailTo = mailTo;
     }
 
@@ -234,7 +200,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return mailSubject;
     }
 
-    public void setMailSubject(final String mailSubject) {
+    public void setMailSubject(String mailSubject) {
         this.mailSubject = mailSubject;
     }
 
@@ -242,7 +208,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return operator;
     }
 
-    public void setOperator(final String operator) {
+    public void setOperator(String operator) {
         this.operator = operator;
     }
 
@@ -250,15 +216,15 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return categoryUuid;
     }
 
-    public void setCategoryUuid(final String uuid) {
-        categoryUuid = uuid;
+    public void setCategoryUuid(String uuid) {
+        this.categoryUuid = uuid;
     }
 
     public String getCategoryPath() {
         return categoryPath;
     }
 
-    public void setCategoryPath(final String categoryPath) {
+    public void setCategoryPath(String categoryPath) {
         this.categoryPath = categoryPath;
     }
 
@@ -266,7 +232,7 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -274,13 +240,12 @@ public class GWTQueryParams implements IsSerializable, Cloneable {
         return queryName;
     }
 
-    public void setQueryName(final String queryName) {
+    public void setQueryName(String queryName) {
         this.queryName = queryName;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("name=");
         sb.append(name);

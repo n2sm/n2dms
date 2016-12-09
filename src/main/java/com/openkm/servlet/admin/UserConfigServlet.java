@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,44 +43,36 @@ import com.openkm.util.WebUtils;
  */
 public class UserConfigServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(UserConfigServlet.class);
 
-    private static Logger log = LoggerFactory
-            .getLogger(UserConfigServlet.class);
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
             if (WebUtils.getBoolean(request, "persist")) {
-                final ServletContext sc = getServletContext();
-                final String ucUser = WebUtils.getString(request, "uc_user");
-                final int upId = WebUtils.getInt(request, "uc_profile");
+                ServletContext sc = getServletContext();
+                String ucUser = WebUtils.getString(request, "uc_user");
+                int upId = WebUtils.getInt(request, "uc_profile");
                 UserConfigDAO.updateProfile(ucUser, upId);
-                sc.getRequestDispatcher("/admin/Auth").forward(request,
-                        response);
+                sc.getRequestDispatcher("/admin/Auth").forward(request, response);
 
                 // Activity log
-                UserActivity.log(userId, "ADMIN_USER_CONFIG_EDIT", ucUser,
-                        null, Integer.toString(upId));
+                UserActivity.log(userId, "ADMIN_USER_CONFIG_EDIT", ucUser, null, Integer.toString(upId));
             } else {
-                final ServletContext sc = getServletContext();
-                final String ucUser = WebUtils.getString(request, "uc_user");
+                ServletContext sc = getServletContext();
+                String ucUser = WebUtils.getString(request, "uc_user");
                 sc.setAttribute("persist", true);
                 sc.setAttribute("profiles", ProfileDAO.findAll(true));
                 sc.setAttribute("uc", UserConfigDAO.findByPk(ucUser));
-                sc.getRequestDispatcher("/admin/user_config_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/user_config_edit.jsp").forward(request, response);
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }

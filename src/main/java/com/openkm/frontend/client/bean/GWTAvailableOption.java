@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,117 +31,65 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTAvailableOption implements IsSerializable {
     private boolean createFolderOption = true;
-
     private boolean findFolderOption = true;
-
     private boolean findDocumentOption = true;
-
+    private boolean similarDocumentVisible = true;
     private boolean downloadOption = true;
-
     private boolean downloadPdfOption = true;
-
     private boolean lockOption = true;
-
     private boolean unLockOption = true;
-
     private boolean addDocumentOption = true;
-
     private boolean checkoutOption = true;
-
     private boolean checkinOption = true;
-
     private boolean cancelCheckoutOption = true;
-
     private boolean deleteOption = true;
-
     private boolean addPropertyGroupOption = true;
-
+    private boolean updatePropertyGroupOption = true;
     private boolean removePropertyGroupOption = true;
-
     private boolean addSubscriptionOption = true;
-
     private boolean removeSubscriptionOption = true;
-
     private boolean homeOption = true;
-
     private boolean refreshOption = true;
-
     private boolean workflowOption = true;
-
     private boolean scannerOption = true;
-
     private boolean uploaderOption = true;
-
     private boolean renameOption = true;
-
     private boolean copyOption = true;
-
     private boolean moveOption = true;
-
     private boolean addBookmarkOption = true;
-
     private boolean setHomeOption = true;
-
     private boolean exportOption = true;
-
     private boolean mediaPlayerOption = true;
-
     private boolean imageViewerOption = true;
-
     private boolean gotoFolderOption = true;
-
     private boolean createFromTemplateOption = true;
-
     private boolean purgeOption = true;
-
     private boolean restoreOption = true;
-
     private boolean purgeTrashOption = true;
-
     private boolean sendDocumentLinkOption = true;
-
     private boolean sendDocumentAttachmentOption = true;
-
+    private boolean forwardMailOption = true;
     private boolean skinOption = true;
-
     private boolean debugOption = true;
-
     private boolean administrationOption = true;
-
     private boolean manageBookmarkOption = true;
-
     private boolean helpOption = true;
-
     private boolean documentationOption = true;
-
     private boolean bugReportOption = true;
-
     private boolean supportRequestOption = true;
-
     private boolean publicForumOption = true;
-
     private boolean versionChangesOption = true;
-
     private boolean projectWebOption = true;
-
     private boolean aboutOption = true;
-
     private boolean languagesOption = true;
-
     private boolean preferencesOption = true;
-
+    private boolean convertOption = true;
     private boolean addNoteOption = true;
-
     private boolean addCategoryOption = true;
-
     private boolean addKeywordOption = true;
-
     private boolean removeNoteOption = true;
-
     private boolean removeCategoryOption = true;
-
     private boolean removeKeywordOption = true;
-
     private boolean mergePdfOption = true;
 
     public GWTAvailableOption() {
@@ -151,7 +99,7 @@ public class GWTAvailableOption implements IsSerializable {
         return createFolderOption;
     }
 
-    public void setCreateFolderOption(final boolean createFolderOption) {
+    public void setCreateFolderOption(boolean createFolderOption) {
         this.createFolderOption = createFolderOption;
     }
 
@@ -159,7 +107,7 @@ public class GWTAvailableOption implements IsSerializable {
         return findFolderOption;
     }
 
-    public void setFindFolderOption(final boolean findFolderOption) {
+    public void setFindFolderOption(boolean findFolderOption) {
         this.findFolderOption = findFolderOption;
     }
 
@@ -167,7 +115,7 @@ public class GWTAvailableOption implements IsSerializable {
         return downloadOption;
     }
 
-    public void setDownloadOption(final boolean downloadOption) {
+    public void setDownloadOption(boolean downloadOption) {
         this.downloadOption = downloadOption;
     }
 
@@ -175,7 +123,7 @@ public class GWTAvailableOption implements IsSerializable {
         return downloadPdfOption;
     }
 
-    public void setDownloadPdfOption(final boolean downloadPdfOption) {
+    public void setDownloadPdfOption(boolean downloadPdfOption) {
         this.downloadPdfOption = downloadPdfOption;
     }
 
@@ -183,7 +131,7 @@ public class GWTAvailableOption implements IsSerializable {
         return lockOption;
     }
 
-    public void setLockOption(final boolean lockOption) {
+    public void setLockOption(boolean lockOption) {
         this.lockOption = lockOption;
     }
 
@@ -191,7 +139,7 @@ public class GWTAvailableOption implements IsSerializable {
         return unLockOption;
     }
 
-    public void setUnLockOption(final boolean unLockOption) {
+    public void setUnLockOption(boolean unLockOption) {
         this.unLockOption = unLockOption;
     }
 
@@ -199,7 +147,7 @@ public class GWTAvailableOption implements IsSerializable {
         return addDocumentOption;
     }
 
-    public void setAddDocumentOption(final boolean addDocumentOption) {
+    public void setAddDocumentOption(boolean addDocumentOption) {
         this.addDocumentOption = addDocumentOption;
     }
 
@@ -207,7 +155,7 @@ public class GWTAvailableOption implements IsSerializable {
         return checkoutOption;
     }
 
-    public void setCheckoutOption(final boolean checkoutOption) {
+    public void setCheckoutOption(boolean checkoutOption) {
         this.checkoutOption = checkoutOption;
     }
 
@@ -215,7 +163,7 @@ public class GWTAvailableOption implements IsSerializable {
         return checkinOption;
     }
 
-    public void setCheckinOption(final boolean checkinOption) {
+    public void setCheckinOption(boolean checkinOption) {
         this.checkinOption = checkinOption;
     }
 
@@ -223,7 +171,7 @@ public class GWTAvailableOption implements IsSerializable {
         return cancelCheckoutOption;
     }
 
-    public void setCancelCheckoutOption(final boolean cancelCheckoutOption) {
+    public void setCancelCheckoutOption(boolean cancelCheckoutOption) {
         this.cancelCheckoutOption = cancelCheckoutOption;
     }
 
@@ -231,7 +179,7 @@ public class GWTAvailableOption implements IsSerializable {
         return deleteOption;
     }
 
-    public void setDeleteOption(final boolean deleteOption) {
+    public void setDeleteOption(boolean deleteOption) {
         this.deleteOption = deleteOption;
     }
 
@@ -239,16 +187,23 @@ public class GWTAvailableOption implements IsSerializable {
         return addPropertyGroupOption;
     }
 
-    public void setAddPropertyGroupOption(final boolean addPropertyGroupOption) {
+    public void setAddPropertyGroupOption(boolean addPropertyGroupOption) {
         this.addPropertyGroupOption = addPropertyGroupOption;
+    }
+
+    public boolean isUpdatePropertyGroupOption() {
+        return updatePropertyGroupOption;
+    }
+
+    public void setUpdatePropertyGroupOption(boolean updatePropertyGroupOption) {
+        this.updatePropertyGroupOption = updatePropertyGroupOption;
     }
 
     public boolean isRemovePropertyGroupOption() {
         return removePropertyGroupOption;
     }
 
-    public void setRemovePropertyGroupOption(
-            final boolean removePropertyGroupOption) {
+    public void setRemovePropertyGroupOption(boolean removePropertyGroupOption) {
         this.removePropertyGroupOption = removePropertyGroupOption;
     }
 
@@ -256,7 +211,7 @@ public class GWTAvailableOption implements IsSerializable {
         return addSubscriptionOption;
     }
 
-    public void setAddSubscriptionOption(final boolean addSubscriptionOption) {
+    public void setAddSubscriptionOption(boolean addSubscriptionOption) {
         this.addSubscriptionOption = addSubscriptionOption;
     }
 
@@ -264,8 +219,7 @@ public class GWTAvailableOption implements IsSerializable {
         return removeSubscriptionOption;
     }
 
-    public void setRemoveSubscriptionOption(
-            final boolean removeSubscriptionOption) {
+    public void setRemoveSubscriptionOption(boolean removeSubscriptionOption) {
         this.removeSubscriptionOption = removeSubscriptionOption;
     }
 
@@ -273,7 +227,7 @@ public class GWTAvailableOption implements IsSerializable {
         return homeOption;
     }
 
-    public void setHomeOption(final boolean homeOption) {
+    public void setHomeOption(boolean homeOption) {
         this.homeOption = homeOption;
     }
 
@@ -281,7 +235,7 @@ public class GWTAvailableOption implements IsSerializable {
         return refreshOption;
     }
 
-    public void setRefreshOption(final boolean refreshOption) {
+    public void setRefreshOption(boolean refreshOption) {
         this.refreshOption = refreshOption;
     }
 
@@ -289,7 +243,7 @@ public class GWTAvailableOption implements IsSerializable {
         return workflowOption;
     }
 
-    public void setWorkflowOption(final boolean workflowOption) {
+    public void setWorkflowOption(boolean workflowOption) {
         this.workflowOption = workflowOption;
     }
 
@@ -297,7 +251,7 @@ public class GWTAvailableOption implements IsSerializable {
         return scannerOption;
     }
 
-    public void setScannerOption(final boolean scannerOption) {
+    public void setScannerOption(boolean scannerOption) {
         this.scannerOption = scannerOption;
     }
 
@@ -305,7 +259,7 @@ public class GWTAvailableOption implements IsSerializable {
         return uploaderOption;
     }
 
-    public void setUploaderOption(final boolean uploaderOption) {
+    public void setUploaderOption(boolean uploaderOption) {
         this.uploaderOption = uploaderOption;
     }
 
@@ -313,7 +267,7 @@ public class GWTAvailableOption implements IsSerializable {
         return renameOption;
     }
 
-    public void setRenameOption(final boolean renameOption) {
+    public void setRenameOption(boolean renameOption) {
         this.renameOption = renameOption;
     }
 
@@ -321,7 +275,7 @@ public class GWTAvailableOption implements IsSerializable {
         return moveOption;
     }
 
-    public void setMoveOption(final boolean moveOption) {
+    public void setMoveOption(boolean moveOption) {
         this.moveOption = moveOption;
     }
 
@@ -329,7 +283,7 @@ public class GWTAvailableOption implements IsSerializable {
         return copyOption;
     }
 
-    public void setCopyOption(final boolean copyOption) {
+    public void setCopyOption(boolean copyOption) {
         this.copyOption = copyOption;
     }
 
@@ -337,7 +291,7 @@ public class GWTAvailableOption implements IsSerializable {
         return addBookmarkOption;
     }
 
-    public void setAddBookmarkOption(final boolean addBookmarkOption) {
+    public void setAddBookmarkOption(boolean addBookmarkOption) {
         this.addBookmarkOption = addBookmarkOption;
     }
 
@@ -345,7 +299,7 @@ public class GWTAvailableOption implements IsSerializable {
         return setHomeOption;
     }
 
-    public void setSetHomeOption(final boolean setHomeOption) {
+    public void setSetHomeOption(boolean setHomeOption) {
         this.setHomeOption = setHomeOption;
     }
 
@@ -353,7 +307,7 @@ public class GWTAvailableOption implements IsSerializable {
         return exportOption;
     }
 
-    public void setExportOption(final boolean exportOption) {
+    public void setExportOption(boolean exportOption) {
         this.exportOption = exportOption;
     }
 
@@ -361,7 +315,7 @@ public class GWTAvailableOption implements IsSerializable {
         return mediaPlayerOption;
     }
 
-    public void setMediaPlayerOption(final boolean mediaPlayerOption) {
+    public void setMediaPlayerOption(boolean mediaPlayerOption) {
         this.mediaPlayerOption = mediaPlayerOption;
     }
 
@@ -369,7 +323,7 @@ public class GWTAvailableOption implements IsSerializable {
         return imageViewerOption;
     }
 
-    public void setImageViewerOption(final boolean imageViewerOption) {
+    public void setImageViewerOption(boolean imageViewerOption) {
         this.imageViewerOption = imageViewerOption;
     }
 
@@ -377,7 +331,7 @@ public class GWTAvailableOption implements IsSerializable {
         return gotoFolderOption;
     }
 
-    public void setGotoFolderOption(final boolean gotoFolderOption) {
+    public void setGotoFolderOption(boolean gotoFolderOption) {
         this.gotoFolderOption = gotoFolderOption;
     }
 
@@ -385,8 +339,7 @@ public class GWTAvailableOption implements IsSerializable {
         return createFromTemplateOption;
     }
 
-    public void setCreateFromTemplateOption(
-            final boolean createFromTemplateOption) {
+    public void setCreateFromTemplateOption(boolean createFromTemplateOption) {
         this.createFromTemplateOption = createFromTemplateOption;
     }
 
@@ -394,7 +347,7 @@ public class GWTAvailableOption implements IsSerializable {
         return purgeOption;
     }
 
-    public void setPurgeOption(final boolean purgeOption) {
+    public void setPurgeOption(boolean purgeOption) {
         this.purgeOption = purgeOption;
     }
 
@@ -402,7 +355,7 @@ public class GWTAvailableOption implements IsSerializable {
         return restoreOption;
     }
 
-    public void setRestoreOption(final boolean restoreOption) {
+    public void setRestoreOption(boolean restoreOption) {
         this.restoreOption = restoreOption;
     }
 
@@ -410,7 +363,7 @@ public class GWTAvailableOption implements IsSerializable {
         return purgeTrashOption;
     }
 
-    public void setPurgeTrashOption(final boolean purgeTrashOption) {
+    public void setPurgeTrashOption(boolean purgeTrashOption) {
         this.purgeTrashOption = purgeTrashOption;
     }
 
@@ -418,7 +371,7 @@ public class GWTAvailableOption implements IsSerializable {
         return sendDocumentLinkOption;
     }
 
-    public void setSendDocumentLinkOption(final boolean sendDocumentLinkOption) {
+    public void setSendDocumentLinkOption(boolean sendDocumentLinkOption) {
         this.sendDocumentLinkOption = sendDocumentLinkOption;
     }
 
@@ -426,16 +379,23 @@ public class GWTAvailableOption implements IsSerializable {
         return sendDocumentAttachmentOption;
     }
 
-    public void setSendDocumentAttachmentOption(
-            final boolean sendDocumentAttachmentOption) {
+    public void setSendDocumentAttachmentOption(boolean sendDocumentAttachmentOption) {
         this.sendDocumentAttachmentOption = sendDocumentAttachmentOption;
+    }
+
+    public boolean isForwardMailOption() {
+        return forwardMailOption;
+    }
+
+    public void setForwardMailOption(boolean forwardMailOption) {
+        this.forwardMailOption = forwardMailOption;
     }
 
     public boolean isSkinOption() {
         return skinOption;
     }
 
-    public void setSkinOption(final boolean skinOption) {
+    public void setSkinOption(boolean skinOption) {
         this.skinOption = skinOption;
     }
 
@@ -443,7 +403,7 @@ public class GWTAvailableOption implements IsSerializable {
         return debugOption;
     }
 
-    public void setDebugOption(final boolean debugOption) {
+    public void setDebugOption(boolean debugOption) {
         this.debugOption = debugOption;
     }
 
@@ -451,7 +411,7 @@ public class GWTAvailableOption implements IsSerializable {
         return administrationOption;
     }
 
-    public void setAdministrationOption(final boolean administrationOption) {
+    public void setAdministrationOption(boolean administrationOption) {
         this.administrationOption = administrationOption;
     }
 
@@ -459,7 +419,7 @@ public class GWTAvailableOption implements IsSerializable {
         return manageBookmarkOption;
     }
 
-    public void setManageBookmarkOption(final boolean manageBookmarkOption) {
+    public void setManageBookmarkOption(boolean manageBookmarkOption) {
         this.manageBookmarkOption = manageBookmarkOption;
     }
 
@@ -467,7 +427,7 @@ public class GWTAvailableOption implements IsSerializable {
         return helpOption;
     }
 
-    public void setHelpOption(final boolean helpOption) {
+    public void setHelpOption(boolean helpOption) {
         this.helpOption = helpOption;
     }
 
@@ -475,7 +435,7 @@ public class GWTAvailableOption implements IsSerializable {
         return documentationOption;
     }
 
-    public void setDocumentationOption(final boolean documentationOption) {
+    public void setDocumentationOption(boolean documentationOption) {
         this.documentationOption = documentationOption;
     }
 
@@ -483,7 +443,7 @@ public class GWTAvailableOption implements IsSerializable {
         return bugReportOption;
     }
 
-    public void setBugReportOption(final boolean bugReportOption) {
+    public void setBugReportOption(boolean bugReportOption) {
         this.bugReportOption = bugReportOption;
     }
 
@@ -491,7 +451,7 @@ public class GWTAvailableOption implements IsSerializable {
         return supportRequestOption;
     }
 
-    public void setSupportRequestOption(final boolean supportRequestOption) {
+    public void setSupportRequestOption(boolean supportRequestOption) {
         this.supportRequestOption = supportRequestOption;
     }
 
@@ -499,7 +459,7 @@ public class GWTAvailableOption implements IsSerializable {
         return publicForumOption;
     }
 
-    public void setPublicForumOption(final boolean publicForumOption) {
+    public void setPublicForumOption(boolean publicForumOption) {
         this.publicForumOption = publicForumOption;
     }
 
@@ -507,7 +467,7 @@ public class GWTAvailableOption implements IsSerializable {
         return versionChangesOption;
     }
 
-    public void setVersionChangesOption(final boolean versionChangesOption) {
+    public void setVersionChangesOption(boolean versionChangesOption) {
         this.versionChangesOption = versionChangesOption;
     }
 
@@ -515,7 +475,7 @@ public class GWTAvailableOption implements IsSerializable {
         return projectWebOption;
     }
 
-    public void setProjectWebOption(final boolean projectWebOption) {
+    public void setProjectWebOption(boolean projectWebOption) {
         this.projectWebOption = projectWebOption;
     }
 
@@ -523,7 +483,7 @@ public class GWTAvailableOption implements IsSerializable {
         return aboutOption;
     }
 
-    public void setAboutOption(final boolean aboutOption) {
+    public void setAboutOption(boolean aboutOption) {
         this.aboutOption = aboutOption;
     }
 
@@ -531,7 +491,7 @@ public class GWTAvailableOption implements IsSerializable {
         return languagesOption;
     }
 
-    public void setLanguagesOption(final boolean languagesOption) {
+    public void setLanguagesOption(boolean languagesOption) {
         this.languagesOption = languagesOption;
     }
 
@@ -539,23 +499,39 @@ public class GWTAvailableOption implements IsSerializable {
         return preferencesOption;
     }
 
-    public void setPreferencesOption(final boolean preferencesOption) {
+    public void setPreferencesOption(boolean preferencesOption) {
         this.preferencesOption = preferencesOption;
+    }
+
+    public boolean isConvertOption() {
+        return convertOption;
+    }
+
+    public void setConvertOption(boolean convertOption) {
+        this.convertOption = convertOption;
     }
 
     public boolean isFindDocumentOption() {
         return findDocumentOption;
     }
 
-    public void setFindDocumentOption(final boolean findDocumentOption) {
+    public void setFindDocumentOption(boolean findDocumentOption) {
         this.findDocumentOption = findDocumentOption;
+    }
+
+    public boolean isSimilarDocumentVisible() {
+        return similarDocumentVisible;
+    }
+
+    public void setSimilarDocumentVisible(boolean similarDocumentVisible) {
+        this.similarDocumentVisible = similarDocumentVisible;
     }
 
     public boolean isAddNoteOption() {
         return addNoteOption;
     }
 
-    public void setAddNoteOption(final boolean addNoteOption) {
+    public void setAddNoteOption(boolean addNoteOption) {
         this.addNoteOption = addNoteOption;
     }
 
@@ -563,7 +539,7 @@ public class GWTAvailableOption implements IsSerializable {
         return addCategoryOption;
     }
 
-    public void setAddCategoryOption(final boolean addCategoryOption) {
+    public void setAddCategoryOption(boolean addCategoryOption) {
         this.addCategoryOption = addCategoryOption;
     }
 
@@ -571,7 +547,7 @@ public class GWTAvailableOption implements IsSerializable {
         return addKeywordOption;
     }
 
-    public void setAddKeywordOption(final boolean addKeywordOption) {
+    public void setAddKeywordOption(boolean addKeywordOption) {
         this.addKeywordOption = addKeywordOption;
     }
 
@@ -579,7 +555,7 @@ public class GWTAvailableOption implements IsSerializable {
         return removeNoteOption;
     }
 
-    public void setRemoveNoteOption(final boolean removeNoteOption) {
+    public void setRemoveNoteOption(boolean removeNoteOption) {
         this.removeNoteOption = removeNoteOption;
     }
 
@@ -587,7 +563,7 @@ public class GWTAvailableOption implements IsSerializable {
         return removeCategoryOption;
     }
 
-    public void setRemoveCategoryOption(final boolean removeCategoryOption) {
+    public void setRemoveCategoryOption(boolean removeCategoryOption) {
         this.removeCategoryOption = removeCategoryOption;
     }
 
@@ -595,7 +571,7 @@ public class GWTAvailableOption implements IsSerializable {
         return removeKeywordOption;
     }
 
-    public void setRemoveKeywordOption(final boolean removeKeywordOption) {
+    public void setRemoveKeywordOption(boolean removeKeywordOption) {
         this.removeKeywordOption = removeKeywordOption;
     }
 
@@ -603,7 +579,7 @@ public class GWTAvailableOption implements IsSerializable {
         return mergePdfOption;
     }
 
-    public void setMergePdfOption(final boolean mergeOption) {
-        mergePdfOption = mergeOption;
+    public void setMergePdfOption(boolean mergeOption) {
+        this.mergePdfOption = mergeOption;
     }
 }

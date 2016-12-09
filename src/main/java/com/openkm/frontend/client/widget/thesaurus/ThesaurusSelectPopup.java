@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
@@ -40,27 +40,17 @@ import com.openkm.frontend.client.Main;
  */
 public class ThesaurusSelectPopup extends DialogBox {
     public static final int NONE = -1;
-
     public static final int DOCUMENT_PROPERTIES = 0;
-
     public static final int WIZARD = 1;
-
     public static final int MAIL_PROPERTIES = 2;
-
     public static final int FOLDER_PROPERTIES = 3;
-
     public static final int MASSIVE = 4;
 
     public ThesaurusPanel thesaurusPanel;
-
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private Button cancelButton;
-
     private Button actionButton;
-
     private int selectedFrom = NONE;
 
     /**
@@ -73,21 +63,20 @@ public class ThesaurusSelectPopup extends DialogBox {
         thesaurusPanel = new ThesaurusPanel();
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("500");
-        vPanel.setHeight("325");
+        vPanel.setWidth("500px");
+        vPanel.setHeight("325px");
         hPanel = new HorizontalPanel();
 
-        cancelButton = new Button(Main.i18n("button.close"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.close"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
         actionButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (thesaurusPanel.isTabTreeSelected()) {
                     executeAction(thesaurusPanel.getActualPath());
                 } else if (thesaurusPanel.isTabKeywordSelected()) {
@@ -99,18 +88,16 @@ public class ThesaurusSelectPopup extends DialogBox {
         vPanel.add(thesaurusPanel);
         vPanel.add(new HTML("<br>"));
         hPanel.add(cancelButton);
-        final HTML space = new HTML();
-        space.setWidth("50");
+        HTML space = new HTML();
+        space.setWidth("50px");
         hPanel.add(space);
         hPanel.add(actionButton);
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(thesaurusPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(thesaurusPanel, "300");
+        vPanel.setCellHorizontalAlignment(thesaurusPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(thesaurusPanel, "300px");
 
         cancelButton.setStyleName("okm-NoButton");
         actionButton.setStyleName("okm-AddButton");
@@ -122,32 +109,24 @@ public class ThesaurusSelectPopup extends DialogBox {
     /**
      * Executes the action
      */
-    public void executeAction(final String actualPath) {
-        final String keyword = actualPath.substring(
-                actualPath.lastIndexOf("/") + 1).replace(" ", "_");
+    public void executeAction(String actualPath) {
+        String keyword = actualPath.substring(actualPath.lastIndexOf("/") + 1).replace(" ", "_");
         switch (selectedFrom) {
         case DOCUMENT_PROPERTIES:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                    .addKeywordToPendinList(keyword);
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                    .addPendingKeyWordsList();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.addKeywordToPendinList(keyword);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.addPendingKeyWordsList();
             break;
         case WIZARD:
-            Main.get().wizardPopup.keywordsWidget
-                    .addKeywordToPendinList(keyword);
+            Main.get().wizardPopup.keywordsWidget.addKeywordToPendinList(keyword);
             Main.get().wizardPopup.keywordsWidget.addPendingKeyWordsList();
             break;
         case MAIL_PROPERTIES:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                    .addKeywordToPendinList(keyword);
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                    .addPendingKeyWordsList();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.addKeywordToPendinList(keyword);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.addPendingKeyWordsList();
             break;
         case FOLDER_PROPERTIES:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                    .addKeywordToPendinList(keyword);
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                    .addPendingKeyWordsList();
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addKeywordToPendinList(keyword);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addPendingKeyWordsList();
             break;
         case MASSIVE:
             Main.get().keywordsPopup.addKeywordToPendinList(keyword);
@@ -170,11 +149,11 @@ public class ThesaurusSelectPopup extends DialogBox {
     /**
      * Shows the popup 
      */
-    public void show(final int selectedFrom) {
+    public void show(int selectedFrom) {
         this.selectedFrom = selectedFrom;
         initButtons();
-        final int left = (Window.getClientWidth() - 400) / 2;
-        final int top = (Window.getClientHeight() - 325) / 2;
+        int left = (Window.getClientWidth() - 400) / 2;
+        int top = (Window.getClientHeight() - 325) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("thesaurus.directory.select.label"));
 
@@ -189,7 +168,7 @@ public class ThesaurusSelectPopup extends DialogBox {
      * 
      * @param enable
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 

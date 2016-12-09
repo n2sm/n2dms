@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  * 
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,7 +33,7 @@ import org.apache.lucene.analysis.TokenStream;
 public class FilenameAnalyzer extends Analyzer {
 
     @Override
-    public TokenStream tokenStream(final String fieldName, final Reader reader) {
+    public TokenStream tokenStream(String fieldName, Reader reader) {
         return new FilenameTokenizer(reader);
     }
 }

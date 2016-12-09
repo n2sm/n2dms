@@ -19,17 +19,16 @@ import org.apache.jackrabbit.core.TransientRepository;
 
 public class IsCheckedOutTest {
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         FileUtils.deleteDirectory(new File("repository"));
-        final Repository repo = new TransientRepository();
-        final Session session = repo.login(new SimpleCredentials("paco", ""
-                .toCharArray()));
-        final Node rootNode = session.getRootNode();
+        Repository repo = new TransientRepository();
+        Session session = repo.login(new SimpleCredentials("paco", "".toCharArray()));
+        Node rootNode = session.getRootNode();
 
         // Add a new node
-        final Node child = rootNode.addNode("prueba", "nt:file");
+        Node child = rootNode.addNode("prueba", "nt:file");
         child.addMixin("mix:versionable");
-        final Node content = child.addNode("jcr:content", "nt:resource");
+        Node content = child.addNode("jcr:content", "nt:resource");
         content.setProperty("jcr:mimeType", "text/plain");
         content.setProperty("jcr:data", "En un lugar de La Mancha...");
         content.setProperty("jcr:lastModified", Calendar.getInstance());
@@ -54,13 +53,11 @@ public class IsCheckedOutTest {
     /**
      *
      */
-    public static void showProperties(final Node node)
-            throws ValueFormatException, IllegalStateException,
-            RepositoryException {
+    public static void showProperties(Node node) throws ValueFormatException, IllegalStateException, RepositoryException {
         System.out.println("## PROPERTIES ##");
 
-        for (final PropertyIterator pit = node.getProperties(); pit.hasNext();) {
-            final Property prop = pit.nextProperty();
+        for (PropertyIterator pit = node.getProperties(); pit.hasNext();) {
+            Property prop = pit.nextProperty();
             System.out.print("* " + prop.getName() + " => ");
 
             if (prop.getDefinition().isMultiple()) {
@@ -78,11 +75,10 @@ public class IsCheckedOutTest {
     /**
      *
      */
-    public static void showVersion(final Node node)
-            throws UnsupportedRepositoryOperationException, RepositoryException {
+    public static void showVersion(Node node) throws UnsupportedRepositoryOperationException, RepositoryException {
         System.out.println("## VERSION ##");
 
-        final Version ver = node.getBaseVersion();
+        Version ver = node.getBaseVersion();
         System.out.println("* Name: " + ver.getName());
         System.out.println("* Created: " + ver.getCreated());
     }

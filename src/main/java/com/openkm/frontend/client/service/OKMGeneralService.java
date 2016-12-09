@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,9 +26,10 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.openkm.frontend.client.OKMException;
+import com.openkm.frontend.client.bean.GWTConfig;
 import com.openkm.frontend.client.bean.GWTConverterStatus;
 import com.openkm.frontend.client.bean.GWTFileUploadingStatus;
-import com.openkm.frontend.client.bean.GWTTestImap;
+import com.openkm.frontend.client.bean.GWTTestMail;
 
 /**
  * @author jllort
@@ -40,8 +41,9 @@ public interface OKMGeneralService extends RemoteService {
 
     public GWTConverterStatus getConversionStatus();
 
-    public GWTTestImap testImapConnection(String host, String user,
-            String password, String imapFolder);
+    public GWTTestMail testMailConnection(String protocol, String host, String user, String password, String mailFolder);
 
     public List<String> getEnabledExtensions() throws OKMException;
+
+    public GWTConfig getConfigValue(String key) throws OKMException;
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,35 +38,26 @@ import com.openkm.util.GWTUtil;
 /**
  * Servlet Class
  */
-public class UserConfigServlet extends OKMRemoteServiceServlet implements
-        OKMUserConfigService {
-    private static Logger log = LoggerFactory
-            .getLogger(UserConfigServlet.class);
-
+public class UserConfigServlet extends OKMRemoteServiceServlet implements OKMUserConfigService {
+    private static Logger log = LoggerFactory.getLogger(UserConfigServlet.class);
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void setUserHome(final String path) throws OKMException {
+    public void setUserHome(String path) throws OKMException {
         log.debug("setUserHome({})", path);
         updateSessionManager();
 
         try {
             OKMUserConfig.getInstance().setHome(null, path);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("setUserHome: void");
@@ -84,21 +75,15 @@ public class UserConfigServlet extends OKMRemoteServiceServlet implements
                 config = OKMUserConfig.getInstance().getConfig(null);
             }
             return GWTUtil.copy(config);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMUserCopyService,
-                    ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMUserCopyService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 }

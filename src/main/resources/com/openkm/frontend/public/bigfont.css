@@ -26,7 +26,7 @@ a:active {
 
 blockquote {
 	border: 1px solid #DBDBCE;
-    background-color: #EBEADD;
+	background-color: #EBEADD;
 }
 
 h1 {
@@ -102,7 +102,7 @@ strong {
 }
 
 .okm-Background-White {
-	background: #FEFCF8;
+	background: #FFF;
 }
 
 /* row results */
@@ -193,7 +193,7 @@ strong {
 }
 
 .okm-MainMenuItem-Base-HorizontalSeparator {
-    background-image: url(img/menu_horizontal_separator.gif);
+	background-image: url(img/menu_horizontal_separator.gif);
 	background-position: center right;
 	background-repeat: repeat-x;
 }
@@ -309,8 +309,8 @@ strong {
 	height: 20px;
 	background-image: url(img/popup_label_back.gif);
 	background-repeat: repeat;
-	cursor:pointer; 
-  	cursor:hand;
+	cursor:pointer;
+	cursor:hand;
 }
 
 .okm-Popup-Error .Caption {
@@ -321,8 +321,8 @@ strong {
 	height: 20px;
 	background-image: url(img/popup_label_back_error.gif);
 	background-repeat: repeat;
-	cursor:pointer; 
-  	cursor:hand;
+	cursor:pointer;
+	cursor:hand;
 }
 
 /* VerticalBar */
@@ -417,8 +417,7 @@ iframe {
 }
 
 .okm-FileBrowser-SelectedRow {
-	background-image: url(img/filebrowser_selected.gif);
-	background-repeat: repeat-x;
+	background-color: #C3D9FF;
 	cursor: default;
 }
 
@@ -462,7 +461,7 @@ iframe {
 .okm-ToolBar-button {
 	background-color: #E5E5E1;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 }
 
 .okm-ToolBar-button-disabled {
@@ -480,20 +479,28 @@ iframe {
 
 .okm-ToolBar-Big-selected {
 	background-color: #b5bad7;
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
 }
 
 .okm-ToolBar-BigTMP-selected {
 	background-color: #b5bad7;
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
 }
 
 .okm-ToolBar-Border {
 	border-top: 1px solid #A5A596;
 	border-left: 1px solid #A5A596;
 	border-right: 1px solid #A5A596;
+}
+
+.okm-Separator-Bottom {
+	border-bottom: 1px solid #cecec7;
+}
+
+.okm-Separator-Top {
+	border-top: 1px solid #f7f7f7;
 }
 
 /* File upload */
@@ -562,8 +569,9 @@ iframe {
 	border-right: 1px solid #666;
 	padding: 2px 7px 2px 7px;
 	background-color: #caccc8;
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
+	height : 22px; 
 }
 
 .gwt-TabBar .gwt-TabBarItem-selected {
@@ -575,8 +583,9 @@ iframe {
 	border-bottom: 1px solid #fff;
 	border-right: 1px solid #666;
 	padding: 2px 7px 2px 7px;
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
+	height : 22px; 
 }
 
 /* Stack Panel */
@@ -584,13 +593,13 @@ iframe {
 	border: 1px solid #A5A596;
 }
 
-.okm-StackPanel .gwt-StackPanelItem {
+.okm-StackPanel .gwt-StackLayoutPanelHeader {
 	height: 19px;
 	background-image: url(img/stackpanel_back.gif);
 	background-repeat: repeat;
 }
 
-.okm-StackPanel .gwt-StackPanelItem-selected {
+.okm-StackPanel .gwt-StackLayoutPanelHeader-selected {
 	height: 19px;
 	background-image: url(img/stackpanel_back.gif);
 	background-repeat: repeat;
@@ -787,7 +796,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 }
 
 .okm-NoButton {
@@ -797,7 +806,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/security/no.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -811,7 +820,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/security/yes.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -825,7 +834,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/add.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -839,7 +848,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/delete.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -853,7 +862,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/export.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -867,7 +876,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/home.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -881,7 +890,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/download.gif");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -895,7 +904,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/preview.png");
 	background-repeat: no-repeat;
 	padding-left: 20px;
@@ -909,7 +918,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/edit.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -923,7 +932,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/compact.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -937,7 +946,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/clean.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -951,7 +960,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/search.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -965,7 +974,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/save.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -979,7 +988,7 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	cursor: pointer;
-  	cursor: hand;
+	cursor: hand;
 	background-image: url("img/icon/actions/comment_add.png");
 	background-repeat: no-repeat;
 	padding-left: 18px;
@@ -1001,21 +1010,25 @@ iframe {
 	font-size: 10pt;
 	font-family: tahoma;
 	-moz-user-select: normal;
-    -khtml-user-select: normal;
-    user-select: normal;
-    background-color: #fff;
+	-khtml-user-select: normal;
+	user-select: normal;
+	background-color: #fff;
 }
+
+input.okm-Input {
+	height : 18px !important;
+} 
 
 .okm-Input-System {
 	border: 1px solid #A5A596;
 	font-size: 10px;
 	font-family: tahoma;
 	-moz-user-select: normal;
-    -khtml-user-select: normal;
-    user-select: normal;
-    background-color: #f00;
-    color: white;
-    font-weight: bold;
+	-khtml-user-select: normal;
+	user-select: normal;
+	background-color: #f00;
+	color: white;
+	font-weight: bold;
 }
 
 .okm-Input-Error {
@@ -1031,7 +1044,7 @@ iframe {
 	border: 1px solid #A5A596;
 	font-size: 10px;
 	font-family: tahoma;
-    background-color: #fff;
+	background-color: #fff;
 }
 
 /* Selects */
@@ -1085,12 +1098,13 @@ iframe {
 
 /* Draggable */
 .okm-Draggable {
-    background-color: #C3D9FF;
+	background-color: #C3D9FF;
+	z-index: 1000;
 }
 
 /* Disable text selection */
-.okm-DisableSelect { 
-    -webkit-user-select: none;
+.okm-DisableSelect {
+	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: -moz-none;;
 	-o-user-select: none;
@@ -1114,16 +1128,16 @@ iframe {
 
 /* ScrollTable */
 .gwt-ScrollTable {
-  	background: white;
+	background: white;
 }
 
 .gwt-ScrollTable .headerWrapper {
- 	background-image: url(img/table_title.gif);
+	background-image: url(img/table_title.gif);
 	background-repeat: repeat;
 }
 
 .gwt-ScrollTable .headerTable tr {
-    background-image: url(img/table_title.gif);
+	background-image: url(img/table_title.gif);
 	background-repeat: repeat;
 	color: #6D6D5F;
 	font-size: 10px;
@@ -1133,22 +1147,22 @@ iframe {
 }
 
 .gwt-ScrollTable .headerTable tr td {
-  	border-left: 1px solid white;
-  	border-right: 1px solid #A5A596;
-  	white-space: nowrap;
-  	margin: 0px;
-  	overflow: hidden;
-  	height: 22px;
+	border-left: 1px solid white;
+	border-right: 1px solid #A5A596;
+	white-space: nowrap;
+	margin: 0px;
+	overflow: hidden;
+	height: 22px;
 }
 
 .gwt-ScrollTable .headerTable .gwt-controller tr td {
-  	border-left: 0px;
-  	border-right: 0px;
+	border-left: 0px;
+	border-right: 0px;
 }
 
 .gwt-controller .separator {
 	border-right: 1px solid white;
-  	border-left: 1px solid #A5A596;
+	border-left: 1px solid #A5A596;
 }
 
 .gwt-ScrollTable .dataTable tr {
@@ -1176,12 +1190,12 @@ iframe {
 
 .gwt-ScrollTable .dataTable tr td {
 	border-left: 1px solid white;
-  	border-right: 1px solid white;
-  	height: 20px;
-  	cursor: default;
-  	white-space: nowrap;
-  	margin: 0px;
-  	overflow: hidden;
+	border-right: 1px solid white;
+	height: 20px;
+	cursor: default;
+	white-space: nowrap;
+	margin: 0px;
+	overflow: hidden;
 }
 
 /**
@@ -1240,35 +1254,35 @@ iframe {
 
 .CalendarWidget .day .gwt-HTML {
 	border: 1px solid #C3D9FF;
-} 
+}
 
 /**
  * DashBoard Widget 
  */
 .okm-DashboardWidget .topLeft {
- 	background-image: url(img/topLeftHeader.gif);
+	background-image: url(img/topLeftHeader.gif);
 	background-repeat: no-repeat;
 	cursor: pointer;
 }
 
 .okm-DashboardWidget .topCenter {
- 	background-image: url(img/topCenterHeader.gif);
+	background-image: url(img/topCenterHeader.gif);
 	background-repeat: repeat-x;
 	text-align: center;
 	cursor: pointer;
 }
 
 .okm-DashboardWidget .topRight {
- 	background-image: url(img/topRightHeader.gif);
+	background-image: url(img/topRightHeader.gif);
 	background-repeat: no-repeat;
 	cursor: pointer;
 }
 
 .okm-DashboardWidget .data {
- 	background-color: white;
- 	border-left: 1px solid #A5A596;
- 	border-bottom: 1px solid #A5A596;
- 	border-right: 1px solid #A5A596; 
+	background-color: white;
+	border-left: 1px solid #A5A596;
+	border-bottom: 1px solid #A5A596;
+	border-right: 1px solid #A5A596;
 }
 
 /**
@@ -1276,8 +1290,8 @@ iframe {
  */
 .okm-Hyperlink {
 	text-decoration: underline;
-	cursor:pointer; 
-  	cursor:hand;
+	cursor:pointer;
+	cursor:hand;
 }
 .okm-Hyperlink a:hover {
 	text-decoration: underline;
@@ -1300,10 +1314,10 @@ iframe {
  * Workflow form panel
  */
 .okm-WorkflowFormPanel {
- 	background-color: #E5E5E1;
- 	border-left: 1px solid #A5A596;
- }
- 
+	background-color: #E5E5E1;
+	border-left: 1px solid #A5A596;
+}
+
 .okm-WorkflowFormPanel-Title {
 	white-space: nowrap;
 	padding: 2px 7px 2px 7px;
@@ -1478,8 +1492,8 @@ iframe {
 }
 
 .okm-Mail-Link {
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
 }
 
 .okm-Mail-MenuPopup {
@@ -1489,7 +1503,7 @@ iframe {
 }
 
 /* Horizontal split panel */
-.hsplitter { 
+.hsplitter {
 	background-image: url(img/separator_points.gif);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
@@ -1503,7 +1517,7 @@ iframe {
 	width: 10px;
 }
 
-.okm-HorizontalSplitPanel .hsplitter { 
+.okm-HorizontalSplitPanel .hsplitter {
 	background-image: url(img/separator_points.gif);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
@@ -1512,12 +1526,12 @@ iframe {
 	font-size: 4px;
 	background-color: #E5E5E1;
 	horizontal-align: 50%;
-    border: 0px; 
+	border: 0px;
 	width: 10px;
 }
 
 /* Vertical split panel */
-.vsplitter { 
+.vsplitter {
 	background-image: url(img/horizontal_separator_points.gif);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
@@ -1558,38 +1572,38 @@ iframe {
 	font-size: 10px;
 	font-family: tahoma;
 	-moz-user-select: normal;
-    -khtml-user-select: normal;
-    user-select: normal;
-    white-space: nowrap;
+	-khtml-user-select: normal;
+	user-select: normal;
+	white-space: nowrap;
 }
 
 .okm-KeyMap-ImageHover {
-	cursor: pointer; 
-  	cursor: hand;
+	cursor: pointer;
+	cursor: hand;
 }
 
 /* Suggest Box */
 .gwt-SuggestBox {
-  padding: 2px;
+	padding: 2px;
 }
 
 .gwt-SuggestBoxPopup {
-  background-color: #EFEBE7;
-  border: 1px solid #999;
+	background-color: #EFEBE7;
+	border: 1px solid #999;
 }
 
 .gwt-SuggestBoxPopup .item {
-  padding: 2px 6px;
-  color: #424242;
-  cursor: default;
+	padding: 2px 6px;
+	color: #424242;
+	cursor: default;
 }
 
 .gwt-SuggestBoxPopup .item-selected {
-  background: #b7d6f6;
+	background: #b7d6f6;
 }
 
 .gwt-SuggestBoxPopup .suggestPopupContent {
-  background: white;
+	background: white;
 }
 
 /* Keyword widget */
@@ -1611,23 +1625,23 @@ iframe {
 
 /* Progress Bar */
 .gwt-ProgressBar-shell {
-  	border: 1px solid #faf9f7;
-  	border-right: 1px solid #848280;
-  	border-bottom: 1px solid #848280;
-  	background-color: #AAAAAA;
-  	height: 14pt;
-  	width: 50%;
+	border: 1px solid #faf9f7;
+	border-right: 1px solid #848280;
+	border-bottom: 1px solid #848280;
+	background-color: #AAAAAA;
+	height: 14pt;
+	width: 50%;
 }
 
 .gwt-ProgressBar-shell .gwt-ProgressBar-bar {
-  	background-color: #67A7E3;
+	background-color: #67A7E3;
 }
 
 .gwt-ProgressBar-shell .gwt-ProgressBar-text {
-  	padding: 0px;
-  	margin: 0px;
-  	color: white;
-  	top: 3px;
+	padding: 0px;
+	margin: 0px;
+	color: white;
+	top: 3px;
 }
 
 /* Tag cloud */
@@ -1651,7 +1665,7 @@ iframe {
 	font-size: 5pt;
 	position: relative;
 	text-decoration: none;
-}   
+}
 
 .okm-cloudSeparator {
 	background-color: #CACCC8;
@@ -1689,9 +1703,9 @@ iframe {
 	font-size: 10px;
 	font-family: tahoma;
 	-moz-user-select: normal;
-    -khtml-user-select: normal;
-    user-select: normal;
-    white-space: nowrap;
+	-khtml-user-select: normal;
+	user-select: normal;
+	white-space: nowrap;
 }
 
 .okm-Left-Top-Border {
@@ -1700,18 +1714,18 @@ iframe {
 	font-size: 10px;
 	font-family: tahoma;
 	-moz-user-select: normal;
-    -khtml-user-select: normal;
-    user-select: normal;
-    white-space: nowrap;
+	-khtml-user-select: normal;
+	user-select: normal;
+	white-space: nowrap;
 }
 
 .okm-validationFailedBorder {
-	border: 2px solid #ff0000;		
+	border: 2px solid #ff0000;
 }
 
 .okm-validationFailedText {
 	color: #ff0000;
-	font-weight: bold;		
+	font-weight: bold;
 }
 
 /* TabLayoutPanel */
@@ -1730,9 +1744,9 @@ iframe {
 	border-right: 1px solid #666;
 	padding: 2px 7px 2px 7px;
 	background-color: #caccc8;
-	cursor: pointer; 
-  	cursor: hand;
-  	height: 20px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
 }
 
 .gwt-TabLayoutPanelTab-selected {
@@ -1744,23 +1758,23 @@ iframe {
 	border-left: 1px solid #bbb;
 	border-right: 1px solid #666;
 	padding: 2px 7px 2px 7px;
-	cursor: pointer; 
-  	cursor: hand;
-  	height: 20px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
 }
 
 /* forum */
 .okm-Forum-Topic {
 	color: #105289;
 	font-size: 1.2em;
-    font-weight: bold;
-    text-decoration: none;
-    cursor: pointer; 
-  	cursor: hand;
+	font-weight: bold;
+	text-decoration: none;
+	cursor: pointer;
+	cursor: hand;
 }
 
 .okm-Forum-User {
-	color : #105289; 
+	color : #105289;
 }
 
 .okm-Forum-Gray {
@@ -1771,6 +1785,30 @@ iframe {
 	color: #7596CF;
 	font-weight: bold;
 	font-size: 1.3em;
+}
+
+/* Mail button */
+.okm-Button-Mail {
+	border: 1px solid #A5A596;
+	background-color : white;
+	border-radius : 4px;
+	height: 22px;
+	font-size: 10px;
+	font-family: verdana, arial, sans-serif;
+	cursor: pointer;
+	cursor: hand;
+}
+
+.okm-Button-Mail > * {
+	vertical-align: middle;
+}
+
+.okm-Button-Mail:hover {
+	background-color : #CACCC8;
+}
+
+.okm-Button-Mail-selected {
+	background-color : #CACCC8;
 }
 
 /* white panel */
@@ -1789,9 +1827,9 @@ iframe {
 
 /* Explorer fix for button images */
 <!--[if IE]>
-	.okm-NoButton, .okm-YesButton, .okm-AddButton, .okm-DeleteButton, .okm-DownloadZipButton,
-	.okm-HomeButton, .okm-DownloadButton, .okm-ViewButton, .okm-ChangeButton, .okm-CompactButton,
-	.okm-CleanButton, .okm-SearchButton, .okm-SaveButton, .okm-CommentButton {
-		padding-left: 13px;
-	}
+.okm-NoButton, .okm-YesButton, .okm-AddButton, .okm-DeleteButton, .okm-DownloadZipButton,
+.okm-HomeButton, .okm-DownloadButton, .okm-ViewButton, .okm-ChangeButton, .okm-CompactButton,
+.okm-CleanButton, .okm-SearchButton, .okm-SaveButton, .okm-CommentButton {
+	padding-left: 13px;
+}
 <![endif]-->

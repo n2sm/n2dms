@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,29 +31,27 @@ import com.openkm.frontend.client.bean.GWTQueryParams;
  */
 public class QueryParamsComparator extends CultureComparator<GWTQueryParams> {
 
-    protected QueryParamsComparator(final String locale) {
+    protected QueryParamsComparator(String locale) {
         super(locale);
     }
 
-    public static QueryParamsComparator getInstance(final String locale) {
+    public static QueryParamsComparator getInstance(String locale) {
         try {
-            final QueryParamsComparator comparator = (QueryParamsComparator) CultureComparator
-                    .getInstance(QueryParamsComparator.class, locale);
+            QueryParamsComparator comparator = (QueryParamsComparator) CultureComparator.getInstance(QueryParamsComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new QueryParamsComparator(locale);
         }
     }
 
     public static QueryParamsComparator getInstance() {
-        final QueryParamsComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        QueryParamsComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTQueryParams arg0, final GWTQueryParams arg1) {
-        final GWTQueryParams first = arg0;
-        final GWTQueryParams second = arg1;
+    public int compare(GWTQueryParams arg0, GWTQueryParams arg1) {
+        GWTQueryParams first = arg0;
+        GWTQueryParams second = arg1;
 
         return collator.compare(first.getQueryName(), second.getQueryName());
     }

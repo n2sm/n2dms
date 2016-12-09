@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.properties;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -55,56 +56,34 @@ import com.openkm.frontend.client.util.Util;
  * @author jllort
  *
  */
-public class TabMail extends Composite implements HasMailEvent,
-        HasMailHandlerExtension, HasPropertyGroupHandlerExtension {
+public class TabMail extends Composite implements HasMailEvent, HasMailHandlerExtension, HasPropertyGroupHandlerExtension {
     private final OKMPropertyGroupServiceAsync propertyGroupService = (OKMPropertyGroupServiceAsync) GWT
             .create(OKMPropertyGroupService.class);
 
     private static final int TAB_HEIGHT = 20;
-
     private int SECURITY_TAB = -1;
 
     public TabLayoutPanel tabPanel;
-
     public Mail mail;
-
     public Notes notes;
-
     public MailViewer mailViewer;
-
     public SecurityScrollTable security;
-
     private VerticalPanel panel;
-
     private List<PropertyGroup> propertyGroup;
-
     private List<TabMailExtension> widgetExtensionList;
-
     private List<MailHandlerExtension> mailHandlerExtensionList;
-
     private List<PropertyGroupHandlerExtension> propertyGroupHandlerExtensionList;
-
     private boolean visibleButton = true; // Sets visibleButtons enabled to default view 
-
     private int selectedTab = 0; // Used to determine selected tab to mantain on change document, because not all documents
                                  // have the same numeber of tabs ( document group properties are variable ) 
-
     private int latestSelectedTab = 0;
-
     private boolean propertiesVisible = false;
-
     private boolean notesVisible = false;
-
     private boolean previewVisible = false;
-
     private boolean securityVisible = false;
-
     private int height = 0;
-
     private int width = 0;
-
     private boolean propertyGroupsVisible = false;
-
     private int IEBugCorrections = 0;
 
     /**
@@ -124,20 +103,21 @@ public class TabMail extends Composite implements HasMailEvent,
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
-                final int tabIndex = event.getSelectedItem().intValue();
-                Main.get().mainPanel.topPanel.toolBar
-                        .evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
+            public void onSelection(SelectionEvent<Integer> event) {
+                int tabIndex = event.getSelectedItem().intValue();
+                Main.get().mainPanel.topPanel.toolBar.evaluateRemovePropertyGroup(isRemovePropertyGroupEnabled(tabIndex));
                 selectedTab = tabIndex;
+
                 if (tabIndex == SECURITY_TAB) {
-                    final Timer timer = new Timer() {
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
                             security.fillWidth(); // Always when shows fires fill width
                         }
                     };
-                    timer.schedule(50); // Fill width must be done after really it'll be visible
+                    timer.schedule(500); // Fill width must be done after really it'll be visible
                 }
+
                 fireEvent(HasMailEvent.TAB_CHANGED);
             }
         });
@@ -148,7 +128,6 @@ public class TabMail extends Composite implements HasMailEvent,
         notes.setSize("100%", "100%");
         mailViewer.setSize("100%", "100%");
         panel.setSize("100%", "100%");
-
         tabPanel.setStyleName("okm-DisableSelect");
 
         initWidget(panel);
@@ -160,24 +139,24 @@ public class TabMail extends Composite implements HasMailEvent,
      * @param width With of the widget
      * @param height Height of the widget
      */
-    @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         this.height = height;
         this.width = width;
         tabPanel.setPixelSize(width, height);
-        mail.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        notes.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        mailViewer.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
-        security.setPixelSize(width, height - TAB_HEIGHT); // Substract tab height
+        mail.setPixelSize(width, height - TAB_HEIGHT);
+        notes.setPixelSize(width, height - TAB_HEIGHT);
+        mailViewer.setPixelSize(width, height - TAB_HEIGHT);
+        security.setPixelSize(width, height - TAB_HEIGHT);
         security.fillWidth();
 
         // Setting size to extension
-        for (final TabMailExtension tabMailExtension : widgetExtensionList) {
-            tabMailExtension.setPixelSize(width, height - TAB_HEIGHT);
+        for (Iterator<TabMailExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            it.next().setPixelSize(width, height - TAB_HEIGHT);
         }
 
         if (!propertyGroup.isEmpty()) { // Sets size to propety groups	
-            for (final PropertyGroup group : propertyGroup) {
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 group.setPixelSize(width, height - TAB_HEIGHT);
             }
         }
@@ -190,7 +169,7 @@ public class TabMail extends Composite implements HasMailEvent,
      * 
      * @param doc The document object
      */
-    public void setProperties(final GWTMail gWTMail) {
+    public void setProperties(GWTMail gWTMail) {
         mail.set(gWTMail);
         notes.set(gWTMail); // Used by TabDocumentCommunicator
         mailViewer.set(gWTMail);
@@ -199,11 +178,10 @@ public class TabMail extends Composite implements HasMailEvent,
         latestSelectedTab = selectedTab; // stores latest selected tab
 
         if (securityVisible) {
-            security.setPath(gWTMail.getPath());
+            security.setUuid(gWTMail.getUuid());
             security.GetGrants();
 
-            final GWTFolder parentFolder = Main.get().activeFolderTree
-                    .getFolder();
+            GWTFolder parentFolder = Main.get().activeFolderTree.getFolder();
             if ((parentFolder.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
                     && (gWTMail.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
                 security.setChangePermision(true);
@@ -213,13 +191,12 @@ public class TabMail extends Composite implements HasMailEvent,
         }
 
         if (propertyGroupsVisible) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         }
 
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup propertyGroup2 : propertyGroup) {
-                tabPanel.remove(propertyGroup2);
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                tabPanel.remove(it.next());
             }
             propertyGroup.clear();
         }
@@ -231,18 +208,19 @@ public class TabMail extends Composite implements HasMailEvent,
         }
 
         // Setting folder object to extensions
-        for (final TabMailExtension tabMailExtension : widgetExtensionList) {
-            tabMailExtension.set(gWTMail);
+        for (Iterator<TabMailExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            it.next().set(gWTMail);
         }
 
         // TODO:Solves minor bug with IE ( now shows contents )
         if (Util.getUserAgent().startsWith("ie") && IEBugCorrections == 1) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
                     correctIEDefect();
                 }
             };
+
             timer.schedule(500);
         }
 
@@ -254,6 +232,7 @@ public class TabMail extends Composite implements HasMailEvent,
      */
     public void correctIEDefect() {
         IEBugCorrections++;
+
         if (tabPanel.getWidgetCount() > 1) {
             tabPanel.selectTab(1);
             tabPanel.selectTab(0);
@@ -272,11 +251,8 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * isWidgetExtensionVisible
-     * 
-     * @param widget
-     * @return
      */
-    public boolean isWidgetExtensionVisible(final Widget widget) {
+    public boolean isWidgetExtensionVisible(Widget widget) {
         if (tabPanel.getWidget(selectedTab).equals(widget)) {
             return true;
         } else {
@@ -286,8 +262,6 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * getSelectedTab
-     * 
-     * @return
      */
     public int getSelectedTab() {
         return selectedTab;
@@ -307,27 +281,32 @@ public class TabMail extends Composite implements HasMailEvent,
             tabPanel.add(mail, Main.i18n("tab.mail.properties"));
             mail.langRefresh();
         }
+
         if (notesVisible) {
             tabPanel.add(notes, Main.i18n("tab.mail.notes"));
             notes.langRefresh();
         }
+
         if (previewVisible) {
             tabPanel.add(mailViewer, Main.i18n("tab.mail.preview"));
             mailViewer.langRefresh();
         }
+
         if (securityVisible) {
             tabPanel.add(security, Main.i18n("tab.mail.security"));
             security.langRefresh();
         }
 
         // Adding extensions
-        for (final TabMailExtension extension : widgetExtensionList) {
+        for (Iterator<TabMailExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            TabMailExtension extension = it.next();
             tabPanel.add(extension, extension.getTabText());
         }
 
         // Refresh lang property group
         if (!propertyGroup.isEmpty()) {
-            for (final PropertyGroup group : propertyGroup) {
+            for (Iterator<PropertyGroup> it = propertyGroup.iterator(); it.hasNext();) {
+                PropertyGroup group = it.next();
                 tabPanel.add(group, group.getGrpLabel());
                 group.langRefresh();
             }
@@ -343,8 +322,8 @@ public class TabMail extends Composite implements HasMailEvent,
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
-        visibleButton = visible;
+    public void setVisibleButtons(boolean visible) {
+        this.visibleButton = visible;
         mail.setVisibleButtons(visible);
         notes.setVisibleButtons(visible);
         security.setVisibleButtons(visible);
@@ -355,22 +334,30 @@ public class TabMail extends Composite implements HasMailEvent,
      * Gets asynchronous to get all groups assigned to a document
      */
     final AsyncCallback<List<GWTPropertyGroup>> callbackGetGroups = new AsyncCallback<List<GWTPropertyGroup>>() {
-        @Override
-        public void onSuccess(final List<GWTPropertyGroup> result) {
-            final GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
+        public void onSuccess(List<GWTPropertyGroup> result) {
+            GWTFolder gwtFolder = Main.get().activeFolderTree.getFolder();
 
-            for (final GWTPropertyGroup gwtGroup : result) {
-                final String groupTranslation = gwtGroup.getLabel();
-                final PropertyGroup group = new PropertyGroup(gwtGroup,
-                        mail.get(), gwtFolder, visibleButton,
-                        gwtGroup.isReadonly());
+            boolean enableUpdatePropertyGroup = false;
+            for (GWTPropertyGroup gwtGroup : result) {
+                String groupTranslation = gwtGroup.getLabel();
+                PropertyGroup group = new PropertyGroup(gwtGroup, mail.get(), gwtFolder, visibleButton, gwtGroup.isReadonly());
                 tabPanel.add(group, groupTranslation);
                 propertyGroup.add(group);
 
                 // Adds property group handlers
-                for (final PropertyGroupHandlerExtension propertyGroupHandlerExtension : propertyGroupHandlerExtensionList) {
-                    group.addPropertyGroupHandlerExtension(propertyGroupHandlerExtension);
+                for (Iterator<PropertyGroupHandlerExtension> itx = propertyGroupHandlerExtensionList.iterator(); itx.hasNext();) {
+                    group.addPropertyGroupHandlerExtension(itx.next());
                 }
+
+                // has update property group
+                if (!enableUpdatePropertyGroup && group.isUpdatePropertyGrouupEnabled()) {
+                    enableUpdatePropertyGroup = true;
+                }
+            }
+
+            // enable property group
+            if (!enableUpdatePropertyGroup) {
+                Main.get().mainPanel.topPanel.toolBar.enableUpdatePropertyGroup();
             }
 
             // To prevent change on document that has minor tabs than previous the new selected tab it'll be the max - 1 on that cases
@@ -381,14 +368,11 @@ public class TabMail extends Composite implements HasMailEvent,
                                                        // and on remove loses selectedTab
             }
 
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetGroupProperties();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetGroupProperties();
             Main.get().showError("GetGroups", caught);
         }
     };
@@ -396,9 +380,8 @@ public class TabMail extends Composite implements HasMailEvent,
     /**
      * Gets all property groups assigned to document
      */
-    private void getGroups(final String path) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.status
-                .setGroupProperties();
+    private void getGroups(String path) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.status.setGroupProperties();
         propertyGroupService.getGroups(path, callbackGetGroups);
     }
 
@@ -406,11 +389,10 @@ public class TabMail extends Composite implements HasMailEvent,
      * Removes the actual property group
      */
     public void removePropertyGroup() {
-        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selectedted Tab
+        selectedTab = tabPanel.getSelectedIndex(); // Sets the actual selected Tab
 
         // Removes group 
-        final PropertyGroup group = (PropertyGroup) tabPanel
-                .getWidget(selectedTab);
+        PropertyGroup group = (PropertyGroup) tabPanel.getWidget(selectedTab);
         group.removeGroup();
         propertyGroup.remove(group);
 
@@ -429,13 +411,10 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * Return if actual tab selected is group property and can be removed
-     * 
-     * @return
      */
-    private boolean isRemovePropertyGroupEnabled(final int tabIndex) {
-        if (tabPanel.getWidget(tabIndex) instanceof PropertyGroup) {
-            return ((PropertyGroup) tabPanel.getWidget(tabIndex))
-                    .isRemovePropertyGroupEnabled();
+    private boolean isRemovePropertyGroupEnabled(int tabIndex) {
+        if ((tabPanel.getWidget(tabIndex) instanceof PropertyGroup)) {
+            return ((PropertyGroup) (tabPanel.getWidget(tabIndex))).isRemovePropertyGroupEnabled();
         } else {
             return false;
         }
@@ -478,7 +457,7 @@ public class TabMail extends Composite implements HasMailEvent,
      * showExtensions
      */
     public void showExtensions() {
-        for (final TabMailExtension extension : widgetExtensionList) {
+        for (TabMailExtension extension : widgetExtensionList) {
             tabPanel.add(extension, extension.getTabText());
             extension.setPixelSize(width, height - TAB_HEIGHT);
         }
@@ -486,10 +465,8 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * setKeywordEnabled
-     * 
-     * @param enabled
      */
-    public void setKeywordEnabled(final boolean enabled) {
+    public void setKeywordEnabled(boolean enabled) {
         mail.setKeywordEnabled(enabled);
     }
 
@@ -508,11 +485,10 @@ public class TabMail extends Composite implements HasMailEvent,
             tabPanel.selectTab(0);
 
             if (securityVisible && mail.get() != null) {
-                security.setPath(mail.get().getPath());
+                security.setUuid(mail.get().getUuid());
                 security.GetGrants();
 
-                final GWTFolder parentFolder = Main.get().activeFolderTree
-                        .getFolder();
+                GWTFolder parentFolder = Main.get().activeFolderTree.getFolder();
                 if ((parentFolder.getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY
                         && (mail.get().getPermissions() & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
                     security.setChangePermision(true);
@@ -525,8 +501,6 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * getMail
-     * 
-     * @return
      */
     public GWTMail getMail() {
         return mail.get();
@@ -534,10 +508,8 @@ public class TabMail extends Composite implements HasMailEvent,
 
     /**
      * addMailExtension
-     * 
-     * @param extension
      */
-    public void addMailExtension(final TabMailExtension extension) {
+    public void addMailExtension(TabMailExtension extension) {
         widgetExtensionList.add(extension);
     }
 
@@ -547,44 +519,53 @@ public class TabMail extends Composite implements HasMailEvent,
      * Needs resizing if not widgets disappears
      */
     public void resizingIncubatorWidgets() {
-        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT); // Substract tab height
+        security.setPixelSize(getOffsetWidth(), getOffsetHeight() - TAB_HEIGHT);
         security.fillWidth();
+
         // TODO:Solves minor bug with IE
         if (Util.getUserAgent().startsWith("ie")) {
-            final Timer timer = new Timer() {
+            Timer timer = new Timer() {
                 @Override
                 public void run() {
-                    tabPanel.setWidth("" + width);
-                    tabPanel.setWidth("" + (width + 1));
-                    final Timer timer = new Timer() {
+                    tabPanel.setWidth("" + width + "px");
+                    tabPanel.setWidth("" + (width + 1) + "px");
+
+                    Timer timer = new Timer() {
                         @Override
                         public void run() {
-                            tabPanel.setWidth("" + width);
+                            tabPanel.setWidth("" + width + "px");
                         }
                     };
+
                     timer.schedule(50);
                 }
             };
+
             timer.schedule(100);
         }
     }
 
+    /**
+     * initSecurity
+     */
+    public void initSecurity() {
+        security.initSecurity();
+    }
+
     @Override
-    public void addMailHandlerExtension(
-            final MailHandlerExtension handlerExtension) {
+    public void addMailHandlerExtension(MailHandlerExtension handlerExtension) {
         mailHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final MailEventConstant event) {
-        for (final MailHandlerExtension handlerExtension : mailHandlerExtensionList) {
+    public void fireEvent(MailEventConstant event) {
+        for (MailHandlerExtension handlerExtension : mailHandlerExtensionList) {
             handlerExtension.onChange(event);
         }
     }
 
     @Override
-    public void addPropertyGroupHandlerExtension(
-            final PropertyGroupHandlerExtension handlerExtension) {
+    public void addPropertyGroupHandlerExtension(PropertyGroupHandlerExtension handlerExtension) {
         propertyGroupHandlerExtensionList.add(handlerExtension);
     }
 }

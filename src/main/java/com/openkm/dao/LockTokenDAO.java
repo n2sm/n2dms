@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,7 +42,7 @@ public class LockTokenDAO {
     /**
      * Create lock token
      */
-    public static void add(final LockToken lt) throws DatabaseException {
+    public static void add(LockToken lt) throws DatabaseException {
         log.debug("add({})", lt);
         Session session = null;
         Transaction tx = null;
@@ -52,7 +52,7 @@ public class LockTokenDAO {
             tx = session.beginTransaction();
             session.save(lt);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -65,22 +65,21 @@ public class LockTokenDAO {
     /**
      * Remove
      */
-    public static void delete(final String user, final String token)
-            throws DatabaseException {
+    public static void delete(String user, String token) throws DatabaseException {
         log.debug("delete({}, {})", user, token);
-        final String qs = "delete from LockToken lt where lt.user=:user and lt.token=:token";
+        String qs = "delete from LockToken lt where lt.user=:user and lt.token=:token";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
             q.setString("token", token);
             q.executeUpdate();
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -94,20 +93,19 @@ public class LockTokenDAO {
      * Find by user
      */
     @SuppressWarnings("unchecked")
-    public static List<LockToken> findByUser(final String user)
-            throws DatabaseException {
+    public static List<LockToken> findByUser(String user) throws DatabaseException {
         log.debug("findByUser({})", user);
-        final String qs = "from LockToken lt where lt.user=:user";
+        String qs = "from LockToken lt where lt.user=:user";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
-            final List<LockToken> ret = q.list();
+            List<LockToken> ret = q.list();
             log.debug("findByUser: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,34 +25,23 @@ import java.io.Serializable;
 
 public class ProfileMenu implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean fileVisible;
-
     private boolean editVisible;
-
     private boolean toolsVisible;
-
     private boolean bookmarksVisible;
-
     private boolean templatesVisible;
-
     private boolean helpVisible;
-
     private ProfileMenuFile prfFile = new ProfileMenuFile();
-
     private ProfileMenuBookmark prfBookmark = new ProfileMenuBookmark();
-
     private ProfileMenuTool prfTool = new ProfileMenuTool();
-
     private ProfileMenuEdit prfEdit = new ProfileMenuEdit();
-
     private ProfileMenuHelp prfHelp = new ProfileMenuHelp();
 
     public boolean isFileVisible() {
         return fileVisible;
     }
 
-    public void setFileVisible(final boolean fileVisible) {
+    public void setFileVisible(boolean fileVisible) {
         this.fileVisible = fileVisible;
     }
 
@@ -60,7 +49,7 @@ public class ProfileMenu implements Serializable {
         return editVisible;
     }
 
-    public void setEditVisible(final boolean editVisible) {
+    public void setEditVisible(boolean editVisible) {
         this.editVisible = editVisible;
     }
 
@@ -68,7 +57,7 @@ public class ProfileMenu implements Serializable {
         return toolsVisible;
     }
 
-    public void setToolsVisible(final boolean toolsVisible) {
+    public void setToolsVisible(boolean toolsVisible) {
         this.toolsVisible = toolsVisible;
     }
 
@@ -76,7 +65,7 @@ public class ProfileMenu implements Serializable {
         return bookmarksVisible;
     }
 
-    public void setBookmarksVisible(final boolean bookmarksVisible) {
+    public void setBookmarksVisible(boolean bookmarksVisible) {
         this.bookmarksVisible = bookmarksVisible;
     }
 
@@ -84,7 +73,7 @@ public class ProfileMenu implements Serializable {
         return templatesVisible;
     }
 
-    public void setTemplatesVisible(final boolean templatesVisible) {
+    public void setTemplatesVisible(boolean templatesVisible) {
         this.templatesVisible = templatesVisible;
     }
 
@@ -92,7 +81,7 @@ public class ProfileMenu implements Serializable {
         return helpVisible;
     }
 
-    public void setHelpVisible(final boolean helpVisible) {
+    public void setHelpVisible(boolean helpVisible) {
         this.helpVisible = helpVisible;
     }
 
@@ -100,7 +89,7 @@ public class ProfileMenu implements Serializable {
         return prfFile;
     }
 
-    public void setPrfFile(final ProfileMenuFile prfFile) {
+    public void setPrfFile(ProfileMenuFile prfFile) {
         this.prfFile = prfFile;
     }
 
@@ -108,7 +97,7 @@ public class ProfileMenu implements Serializable {
         return prfBookmark;
     }
 
-    public void setPrfBookmark(final ProfileMenuBookmark prfBookmark) {
+    public void setPrfBookmark(ProfileMenuBookmark prfBookmark) {
         this.prfBookmark = prfBookmark;
     }
 
@@ -116,7 +105,7 @@ public class ProfileMenu implements Serializable {
         return prfTool;
     }
 
-    public void setPrfTool(final ProfileMenuTool prfTool) {
+    public void setPrfTool(ProfileMenuTool prfTool) {
         this.prfTool = prfTool;
     }
 
@@ -124,7 +113,7 @@ public class ProfileMenu implements Serializable {
         return prfEdit;
     }
 
-    public void setPrfEdit(final ProfileMenuEdit prfEdit) {
+    public void setPrfEdit(ProfileMenuEdit prfEdit) {
         this.prfEdit = prfEdit;
     }
 
@@ -132,13 +121,12 @@ public class ProfileMenu implements Serializable {
         return prfHelp;
     }
 
-    public void setPrfHelp(final ProfileMenuHelp prfHelp) {
+    public void setPrfHelp(ProfileMenuHelp prfHelp) {
         this.prfHelp = prfHelp;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("fileVisible=").append(fileVisible);
         sb.append(", editVisible=").append(editVisible);

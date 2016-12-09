@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.searchuser;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTQueryParams;
 import com.openkm.frontend.client.service.OKMDashboardService;
@@ -47,25 +47,16 @@ import com.openkm.frontend.client.service.OKMSearchServiceAsync;
  */
 public class UserNews extends Composite {
 
-    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT
-            .create(OKMDashboardService.class);
-
-    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT
-            .create(OKMSearchService.class);
+    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT.create(OKMDashboardService.class);
+    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT.create(OKMSearchService.class);
 
     private ExtendedFlexTable table;
-
     public MenuPopup menuPopup;
-
     private Status status;
-
     private boolean firstTime = true;
-
     // Holds the data rows of the table this is a list of RowData Object
     public Map<Integer, GWTQueryParams> data;
-
     private int dataIndexValue = 0;
-
     private int searchIdToDelete = 0;
 
     /**
@@ -102,6 +93,7 @@ public class UserNews extends Composite {
     public void showMenu() {
         // The browser menu depends on actual view
         // Must substract top position from Y Screen Position
+        menuPopup.evaluateMenuOptions();
         menuPopup.setPopupPosition(table.getMouseX(), table.getMouseY());
         menuPopup.show();
     }
@@ -119,12 +111,11 @@ public class UserNews extends Composite {
      * Call Back get search 
      */
     final AsyncCallback<List<GWTQueryParams>> callbackGetUserSearchs = new AsyncCallback<List<GWTQueryParams>>() {
-        @Override
-        public void onSuccess(final List<GWTQueryParams> result) {
+        public void onSuccess(List<GWTQueryParams> result) {
             table.removeAllRows();
 
-            for (final GWTQueryParams gwtQueryParams : result) {
-                addRow(gwtQueryParams);
+            for (Iterator<GWTQueryParams> it = result.iterator(); it.hasNext();) {
+                addRow(it.next());
             }
             if (!firstTime) {
                 status.unsetFlag_getUserNews();
@@ -133,8 +124,7 @@ public class UserNews extends Composite {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             if (!firstTime) {
                 status.unsetFlag_getUserNews();
             } else {
@@ -149,8 +139,7 @@ public class UserNews extends Composite {
      * Call Back delete search 
      */
     final AsyncCallback<Object> callbackDeleteSearch = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             table.removeRow(getSelectedRow());
             table.selectPrevRow();
             data.remove(new Integer(searchIdToDelete));
@@ -158,8 +147,7 @@ public class UserNews extends Composite {
             status.unsetFlag_deleteSearch();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             status.unsetFlag_deleteSearch();
             Main.get().showError("DeleteSearch", caught);
         }
@@ -170,7 +158,7 @@ public class UserNews extends Composite {
      * 
      * @param search
      */
-    public void addNewSavedSearch(final GWTQueryParams search) {
+    public void addNewSavedSearch(GWTQueryParams search) {
         addRow(search);
     }
 
@@ -179,25 +167,23 @@ public class UserNews extends Composite {
      * 
      * @param search The search value
      */
-    public void addRow(final GWTQueryParams search) {
-        final int rows = table.getRowCount();
+    public void addRow(GWTQueryParams search) {
+        int rows = table.getRowCount();
 
         data.put(dataIndexValue, search);
-
         table.setHTML(rows, 0, "&nbsp;");
+
         table.setHTML(rows, 1, search.getQueryName());
         table.setHTML(rows, 2, "" + dataIndexValue++);
         table.setHTML(rows, 3, "");
         table.getFlexCellFormatter().setVisible(rows, 2, false);
 
         // The hidden column extends table to 100% width
-        final CellFormatter cellFormatter = table.getCellFormatter();
-        cellFormatter.setWidth(rows, 0, "30");
-        cellFormatter.setHeight(rows, 0, "20");
-        cellFormatter.setHorizontalAlignment(rows, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        cellFormatter.setVerticalAlignment(rows, 0,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        CellFormatter cellFormatter = table.getCellFormatter();
+        cellFormatter.setWidth(rows, 0, "30px");
+        cellFormatter.setHeight(rows, 0, "20px");
+        cellFormatter.setHorizontalAlignment(rows, 0, HasAlignment.ALIGN_CENTER);
+        cellFormatter.setVerticalAlignment(rows, 0, HasAlignment.ALIGN_MIDDLE);
         cellFormatter.setWidth(rows, 3, "100%");
 
         table.getRowFormatter().setStyleName(rows, "okm-userNews");
@@ -211,9 +197,8 @@ public class UserNews extends Composite {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, false);
         }
@@ -234,9 +219,8 @@ public class UserNews extends Composite {
      */
     public void getSearch() {
         if (getSelectedRow() >= 0) {
-            final int id = Integer.parseInt(table.getText(getSelectedRow(), 2));
-            Main.get().mainPanel.search.searchBrowser.searchResult
-                    .getSearch(data.get(new Integer(id)));
+            int id = Integer.parseInt(table.getText(getSelectedRow(), 2));
+            Main.get().mainPanel.search.searchBrowser.searchResult.getSearch(data.get(new Integer(id)));
         }
     }
 
@@ -247,7 +231,7 @@ public class UserNews extends Composite {
      */
     public GWTQueryParams getSavedSearch() {
         if (getSelectedRow() >= 0) {
-            final int id = Integer.parseInt(table.getText(getSelectedRow(), 2));
+            int id = Integer.parseInt(table.getText(getSelectedRow(), 2));
             return data.get(new Integer(id));
         } else {
             return null;
@@ -260,10 +244,8 @@ public class UserNews extends Composite {
     public void deleteSearch() {
         if (getSelectedRow() >= 0) {
             status.setFlag_deleteSearch();
-            searchIdToDelete = Integer.parseInt(table.getText(getSelectedRow(),
-                    2));
-            searchService.deleteSearch(data.get(new Integer(searchIdToDelete))
-                    .getId(), callbackDeleteSearch);
+            searchIdToDelete = Integer.parseInt(table.getText(getSelectedRow(), 2));
+            searchService.deleteSearch(data.get(new Integer(searchIdToDelete)).getId(), callbackDeleteSearch);
         }
     }
 
@@ -272,7 +254,7 @@ public class UserNews extends Composite {
      * 
      * @param selected The selected panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
         table.setSelectedPanel(selected);
     }
 

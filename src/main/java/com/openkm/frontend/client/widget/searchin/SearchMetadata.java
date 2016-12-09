@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTPropertyParams;
 import com.openkm.frontend.client.bean.form.GWTFormElement;
+import com.openkm.frontend.client.constants.ui.UIDockPanelConstants;
 import com.openkm.frontend.client.widget.form.FormManager;
 
 /**
@@ -46,20 +47,16 @@ import com.openkm.frontend.client.widget.form.FormManager;
 public class SearchMetadata extends Composite {
 
     private ScrollPanel scrollPanel;
-
     private FlexTable table;
-
     private FormManager formManager;
-
     public GroupPopup groupPopup;
-
     public Button addGroup;
 
     /**
      * SearchMetadata
      */
-    public SearchMetadata(final HasSearch search) {
-        formManager = new FormManager(search);
+    public SearchMetadata(HasPropertyHandler propertyHandler) {
+        formManager = new FormManager(propertyHandler);
         table = new FlexTable();
         scrollPanel = new ScrollPanel(table);
 
@@ -73,13 +70,12 @@ public class SearchMetadata extends Composite {
         groupPopup.setStyleName("okm-Popup");
         groupPopup.addStyleName("okm-DisableSelect");
 
-        addGroup = new Button(Main.i18n("search.add.property.group"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        groupPopup.show();
-                    }
-                });
+        addGroup = new Button(Main.i18n("search.add.property.group"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                groupPopup.show(UIDockPanelConstants.SEARCH);
+            }
+        });
 
         table.setWidget(0, 0, addGroup);
         table.setWidget(1, 0, formManager.getTable());

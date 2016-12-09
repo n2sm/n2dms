@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,16 +41,13 @@ public interface OKMChatServiceAsync {
 
     public void getPendingChatRoomUser(AsyncCallback<List<String>> callback);
 
-    public void getPendingMessage(String room,
-            AsyncCallback<List<String>> callback);
+    public void getPendingMessage(String room, AsyncCallback<List<String>> callback);
 
-    public void addMessageToRoom(String room, String msg,
-            AsyncCallback<?> callback);
+    public void addMessageToRoom(String room, String msg, AsyncCallback<?> callback);
 
     public void closeRoom(String room, AsyncCallback<?> callback);
 
-    public void addUserToChatRoom(String room, String user,
-            AsyncCallback<?> callback);
+    public void addUserToChatRoom(String room, String user, AsyncCallback<?> callback);
 
     public void usersInRoom(String room, AsyncCallback<String> callback);
 

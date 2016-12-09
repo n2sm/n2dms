@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
@@ -32,6 +33,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.constants.service.RPCService;
+import com.openkm.frontend.client.service.OKMGeneralService;
+import com.openkm.frontend.client.service.OKMGeneralServiceAsync;
 
 /**
  * Util
@@ -40,6 +43,8 @@ import com.openkm.frontend.client.constants.service.RPCService;
  * 
  */
 public class Util {
+    private static final OKMGeneralServiceAsync generalService = (OKMGeneralServiceAsync) GWT.create(OKMGeneralService.class);
+
     /**
      * Generates HTML for item with an attached icon.
      * 
@@ -47,7 +52,7 @@ public class Util {
      * @param title the title of the item
      * @return the resultant HTML
      */
-    public static String imageItemHTML(final String imageUrl, final String title) {
+    public static String imageItemHTML(String imageUrl, String title) {
         return "<span style='text-align:left; margin-right:4px;'><img align=\"absmidle\" style='margin-right:4px; white-space:nowrap;' src='"
                 + imageUrl.toLowerCase() + "'>" + title + "</span>";
     }
@@ -59,12 +64,9 @@ public class Util {
      * @param title the title of the item
      * @return the resultant HTML
      */
-    public static String imageItemHTML(final String imageUrl,
-            final String title, final String align) {
-        return "<span style='text-align:left; margin-right:4px;'><img align=\""
-                + align
-                + "\" style='margin-right:4px; white-space:nowrap;' src='"
-                + imageUrl.toLowerCase() + "'>" + title + "</span>";
+    public static String imageItemHTML(String imageUrl, String title, String align) {
+        return "<span style='text-align:left; margin-right:4px;'><img align=\"" + align
+                + "\" style='margin-right:4px; white-space:nowrap;' src='" + imageUrl.toLowerCase() + "'>" + title + "</span>";
     }
 
     /**
@@ -73,9 +75,8 @@ public class Util {
      * @param imageUrl the url of the icon image
      * @return the resultant HTML
      */
-    public static String imageItemHTML(final String imageUrl) {
-        return "<img align=\"absmidle\" style='margin-right:4px' src='"
-                + imageUrl.toLowerCase() + "'>";
+    public static String imageItemHTML(String imageUrl) {
+        return "<img align=\"absmidle\" style='margin-right:4px' src='" + imageUrl.toLowerCase() + "'>";
     }
 
     /**
@@ -86,11 +87,9 @@ public class Util {
      * @param style the style of the image
      * @return the resultant HTML
      */
-    public static String imageHTML(final String imageUrl, final String alt,
-            final String style) {
+    public static String imageHTML(String imageUrl, String alt, String style) {
         if (!style.equals("")) {
-            return "<img align=\"absmidle\"" + style + " src='"
-                    + imageUrl.toLowerCase() + "'>";
+            return "<img align=\"absmidle\"" + style + " src='" + imageUrl.toLowerCase() + "'>";
         } else {
             return imageHTML(imageUrl, alt);
         }
@@ -103,10 +102,8 @@ public class Util {
      * @param alt the image alt
      * @return the resultant HTML
      */
-    public static String imageHTML(final String imageUrl, final String alt) {
-        return "<img border=\"0\" align=\"absmidle\" alt=\"" + alt
-                + "\" title=\"" + alt + "\" src='" + imageUrl.toLowerCase()
-                + "'>";
+    public static String imageHTML(String imageUrl, String alt) {
+        return "<img border=\"0\" align=\"absmidle\" alt=\"" + alt + "\" title=\"" + alt + "\" src='" + imageUrl.toLowerCase() + "'>";
     }
 
     /**
@@ -115,7 +112,7 @@ public class Util {
      * @param imageUrl the url of the icon image
      * @return the resultant HTML
      */
-    public static String imageHTML(final String imageUrl) {
+    public static String imageHTML(String imageUrl) {
         return imageHTML(imageUrl, "");
     }
 
@@ -125,9 +122,8 @@ public class Util {
      * @param mime The document mime-type
      * @return the html image of mime-type file
      */
-    public static String mimeImageHTML(final String mime) {
-        return "<img align=\"absmidle\" style=\"margin-right:4px\" src=\""
-                + Main.CONTEXT + "/mime/" + mime + "\"'>";
+    public static String mimeImageHTML(String mime) {
+        return "<img align=\"absmidle\" style=\"margin-right:4px\" src=\"" + Main.CONTEXT + "/mime/" + mime + "\"'>";
     }
 
     /**
@@ -136,9 +132,9 @@ public class Util {
      * @param imageUrl The image url
      * @param text The text value
      */
-    public static String flagMenuHTML(final String flag, final String text) {
-        return "<img style='margin-right:8px; margin-left:2px; vertical-align:middle;' "
-                + "src=\"" + Main.CONTEXT + "/flag/" + flag + "\"'>" + text;
+    public static String flagMenuHTML(String flag, String text) {
+        return "<img style='margin-right:8px; margin-left:2px; vertical-align:middle;' " + "src=\"" + Main.CONTEXT + "/flag/" + flag
+                + "\"'>" + text;
     }
 
     /**
@@ -147,9 +143,8 @@ public class Util {
      * @param imageUrl The image url
      * @param text The text value
      */
-    public static String menuHTML(final String imageUrl, final String text) {
-        return "<img style='margin-right:8px; margin-left:2px; vertical-align:middle;' src='"
-                + imageUrl + "'>" + text;
+    public static String menuHTML(String imageUrl, String text) {
+        return "<img style='margin-right:8px; margin-left:2px; vertical-align:middle;' src='" + imageUrl + "'>" + text;
     }
 
     /**
@@ -160,14 +155,10 @@ public class Util {
      * @param caption the group caption
      * @return the header HTML fragment
      */
-    public static String createHeaderHTML(final String imageUrl,
-            final String caption) {
-        return "<table align='left'><tr>"
-                + "<td><img src='"
-                + imageUrl
-                + "'></td>"
-                + "<td style='vertical-align:middle'><b style='white-space:nowrap; cursor:default;'>"
-                + caption + "</b></td>" + "</tr></table>";
+    public static String createHeaderHTML(String imageUrl, String caption) {
+        return "<table align='left'><tr>" + "<td><img src='" + imageUrl + "'></td>"
+                + "<td style='vertical-align:middle'><b style='white-space:nowrap; cursor:default;'>" + caption + "</b></td>"
+                + "</tr></table>";
     }
 
     /**
@@ -176,8 +167,8 @@ public class Util {
      * @param width The desired width space
      * @return an HTML element meaning the with
      */
-    public static HTML hSpace(final String width) {
-        final HTML spacer = new HTML("");
+    public static HTML hSpace(String width) {
+        HTML spacer = new HTML("");
         spacer.setWidth(width);
         return spacer;
     }
@@ -188,8 +179,8 @@ public class Util {
      * @param height The desired height space
      * @return an HTML element meaning the height
      */
-    public static HTML vSpace(final String height) {
-        final HTML spacer = new HTML("");
+    public static HTML vSpace(String height) {
+        HTML spacer = new HTML("");
         spacer.setHeight(height);
         return spacer;
     }
@@ -201,8 +192,8 @@ public class Util {
      * @param height The desired height space
      * @return an HTML element meaning the with and height
      */
-    public static HTML space(final String width, final String height) {
-        final HTML spacer = new HTML("");
+    public static HTML space(String width, String height) {
+        HTML spacer = new HTML("");
         spacer.setWidth(width);
         spacer.setHeight(height);
         return spacer;
@@ -214,9 +205,8 @@ public class Util {
      * @param text The text url description
      * @param uri The url to open
      */
-    public static String windowOpen(final String text, final String uri) {
-        return "<span onclick=\"javascript:window.open('" + uri + "')\">"
-                + text + "</span>";
+    public static String windowOpen(String text, String uri) {
+        return "<span onclick=\"javascript:window.open('" + uri + "')\">" + text + "</span>";
     }
 
     /**
@@ -224,7 +214,7 @@ public class Util {
      */
     public static boolean isJREInstalled() {
         if (GWT.isProdMode()) {
-            final String[] jreList = getJREs();
+            String[] jreList = getJREs();
 
             if (jreList != null && jreList.length > 0) {
                 return true;
@@ -239,14 +229,13 @@ public class Util {
     /**
      * Download file by UUID
      */
-    public static void downloadFileByUUID(final String uuid, String params) {
+    public static void downloadFileByUUID(String uuid, String params) {
         if (!params.equals("") && !params.endsWith("&")) {
             params += "&";
         }
 
         final Element downloadIframe = RootPanel.get("__download").getElement();
-        final String url = RPCService.DownloadServlet + "?" + params + "uuid="
-                + URL.encodeQueryString(uuid);
+        String url = RPCService.DownloadServlet + "?" + params + "uuid=" + URL.encodeQueryString(uuid);
         DOM.setElementAttribute(downloadIframe, "src", url);
     }
 
@@ -254,22 +243,20 @@ public class Util {
      * Download file by path
      */
     @Deprecated
-    public static void downloadFile(final String path, String params) {
+    public static void downloadFile(String path, String params) {
         if (!params.equals("") && !params.endsWith("&")) {
             params += "&";
         }
 
         final Element downloadIframe = RootPanel.get("__download").getElement();
-        final String url = RPCService.DownloadServlet + "?" + params + "path="
-                + URL.encodeQueryString(path);
+        String url = RPCService.DownloadServlet + "?" + params + "path=" + URL.encodeQueryString(path);
         DOM.setElementAttribute(downloadIframe, "src", url);
     }
 
     /**
      * downloadFilesByUUID
      */
-    public static void downloadFilesByUUID(final List<String> uuidList,
-            String params) {
+    public static void downloadFilesByUUID(List<String> uuidList, String params) {
         if (!params.equals("")) {
             params = "&" + params;
         }
@@ -277,7 +264,7 @@ public class Util {
         final Element downloadIframe = RootPanel.get("__download").getElement();
         String url = RPCService.DownloadServlet + "?export" + params;
 
-        for (final String uuid : uuidList) {
+        for (String uuid : uuidList) {
             url += "&uuidList=" + URL.encodeQueryString(uuid);
         }
 
@@ -290,7 +277,7 @@ public class Util {
      * @author danilo
      */
     @Deprecated
-    public static void downloadFiles(final List<String> path, String params) {
+    public static void downloadFiles(List<String> path, String params) {
         if (!params.equals("")) {
             params = "&" + params;
         }
@@ -298,7 +285,7 @@ public class Util {
         final Element downloadIframe = RootPanel.get("__download").getElement();
         String url = RPCService.DownloadServlet + "?export" + params;
 
-        for (final String p : path) {
+        for (String p : path) {
             url += "&pathList=" + URL.encodeQueryString(p);
         }
 
@@ -308,11 +295,9 @@ public class Util {
     /**
      * Download file
      */
-    public static void downloadFilePdf(final String uuid) {
+    public static void downloadFilePdf(String uuid) {
         final Element downloadIframe = RootPanel.get("__download").getElement();
-        final String url = RPCService.ConverterServlet
-                + "?inline=false&toPdf=true&uuid="
-                + URL.encodeQueryString(uuid);
+        String url = RPCService.ConverterServlet + "?inline=false&toPdf=true&uuid=" + URL.encodeQueryString(uuid);
         DOM.setElementAttribute(downloadIframe, "src", url);
         Main.get().conversionStatus.getStatus();
     }
@@ -320,26 +305,42 @@ public class Util {
     /**
      * executeReport
      */
-    public static void executeReport(final long id,
-            final Map<String, String> params) {
+    public static void executeReport(long id, Map<String, String> params) {
         String parameters = "";
 
         if (!params.isEmpty()) {
-            for (final String key : params.keySet()) {
+            for (String key : params.keySet()) {
                 parameters += "&" + key + "=" + params.get(key);
             }
         }
 
         final Element downloadIframe = RootPanel.get("__download").getElement();
-        final String url = RPCService.ReportServlet + "?" + "id=" + id
-                + parameters;
+        String url = RPCService.ReportServlet + "?" + "id=" + id + parameters;
+        DOM.setElementAttribute(downloadIframe, "src", url);
+    }
+
+    /**
+     * print file
+     */
+    public static void print(String uuid) {
+        final Element printIframe = RootPanel.get("__print").getElement();
+        String url = RPCService.ConverterServlet + "?inline=true&print=true&toPdf=true&uuid=" + URL.encodeQueryString(uuid);
+        DOM.setElementAttribute(printIframe, "src", url);
+    }
+
+    /**
+     * Download CSV file
+     */
+    public static void downloadCSVFile(String params) {
+        final Element downloadIframe = RootPanel.get("__download").getElement();
+        String url = RPCService.CSVExporterServlet + "?" + params;
         DOM.setElementAttribute(downloadIframe, "src", url);
     }
 
     /**
      * markHTMLTextAsBold
      */
-    public static String getTextAsBoldHTML(final String text, final boolean mark) {
+    public static String getTextAsBoldHTML(String text, boolean mark) {
         if (mark) {
             return "<b>" + text + "</b>";
         } else {
@@ -353,9 +354,9 @@ public class Util {
      * @param path The complete item path.
      * @return The parent item path.
      */
-    public static String getParent(final String path) {
-        final int lastSlash = path.lastIndexOf('/');
-        final String ret = lastSlash > 0 ? path.substring(0, lastSlash) : "";
+    public static String getParent(String path) {
+        int lastSlash = path.lastIndexOf('/');
+        String ret = (lastSlash > 0) ? path.substring(0, lastSlash) : "";
         return ret;
     }
 
@@ -365,75 +366,88 @@ public class Util {
      * @param path The complete item path.
      * @return The name of the item.
      */
-    public static String getName(final String path) {
-        final String ret = path.substring(path.lastIndexOf('/') + 1);
+    public static String getName(String path) {
+        String ret = path.substring(path.lastIndexOf('/') + 1);
         return ret;
     }
 
     /**
      * Encode path elements
      */
-    public static String encodePathElements(final String path) {
-        final String[] eltos = path.split("\\/");
+    public static String encodePathElements(String path) {
+        String[] eltos = path.split("\\/");
         String ret = "";
 
         for (int i = 1; i < eltos.length; i++) {
-            ret = ret.concat("/").concat(
-                    URL.encodeQueryString(URL.encodeQueryString(eltos[i])));
+            ret = ret.concat("/").concat(URL.encodePathSegment(eltos[i]));
         }
 
         return ret;
     }
 
     /**
+     * Generate selectable widget text
+     */
+    public static HTML createSelectable(String html) {
+        HTML widget = new HTML(html);
+        widget.addStyleName("okm-EnableSelect");
+        return widget;
+    }
+
+    /**
      * isRoot
      */
-    public static boolean isRoot(final String fldPath) {
+    public static boolean isRoot(String fldPath) {
         boolean isRoot = false;
 
         if (Main.get().workspaceUserProperties.getWorkspace().isStackTaxonomy()) {
-            isRoot = isRoot
-                    || Main.get().taxonomyRootFolder.getPath().equals(fldPath);
+            isRoot = isRoot || Main.get().taxonomyRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackCategoriesVisible()) {
-            isRoot = isRoot
-                    || Main.get().categoriesRootFolder.getPath()
-                            .equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackCategoriesVisible()) {
+            isRoot = isRoot || Main.get().categoriesRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackThesaurusVisible()) {
-            isRoot = isRoot
-                    || Main.get().thesaurusRootFolder.getPath().equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackThesaurusVisible()) {
+            isRoot = isRoot || Main.get().thesaurusRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackTemplatesVisible()) {
-            isRoot = isRoot
-                    || Main.get().templatesRootFolder.getPath().equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackTemplatesVisible()) {
+            isRoot = isRoot || Main.get().templatesRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackPersonalVisible()) {
-            isRoot = isRoot
-                    || Main.get().personalRootFolder.getPath().equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackPersonalVisible()) {
+            isRoot = isRoot || Main.get().personalRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackMailVisible()) {
-            isRoot = isRoot
-                    || Main.get().mailRootFolder.getPath().equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackMailVisible()) {
+            isRoot = isRoot || Main.get().mailRootFolder.getPath().equals(fldPath);
         }
 
-        if (Main.get().workspaceUserProperties.getWorkspace()
-                .isStackTrashVisible()) {
-            isRoot = isRoot
-                    || Main.get().trashRootFolder.getPath().equals(fldPath);
+        if (Main.get().workspaceUserProperties.getWorkspace().isStackTrashVisible()) {
+            isRoot = isRoot || Main.get().trashRootFolder.getPath().equals(fldPath);
         }
 
         return isRoot;
+    }
+
+    /**
+     * isSearchableKey
+     */
+    public static boolean isSearchableKey(KeyUpEvent event) {
+        return (!EventUtils.isNavigationKey(event.getNativeKeyCode()) && !EventUtils.isModifierKey(event.getNativeKeyCode()) && !EventUtils
+                .isArrowKey(event.getNativeKeyCode()));
+    }
+
+    /**
+     * Show only mail name
+     */
+    public static String showMailName(String mail) {
+        if (mail.startsWith("\"")) {
+            return mail.substring(1, mail.indexOf("\"", 1));
+        } else {
+            return mail.replaceFirst("<", "&lt;").replaceAll(">", "&gt;");
+        }
     }
 
     /**
@@ -441,7 +455,7 @@ public class Util {
      * 
      * @param title The css name
      */
-    public static void changeCss(final String title) {
+    public static void changeCss(String title) {
         if (title.equals("bigfont")) {
             Main.get().mainPanel.desktop.navigator.setSkinExtrStackSize(1);
             Main.get().mainPanel.search.historySearch.setSkinExtrStackSize(1);
@@ -530,10 +544,9 @@ public class Util {
                                                   $wnd.swfobject.removeSWF("jsmediaplayer");
                                                   }-*/;
 
-    public static native void createMediaPlayer(String mediaUrl,
-            String mediaProvider, String width, String height) /*-{
-                                                               $wnd.swfobject.embedSWF("../js/mediaplayer/player.swf", "mediaplayercontainer", width, height, "9.0.0", "../js/mediaplayer/expressinstall.swf", {file:mediaUrl,provider:mediaProvider,autostart:"true",width:width,height:height}, {allowscriptaccess:"always",allowfullscreen: "true"}, {id:"jsmediaplayer",name:"jsmediaplayer"});
-                                                               }-*/;
+    public static native void createMediaPlayer(String mediaUrl, String mediaProvider, String width, String height) /*-{
+                                                                                                                    $wnd.swfobject.embedSWF("../js/mediaplayer/player.swf", "mediaplayercontainer", width, height, "9.0.0", "../js/mediaplayer/expressinstall.swf", {file:mediaUrl,provider:mediaProvider,autostart:"true",width:width,height:height}, {allowscriptaccess:"always",allowfullscreen: "true"}, {id:"jsmediaplayer",name:"jsmediaplayer"});
+                                                                                                                    }-*/;
 
     public static native void resizeMediaPlayer(String width, String height) /*-{
                                                                              obj = $wnd.swfobject.getObjectById('jsmediaplayer');
@@ -541,11 +554,20 @@ public class Util {
                                                                              obj.height = height;
                                                                              }-*/;
 
-    public static native void createPDFViewerZviewer(String pdfUrl,
-            String width, String height) /*-{
-                                         pdfUrl = encodeURIComponent(pdfUrl);
-                                         $wnd.swfobject.embedSWF("../js/zviewer/zviewer.swf", "pdfviewercontainer", width, height, "9.0.0", "../js/mediaplayer/expressinstall.swf", {doc_url:pdfUrl}, {allowFullScreen:"true",menu:"false",bgcolor:"#efefef"}, {id:"jspdfviewer",name:"jspdfviewer"});
-                                         }-*/;
+    public static native void createSwfViewer(String swfUrl, String width, String height) /*-{
+                                                                                          $wnd.swfobject.embedSWF(swfUrl, "swfviewercontainer", width, height, "9.0.0", "../js/mediaplayer/expressinstall.swf", {width:width,height:height}, {}, {id:"jswfviewer",name:"jswfviewer"});
+                                                                                          }-*/;
+
+    public static native void resizeSwfViewer(String width, String height) /*-{
+                                                                           obj = $wnd.swfobject.getObjectById('jswfviewer');
+                                                                           obj.width = width;
+                                                                           obj.height = height;
+                                                                           }-*/;
+
+    public static native void createPDFViewerZviewer(String pdfUrl, String width, String height) /*-{
+                                                                                                 pdfUrl = encodeURIComponent(pdfUrl);
+                                                                                                 $wnd.swfobject.embedSWF("../js/zviewer/zviewer.swf", "pdfviewercontainer", width, height, "9.0.0", "../js/mediaplayer/expressinstall.swf", {doc_url:pdfUrl}, {allowFullScreen:"true",menu:"false",bgcolor:"#efefef"}, {id:"jspdfviewer",name:"jspdfviewer"});
+                                                                                                 }-*/;
 
     public static native void resizePDFViewerZviewer(String width, String height) /*-{
                                                                                   obj = $wnd.swfobject.getObjectById('jspdfviewer');
@@ -553,81 +575,59 @@ public class Util {
                                                                                   obj.height = height;
                                                                                   }-*/;
 
-    public static native void createPDFViewerFlexPaper(String pdfUrl,
-            String width, String height, String printEnabled) /*-{
-                                                              if (printEnabled == 'true') {
-                                                              fpViewer = "../js/flexpaper/FlexPaperViewer.swf";
-                                                              } else {
-                                                              fpViewer = "../js/flexpaper/FlexPaperViewerRO.swf";
-                                                              }
-                                                              
-                                                              pdfUrl = encodeURIComponent(pdfUrl);
-                                                              $wnd.swfobject.embedSWF(fpViewer, "pdfviewercontainer", width, height, "10.0.0", "playerProductInstall.swf",
-                                                              {
-                                                              SwfFile : pdfUrl,
-                                                              Scale : 0.6,
-                                                              ZoomTransition : "easeOut",
-                                                              ZoomTime : 0.5,
-                                                              ZoomInterval : 0.1,
-                                                              FitPageOnLoad : false,
-                                                              FitWidthOnLoad : true,
-                                                              PrintEnabled : printEnabled,
-                                                              FullScreenAsMaxWindow : false,
-                                                              ProgressiveLoading : true,
-                                                              
-                                                              // PrintToolsVisible : printEnabled,
-                                                              ViewModeToolsVisible : true,
-                                                              ZoomToolsVisible : true,
-                                                              FullScreenVisible : true,
-                                                              NavToolsVisible : true,
-                                                              CursorToolsVisible : true,
-                                                              SearchToolsVisible : true,
-                                                              localeChain: "en_US"
-                                                              },
-                                                              {
-                                                              quality : "high",
-                                                              bgcolor : "#ffffff",
-                                                              allowscriptaccess : "sameDomain",
-                                                              allowfullscreen : "true"
-                                                              },
-                                                              {
-                                                              id : "FlexPaperViewer",
-                                                              name : "FlexPaperViewer"
-                                                              });
-                                                              }-*/;
+    public static native void createPDFViewerFlexPaper(String pdfUrl, String width, String height) /*-{
+                                                                                                   fpViewer = "../js/flexpaper/FlexPaperViewer.swf";
+                                                                                                   pdfUrl = encodeURIComponent(pdfUrl);
+                                                                                                   $wnd.swfobject.embedSWF(fpViewer, "pdfviewercontainer", width, height, "10.0.0", "playerProductInstall.swf",
+                                                                                                   {
+                                                                                                   SwfFile : pdfUrl,
+                                                                                                   Scale : 0.6,
+                                                                                                   ZoomTransition : "easeOut",
+                                                                                                   ZoomTime : 0.5,
+                                                                                                   ZoomInterval : 0.1,
+                                                                                                   FitPageOnLoad : false,
+                                                                                                   FitWidthOnLoad : true,
+                                                                                                   FullScreenAsMaxWindow : false,
+                                                                                                   ProgressiveLoading : true,
+                                                                                                   ViewModeToolsVisible : true,
+                                                                                                   ZoomToolsVisible : true,
+                                                                                                   FullScreenVisible : true,
+                                                                                                   NavToolsVisible : true,
+                                                                                                   CursorToolsVisible : true,
+                                                                                                   SearchToolsVisible : true,
+                                                                                                   localeChain: "en_US"
+                                                                                                   },
+                                                                                                   {
+                                                                                                   quality : "high",
+                                                                                                   bgcolor : "#ffffff",
+                                                                                                   allowscriptaccess : "sameDomain",
+                                                                                                   allowfullscreen : "true"
+                                                                                                   },
+                                                                                                   {
+                                                                                                   id : "FlexPaperViewer",
+                                                                                                   name : "FlexPaperViewer"
+                                                                                                   });
+                                                                                                   }-*/;
 
-    public static native void resizePDFViewerFlexPaper(String width,
-            String height) /*-{
-                           obj = $wnd.swfobject.getObjectById('FlexPaperViewer');
-                           obj.width = width;
-                           obj.height = height;
-                           }-*/;
+    public static native void resizePDFViewerFlexPaper(String width, String height) /*-{
+                                                                                    obj = $wnd.swfobject.getObjectById('FlexPaperViewer');
+                                                                                    obj.width = width;
+                                                                                    obj.height = height;
+                                                                                    }-*/;
+
+    public static native void resizeEmbededPDF(String width, String height, String pdfId) /*-{
+                                                                                          obj = $wnd.document.getElementById(pdfId);
+                                                                                          obj.width = width;
+                                                                                          obj.height = height;
+                                                                                          }-*/;
 
     public static native String[] getJREs() /*-{
                                             return $wnd.deployJava.getJREs();
                                             }-*/;
 
-    public static native void createLinkClipboardButton(String textToCopy,
-            String containerName) /*-{
-                                  $wnd.swfobject.embedSWF("../clippy.swf", containerName, 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
-                                  }-*/;
-
-    public static native void createURLClipboardButton(String textToCopy) /*-{
-                                                                          $wnd.swfobject.embedSWF("../clippy.swf", "urlclipboardcontainer", 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
-                                                                          }-*/;
-
-    public static native void createWebDavClipboardButton(String textToCopy) /*-{
-                                                                             $wnd.swfobject.embedSWF("../clippy.swf", "webdavclipboardcontainer", 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
-                                                                             }-*/;
-
-    public static native void createFolderURLClipboardButton(String textToCopy) /*-{
-                                                                                $wnd.swfobject.embedSWF("../clippy.swf", "folderurlclipboardcontainer", 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
-                                                                                }-*/;
-
-    public static native void createFolderWebDavClipboardButton(
-            String textToCopy) /*-{
-                               $wnd.swfobject.embedSWF("../clippy.swf", "folderwebdavclipboardcontainer", 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
-                               }-*/;
+    public static native void createClipboardButton(String divId, String textToCopy) /*-{
+                                                                                     $wnd.swfobject.embedSWF("../clippy.swf", divId, 14, 14, "9.0.0", "../clippy.swf", {text:textToCopy}, {quality:"high",scale:"noscale",bgcolor:"#FFFFFF"}, {id:"clippy",name:"clippy"});
+                                                                                     }-*/;
 
     public static native String escape(String text) /*-{
                                                     return escape(text);

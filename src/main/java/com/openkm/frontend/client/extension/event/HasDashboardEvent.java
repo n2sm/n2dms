@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,7 +40,6 @@ public interface HasDashboardEvent {
     public static class DashboardEventConstant {
 
         static final int EVENT_TOOLBOX_CHANGED = 1;
-
         static final int EVENT_DASHBOARD_REFRESH = 2;
 
         private int type = 0;
@@ -50,7 +49,7 @@ public interface HasDashboardEvent {
          * 
          * @param type
          */
-        private DashboardEventConstant(final int type) {
+        private DashboardEventConstant(int type) {
             this.type = type;
         }
 
@@ -59,11 +58,8 @@ public interface HasDashboardEvent {
         }
     }
 
-    DashboardEventConstant TOOLBOX_CHANGED = new DashboardEventConstant(
-            DashboardEventConstant.EVENT_TOOLBOX_CHANGED);
-
-    DashboardEventConstant DASHBOARD_REFRESH = new DashboardEventConstant(
-            DashboardEventConstant.EVENT_DASHBOARD_REFRESH);
+    DashboardEventConstant TOOLBOX_CHANGED = new DashboardEventConstant(DashboardEventConstant.EVENT_TOOLBOX_CHANGED);
+    DashboardEventConstant DASHBOARD_REFRESH = new DashboardEventConstant(DashboardEventConstant.EVENT_DASHBOARD_REFRESH);
 
     /**
      * @param event

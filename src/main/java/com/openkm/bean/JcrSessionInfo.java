@@ -26,18 +26,15 @@ import javax.jcr.Session;
 
 public class JcrSessionInfo implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Calendar creation;
-
     private Calendar lastAccess;
-
     private Session session;
 
     public Calendar getLastAccess() {
         return lastAccess;
     }
 
-    public void setLastAccess(final Calendar lastAccess) {
+    public void setLastAccess(Calendar lastAccess) {
         this.lastAccess = lastAccess;
     }
 
@@ -45,7 +42,7 @@ public class JcrSessionInfo implements Serializable {
         return creation;
     }
 
-    public void setCreation(final Calendar creation) {
+    public void setCreation(Calendar creation) {
         this.creation = creation;
     }
 
@@ -53,13 +50,12 @@ public class JcrSessionInfo implements Serializable {
         return session;
     }
 
-    public void setSession(final javax.jcr.Session session) {
+    public void setSession(javax.jcr.Session session) {
         this.session = session;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("session=");
         sb.append(session);

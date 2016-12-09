@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,36 +34,24 @@ import com.openkm.bean.form.FormElement;
 import com.openkm.bean.form.Input;
 import com.openkm.bean.form.Option;
 import com.openkm.bean.form.Select;
+import com.openkm.bean.form.Separator;
 import com.openkm.bean.form.SuggestBox;
 import com.openkm.bean.form.TextArea;
 import com.openkm.bean.form.Validator;
 
 public class FormElementComplex implements Serializable {
-    private static Logger log = LoggerFactory
-            .getLogger(FormElementComplex.class);
-
+    private static Logger log = LoggerFactory.getLogger(FormElementComplex.class);
     private static final long serialVersionUID = 1L;
-
     private String objClass;
-
     private String label;
-
     private String name;
-
     private String width;
-
     private String height;
-
     private String type;
-
     private String value;
-
     private String transition;
-
     private boolean readonly;
-
     private List<Option> options = new ArrayList<Option>();
-
     private List<Validator> validators = new ArrayList<Validator>();
 
     public FormElementComplex() {
@@ -73,7 +61,7 @@ public class FormElementComplex implements Serializable {
         return objClass;
     }
 
-    public void setObjClass(final String objClass) {
+    public void setObjClass(String objClass) {
         this.objClass = objClass;
     }
 
@@ -81,7 +69,7 @@ public class FormElementComplex implements Serializable {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -89,7 +77,7 @@ public class FormElementComplex implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -97,7 +85,7 @@ public class FormElementComplex implements Serializable {
         return width;
     }
 
-    public void setWidth(final String width) {
+    public void setWidth(String width) {
         this.width = width;
     }
 
@@ -105,7 +93,7 @@ public class FormElementComplex implements Serializable {
         return height;
     }
 
-    public void setHeight(final String height) {
+    public void setHeight(String height) {
         this.height = height;
     }
 
@@ -113,7 +101,7 @@ public class FormElementComplex implements Serializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -121,7 +109,7 @@ public class FormElementComplex implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -129,7 +117,7 @@ public class FormElementComplex implements Serializable {
         return transition;
     }
 
-    public void setTransition(final String transition) {
+    public void setTransition(String transition) {
         this.transition = transition;
     }
 
@@ -137,7 +125,7 @@ public class FormElementComplex implements Serializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
@@ -145,7 +133,7 @@ public class FormElementComplex implements Serializable {
         return options;
     }
 
-    public void setOptions(final List<Option> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 
@@ -153,16 +141,16 @@ public class FormElementComplex implements Serializable {
         return validators;
     }
 
-    public void setValidators(final List<Validator> validators) {
+    public void setValidators(List<Validator> validators) {
         this.validators = validators;
     }
 
     /**
      * Conversion from FormElement to FormElementComplex.
      */
-    public static FormElementComplex toFormElementComplex(final FormElement fe) {
+    public static FormElementComplex toFormElementComplex(FormElement fe) {
         log.debug("toFormElementComplex({})", fe);
-        final FormElementComplex fec = new FormElementComplex();
+        FormElementComplex fec = new FormElementComplex();
 
         fec.setHeight(fe.getHeight());
         fec.setWidth(fe.getWidth());
@@ -170,36 +158,45 @@ public class FormElementComplex implements Serializable {
         fec.setName(fe.getName());
 
         if (fe instanceof Input) {
-            final Input i = (Input) fe;
+            Input i = (Input) fe;
             fec.setType(i.getType());
             fec.setValue(i.getValue());
+            fec.setValidators(i.getValidators());
             fec.setReadonly(i.isReadonly());
             fec.setObjClass(i.getClass().getName());
         } else if (fe instanceof SuggestBox) {
-            final SuggestBox sb = (SuggestBox) fe;
+            SuggestBox sb = (SuggestBox) fe;
             fec.setValue(sb.getValue());
+            fec.setValidators(sb.getValidators());
             fec.setReadonly(sb.isReadonly());
             fec.setObjClass(sb.getClass().getName());
         } else if (fe instanceof TextArea) {
-            final TextArea ta = (TextArea) fe;
+            TextArea ta = (TextArea) fe;
             fec.setValue(ta.getValue());
+            fec.setValidators(ta.getValidators());
             fec.setReadonly(ta.isReadonly());
             fec.setObjClass(ta.getClass().getName());
         } else if (fe instanceof CheckBox) {
-            final CheckBox cb = (CheckBox) fe;
+            CheckBox cb = (CheckBox) fe;
             fec.setValue(Boolean.toString(cb.getValue()));
+            fec.setValidators(cb.getValidators());
             fec.setReadonly(cb.isReadonly());
             fec.setObjClass(cb.getClass().getName());
         } else if (fe instanceof Select) {
-            final Select s = (Select) fe;
+            Select s = (Select) fe;
+            fec.setValue(s.getValue());
             fec.setType(s.getType());
             fec.setOptions(s.getOptions());
+            fec.setValidators(s.getValidators());
             fec.setReadonly(s.isReadonly());
             fec.setObjClass(s.getClass().getName());
         } else if (fe instanceof Button) {
-            final Button b = (Button) fe;
+            Button b = (Button) fe;
             fec.setTransition(b.getTransition());
             fec.setObjClass(b.getClass().getName());
+        } else if (fe instanceof Separator) {
+            Separator s = new Separator();
+            fec.setObjClass(s.getClass().getName());
         }
 
         log.debug("toFormElementComplex: ", fec);
@@ -209,7 +206,7 @@ public class FormElementComplex implements Serializable {
     /**
      * Conversion from FormElementComplex to FormElement.
      */
-    public static FormElement toFormElement(final FormElementComplex fec) {
+    public static FormElement toFormElement(FormElementComplex fec) {
         log.debug("toFormElement({})", fec);
         FormElement fe = new FormElement();
 
@@ -235,6 +232,7 @@ public class FormElementComplex implements Serializable {
             ((CheckBox) fe).setReadonly(fec.isReadonly());
         } else if (Select.class.getName().equals(fec.getObjClass())) {
             fe = new Select();
+            ((Select) fe).setValue(fec.getValue());
             ((Select) fe).setOptions(fec.getOptions());
             ((Select) fe).setReadonly(fec.isReadonly());
 
@@ -266,9 +264,8 @@ public class FormElementComplex implements Serializable {
         return fe;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=").append(label);
         sb.append(", name=").append(name);

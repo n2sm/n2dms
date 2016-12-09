@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
@@ -15,10 +15,7 @@
     $(document).ready(function() {
     	$('form').bind('submit', function(event) {
         	var error = $('input[name="usr_id"] + span.vanadium-invalid');
-        	var id = $('input[name="usr_id"]').val();
-            if ((error != null) && (!id.match(/^[a-zA-Z0-9._]+$/))) {
-                return false;
-            }
+    		
     		if (error == null || error.text() == '') {
         		return true;
         	} else {
@@ -95,7 +92,7 @@
           </tr>
           <tr>
             <td>Name</td>
-            <td><input class="" name="usr_name" size="25" value="${usr.name}"/></td>
+            <td><input class=":required :only_on_blur" name="usr_name" size="25" value="${usr.name}"/></td>
           </tr>
           <tr>
             <td>Mail</td>
@@ -133,8 +130,12 @@
           </tr>
           <tr>
             <td colspan="2" align="right">
-              <input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              <input type="submit" value="Send"/>
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <c:choose>
+                <c:when test="${action == 'userCreate'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                <c:when test="${action == 'userEdit'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                <c:when test="${action == 'userDelete'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+              </c:choose>
             </td>
           </tr>
         </table>

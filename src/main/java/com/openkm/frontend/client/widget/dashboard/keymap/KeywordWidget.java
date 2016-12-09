@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.dashboard.keymap;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,11 +33,11 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTKeyword;
 import com.openkm.frontend.client.widget.dashboard.Status;
@@ -50,23 +51,17 @@ import com.openkm.frontend.client.widget.dashboard.Status;
 public class KeywordWidget extends Composite {
 
     private VerticalPanel vPanel;
-
     private FlexTable table;
-
     private Header header;
-
     private Map<String, String> selectedMap = new HashMap<String, String>();
-
     private Map<String, String> keywordTableMap = new HashMap<String, String>();
-
     public Status status;
-
     private boolean zoom = false;
 
     /**
      * KeywordWidget
      */
-    public KeywordWidget(final String text) {
+    public KeywordWidget(String text) {
         status = new Status();
         status.setStyleName("okm-StatusPopup");
 
@@ -76,19 +71,17 @@ public class KeywordWidget extends Composite {
 
         table.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
-                final int row = table.getCellForEvent(event).getRowIndex();
-                final String keyword = table.getHTML(row, 0);
+            public void onClick(ClickEvent event) {
+                int row = table.getCellForEvent(event).getRowIndex();
+                String keyword = table.getHTML(row, 0);
                 if (selectedMap.keySet().contains(keyword)) {
                     styleRow(row, false);
                     selectedMap.remove(keyword);
-                    Main.get().mainPanel.dashboard.keyMapDashboard
-                            .removeKey(keyword);
+                    Main.get().mainPanel.dashboard.keyMapDashboard.removeKey(keyword);
                 } else {
                     selectedMap.put(keyword, "" + row);
                     styleRow(row, true);
-                    Main.get().mainPanel.dashboard.keyMapDashboard
-                            .selectKey(keyword);
+                    Main.get().mainPanel.dashboard.keyMapDashboard.selectKey(keyword);
                 }
             }
         });
@@ -100,9 +93,9 @@ public class KeywordWidget extends Composite {
         vPanel.add(header);
         vPanel.add(table);
 
-        header.setSize("100%", "30");
+        header.setSize("100%", "30px");
         vPanel.setWidth("100%");
-        vPanel.setCellHeight(header, "30");
+        vPanel.setCellHeight(header, "30px");
 
         header.setStyleName("okm-KeywordWidget-Header");
 
@@ -112,10 +105,9 @@ public class KeywordWidget extends Composite {
     /**
      * @param keyword
      */
-    public void selectRow(final String keyword) {
-        if (keywordTableMap.keySet().contains(keyword)
-                && !selectedMap.keySet().contains(keyword)) {
-            final int row = Integer.valueOf(keywordTableMap.get(keyword));
+    public void selectRow(String keyword) {
+        if (keywordTableMap.keySet().contains(keyword) && !selectedMap.keySet().contains(keyword)) {
+            int row = Integer.valueOf(keywordTableMap.get(keyword));
             selectedMap.put(keyword, "" + row);
             styleRow(row, true);
         }
@@ -125,9 +117,9 @@ public class KeywordWidget extends Composite {
      * Unselect the keyword row
      * @param keyword
      */
-    public void unselectRow(final String keyword) {
+    public void unselectRow(String keyword) {
         if (selectedMap.keySet().contains(keyword)) {
-            final int row = Integer.valueOf(selectedMap.get(keyword));
+            int row = Integer.valueOf(selectedMap.get(keyword));
             selectedMap.remove(keyword);
             styleRow(row, false);
         }
@@ -137,8 +129,8 @@ public class KeywordWidget extends Composite {
      * Unselect all rows
      */
     public void unselectAllRows() {
-        for (final String string : selectedMap.keySet()) {
-            final int row = Integer.valueOf(selectedMap.get(string));
+        for (Iterator<String> it = selectedMap.keySet().iterator(); it.hasNext();) {
+            int row = Integer.valueOf(selectedMap.get(it.next()));
             styleRow(row, false);
         }
         selectedMap = new HashMap<String, String>();
@@ -149,8 +141,8 @@ public class KeywordWidget extends Composite {
      * 
      * @param keyword
      */
-    public void add(final GWTKeyword keyword) {
-        final int row = table.getRowCount();
+    public void add(GWTKeyword keyword) {
+        int row = table.getRowCount();
         table.setHTML(row, 0, keyword.getKeyword());
         table.setHTML(row, 1, "" + keyword.getFrequency());
         table.getRowFormatter().setStyleName(row, "okm-Table-Row");
@@ -180,7 +172,7 @@ public class KeywordWidget extends Composite {
      * 
      * @param text
      */
-    public void setHeaderText(final String text) {
+    public void setHeaderText(String text) {
         selectedMap = new HashMap<String, String>();
         header.setHeaderText(text);
     }
@@ -191,13 +183,12 @@ public class KeywordWidget extends Composite {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    private void styleRow(final int row, final boolean selected) {
+    private void styleRow(int row, boolean selected) {
         // Ensures that header is never changed
         if (selected) {
             table.getRowFormatter().addStyleName(row, "okm-Table-SelectedRow");
         } else {
-            table.getRowFormatter().removeStyleName(row,
-                    "okm-Table-SelectedRow");
+            table.getRowFormatter().removeStyleName(row, "okm-Table-SelectedRow");
         }
     }
 
@@ -210,13 +201,12 @@ public class KeywordWidget extends Composite {
     private class Header extends HorizontalPanel implements HasClickHandlers {
 
         private Image zoomImage;
-
         private HTML headerText;
 
         /**
          * Header
          */
-        public Header(final boolean visible, final String text) {
+        public Header(boolean visible, String text) {
             super();
             sinkEvents(Event.ONCLICK);
             headerText = new HTML();
@@ -235,16 +225,13 @@ public class KeywordWidget extends Composite {
             this.add(headerText);
 
             setCellWidth(zoomImage, "30");
-            this.setCellHorizontalAlignment(zoomImage,
-                    HasHorizontalAlignment.ALIGN_CENTER);
-            setCellVerticalAlignment(zoomImage,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
-            setCellVerticalAlignment(headerText,
-                    HasVerticalAlignment.ALIGN_MIDDLE);
+            this.setCellHorizontalAlignment(zoomImage, HasAlignment.ALIGN_CENTER);
+            setCellVerticalAlignment(zoomImage, HasAlignment.ALIGN_MIDDLE);
+            setCellVerticalAlignment(headerText, HasAlignment.ALIGN_MIDDLE);
 
             addClickHandler(new ClickHandler() {
                 @Override
-                public void onClick(final ClickEvent event) {
+                public void onClick(ClickEvent event) {
                     zoom = !zoom;
                     table.setVisible(zoom);
                     if (zoom) {
@@ -261,7 +248,7 @@ public class KeywordWidget extends Composite {
          * 
          * @param text
          */
-        public void setHeaderText(final String text) {
+        public void setHeaderText(String text) {
             headerText.setHTML("<b>" + text + "</b>");
         }
 
@@ -269,7 +256,7 @@ public class KeywordWidget extends Composite {
          * @see com.google.gwt.event.dom.client.HasClickHandlers#addClickHandler(com.google.gwt.event.dom.client.ClickHandler)
          */
         @Override
-        public HandlerRegistration addClickHandler(final ClickHandler handler) {
+        public HandlerRegistration addClickHandler(ClickHandler handler) {
             return addHandler(handler, ClickEvent.getType());
         }
     }
@@ -278,8 +265,8 @@ public class KeywordWidget extends Composite {
      * Sets the refreshing
      */
     public void setRefreshing() {
-        final int left = getAbsoluteLeft() + getOffsetWidth() / 2;
-        final int top = getAbsoluteTop() + getOffsetHeight() / 2;
+        int left = getAbsoluteLeft() + (getOffsetWidth() / 2);
+        int top = getAbsoluteTop() + (getOffsetHeight() / 2);
         if (zoom) {
             status.setFlag_getDashboard();
         }
@@ -298,13 +285,13 @@ public class KeywordWidget extends Composite {
      * 
      * @param keyword The keyword to change rate
      */
-    public void increaseKeywordRate(final String keyword, final boolean add) {
+    public void increaseKeywordRate(String keyword, boolean add) {
         if (keywordTableMap.containsKey(keyword)) {
-            final int row = Integer.valueOf(keywordTableMap.get(keyword));
-            final int value = Integer.valueOf(table.getHTML(row, 1)) + 1;
+            int row = Integer.valueOf(keywordTableMap.get(keyword));
+            int value = Integer.valueOf(table.getHTML(row, 1)) + 1;
             table.setHTML(row, 1, "" + value);
         } else if (add) {
-            final GWTKeyword key = new GWTKeyword();
+            GWTKeyword key = new GWTKeyword();
             key.setFrequency(1);
             key.setKeyword(keyword);
             key.setTop10(false);
@@ -317,10 +304,10 @@ public class KeywordWidget extends Composite {
      * 
      * @param keyword The keyword to change rate
      */
-    public void decreaseKeywordRate(final String keyword) {
+    public void decreaseKeywordRate(String keyword) {
         if (keywordTableMap.containsKey(keyword)) {
-            final int row = Integer.valueOf(keywordTableMap.get(keyword));
-            final int value = Integer.valueOf(table.getHTML(row, 1)) - 1;
+            int row = Integer.valueOf(keywordTableMap.get(keyword));
+            int value = Integer.valueOf(table.getHTML(row, 1)) - 1;
             if (value > 0) {
                 table.setHTML(row, 1, "" + value);
             } else {

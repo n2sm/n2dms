@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,7 +44,6 @@ import com.openkm.dao.bean.AutomationValidation;
  */
 public class AutomationDAO {
     private static Logger log = LoggerFactory.getLogger(AutomationDAO.class);
-
     private static AutomationDAO single = new AutomationDAO();
 
     private AutomationDAO() {
@@ -57,7 +56,7 @@ public class AutomationDAO {
     /**
      * Create
      */
-    public void create(final AutomationRule ar) throws DatabaseException {
+    public void create(AutomationRule ar) throws DatabaseException {
         log.debug("create({})", ar);
         Session session = null;
         Transaction tx = null;
@@ -67,7 +66,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.save(ar);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -80,7 +79,7 @@ public class AutomationDAO {
     /**
      * Update
      */
-    public void update(final AutomationRule ar) throws DatabaseException {
+    public void update(AutomationRule ar) throws DatabaseException {
         log.debug("update({})", ar);
         Session session = null;
         Transaction tx = null;
@@ -90,7 +89,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.update(ar);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -103,8 +102,7 @@ public class AutomationDAO {
     /**
      * Update action
      */
-    public void updateAction(final AutomationAction aa)
-            throws DatabaseException {
+    public void updateAction(AutomationAction aa) throws DatabaseException {
         log.debug("updateAction({})", aa);
         Session session = null;
         Transaction tx = null;
@@ -114,7 +112,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.update(aa);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -127,8 +125,7 @@ public class AutomationDAO {
     /**
      * Update validation
      */
-    public void updateValidation(final AutomationValidation av)
-            throws DatabaseException {
+    public void updateValidation(AutomationValidation av) throws DatabaseException {
         log.debug("updateAction({})", av);
         Session session = null;
         Transaction tx = null;
@@ -138,7 +135,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.update(av);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -151,7 +148,7 @@ public class AutomationDAO {
     /**
      * Delete
      */
-    public void delete(final long raId) throws DatabaseException {
+    public void delete(long raId) throws DatabaseException {
         log.debug("delete({})", raId);
         Session session = null;
         Transaction tx = null;
@@ -159,11 +156,10 @@ public class AutomationDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final AutomationRule ra = (AutomationRule) session.load(
-                    AutomationRule.class, raId);
+            AutomationRule ra = (AutomationRule) session.load(AutomationRule.class, raId);
             session.delete(ra);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -176,7 +172,7 @@ public class AutomationDAO {
     /**
      * Delete action
      */
-    public void deleteAction(final long aaId) throws DatabaseException {
+    public void deleteAction(long aaId) throws DatabaseException {
         log.debug("deleteAction({})", aaId);
         Session session = null;
         Transaction tx = null;
@@ -184,11 +180,10 @@ public class AutomationDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final AutomationAction aa = (AutomationAction) session.load(
-                    AutomationAction.class, aaId);
+            AutomationAction aa = (AutomationAction) session.load(AutomationAction.class, aaId);
             session.delete(aa);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -201,7 +196,7 @@ public class AutomationDAO {
     /**
      * Delete validation
      */
-    public void deleteValidation(final long avId) throws DatabaseException {
+    public void deleteValidation(long avId) throws DatabaseException {
         log.debug("deleteValidation({})", avId);
         Session session = null;
         Transaction tx = null;
@@ -209,11 +204,10 @@ public class AutomationDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final AutomationValidation av = (AutomationValidation) session
-                    .load(AutomationValidation.class, avId);
+            AutomationValidation av = (AutomationValidation) session.load(AutomationValidation.class, avId);
             session.delete(av);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -226,8 +220,7 @@ public class AutomationDAO {
     /**
      * Create
      */
-    public void createAction(final AutomationAction aa)
-            throws DatabaseException {
+    public void createAction(AutomationAction aa) throws DatabaseException {
         log.debug("createAction({})", aa);
         Session session = null;
         Transaction tx = null;
@@ -237,7 +230,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.save(aa);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -250,8 +243,7 @@ public class AutomationDAO {
     /**
      * Create
      */
-    public void createValidation(final AutomationValidation av)
-            throws DatabaseException {
+    public void createValidation(AutomationValidation av) throws DatabaseException {
         log.debug("createValidation({})", av);
         Session session = null;
         Transaction tx = null;
@@ -261,7 +253,7 @@ public class AutomationDAO {
             tx = session.beginTransaction();
             session.save(av);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -277,17 +269,17 @@ public class AutomationDAO {
     @SuppressWarnings("unchecked")
     public List<AutomationRule> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from AutomationRule ar order by ar.order";
+        String qs = "from AutomationRule ar order by ar.order";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<AutomationRule> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<AutomationRule> ret = q.list();
             initializeRules(ret);
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -298,22 +290,21 @@ public class AutomationDAO {
      * find filtered riles
      */
     @SuppressWarnings("unchecked")
-    public List<AutomationRule> findByEvent(final String event, final String at)
-            throws DatabaseException {
+    public List<AutomationRule> findByEvent(String event, String at) throws DatabaseException {
         log.debug("findByEvent({}, {})", event, at);
-        final String qs = "from AutomationRule ar where ar.event=:event and ar.at=:at order by ar.order";
+        String qs = "from AutomationRule ar where ar.event=:event and ar.at=:at order by ar.order";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("event", event);
             q.setString("at", at);
-            final List<AutomationRule> ret = q.list();
+            List<AutomationRule> ret = q.list();
             initializeRules(ret);
             log.debug("findByEvent: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -324,21 +315,20 @@ public class AutomationDAO {
      * Get all metadata actions
      */
     @SuppressWarnings("unchecked")
-    public List<AutomationMetadata> findMetadataValidationsByAt(final String at)
-            throws DatabaseException {
+    public List<AutomationMetadata> findMetadataValidationsByAt(String at) throws DatabaseException {
         log.debug("findAllMetadataValidations()");
-        final String qs = "from AutomationMetadata am where am.group=:group and am.at=:at order by am.name";
+        String qs = "from AutomationMetadata am where am.group=:group and am.at=:at order by am.name";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("group", AutomationMetadata.GROUP_VALIDATION);
             q.setString("at", at);
-            final List<AutomationMetadata> ret = q.list();
+            List<AutomationMetadata> ret = q.list();
             log.debug("findAllMetadataValidations: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -349,21 +339,20 @@ public class AutomationDAO {
      * Get all metadata actions
      */
     @SuppressWarnings("unchecked")
-    public List<AutomationMetadata> findMetadataActionsByAt(final String at)
-            throws DatabaseException {
+    public List<AutomationMetadata> findMetadataActionsByAt(String at) throws DatabaseException {
         log.debug("findAllMetadataActions()");
-        final String qs = "from AutomationMetadata am where am.group=:group and am.at=:at order by am.name";
+        String qs = "from AutomationMetadata am where am.group=:group and am.at=:at order by am.name";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("group", AutomationMetadata.GROUP_ACTION);
             q.setString("at", at);
-            final List<AutomationMetadata> ret = q.list();
+            List<AutomationMetadata> ret = q.list();
             log.debug("findAllMetadataActions: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -373,21 +362,20 @@ public class AutomationDAO {
     /**
      * Find by pk
      */
-    public AutomationRule findByPk(final long arId) throws DatabaseException {
+    public AutomationRule findByPk(long arId) throws DatabaseException {
         log.debug("findByPk({})", arId);
-        final String qs = "from AutomationRule ar where ar.id=:id";
+        String qs = "from AutomationRule ar where ar.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", arId);
-            final AutomationRule ret = (AutomationRule) q.setMaxResults(1)
-                    .uniqueResult();
+            AutomationRule ret = (AutomationRule) q.setMaxResults(1).uniqueResult();
             initialize(ret);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -397,21 +385,19 @@ public class AutomationDAO {
     /**
      * Get metadata by pk
      */
-    public AutomationMetadata findMetadataByPk(final long amId)
-            throws DatabaseException {
+    public AutomationMetadata findMetadataByPk(long amId) throws DatabaseException {
         log.debug("findMetadataByPk({})", amId);
-        final String qs = "from AutomationMetadata am where am.id=:id";
+        String qs = "from AutomationMetadata am where am.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", amId);
-            final AutomationMetadata ret = (AutomationMetadata) q
-                    .setMaxResults(1).uniqueResult();
+            AutomationMetadata ret = (AutomationMetadata) q.setMaxResults(1).uniqueResult();
             log.debug("findMetadataByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -421,22 +407,20 @@ public class AutomationDAO {
     /**
      * Get validation by pk
      */
-    public AutomationValidation findValidationByPk(final long avId)
-            throws DatabaseException {
+    public AutomationValidation findValidationByPk(long avId) throws DatabaseException {
         log.debug("findValidationByPk({})", avId);
-        final String qs = "from AutomationValidation av where av.id=:id";
+        String qs = "from AutomationValidation av where av.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", avId);
-            final AutomationValidation ret = (AutomationValidation) q
-                    .setMaxResults(1).uniqueResult();
+            AutomationValidation ret = (AutomationValidation) q.setMaxResults(1).uniqueResult();
             initialize(ret);
             log.debug("findValidationByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -446,22 +430,20 @@ public class AutomationDAO {
     /**
      * Get action by pk
      */
-    public AutomationAction findActionByPk(final long aaId)
-            throws DatabaseException {
+    public AutomationAction findActionByPk(long aaId) throws DatabaseException {
         log.debug("findActionByPk({})", aaId);
-        final String qs = "from AutomationAction aa where aa.id=:id";
+        String qs = "from AutomationAction aa where aa.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", aaId);
-            final AutomationAction ret = (AutomationAction) q.setMaxResults(1)
-                    .uniqueResult();
+            AutomationAction ret = (AutomationAction) q.setMaxResults(1).uniqueResult();
             initialize(ret);
             log.debug("findActionByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -471,7 +453,7 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final AutomationRule aRule) {
+    private void initialize(AutomationRule aRule) {
         if (aRule != null) {
             Hibernate.initialize(aRule);
             initializeActions(aRule.getActions());
@@ -482,7 +464,7 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final AutomationValidation aValidation) {
+    private void initialize(AutomationValidation aValidation) {
         if (aValidation != null) {
             Hibernate.initialize(aValidation);
             Hibernate.initialize(aValidation.getParams());
@@ -492,7 +474,7 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final AutomationAction aAction) {
+    private void initialize(AutomationAction aAction) {
         if (aAction != null) {
             Hibernate.initialize(aAction);
             Hibernate.initialize(aAction.getParams());
@@ -502,8 +484,8 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initializeRules(final List<AutomationRule> nRuleList) {
-        for (final AutomationRule aRule : nRuleList) {
+    private void initializeRules(List<AutomationRule> nRuleList) {
+        for (AutomationRule aRule : nRuleList) {
             initialize(aRule);
         }
     }
@@ -511,9 +493,8 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initializeValidations(
-            final List<AutomationValidation> nValidationList) {
-        for (final AutomationValidation aValidation : nValidationList) {
+    private void initializeValidations(List<AutomationValidation> nValidationList) {
+        for (AutomationValidation aValidation : nValidationList) {
             initialize(aValidation);
         }
     }
@@ -521,8 +502,8 @@ public class AutomationDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initializeActions(final List<AutomationAction> nActionList) {
-        for (final AutomationAction aAction : nActionList) {
+    private void initializeActions(List<AutomationAction> nActionList) {
+        for (AutomationAction aAction : nActionList) {
             initialize(aAction);
         }
     }

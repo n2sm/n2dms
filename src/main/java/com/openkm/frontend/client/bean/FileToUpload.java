@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,42 +35,27 @@ public class FileToUpload implements Cloneable {
     public static final String DEFAULT_SIZE = "45";
 
     private FileUploadForm uploadForm;
-
     private FileUpload fileUpload;
-
     private int action;
-
     private String size = DEFAULT_SIZE;
-
     private boolean fireEvent = false;
-
     private String path = "";
-
     private boolean enableAddButton = true;
-
     private boolean enableImport = true;
-
     private String desiredDocumentName;
-
     private boolean lastToBeUploaded = false;
-
     private HasWorkflow workflow;
-
     private double workflowTaskId;
-
     private String workflowTransition;
-
     private String name = "";
-
     private String documentPath = "";
-
     private String documentUUID = "";
 
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
     public FileToUpload clone() {
-        final FileToUpload fileUpload = new FileToUpload();
+        FileToUpload fileUpload = new FileToUpload();
         fileUpload.setAction(getAction());
         fileUpload.setDesiredDocumentName(getDesiredDocumentName());
         fileUpload.setDocumentPath(getDocumentPath());
@@ -93,7 +78,7 @@ public class FileToUpload implements Cloneable {
         return fileUpload;
     }
 
-    public void setFileUpload(final FileUpload fileUpload) {
+    public void setFileUpload(FileUpload fileUpload) {
         this.fileUpload = fileUpload;
     }
 
@@ -101,7 +86,7 @@ public class FileToUpload implements Cloneable {
         return action;
     }
 
-    public void setAction(final int action) {
+    public void setAction(int action) {
         this.action = action;
     }
 
@@ -109,7 +94,7 @@ public class FileToUpload implements Cloneable {
         return size;
     }
 
-    public void setSize(final String size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
@@ -117,7 +102,7 @@ public class FileToUpload implements Cloneable {
         return fireEvent;
     }
 
-    public void setFireEvent(final boolean fireEvent) {
+    public void setFireEvent(boolean fireEvent) {
         this.fireEvent = fireEvent;
     }
 
@@ -125,7 +110,7 @@ public class FileToUpload implements Cloneable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -133,7 +118,7 @@ public class FileToUpload implements Cloneable {
         return desiredDocumentName;
     }
 
-    public void setDesiredDocumentName(final String desiredDocumentName) {
+    public void setDesiredDocumentName(String desiredDocumentName) {
         this.desiredDocumentName = desiredDocumentName;
     }
 
@@ -141,7 +126,7 @@ public class FileToUpload implements Cloneable {
         return lastToBeUploaded;
     }
 
-    public void setLastToBeUploaded(final boolean lastToBeUploaded) {
+    public void setLastToBeUploaded(boolean lastToBeUploaded) {
         this.lastToBeUploaded = lastToBeUploaded;
     }
 
@@ -149,7 +134,7 @@ public class FileToUpload implements Cloneable {
         return workflow;
     }
 
-    public void setWorkflow(final HasWorkflow workflow) {
+    public void setWorkflow(HasWorkflow workflow) {
         this.workflow = workflow;
     }
 
@@ -157,7 +142,7 @@ public class FileToUpload implements Cloneable {
         return enableImport;
     }
 
-    public void setEnableImport(final boolean enableImport) {
+    public void setEnableImport(boolean enableImport) {
         this.enableImport = enableImport;
     }
 
@@ -165,7 +150,7 @@ public class FileToUpload implements Cloneable {
         return enableAddButton;
     }
 
-    public void setEnableAddButton(final boolean enableAddButton) {
+    public void setEnableAddButton(boolean enableAddButton) {
         this.enableAddButton = enableAddButton;
     }
 
@@ -173,7 +158,7 @@ public class FileToUpload implements Cloneable {
         return workflowTaskId;
     }
 
-    public void setWorkflowTaskId(final double workflowTaskId) {
+    public void setWorkflowTaskId(double workflowTaskId) {
         this.workflowTaskId = workflowTaskId;
     }
 
@@ -181,7 +166,7 @@ public class FileToUpload implements Cloneable {
         return workflowTransition;
     }
 
-    public void setWorkflowTransition(final String workflowTransition) {
+    public void setWorkflowTransition(String workflowTransition) {
         this.workflowTransition = workflowTransition;
     }
 
@@ -189,7 +174,7 @@ public class FileToUpload implements Cloneable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -197,7 +182,7 @@ public class FileToUpload implements Cloneable {
         return documentPath;
     }
 
-    public void setDocumentPath(final String documentPath) {
+    public void setDocumentPath(String documentPath) {
         this.documentPath = documentPath;
     }
 
@@ -205,7 +190,7 @@ public class FileToUpload implements Cloneable {
         return documentUUID;
     }
 
-    public void setDocumentUUID(final String documentUUID) {
+    public void setDocumentUUID(String documentUUID) {
         this.documentUUID = documentUUID;
     }
 
@@ -213,7 +198,7 @@ public class FileToUpload implements Cloneable {
         return uploadForm;
     }
 
-    public void setUploadForm(final FileUploadForm uploadForm) {
+    public void setUploadForm(FileUploadForm uploadForm) {
         this.uploadForm = uploadForm;
     }
 }

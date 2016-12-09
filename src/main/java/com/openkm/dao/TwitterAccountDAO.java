@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,8 +34,7 @@ import com.openkm.core.DatabaseException;
 import com.openkm.dao.bean.TwitterAccount;
 
 public class TwitterAccountDAO {
-    private static Logger log = LoggerFactory
-            .getLogger(TwitterAccountDAO.class);
+    private static Logger log = LoggerFactory.getLogger(TwitterAccountDAO.class);
 
     private TwitterAccountDAO() {
     }
@@ -43,7 +42,7 @@ public class TwitterAccountDAO {
     /**
      * Create account
      */
-    public static void create(final TwitterAccount ta) throws DatabaseException {
+    public static void create(TwitterAccount ta) throws DatabaseException {
         log.debug("create({})", ta);
         Session session = null;
         Transaction tx = null;
@@ -53,7 +52,7 @@ public class TwitterAccountDAO {
             tx = session.beginTransaction();
             session.save(ta);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -66,7 +65,7 @@ public class TwitterAccountDAO {
     /**
      * Update
      */
-    public static void update(final TwitterAccount ta) throws DatabaseException {
+    public static void update(TwitterAccount ta) throws DatabaseException {
         log.debug("update({})", ta);
         Session session = null;
         Transaction tx = null;
@@ -76,7 +75,7 @@ public class TwitterAccountDAO {
             tx = session.beginTransaction();
             session.update(ta);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -89,7 +88,7 @@ public class TwitterAccountDAO {
     /**
      * Delete
      */
-    public static void delete(final long taId) throws DatabaseException {
+    public static void delete(long taId) throws DatabaseException {
         log.debug("delete({})", taId);
         Session session = null;
         Transaction tx = null;
@@ -97,11 +96,10 @@ public class TwitterAccountDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final TwitterAccount ta = (TwitterAccount) session.load(
-                    TwitterAccount.class, taId);
+            TwitterAccount ta = (TwitterAccount) session.load(TwitterAccount.class, taId);
             session.delete(ta);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -115,27 +113,24 @@ public class TwitterAccountDAO {
      * Find by user
      */
     @SuppressWarnings("unchecked")
-    public static List<TwitterAccount> findByUser(final String user,
-            final boolean filterByActive) throws DatabaseException {
+    public static List<TwitterAccount> findByUser(String user, boolean filterByActive) throws DatabaseException {
         log.debug("findByUser({})", user);
-        final String qs = "from TwitterAccount ta where ta.user=:user "
-                + (filterByActive ? "and ta.active=:active" : "")
-                + " order by ta.id";
+        String qs = "from TwitterAccount ta where ta.user=:user " + (filterByActive ? "and ta.active=:active" : "") + " order by ta.id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
 
             if (filterByActive) {
                 q.setBoolean("active", true);
             }
 
-            final List<TwitterAccount> ret = q.list();
+            List<TwitterAccount> ret = q.list();
             log.debug("findByUser: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -146,26 +141,23 @@ public class TwitterAccountDAO {
      * Find all twitter accounts
      */
     @SuppressWarnings("unchecked")
-    public static List<TwitterAccount> findAll(final boolean filterByActive)
-            throws DatabaseException {
+    public static List<TwitterAccount> findAll(boolean filterByActive) throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from TwitterAccount ta "
-                + (filterByActive ? "where ta.active=:active" : "")
-                + " order by ta.id";
+        String qs = "from TwitterAccount ta " + (filterByActive ? "where ta.active=:active" : "") + " order by ta.id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
 
             if (filterByActive) {
                 q.setBoolean("active", true);
             }
 
-            final List<TwitterAccount> ret = q.list();
+            List<TwitterAccount> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -175,21 +167,19 @@ public class TwitterAccountDAO {
     /**
      * Find by pk
      */
-    public static TwitterAccount findByPk(final long taId)
-            throws DatabaseException {
+    public static TwitterAccount findByPk(long taId) throws DatabaseException {
         log.debug("findByPk({})", taId);
-        final String qs = "from TwitterAccount ta where ta.id=:id";
+        String qs = "from TwitterAccount ta where ta.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", taId);
-            final TwitterAccount ret = (TwitterAccount) q.setMaxResults(1)
-                    .uniqueResult();
+            TwitterAccount ret = (TwitterAccount) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

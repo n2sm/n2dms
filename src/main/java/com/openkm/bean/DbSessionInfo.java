@@ -26,18 +26,15 @@ import org.springframework.security.core.Authentication;
 
 public class DbSessionInfo implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Calendar creation;
-
     private Calendar lastAccess;
-
     private Authentication auth;
 
     public Calendar getLastAccess() {
         return lastAccess;
     }
 
-    public void setLastAccess(final Calendar lastAccess) {
+    public void setLastAccess(Calendar lastAccess) {
         this.lastAccess = lastAccess;
     }
 
@@ -45,7 +42,7 @@ public class DbSessionInfo implements Serializable {
         return creation;
     }
 
-    public void setCreation(final Calendar creation) {
+    public void setCreation(Calendar creation) {
         this.creation = creation;
     }
 
@@ -53,13 +50,12 @@ public class DbSessionInfo implements Serializable {
         return auth;
     }
 
-    public void setAuth(final Authentication auth) {
+    public void setAuth(Authentication auth) {
         this.auth = auth;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("auth=");
         sb.append(auth);

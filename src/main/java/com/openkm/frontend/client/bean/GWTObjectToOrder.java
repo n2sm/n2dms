@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,7 +28,6 @@ package com.openkm.frontend.client.bean;
 public class GWTObjectToOrder {
 
     private Object object;
-
     private String dataId;
 
     /**
@@ -41,7 +40,7 @@ public class GWTObjectToOrder {
         return object;
     }
 
-    public void setObject(final Object object) {
+    public void setObject(Object object) {
         this.object = object;
     }
 
@@ -49,7 +48,7 @@ public class GWTObjectToOrder {
         return dataId;
     }
 
-    public void setDataId(final String dataId) {
+    public void setDataId(String dataId) {
         this.dataId = dataId;
     }
 

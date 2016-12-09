@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -43,61 +43,51 @@ public class BookmarkService {
     private static Logger log = LoggerFactory.getLogger(BookmarkService.class);
 
     @WebMethod
-    public Bookmark add(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "name") final String name)
-            throws AccessDeniedException, PathNotFoundException,
-            RepositoryException, DatabaseException {
+    public Bookmark add(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "name") String name) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException {
         log.debug("add({}, {}, {})", new Object[] { token, nodePath, name });
-        final BookmarkModule bm = ModuleManager.getBookmarkModule();
-        final Bookmark bookmark = bm.add(token, nodePath, name);
+        BookmarkModule bm = ModuleManager.getBookmarkModule();
+        Bookmark bookmark = bm.add(token, nodePath, name);
         log.debug("add: {}", bookmark);
         return bookmark;
     }
 
     @WebMethod
-    public Bookmark get(@WebParam(name = "token") final String token,
-            @WebParam(name = "bmId") final int bmId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public Bookmark get(@WebParam(name = "token") String token, @WebParam(name = "bmId") int bmId) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("get({}, {})", new Object[] { token, bmId });
-        final BookmarkModule bm = ModuleManager.getBookmarkModule();
-        final Bookmark bookmark = bm.get(token, bmId);
+        BookmarkModule bm = ModuleManager.getBookmarkModule();
+        Bookmark bookmark = bm.get(token, bmId);
         log.debug("get: {}", bookmark);
         return bookmark;
     }
 
     @WebMethod
-    public void remove(@WebParam(name = "token") final String token,
-            @WebParam(name = "bmId") final int bmId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void remove(@WebParam(name = "token") String token, @WebParam(name = "bmId") int bmId) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("remove({}, {})", token, bmId);
-        final BookmarkModule bm = ModuleManager.getBookmarkModule();
+        BookmarkModule bm = ModuleManager.getBookmarkModule();
         bm.remove(token, bmId);
         log.debug("remove: void");
     }
 
     @WebMethod
-    public Bookmark rename(@WebParam(name = "token") final String token,
-            @WebParam(name = "bmId") final int bmId,
-            @WebParam(name = "newName") final String newName)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public Bookmark rename(@WebParam(name = "token") String token, @WebParam(name = "bmId") int bmId,
+            @WebParam(name = "newName") String newName) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("rename({}, {}, {})", new Object[] { token, bmId, newName });
-        final BookmarkModule bm = ModuleManager.getBookmarkModule();
-        final Bookmark bookmark = bm.rename(token, bmId, newName);
+        BookmarkModule bm = ModuleManager.getBookmarkModule();
+        Bookmark bookmark = bm.rename(token, bmId, newName);
         log.debug("rename: {}", bookmark);
         return bookmark;
     }
 
     @WebMethod
-    public Bookmark[] getAll(@WebParam(name = "token") final String token)
-            throws RepositoryException, DatabaseException {
+    public Bookmark[] getAll(@WebParam(name = "token") String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getAll({})", token);
-        final BookmarkModule bm = ModuleManager.getBookmarkModule();
-        final List<Bookmark> col = bm.getAll(token);
-        final Bookmark[] result = col.toArray(new Bookmark[col.size()]);
+        BookmarkModule bm = ModuleManager.getBookmarkModule();
+        List<Bookmark> col = bm.getAll(token);
+        Bookmark[] result = col.toArray(new Bookmark[col.size()]);
         log.debug("getAll: {}", col);
         return result;
     }

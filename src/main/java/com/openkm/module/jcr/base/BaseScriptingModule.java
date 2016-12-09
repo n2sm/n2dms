@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,8 +36,7 @@ import com.openkm.bean.Folder;
 import com.openkm.bean.Scripting;
 
 public class BaseScriptingModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BaseScriptingModule.class);
+    private static Logger log = LoggerFactory.getLogger(BaseScriptingModule.class);
 
     /**
      * Check for scripts and evaluate
@@ -46,18 +45,16 @@ public class BaseScriptingModule {
      * @param user User who generated the modification event
      * @param eventType Type of modification event
      */
-    public static void checkScripts(final Session session,
-            final Node scriptNode, final Node eventNode, final String eventType) {
-        log.debug("checkScripts({}, {}, {}, {})", new Object[] { session,
-                scriptNode, eventNode, eventType });
+    public static void checkScripts(Session session, Node scriptNode, Node eventNode, String eventType) {
+        log.debug("checkScripts({}, {}, {}, {})", new Object[] { session, scriptNode, eventNode, eventType });
 
         try {
             checkScriptsHelper(session, scriptNode, eventNode, eventType);
-        } catch (final ValueFormatException e) {
+        } catch (ValueFormatException e) {
             log.error(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.error(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -67,34 +64,29 @@ public class BaseScriptingModule {
     /**
      * Check script helper method for recursion.
      */
-    private static void checkScriptsHelper(final Session session,
-            final Node scriptNode, final Node eventNode, final String eventType)
+    private static void checkScriptsHelper(Session session, Node scriptNode, Node eventNode, String eventType)
             throws javax.jcr.RepositoryException {
-        log.debug("checkScriptsHelper({}, {}, {}, {})", new Object[] { session,
-                scriptNode, eventNode, eventType });
+        log.debug("checkScriptsHelper({}, {}, {}, {})", new Object[] { session, scriptNode, eventNode, eventType });
 
-        if (scriptNode.isNodeType(Folder.TYPE)
-                || scriptNode.isNodeType(Document.TYPE)) {
+        if (scriptNode.isNodeType(Folder.TYPE) || scriptNode.isNodeType(Document.TYPE)) {
             if (scriptNode.isNodeType(Scripting.TYPE)) {
-                final String code = scriptNode.getProperty(
-                        Scripting.SCRIPT_CODE).getString();
+                String code = scriptNode.getProperty(Scripting.SCRIPT_CODE).getString();
 
                 // Evaluate script
-                final Interpreter i = new Interpreter();
+                Interpreter i = new Interpreter();
                 try {
                     i.set("session", session);
                     i.set("scriptNode", scriptNode);
                     i.set("eventNode", eventNode);
                     i.set("eventType", eventType);
                     i.eval(code);
-                } catch (final EvalError e) {
+                } catch (EvalError e) {
                     log.warn(e.getMessage(), e);
                 }
             }
 
             // Check for script in parent node
-            checkScriptsHelper(session, scriptNode.getParent(), eventNode,
-                    eventType);
+            checkScriptsHelper(session, scriptNode.getParent(), eventNode, eventType);
         }
 
         log.debug("checkScriptsHelper: void");

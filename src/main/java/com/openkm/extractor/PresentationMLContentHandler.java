@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,30 +26,23 @@ import org.xml.sax.SAXException;
 
 public class PresentationMLContentHandler extends MsOffice2007ContentHandler {
 
-    @Override
     public String getFilePattern() {
         return "ppt/slides/slide";
     }
 
-    @Override
-    public void startElement(final String namespaceURI, final String localName,
-            final String rawName, final Attributes atts) throws SAXException {
+    public void startElement(String namespaceURI, String localName, String rawName, Attributes atts) throws SAXException {
         if (rawName.equals("a:t")) {
             appendChar = true;
         }
     }
 
-    @Override
-    public void characters(final char[] ch, final int start, final int length)
-            throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
         if (appendChar) {
             content.append(ch, start, length);
         }
     }
 
-    @Override
-    public void endElement(final String namespaceURI, final String localName,
-            final String qName) throws SAXException {
+    public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
         if (qName.equals("a:p")) {
             content.append("\n");
         }

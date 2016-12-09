@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,21 +33,17 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FilesystemClassLoader extends ClassLoader implements
-        MultipleClassLoader {
-    private static Logger log = LoggerFactory
-            .getLogger(FilesystemClassLoader.class);
-
+public class FilesystemClassLoader extends ClassLoader implements MultipleClassLoader {
+    private static Logger log = LoggerFactory.getLogger(FilesystemClassLoader.class);
     private File file = null;
 
-    public FilesystemClassLoader(final File file) throws IOException {
+    public FilesystemClassLoader(File file) throws IOException {
         super();
         this.file = file;
 
     }
 
-    public FilesystemClassLoader(final File file, final ClassLoader parent)
-            throws IOException {
+    public FilesystemClassLoader(File file, ClassLoader parent) throws IOException {
         super(parent);
         this.file = file;
     }
@@ -58,16 +54,15 @@ public class FilesystemClassLoader extends ClassLoader implements
     @Override
     public String getMainClassName() throws IOException {
         log.debug("getMainClassName()");
-        final File mf = new File(file, "META-INF/MANIFEST.MF");
+        File mf = new File(file, "META-INF/MANIFEST.MF");
         FileInputStream fis = null;
 
         try {
             if (mf.exists() && mf.canRead()) {
                 fis = new FileInputStream(mf);
-                final Manifest manif = new Manifest(fis);
-                final Attributes attr = manif.getMainAttributes();
-                return attr != null ? attr.getValue(Attributes.Name.MAIN_CLASS)
-                        : null;
+                Manifest manif = new Manifest(fis);
+                Attributes attr = manif.getMainAttributes();
+                return attr != null ? attr.getValue(Attributes.Name.MAIN_CLASS) : null;
             }
         } finally {
             IOUtils.closeQuietly(fis);
@@ -80,30 +75,29 @@ public class FilesystemClassLoader extends ClassLoader implements
      * Find class
      */
     @Override
-    public Class<?> findClass(final String className) {
+    public Class<?> findClass(String className) {
         log.info("findClass({})", className);
-        final String classFile = className.replace('.', '/').concat(".class");
-        final File fc = new File(file, classFile);
+        String classFile = className.replace('.', '/').concat(".class");
+        File fc = new File(file, classFile);
         FileInputStream fis = null;
 
         // Check for system class
         try {
             return findSystemClass(className);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // Ignore
         }
 
         try {
             if (fc.exists() && fc.canRead()) {
                 fis = new FileInputStream(fc);
-                final byte[] classByte = IOUtils.toByteArray(fis);
+                byte[] classByte = IOUtils.toByteArray(fis);
 
                 if (classByte != null) {
-                    return defineClass(className, classByte, 0,
-                            classByte.length, null);
+                    return defineClass(className, classByte, 0, classByte.length, null);
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(fis);
@@ -116,15 +110,15 @@ public class FilesystemClassLoader extends ClassLoader implements
      * Get resource input stream
      */
     @Override
-    public InputStream getResourceAsStream(final String name) {
+    public InputStream getResourceAsStream(String name) {
         log.debug("getResourceAsStream({})", name);
-        final File fr = new File(file, name);
+        File fr = new File(file, name);
 
         try {
             if (fr.exists() && fr.canRead()) {
                 return new FileInputStream(fr);
             }
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error(e.getMessage(), e);
         }
 

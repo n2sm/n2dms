@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.jcr;
@@ -29,11 +29,13 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.jackrabbit.api.XASession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openkm.bean.ContentInfo;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.Folder;
 import com.openkm.bean.Repository;
 import com.openkm.core.AccessDeniedException;
@@ -59,10 +61,8 @@ public class JcrFolderModule implements FolderModule {
     private static Logger log = LoggerFactory.getLogger(JcrFolderModule.class);
 
     @Override
-    public Folder create(final String token, final Folder fld)
-            throws AccessDeniedException, RepositoryException,
-            PathNotFoundException, ItemExistsException, DatabaseException,
-            ExtensionException {
+    public Folder create(String token, Folder fld) throws AccessDeniedException, RepositoryException, PathNotFoundException,
+            ItemExistsException, DatabaseException, ExtensionException {
         log.debug("create({}, {})", token, fld);
         Folder newFolder = null;
         Node parentNode = null;
@@ -79,7 +79,7 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final String parent = PathUtils.getParent(fld.getPath());
+            String parent = PathUtils.getParent(fld.getPath());
             String name = PathUtils.getName(fld.getPath());
             parentNode = session.getRootNode().getNode(parent.substring(1));
 
@@ -88,47 +88,42 @@ public class JcrFolderModule implements FolderModule {
             fld.setPath(parent + "/" + name);
 
             // EP - PRE
-            final Ref<Node> refParentNode = new Ref<Node>(parentNode);
-            final Ref<Folder> refFld = new Ref<Folder>(fld);
-            FolderExtensionManager.getInstance().preCreate(session,
-                    refParentNode, refFld);
+            Ref<Node> refParentNode = new Ref<Node>(parentNode);
+            Ref<Folder> refFld = new Ref<Folder>(fld);
+            FolderExtensionManager.getInstance().preCreate(session, refParentNode, refFld);
             parentNode = refParentNode.get();
             name = PathUtils.escape(PathUtils.getName(refFld.get().getPath()));
 
             // Create node
-            final Node folderNode = BaseFolderModule.create(session,
-                    parentNode, name);
+            Node folderNode = BaseFolderModule.create(session, parentNode, name);
 
             // EP - POST
-            final Ref<Node> refFolderNode = new Ref<Node>(folderNode);
-            FolderExtensionManager.getInstance().postCreate(session,
-                    refParentNode, refFolderNode);
+            Ref<Node> refFolderNode = new Ref<Node>(folderNode);
+            FolderExtensionManager.getInstance().postCreate(session, refParentNode, refFolderNode);
 
             // Set returned folder properties
             newFolder = BaseFolderModule.getProperties(session, folderNode);
 
             // Check scripting
-            BaseScriptingModule.checkScripts(session, parentNode, folderNode,
-                    "CREATE_FOLDER");
+            BaseScriptingModule.checkScripts(session, parentNode, folderNode, "CREATE_FOLDER");
 
             // Activity log
-            UserActivity.log(session.getUserID(), "CREATE_FOLDER",
-                    folderNode.getUUID(), fld.getPath(), null);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "CREATE_FOLDER", folderNode.getUUID(), fld.getPath(), null);
+        } catch (javax.jcr.PathNotFoundException e) {
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.ItemExistsException e) {
+        } catch (javax.jcr.ItemExistsException e) {
             JCRUtils.discardsPendingChanges(parentNode);
             throw new ItemExistsException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             JCRUtils.discardsPendingChanges(parentNode);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             JCRUtils.discardsPendingChanges(parentNode);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             JCRUtils.discardsPendingChanges(parentNode);
             throw e;
-        } catch (final ExtensionException e) {
+        } catch (ExtensionException e) {
             JCRUtils.discardsPendingChanges(parentNode);
             throw e;
         } finally {
@@ -142,9 +137,7 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public Folder getProperties(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getProperties(String token, String fldPath) throws PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getProperties({}, {})", token, fldPath);
         Folder fld = null;
         Session session = null;
@@ -156,17 +149,15 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node folderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
+            Node folderNode = session.getRootNode().getNode(fldPath.substring(1));
             fld = BaseFolderModule.getProperties(session, folderNode);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_FOLDER_PROPERTIES",
-                    folderNode.getUUID(), fldPath, null);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "GET_FOLDER_PROPERTIES", folderNode.getUUID(), fldPath, null);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -180,9 +171,8 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public void delete(final String token, final String fldPath)
-            throws AccessDeniedException, RepositoryException,
-            PathNotFoundException, LockException, DatabaseException {
+    public void delete(String token, String fldPath) throws AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, DatabaseException {
         log.debug("delete({}, {})", token, fldPath);
         Session session = null;
 
@@ -197,35 +187,27 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final String name = PathUtils.getName(fldPath);
-            final Node folderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
-            final Node parentNode = folderNode.getParent();
-            final Node userTrash = session.getRootNode().getNode(
-                    Repository.TRASH + "/" + session.getUserID());
+            String name = PathUtils.getName(fldPath);
+            Node folderNode = session.getRootNode().getNode(fldPath.substring(1));
+            Node parentNode = folderNode.getParent();
+            Node userTrash = session.getRootNode().getNode(Repository.TRASH + "/" + session.getUserID());
 
             if (BaseFolderModule.hasLockedNodes(folderNode)) {
-                throw new LockException(
-                        "Can't delete a folder with child locked nodes");
+                throw new LockException("Can't delete a folder with child locked nodes");
             }
 
             if (!BaseFolderModule.hasWriteAccess(folderNode)) {
-                throw new AccessDeniedException(
-                        "Can't delete a folder with readonly nodes");
+                throw new AccessDeniedException("Can't delete a folder with readonly nodes");
             }
 
-            if (Repository.ROOT.equals(name)
-                    || Repository.CATEGORIES.equals(name)
-                    || Repository.THESAURUS.equals(name)
-                    || Repository.TEMPLATES.equals(name)
-                    || Repository.PERSONAL.equals(name)
-                    || Repository.MAIL.equals(name)
+            if (Repository.ROOT.equals(name) || Repository.CATEGORIES.equals(name) || Repository.THESAURUS.equals(name)
+                    || Repository.TEMPLATES.equals(name) || Repository.PERSONAL.equals(name) || Repository.MAIL.equals(name)
                     || Repository.TRASH.equals(name)) {
                 throw new AccessDeniedException("Can't delete a required node");
             }
 
             // Test if already exists a folder with the same name in the trash
-            final String destPath = userTrash.getPath() + "/";
+            String destPath = userTrash.getPath() + "/";
             String testName = name;
 
             for (int i = 1; session.itemExists(destPath + testName); i++) {
@@ -233,33 +215,29 @@ public class JcrFolderModule implements FolderModule {
             }
 
             // PRE
-            final Ref<Node> refFolderNode = new Ref<Node>(folderNode);
-            FolderExtensionManager.getInstance().preDelete(session, fldPath,
-                    refFolderNode);
+            Ref<Node> refFolderNode = new Ref<Node>(folderNode);
+            FolderExtensionManager.getInstance().preDelete(session, fldPath, refFolderNode);
 
             session.move(folderNode.getPath(), destPath + testName);
             session.getRootNode().save();
 
             // POST
-            FolderExtensionManager.getInstance().postDelete(session, fldPath,
-                    refFolderNode);
+            FolderExtensionManager.getInstance().postDelete(session, fldPath, refFolderNode);
 
             // Check scripting
-            BaseScriptingModule.checkScripts(session, parentNode, folderNode,
-                    "DELETE_FOLDER");
+            BaseScriptingModule.checkScripts(session, parentNode, folderNode, "DELETE_FOLDER");
 
             // Activity log
-            UserActivity.log(session.getUserID(), "DELETE_FOLDER",
-                    folderNode.getUUID(), fldPath, null);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "DELETE_FOLDER", folderNode.getUUID(), fldPath, null);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new RepositoryException(e.getMessage(), e);
@@ -273,9 +251,8 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public void purge(final String token, final String fldPath)
-            throws AccessDeniedException, RepositoryException,
-            PathNotFoundException, DatabaseException {
+    public void purge(String token, String fldPath) throws AccessDeniedException, RepositoryException, PathNotFoundException,
+            DatabaseException {
         log.debug("purge({}, {})", token, fldPath);
         Node parentNode = null;
         Session session = null;
@@ -291,14 +268,12 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node folderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
-            final String fldUuid = folderNode.getUUID();
+            Node folderNode = session.getRootNode().getNode(fldPath.substring(1));
+            String fldUuid = folderNode.getUUID();
 
             // PRE
-            final Ref<Node> refFolderNode = new Ref<Node>(folderNode);
-            FolderExtensionManager.getInstance().prePurge(session, fldPath,
-                    refFolderNode);
+            Ref<Node> refFolderNode = new Ref<Node>(folderNode);
+            FolderExtensionManager.getInstance().prePurge(session, fldPath, refFolderNode);
 
             synchronized (folderNode) {
                 parentNode = folderNode.getParent();
@@ -310,21 +285,19 @@ public class JcrFolderModule implements FolderModule {
             FolderExtensionManager.getInstance().postPurge(session, fldPath);
 
             // Check scripting
-            BaseScriptingModule.checkScripts(session, parentNode, folderNode,
-                    "PURGE_FOLDER");
+            BaseScriptingModule.checkScripts(session, parentNode, folderNode, "PURGE_FOLDER");
 
             // Activity log
-            UserActivity.log(session.getUserID(), "PURGE_FOLDER", fldUuid,
-                    fldPath, null);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "PURGE_FOLDER", fldUuid, fldPath, null);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(parentNode);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(parentNode);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(parentNode);
             throw new RepositoryException(e.getMessage(), e);
@@ -338,11 +311,9 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public Folder rename(final String token, final String fldPath,
-            String newName) throws AccessDeniedException, RepositoryException,
+    public Folder rename(String token, String fldPath, String newName) throws AccessDeniedException, RepositoryException,
             PathNotFoundException, ItemExistsException, DatabaseException {
-        log.debug("rename({}, {}, {})",
-                new Object[] { token, fldPath, newName });
+        log.debug("rename({}, {}, {})", new Object[] { token, fldPath, newName });
         Folder renamedFolder = null;
         Session session = null;
         Node folderNode = null;
@@ -358,62 +329,55 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final String parent = PathUtils.getParent(fldPath);
-            final String name = PathUtils.getName(fldPath);
+            String parent = PathUtils.getParent(fldPath);
+            String name = PathUtils.getName(fldPath);
 
             // Escape dangerous chars in name
             newName = PathUtils.escape(newName);
 
             if (newName != null && !newName.equals("") && !newName.equals(name)) {
-                final String newPath = parent + "/" + newName;
+                String newPath = parent + "/" + newName;
 
                 // PRE
                 Ref<Node> refFolderNode = new Ref<Node>(folderNode);
-                FolderExtensionManager.getInstance().preRename(session,
-                        fldPath, newPath, refFolderNode);
+                FolderExtensionManager.getInstance().preRename(session, fldPath, newPath, refFolderNode);
 
                 session.move(fldPath, newPath);
 
                 // Set new name
-                folderNode = session.getRootNode()
-                        .getNode(newPath.substring(1));
+                folderNode = session.getRootNode().getNode(newPath.substring(1));
                 folderNode.setProperty(Folder.NAME, newName);
 
                 // Publish changes
                 session.save();
 
                 // Set returned folder properties
-                renamedFolder = BaseFolderModule.getProperties(session,
-                        folderNode);
+                renamedFolder = BaseFolderModule.getProperties(session, folderNode);
 
                 // POST
                 refFolderNode = new Ref<Node>(folderNode);
-                FolderExtensionManager.getInstance().postRename(session,
-                        fldPath, newPath, refFolderNode);
+                FolderExtensionManager.getInstance().postRename(session, fldPath, newPath, refFolderNode);
             } else {
                 // Don't change anything
-                folderNode = session.getRootNode()
-                        .getNode(fldPath.substring(1));
-                renamedFolder = BaseFolderModule.getProperties(session,
-                        folderNode);
+                folderNode = session.getRootNode().getNode(fldPath.substring(1));
+                renamedFolder = BaseFolderModule.getProperties(session, folderNode);
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "RENAME_FOLDER",
-                    folderNode.getUUID(), fldPath, newName);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "RENAME_FOLDER", folderNode.getUUID(), fldPath, newName);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.ItemExistsException e) {
+        } catch (javax.jcr.ItemExistsException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new ItemExistsException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new RepositoryException(e.getMessage(), e);
@@ -428,10 +392,8 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public void move(final String token, final String fldPath,
-            final String dstPath) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            DatabaseException {
+    public void move(String token, String fldPath, String dstPath) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, ItemExistsException, DatabaseException {
         log.debug("move({}, {}, {})", new Object[] { token, fldPath, dstPath });
         Session session = null;
 
@@ -446,44 +408,39 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            //Node fldNode = session.getRootNode().getNode(fldPath.substring(1));
-            final String name = PathUtils.getName(fldPath);
-            final String dstNodePath = dstPath + "/" + name;
+            // Node fldNode = session.getRootNode().getNode(fldPath.substring(1));
+            String name = PathUtils.getName(fldPath);
+            String dstNodePath = dstPath + "/" + name;
 
             // PRE
-            FolderExtensionManager.getInstance().preMove(session, fldPath,
-                    dstNodePath);
+            FolderExtensionManager.getInstance().preMove(session, fldPath, dstNodePath);
 
             session.move(fldPath, dstNodePath);
             session.save();
-            final Node dstFldNode = session.getRootNode().getNode(
-                    dstNodePath.substring(1));
+            Node dstFldNode = session.getRootNode().getNode(dstNodePath.substring(1));
 
             // POST
-            final Ref<Node> refDstFldNode = new Ref<Node>(dstFldNode);
-            FolderExtensionManager.getInstance().postMove(session, fldPath,
-                    dstNodePath, refDstFldNode);
+            Ref<Node> refDstFldNode = new Ref<Node>(dstFldNode);
+            FolderExtensionManager.getInstance().postMove(session, fldPath, dstNodePath, refDstFldNode);
 
             // Check scripting
-            BaseScriptingModule.checkScripts(session, dstFldNode.getParent(),
-                    dstFldNode, "MOVE_FOLDER");
+            BaseScriptingModule.checkScripts(session, dstFldNode.getParent(), dstFldNode, "MOVE_FOLDER");
 
             // Activity log
-            UserActivity.log(session.getUserID(), "MOVE_FOLDER",
-                    dstFldNode.getUUID(), fldPath, dstPath);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "MOVE_FOLDER", dstFldNode.getUUID(), fldPath, dstPath);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.ItemExistsException e) {
+        } catch (javax.jcr.ItemExistsException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new ItemExistsException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(session);
             throw new RepositoryException(e.getMessage(), e);
@@ -497,12 +454,10 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public void copy(final String token, final String fldPath,
-            final String dstPath) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            IOException, DatabaseException, UserQuotaExceededException {
+    public void copy(String token, String fldPath, String dstPath) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, ItemExistsException, IOException, DatabaseException, UserQuotaExceededException {
         log.debug("copy({}, {}, {})", new Object[] { token, fldPath, dstPath });
-        //Transaction t = null;
+        // Transaction t = null;
         XASession session = null;
 
         if (Config.SYSTEM_READONLY) {
@@ -513,61 +468,54 @@ public class JcrFolderModule implements FolderModule {
             if (token == null) {
                 session = (XASession) JCRUtils.getSession();
             } else {
-                session = (XASession) JcrSessionManager.getInstance()
-                        .get(token);
+                session = (XASession) JcrSessionManager.getInstance().get(token);
             }
 
-            final String name = PathUtils.getName(fldPath);
-            //t = new Transaction(session);
-            //t.start();
+            String name = PathUtils.getName(fldPath);
+            // t = new Transaction(session);
+            // t.start();
 
             // Make some work
-            final Node srcFolderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
-            final Node dstFolderNode = session.getRootNode().getNode(
-                    dstPath.substring(1));
+            Node srcFolderNode = session.getRootNode().getNode(fldPath.substring(1));
+            Node dstFolderNode = session.getRootNode().getNode(dstPath.substring(1));
 
             // PRE
-            final Ref<Node> refSrcFolderNode = new Ref<Node>(srcFolderNode);
-            final Ref<Node> refDstFolderNode = new Ref<Node>(dstFolderNode);
-            FolderExtensionManager.getInstance().preCopy(session,
-                    refSrcFolderNode, refDstFolderNode);
+            Ref<Node> refSrcFolderNode = new Ref<Node>(srcFolderNode);
+            Ref<Node> refDstFolderNode = new Ref<Node>(dstFolderNode);
+            FolderExtensionManager.getInstance().preCopy(session, refSrcFolderNode, refDstFolderNode);
 
-            final Node newFolder = BaseFolderModule.create(session,
-                    dstFolderNode, name);
+            Node newFolder = BaseFolderModule.create(session, dstFolderNode, name);
             dstFolderNode.save();
             BaseFolderModule.copy(session, srcFolderNode, newFolder);
 
-            //t.end();
-            //t.commit();
+            // t.end();
+            // t.commit();
 
             // POST
-            final Ref<Node> refNewFolderNode = new Ref<Node>(newFolder);
-            FolderExtensionManager.getInstance().postCopy(session,
-                    refSrcFolderNode, refNewFolderNode);
+            Ref<Node> refNewFolderNode = new Ref<Node>(newFolder);
+            FolderExtensionManager.getInstance().postCopy(session, refSrcFolderNode, refNewFolderNode);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "COPY_FOLDER",
-                    dstFolderNode.getUUID(), fldPath, dstPath);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "COPY_FOLDER", dstFolderNode.getUUID(), fldPath, dstPath);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            //t.rollback();
+            // t.rollback();
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.ItemExistsException e) {
+        } catch (javax.jcr.ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            //t.rollback();
+            // t.rollback();
             throw new ItemExistsException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            //t.rollback();
+            // t.rollback();
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
-            //t.rollback();
+            // t.rollback();
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final java.io.IOException e) {
+        } catch (java.io.IOException e) {
             log.error(e.getMessage(), e);
-            //t.rollback();
+            // t.rollback();
             throw e;
         } finally {
             if (token == null) {
@@ -579,19 +527,21 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
+    public void extendedCopy(String token, String fldPath, String dstPath, ExtendedAttributes extAttr) throws PathNotFoundException,
+            ItemExistsException, AccessDeniedException, RepositoryException, IOException, DatabaseException, UserQuotaExceededException {
+        throw new NotImplementedException("extendedCopy");
+    }
+
+    @Override
     @Deprecated
-    public List<Folder> getChilds(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public List<Folder> getChilds(String token, String fldPath) throws PathNotFoundException, RepositoryException, DatabaseException {
         return getChildren(token, fldPath);
     }
 
     @Override
-    public List<Folder> getChildren(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public List<Folder> getChildren(String token, String fldPath) throws PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getChildren({}, {})", token, fldPath);
-        final List<Folder> children = new ArrayList<Folder>();
+        List<Folder> children = new ArrayList<Folder>();
         Session session = null;
 
         try {
@@ -601,11 +551,10 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node folderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
+            Node folderNode = session.getRootNode().getNode(fldPath.substring(1));
 
-            for (final NodeIterator ni = folderNode.getNodes(); ni.hasNext();) {
-                final Node child = ni.nextNode();
+            for (NodeIterator ni = folderNode.getNodes(); ni.hasNext();) {
+                Node child = ni.nextNode();
 
                 if (child.isNodeType(Folder.TYPE)) {
                     children.add(BaseFolderModule.getProperties(session, child));
@@ -613,12 +562,11 @@ public class JcrFolderModule implements FolderModule {
             }
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_CHILDREN_FOLDERS",
-                    folderNode.getUUID(), fldPath, null);
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "GET_CHILDREN_FOLDERS", folderNode.getUUID(), fldPath, null);
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -632,8 +580,7 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public ContentInfo getContentInfo(final String token, final String fldPath)
-            throws AccessDeniedException, RepositoryException,
+    public ContentInfo getContentInfo(String token, String fldPath) throws AccessDeniedException, RepositoryException,
             PathNotFoundException, DatabaseException {
         log.debug("getContentInfo({}, {})", token, fldPath);
         ContentInfo contentInfo = new ContentInfo();
@@ -646,20 +593,18 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node folderNode = session.getRootNode().getNode(
-                    fldPath.substring(1));
+            Node folderNode = session.getRootNode().getNode(fldPath.substring(1));
             contentInfo = BaseFolderModule.getContentInfo(folderNode);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "GET_FOLDER_CONTENT_INFO",
-                    folderNode.getUUID(), fldPath, contentInfo.toString());
-        } catch (final javax.jcr.PathNotFoundException e) {
+            UserActivity.log(session.getUserID(), "GET_FOLDER_CONTENT_INFO", folderNode.getUUID(), fldPath, contentInfo.toString());
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -673,9 +618,7 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public boolean isValid(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public boolean isValid(String token, String fldPath) throws PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("isValid({}, {})", token, fldPath);
         boolean valid = false;
         Session session = null;
@@ -687,17 +630,16 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node node = session.getRootNode().getNode(
-                    fldPath.substring(1));
+            Node node = session.getRootNode().getNode(fldPath.substring(1));
 
             if (node.isNodeType(Folder.TYPE)) {
                 valid = true;
             }
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {
@@ -710,9 +652,7 @@ public class JcrFolderModule implements FolderModule {
     }
 
     @Override
-    public String getPath(final String token, final String uuid)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String getPath(String token, String uuid) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getPath({}, {})", token, uuid);
         String path = null;
         Session session = null;
@@ -724,15 +664,15 @@ public class JcrFolderModule implements FolderModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node node = session.getNodeByUUID(uuid);
+            Node node = session.getNodeByUUID(uuid);
 
             if (node.isNodeType(Folder.TYPE)) {
                 path = node.getPath();
             }
-        } catch (final javax.jcr.AccessDeniedException e) {
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {

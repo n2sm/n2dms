@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,24 +33,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTProcessInstanceLogEntry implements IsSerializable {
     private double processInstanceId;
-
     private double processDefinitionId;
-
     private String processDefinitionName;
-
     private String token;
-
     private Date date;
-
     private String type;
-
     private String info;
 
     public double getProcessInstanceId() {
         return processInstanceId;
     }
 
-    public void setProcessInstanceId(final double processInstanceId) {
+    public void setProcessInstanceId(double processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
 
@@ -58,7 +52,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return processDefinitionId;
     }
 
-    public void setProcessDefinitionId(final double processDefinitionId) {
+    public void setProcessDefinitionId(double processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
     }
 
@@ -66,7 +60,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return processDefinitionName;
     }
 
-    public void setProcessDefinitionName(final String processDefinitionName) {
+    public void setProcessDefinitionName(String processDefinitionName) {
         this.processDefinitionName = processDefinitionName;
     }
 
@@ -74,7 +68,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return token;
     }
 
-    public void setToken(final String token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -82,7 +76,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -90,7 +84,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -98,7 +92,7 @@ public class GWTProcessInstanceLogEntry implements IsSerializable {
         return info;
     }
 
-    public void setInfo(final String info) {
+    public void setInfo(String info) {
         this.info = info;
     }
 }

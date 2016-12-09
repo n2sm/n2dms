@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -44,7 +44,7 @@ public class NodeLock implements Serializable {
         return token;
     }
 
-    public void setToken(final String token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -52,7 +52,7 @@ public class NodeLock implements Serializable {
         return owner;
     }
 
-    public void setOwner(final String owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
@@ -60,18 +60,16 @@ public class NodeLock implements Serializable {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("token=").append(token);
         sb.append(", owner=").append(owner);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
         sb.append("}");
         return sb.toString();
     }

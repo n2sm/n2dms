@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,17 +34,17 @@ import com.openkm.core.Config;
 public class FilenameTokenizer extends CharTokenizer {
 
     /** Construct a new FilenameTokenizer. */
-    public FilenameTokenizer(final Reader in) {
+    public FilenameTokenizer(Reader in) {
         super(Config.LUCENE_VERSION, in);
     }
 
     @Override
-    protected boolean isTokenChar(final char c) {
+    protected boolean isTokenChar(char c) {
         return Character.isLetterOrDigit(c);
     }
 
     @Override
-    protected char normalize(final char c) {
+    protected char normalize(char c) {
         return Character.toLowerCase(c);
     }
 }

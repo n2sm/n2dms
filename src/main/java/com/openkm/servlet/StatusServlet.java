@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,22 +49,18 @@ import com.openkm.util.UserActivity;
  */
 public class StatusServlet extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(StatusServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String action = request.getPathInfo();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String action = request.getPathInfo();
         org.hibernate.Session dbSession = null;
         log.debug("action: {}", action);
 
         try {
-            final String user = PrincipalUtils.getUser();
+            String user = PrincipalUtils.getUser();
             dbSession = HibernateUtil.getSessionFactory().openSession();
 
             // Check database
@@ -74,19 +70,17 @@ public class StatusServlet extends HttpServlet {
             checkRepository();
 
             response.setContentType("text/plain; charset=UTF-8");
-            final PrintWriter out = response.getWriter();
+            PrintWriter out = response.getWriter();
             out.println("OK");
             out.close();
 
             // Activity log
             UserActivity.log(user, "MISC_STATUS", null, null, "OK");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Activity log
-            UserActivity.log(request.getRemoteUser(), "MISC_STATUS", null,
-                    null, e.getMessage());
+            UserActivity.log(request.getRemoteUser(), "MISC_STATUS", null, null, e.getMessage());
             log.error(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             HibernateUtil.close(dbSession);
         }
@@ -96,14 +90,13 @@ public class StatusServlet extends HttpServlet {
      * Check database connection
      */
     @SuppressWarnings("unchecked")
-    private void checkDatabase(final org.hibernate.Session session)
-            throws Exception {
-        final String qs = "from Activity where action='MISC_STATUS'";
-        final org.hibernate.Query q = session.createQuery(qs);
-        final List<Activity> ret = q.list();
+    private void checkDatabase(org.hibernate.Session session) throws Exception {
+        String qs = "from Activity where action='MISC_STATUS'";
+        org.hibernate.Query q = session.createQuery(qs);
+        List<Activity> ret = q.list();
 
-        for (final Activity act : ret) {
-            final String txt = act.toString();
+        for (Activity act : ret) {
+            String txt = act.toString();
             log.debug("checkDatabase: {}", txt);
         }
     }
@@ -112,14 +105,13 @@ public class StatusServlet extends HttpServlet {
      * Check repository connection
      */
     private void checkRepository() throws Exception {
-        final String token = DbSessionManager.getInstance().getSystemToken();
-        final QueryParams params = new QueryParams();
+        String token = DbSessionManager.getInstance().getSystemToken();
+        QueryParams params = new QueryParams();
         params.setAuthor(Config.ADMIN_USER);
         params.setPath("/" + Repository.ROOT);
-        final List<QueryResult> results = OKMSearch.getInstance().find(token,
-                params);
+        List<QueryResult> results = OKMSearch.getInstance().find(token, params);
 
-        for (final QueryResult qr : results) {
+        for (QueryResult qr : results) {
             log.info("Result: {}", qr);
         }
     }

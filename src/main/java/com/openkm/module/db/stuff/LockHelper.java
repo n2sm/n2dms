@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,20 +31,17 @@ public class LockHelper {
     /**
      * Check for lock
      */
-    public static void checkWriteLock(final NodeDocument nDoc)
-            throws LockException, DatabaseException {
-        final String user = PrincipalUtils.getUser();
+    public static void checkWriteLock(NodeDocument nDoc) throws LockException, DatabaseException {
+        String user = PrincipalUtils.getUser();
         checkWriteLock(user, nDoc);
     }
 
     /**
      * Check for lock. Needed by Zoho extension.
      */
-    public static void checkWriteLock(final String user, final NodeDocument nDoc)
-            throws LockException, DatabaseException {
+    public static void checkWriteLock(String user, NodeDocument nDoc) throws LockException, DatabaseException {
         if (nDoc.isLocked() && !user.equals(nDoc.getLock().getOwner())) {
-            final String docPath = NodeBaseDAO.getInstance().getParentUuid(
-                    nDoc.getUuid());
+            String docPath = NodeBaseDAO.getInstance().getParentUuid(nDoc.getUuid());
             throw new LockException(nDoc.getUuid() + " : " + docPath);
         }
     }

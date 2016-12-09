@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,52 +31,34 @@ public class Repository implements Serializable {
     private static final long serialVersionUID = -6920884124466924375L;
 
     public static final String OKM = "okm";
-
     public static final String OKM_URI = "http://www.openkm.org/1.0";
-
     public static final String ROOT = "okm:root";
-
     public static final String TRASH = "okm:trash";
-
     public static final String TEMPLATES = "okm:templates";
-
     public static final String THESAURUS = "okm:thesaurus";
-
     public static final String CATEGORIES = "okm:categories";
-
     public static final String SYS_CONFIG = "okm:config";
-
     public static final String SYS_CONFIG_TYPE = "okm:sysConfig";
-
     public static final String SYS_CONFIG_UUID = "okm:uuid";
-
     public static final String SYS_CONFIG_VERSION = "okm:version";
-
     public static final String PERSONAL = "okm:personal";
-
     public static final String MAIL = "okm:mail";
-
     public static final String USER_CONFIG = "okm:config";
-
     public static final String USER_CONFIG_TYPE = "okm:userConfig";
-
     public static final String LOCK_TOKENS = "okm:lockTokens";
+    public static final String METADATA = "okm:metadata";
 
     private static String uuid;
-
     private static String updateMsg;
-
     private String id;
-
     private String name;
-
     private String description;
 
     public static String getUuid() {
         return uuid;
     }
 
-    public static void setUuid(final String uuid) {
+    public static void setUuid(String uuid) {
         Repository.uuid = uuid;
     }
 
@@ -84,7 +66,7 @@ public class Repository implements Serializable {
         return updateMsg;
     }
 
-    public static void setUpdateMsg(final String updateMsg) {
+    public static void setUpdateMsg(String updateMsg) {
         Repository.updateMsg = updateMsg;
     }
 
@@ -92,7 +74,7 @@ public class Repository implements Serializable {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -100,7 +82,7 @@ public class Repository implements Serializable {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -108,7 +90,7 @@ public class Repository implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

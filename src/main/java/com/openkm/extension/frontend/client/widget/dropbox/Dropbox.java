@@ -32,46 +32,32 @@ import com.openkm.frontend.client.extension.event.handler.MailHandlerExtension;
  * @author sochoa
  *
  */
-public class Dropbox implements DocumentHandlerExtension,
-        FolderHandlerExtension, MailHandlerExtension, LanguageHandlerExtension {
+public class Dropbox implements DocumentHandlerExtension, FolderHandlerExtension, MailHandlerExtension, LanguageHandlerExtension {
 
-    private final OKMDropboxServiceAsync dropboxService = (OKMDropboxServiceAsync) GWT
-            .create(OKMDropboxService.class);
+    private final OKMDropboxServiceAsync dropboxService = (OKMDropboxServiceAsync) GWT.create(OKMDropboxService.class);
 
     public static final int TAB_DOCUMENT = 0;
-
     public static final int TAB_FOLDER = 1;
-
     public static final int TAB_MAIL = 2;
-
     public static final int TAB_RECORD = 3;
 
     public static Dropbox singleton;
-
     private static final String UUID = "101fa1e6-4bf6-4e39-9124-88f44a474268";
 
     public SubMenuDropbox subMenuDropbox;
-
     public Status status;
-
     public ConfirmPopup confirmPopup;
-
     public SearchPopup searchPopup;
-
     private int selectedPanel = TAB_DOCUMENT;
-
     public AuthorizePopup authorizePopup;
-
     public FolderSelectPopup folderSelectPopup;
-
     private StatusListenerPopup statusListenerPopup;
-
     private boolean statusListener = false;
 
     /**
      * Dropbox
      */
-    public Dropbox(final List<String> uuidList) {
+    public Dropbox(List<String> uuidList) {
         if (isRegistered(uuidList)) {
             singleton = this;
             subMenuDropbox = new SubMenuDropbox();
@@ -97,8 +83,8 @@ public class Dropbox implements DocumentHandlerExtension,
             statusListenerPopup = new StatusListenerPopup();
             statusListenerPopup.setStyleName("okm-Popup");
             statusListenerPopup.addStyleName("okm-DisableSelect");
-            statusListenerPopup.setWidth("610");
-            statusListenerPopup.setHeight("250");
+            statusListenerPopup.setWidth("610px");
+            statusListenerPopup.setHeight("250px");
         }
     }
 
@@ -106,7 +92,7 @@ public class Dropbox implements DocumentHandlerExtension,
      * getExtensions
      */
     public List<Object> getExtensions() {
-        final List<Object> extensions = new ArrayList<Object>();
+        List<Object> extensions = new ArrayList<Object>();
         extensions.add(singleton);
         extensions.add(subMenuDropbox.getMenu());
         return extensions;
@@ -139,7 +125,7 @@ public class Dropbox implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final DocumentEventConstant event) {
+    public void onChange(DocumentEventConstant event) {
         if (event.equals(HasDocumentEvent.DOCUMENT_CHANGED)) {
             selectedPanel = TAB_DOCUMENT;
             subMenuDropbox.evaluateMenus();
@@ -147,7 +133,7 @@ public class Dropbox implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final FolderEventConstant event) {
+    public void onChange(FolderEventConstant event) {
         if (event.equals(HasFolderEvent.FOLDER_CHANGED)) {
             selectedPanel = TAB_FOLDER;
             subMenuDropbox.evaluateMenus();
@@ -155,7 +141,7 @@ public class Dropbox implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final MailEventConstant event) {
+    public void onChange(MailEventConstant event) {
         if (event.equals(HasMailEvent.MAIL_CHANGED)) {
             selectedPanel = TAB_MAIL;
             subMenuDropbox.evaluateMenus();
@@ -163,7 +149,7 @@ public class Dropbox implements DocumentHandlerExtension,
     }
 
     @Override
-    public void onChange(final LanguageEventConstant event) {
+    public void onChange(LanguageEventConstant event) {
         if (event.equals(HasLanguageEvent.LANGUAGE_CHANGED)) {
             subMenuDropbox.langRefresh();
             authorizePopup.langRefresh();
@@ -181,7 +167,7 @@ public class Dropbox implements DocumentHandlerExtension,
     /**
      * startStatusListener
      */
-    public void startStatusListener(final int action) {
+    public void startStatusListener(int action) {
         statusListener = true;
         statusListenerPopup.reset(action);
         statusListenerPopup.center();
@@ -193,45 +179,41 @@ public class Dropbox implements DocumentHandlerExtension,
      */
     public void runStatusListener() {
         if (statusListener) {
-            dropboxService
-                    .statusListener(new AsyncCallback<List<GWTDropboxStatusListener>>() {
+            dropboxService.statusListener(new AsyncCallback<List<GWTDropboxStatusListener>>() {
+                @Override
+                public void onSuccess(List<GWTDropboxStatusListener> result) {
+                    for (GWTDropboxStatusListener obj : result) {
+                        statusListenerPopup.add(obj);
+                    }
+                    statusListenerPopup.center();
+                    new Timer() {
                         @Override
-                        public void onSuccess(
-                                final List<GWTDropboxStatusListener> result) {
-                            for (final GWTDropboxStatusListener obj : result) {
-                                statusListenerPopup.add(obj);
-                            }
-                            statusListenerPopup.center();
-                            new Timer() {
-                                @Override
-                                public void run() {
-                                    runStatusListener();
-                                }
-                            }.schedule(200);
+                        public void run() {
+                            runStatusListener();
                         }
+                    }.schedule(200);
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            GeneralComunicator.showError("status", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    GeneralComunicator.showError("status", caught);
+                }
+            });
         } else {
             // Execute last time to ensure all data list has been displayed
-            dropboxService
-                    .statusListener(new AsyncCallback<List<GWTDropboxStatusListener>>() {
-                        @Override
-                        public void onSuccess(
-                                final List<GWTDropboxStatusListener> result) {
-                            for (final GWTDropboxStatusListener dsl : result) {
-                                statusListenerPopup.add(dsl);
-                            }
-                        }
+            dropboxService.statusListener(new AsyncCallback<List<GWTDropboxStatusListener>>() {
+                @Override
+                public void onSuccess(List<GWTDropboxStatusListener> result) {
+                    for (GWTDropboxStatusListener dsl : result) {
+                        statusListenerPopup.add(dsl);
+                    }
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            GeneralComunicator.showError("status", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    GeneralComunicator.showError("status", caught);
+                }
+            });
         }
     }
 
@@ -246,7 +228,7 @@ public class Dropbox implements DocumentHandlerExtension,
     /**
      * isRegistered
      */
-    public static boolean isRegistered(final List<String> uuidList) {
+    public static boolean isRegistered(List<String> uuidList) {
         return uuidList.contains(UUID);
     }
 }

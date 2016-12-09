@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,6 +36,8 @@ import org.springframework.security.core.Authentication;
 
 import com.openkm.bean.DbSessionInfo;
 import com.openkm.core.Config;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * @author pavila
@@ -43,17 +45,14 @@ import com.openkm.core.Config;
 public class DbSessionManager {
     @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(DbSessionManager.class);
-
     private static DbSessionManager instance = new DbSessionManager();
-
-    private Map<String, DbSessionInfo> sessions = new HashMap<String, DbSessionInfo>();
-
+    private Map<String, DbSessionInfo> sessions = new HashMap<>();
     private static String systemToken;
 
     /**
      * Prevents class instantiation
      */
-    private DbSessionManager() {
+    protected DbSessionManager() {
     }
 
     /**
@@ -75,16 +74,20 @@ public class DbSessionManager {
      */
     public void putSystemSession() {
         systemToken = UUID.randomUUID().toString();
-        final Authentication auth = new UsernamePasswordAuthenticationToken(
-                Config.SYSTEM_USER, null, null);
+
+        // User principal
+        List<GrantedAuthority> sga = new ArrayList<>();
+        sga.add(new SimpleGrantedAuthority(Config.DEFAULT_ADMIN_ROLE));
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(Config.SYSTEM_USER, null, sga);
         add(systemToken, auth);
     }
 
     /**
      * Add a new session
      */
-    public synchronized void add(final String token, final Authentication auth) {
-        final DbSessionInfo si = new DbSessionInfo();
+    public synchronized void add(String token, Authentication auth) {
+        DbSessionInfo si = new DbSessionInfo();
         si.setAuth(auth);
         si.setCreation(Calendar.getInstance());
         si.setLastAccess(Calendar.getInstance());
@@ -94,8 +97,8 @@ public class DbSessionManager {
     /**
      * Return a session
      */
-    public Authentication getAuthentication(final String token) {
-        final DbSessionInfo si = sessions.get(token);
+    public Authentication getAuthentication(String token) {
+        DbSessionInfo si = sessions.get(token);
 
         if (si != null) {
             si.setLastAccess(Calendar.getInstance());
@@ -108,8 +111,8 @@ public class DbSessionManager {
     /**
      * Return a token which pertains to a authentication session
      */
-    public String getToken(final Authentication auth) {
-        for (final Entry<String, DbSessionInfo> entry : sessions.entrySet()) {
+    public String getToken(Authentication auth) {
+        for (Entry<String, DbSessionInfo> entry : sessions.entrySet()) {
             if (entry.getValue().getAuth().equals(auth)) {
                 return entry.getKey();
             }
@@ -121,14 +124,14 @@ public class DbSessionManager {
     /**
      * Return a session info
      */
-    public DbSessionInfo getInfo(final String token) {
+    public DbSessionInfo getInfo(String token) {
         return sessions.get(token);
     }
 
     /**
      * Remove a session
      */
-    public synchronized void remove(final String token) {
+    public synchronized void remove(String token) {
         sessions.remove(token);
     }
 
@@ -136,9 +139,9 @@ public class DbSessionManager {
      * Return all active tokens
      */
     public List<String> getTokens() {
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
-        for (final String token : sessions.keySet()) {
+        for (String token : sessions.keySet()) {
             list.add(token);
         }
 

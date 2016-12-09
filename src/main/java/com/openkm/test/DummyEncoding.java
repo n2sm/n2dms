@@ -37,17 +37,12 @@ import org.slf4j.LoggerFactory;
 
 public class DummyEncoding {
     private static Logger log = LoggerFactory.getLogger(DummyEncoding.class);
-
     private static String repHomeDir = "repotest2";
-
     private static Session systemSession = null;
-
     private static Repository repository = null;
-
     private static String nodoPruebaName = "nodoPrueba γλώσσα ñañeñó";
 
-    public static void main(final String[] args) throws NamingException,
-            RepositoryException, IOException {
+    public static void main(String[] args) throws NamingException, RepositoryException, IOException {
         write();
         read();
     }
@@ -55,12 +50,9 @@ public class DummyEncoding {
     /**
      * Write repository data
      */
-    private static void write() throws NamespaceException,
-            UnsupportedRepositoryOperationException, AccessDeniedException,
-            ItemExistsException, PathNotFoundException,
-            NoSuchNodeTypeException, LockException, VersionException,
-            ConstraintViolationException, InvalidItemStateException,
-            RepositoryException, NamingException, UnsupportedEncodingException {
+    private static void write() throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException,
+            ItemExistsException, PathNotFoundException, NoSuchNodeTypeException, LockException, VersionException,
+            ConstraintViolationException, InvalidItemStateException, RepositoryException, NamingException, UnsupportedEncodingException {
         log.info("*** DESTROY REPOSITORY ***");
         removeRepository();
 
@@ -68,22 +60,21 @@ public class DummyEncoding {
         createRepository();
 
         log.info("*** USER LOGIN ***");
-        final Session userSession = login("paco", "pepe");
+        Session userSession = login("paco", "pepe");
 
         log.info("*** GET MY ROOT NODE ***");
-        final Node rootNode = userSession.getRootNode();
-        final Node myRoot = rootNode.getNode("my:root");
+        Node rootNode = userSession.getRootNode();
+        Node myRoot = rootNode.getNode("my:root");
 
         log.info("*** ADD A TEST NODE ***");
-        final Node nodoPrueba = myRoot.addNode(nodoPruebaName);
+        Node nodoPrueba = myRoot.addNode(nodoPruebaName);
         nodoPrueba.setProperty("nombre", nodoPruebaName);
         myRoot.save();
 
         log.info("*** ADD A DOCUMENT NODE ***");
-        final Node fileNode = myRoot.addNode("ñañó", "nt:file");
-        final Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
-        contentNode.setProperty("jcr:data", new ByteArrayInputStream(
-                nodoPruebaName.getBytes("UTF-8")));
+        Node fileNode = myRoot.addNode("ñañó", "nt:file");
+        Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
+        contentNode.setProperty("jcr:data", new ByteArrayInputStream(nodoPruebaName.getBytes("UTF-8")));
         contentNode.setProperty("jcr:mimeType", "text/plain");
         contentNode.setProperty("jcr:encoding", "UTF-8");
         contentNode.setProperty("jcr:lastModified", Calendar.getInstance());
@@ -97,24 +88,23 @@ public class DummyEncoding {
     /**
      * Read repository data
      */
-    private static void read() throws LoginException, NoSuchWorkspaceException,
-            NamingException, RepositoryException, IOException {
+    private static void read() throws LoginException, NoSuchWorkspaceException, NamingException, RepositoryException, IOException {
         log.info("*** USER LOGIN ***");
-        final Session userSession = login("paco", "pepe");
+        Session userSession = login("paco", "pepe");
 
         log.info("*** GET MY ROOT NODE ***");
-        final Node rootNode = userSession.getRootNode();
-        final Node myRoot = rootNode.getNode("my:root");
+        Node rootNode = userSession.getRootNode();
+        Node myRoot = rootNode.getNode("my:root");
 
         log.info("*** VIEW TEST NODE PROPERTIES ***");
-        final Node nodoPrueba = myRoot.getNode(nodoPruebaName);
+        Node nodoPrueba = myRoot.getNode(nodoPruebaName);
         log.info("** NOMBRE: " + nodoPrueba.getProperty("nombre").getString());
 
         log.info("*** VIEW DOCUMENT NODE PROPERTIES ***");
-        final Node fileNode = myRoot.getNode("ñañó");
-        final Node contentNode = fileNode.getNode("jcr:content");
-        final InputStream is = contentNode.getProperty("jcr:data").getStream();
-        final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        Node fileNode = myRoot.getNode("ñañó");
+        Node contentNode = fileNode.getNode("jcr:content");
+        InputStream is = contentNode.getProperty("jcr:data").getStream();
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
         log.info("** DATA: " + new String(IOUtils.toByteArray(isr)));
         isr.close();
         is.close();
@@ -130,7 +120,7 @@ public class DummyEncoding {
     private static void removeRepository() {
         try {
             FileUtils.deleteDirectory(new File(repHomeDir));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("No previous repo");
         }
     }
@@ -138,12 +128,10 @@ public class DummyEncoding {
     /**
      * 
      */
-    public static Session login(final String user, final String pass)
-            throws NamingException, RepositoryException, LoginException,
+    public static Session login(String user, String pass) throws NamingException, RepositoryException, LoginException,
             NoSuchWorkspaceException {
-        final Repository repository = getRepository();
-        final Session session = repository.login(new SimpleCredentials(user,
-                pass.toCharArray()), null);
+        Repository repository = getRepository();
+        Session session = repository.login(new SimpleCredentials(user, pass.toCharArray()), null);
         log.debug("Session: " + session);
         return session;
     }
@@ -151,15 +139,13 @@ public class DummyEncoding {
     /**
      * 
      */
-    public static synchronized Repository getRepository()
-            throws RepositoryException {
+    public static synchronized Repository getRepository() throws RepositoryException {
         if (repository == null) {
             // Repository config
-            final String repositoryConfig = "repository2.xml";
-            final String repositoryHome = "repotest2";
+            String repositoryConfig = "repository2.xml";
+            String repositoryHome = "repotest2";
 
-            final RepositoryConfig config = RepositoryConfig.create(
-                    repositoryConfig, repositoryHome);
+            RepositoryConfig config = RepositoryConfig.create(repositoryConfig, repositoryHome);
             repository = RepositoryImpl.create(config);
             log.debug("*** System repository created " + repository);
         }
@@ -170,13 +156,10 @@ public class DummyEncoding {
     /**
      * 
      */
-    public static synchronized Session getSystemSession()
-            throws LoginException, NoSuchWorkspaceException,
-            RepositoryException {
+    public static synchronized Session getSystemSession() throws LoginException, NoSuchWorkspaceException, RepositoryException {
         if (systemSession == null) {
             // System User Session
-            systemSession = repository.login(
-                    new SimpleCredentials("system", "".toCharArray()), null);
+            systemSession = repository.login(new SimpleCredentials("system", "".toCharArray()), null);
             log.debug("*** System user created " + systemSession.getUserID());
         }
 
@@ -186,23 +169,20 @@ public class DummyEncoding {
     /**
      *
      */
-    public static Node createRepository() throws NamespaceException,
-            UnsupportedRepositoryOperationException, AccessDeniedException,
-            RepositoryException, ItemExistsException, PathNotFoundException,
-            NoSuchNodeTypeException, LockException, VersionException,
+    public static Node createRepository() throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException,
+            RepositoryException, ItemExistsException, PathNotFoundException, NoSuchNodeTypeException, LockException, VersionException,
             ConstraintViolationException, InvalidItemStateException {
         // Initialize repository
         getRepository();
-        final Session systemSession = getSystemSession();
+        Session systemSession = getSystemSession();
 
         // Namespace registration
-        final Workspace ws = systemSession.getWorkspace();
-        ws.getNamespaceRegistry().registerNamespace("my",
-                "http://www.guia-ubuntu.org/1.0");
+        Workspace ws = systemSession.getWorkspace();
+        ws.getNamespaceRegistry().registerNamespace("my", "http://www.guia-ubuntu.org/1.0");
 
         // Node creation
-        final Node root = systemSession.getRootNode();
-        final Node okmRoot = root.addNode("my:root");
+        Node root = systemSession.getRootNode();
+        Node okmRoot = root.addNode("my:root");
         okmRoot.addMixin("mix:referenceable");
         systemSession.save();
         log.info("****** Repository created *******");

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,8 +36,7 @@ public class RoleComparator implements Comparator<String> {
         return INSTANCE;
     }
 
-    @Override
-    public int compare(final String arg0, final String arg1) {
+    public int compare(String arg0, String arg1) {
         return arg0.toLowerCase().compareTo(arg1.toLowerCase());
     }
 }

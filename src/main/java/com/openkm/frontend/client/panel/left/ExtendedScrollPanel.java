@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -60,9 +60,7 @@ public class ExtendedScrollPanel extends ScrollPanel {
      */
 
     private final int MARGIN_AUTO_SCROLL_POS = 30; // Sets 30px from top widget and 30px from bottom to start autoscroll during drag  and drop
-
     private final int SCROLL_ACCELERATION = 20; // Acceleration factor to top / down scroll during drag and drop
-
     private final int TIMER_SPEED = 100;
 
     private Timer timer = null;
@@ -70,7 +68,6 @@ public class ExtendedScrollPanel extends ScrollPanel {
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.UIObject#getAbsoluteTop()
      */
-    @Override
     public int getAbsoluteTop() {
         // Must be make a correction on getAbsoluteTop when the scroll is enabled the real absolute top is
         // super absoluteTop value + actual scroll position
@@ -84,13 +81,11 @@ public class ExtendedScrollPanel extends ScrollPanel {
      * @param y position
      * @return
      */
-    private boolean isOverlap(final int x, final int y) {
-        final boolean xOverlap = getAbsoluteLeft() <= x
-                && getAbsoluteLeft() + getOffsetWidth() >= x;
-        final boolean yOverlap = getAbsoluteTop() <= y
-                && getAbsoluteTop() + getOffsetHeight() >= y;
+    private boolean isOverlap(int x, int y) {
+        boolean xOverlap = getAbsoluteLeft() <= x && (getAbsoluteLeft() + getOffsetWidth()) >= x;
+        boolean yOverlap = getAbsoluteTop() <= y && (getAbsoluteTop() + getOffsetHeight()) >= y;
 
-        return xOverlap && yOverlap;
+        return (xOverlap && yOverlap);
     }
 
     /**
@@ -99,8 +94,7 @@ public class ExtendedScrollPanel extends ScrollPanel {
      *  * Scrolls down with SCROLL_ACCELERATION factor
      */
     private void ScrollDown() {
-        setVerticalScrollPosition(getVerticalScrollPosition()
-                + SCROLL_ACCELERATION);
+        this.setVerticalScrollPosition(getVerticalScrollPosition() + SCROLL_ACCELERATION);
     }
 
     /**
@@ -109,8 +103,7 @@ public class ExtendedScrollPanel extends ScrollPanel {
      * Scrolls up with SCROLL_ACCELERATION factor
      */
     private void ScrollUp() {
-        setVerticalScrollPosition(getVerticalScrollPosition()
-                - SCROLL_ACCELERATION);
+        this.setVerticalScrollPosition(getVerticalScrollPosition() - SCROLL_ACCELERATION);
     }
 
     /**
@@ -122,13 +115,11 @@ public class ExtendedScrollPanel extends ScrollPanel {
      * @param y position
      * @return
      */
-    private boolean isAutoScrollUp(final int x, final int y) {
-        final boolean xOverlap = getAbsoluteLeft() <= x
-                && getAbsoluteLeft() + getOffsetWidth() >= x;
-        final boolean yOverlap = getAbsoluteTop() <= y
-                && getAbsoluteTop() + MARGIN_AUTO_SCROLL_POS >= y;
+    private boolean isAutoScrollUp(int x, int y) {
+        boolean xOverlap = getAbsoluteLeft() <= x && (getAbsoluteLeft() + getOffsetWidth()) >= x;
+        boolean yOverlap = getAbsoluteTop() <= y && (getAbsoluteTop() + MARGIN_AUTO_SCROLL_POS) >= y;
 
-        return xOverlap && yOverlap;
+        return (xOverlap && yOverlap);
     }
 
     /**
@@ -140,14 +131,12 @@ public class ExtendedScrollPanel extends ScrollPanel {
      * @param y position
      * @return
      */
-    private boolean isAutoScrollDown(final int x, final int y) {
-        final boolean xOverlap = getAbsoluteLeft() <= x
-                && getAbsoluteLeft() + getOffsetWidth() >= x;
-        final boolean yOverlap = getAbsoluteTop() + getOffsetHeight()
-                - MARGIN_AUTO_SCROLL_POS <= y
-                && getAbsoluteTop() + getOffsetHeight() >= y;
+    private boolean isAutoScrollDown(int x, int y) {
+        boolean xOverlap = getAbsoluteLeft() <= x && (getAbsoluteLeft() + getOffsetWidth()) >= x;
+        boolean yOverlap =
+                (getAbsoluteTop() + getOffsetHeight() - MARGIN_AUTO_SCROLL_POS) <= y && (getAbsoluteTop() + getOffsetHeight()) >= y;
 
-        return xOverlap && yOverlap;
+        return (xOverlap && yOverlap);
     }
 
     /**
@@ -156,12 +145,11 @@ public class ExtendedScrollPanel extends ScrollPanel {
      * @param x position
      * @param y position
      */
-    public void ScrollOnDragDrop(final int x, final int y) {
+    public void ScrollOnDragDrop(int x, int y) {
         if (isOverlap(x, y)) {
             if (isAutoScrollUp(x, y)) {
                 if (timer == null) {
                     timer = new Timer() {
-                        @Override
                         public void run() {
                             ScrollUp();
                         }
@@ -171,7 +159,6 @@ public class ExtendedScrollPanel extends ScrollPanel {
             } else if (isAutoScrollDown(x, y)) {
                 if (timer == null) {
                     timer = new Timer() {
-                        @Override
                         public void run() {
                             ScrollDown();
                         }

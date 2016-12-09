@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,41 +40,34 @@ import com.openkm.util.WebUtils;
  */
 public class CheckEmailServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(CheckEmailServlet.class);
+    private static Logger log = LoggerFactory.getLogger(CheckEmailServlet.class);
 
     @Override
-    protected void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
+        String action = WebUtils.getString(request, "action");
         updateSessionManager(request);
 
         if (action.equals("send")) {
             send(request, response);
         } else {
-            final ServletContext sc = getServletContext();
+            ServletContext sc = getServletContext();
             sc.setAttribute("error", null);
             sc.setAttribute("success", null);
-            sc.getRequestDispatcher("/admin/check_email.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/admin/check_email.jsp").forward(request, response);
         }
     }
 
     /**
      * Send email
      */
-    private void send(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    private void send(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("send({}, {})", request, response);
-        final String from = WebUtils.getString(request, "from");
-        final String to = WebUtils.getString(request, "to");
-        final String subject = WebUtils.getString(request, "subject");
-        final String content = WebUtils.getString(request, "content");
-        final ServletContext sc = getServletContext();
+        String from = WebUtils.getString(request, "from");
+        String to = WebUtils.getString(request, "to");
+        String subject = WebUtils.getString(request, "subject");
+        String content = WebUtils.getString(request, "content");
+        ServletContext sc = getServletContext();
         sc.setAttribute("from", from);
         sc.setAttribute("to", to);
         sc.setAttribute("subject", subject);
@@ -84,17 +77,15 @@ public class CheckEmailServlet extends BaseServlet {
             MailUtils.sendMessage(from, to, subject, content);
             sc.setAttribute("error", null);
             sc.setAttribute("success", "Ok");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             sc.setAttribute("success", null);
             sc.setAttribute("error", e.getMessage());
         }
 
-        sc.getRequestDispatcher("/admin/check_email.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/check_email.jsp").forward(request, response);
 
         // Activity log
-        UserActivity.log(request.getRemoteUser(), "ADMIN_CHECK_EMAIL", null,
-                null, from + ", " + to + ", " + subject + ", " + content);
+        UserActivity.log(request.getRemoteUser(), "ADMIN_CHECK_EMAIL", null, null, from + ", " + to + ", " + subject + ", " + content);
         log.debug("view: void");
     }
 }

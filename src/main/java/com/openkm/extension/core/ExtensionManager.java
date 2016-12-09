@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,12 +44,8 @@ import com.openkm.core.Config;
  */
 public class ExtensionManager {
     private static Logger log = LoggerFactory.getLogger(ExtensionManager.class);
-
-    protected static URI base = new File(Config.HOME_DIR + File.separator
-            + "plugins").toURI();
-
+    protected static URI base = new File(Config.HOME_DIR + File.separator + "plugins").toURI();
     private static ExtensionManager em = null;
-
     private static PluginManager pm = null;
 
     private ExtensionManager() {
@@ -75,7 +71,7 @@ public class ExtensionManager {
      * Get plugins
      */
     public <P extends Plugin> List<P> getPlugins(final Class<P> plugin) {
-        final PluginManagerUtil pmu = new PluginManagerUtil(pm);
+        PluginManagerUtil pmu = new PluginManagerUtil(pm);
         return new ArrayList<P>(pmu.getPlugins(plugin));
     }
 

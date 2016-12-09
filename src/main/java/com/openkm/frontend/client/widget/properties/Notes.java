@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.properties;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,8 +36,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RichTextArea;
@@ -63,73 +63,48 @@ import com.openkm.frontend.client.widget.richtext.RichTextToolbar;
  *
  */
 public class Notes extends Composite {
-    private final OKMNoteServiceAsync noteService = (OKMNoteServiceAsync) GWT
-            .create(OKMNoteService.class);
-
+    private final OKMNoteServiceAsync noteService = (OKMNoteServiceAsync) GWT.create(OKMNoteService.class);
     public static final int DOCUMENT_NOTE = 1;
-
     public static final int FOLDER_NOTE = 2;
-
     public static final int MAIL_NOTE = 3;
 
     private FlexTable tableNotes;
-
     private Object object;
-
     private Button addButton;
-
     private Button updateButton;
-
     private Button cancelButton;
-
     private ScrollPanel scrollPanel;
-
     public RichTextArea richTextArea;
-
     private RichTextToolbar richTextToolbar;
-
     private VerticalPanel newNotePanel;
-
     private TextArea textArea;
-
     private HTML addNote;
-
     private Grid gridRichText;
-
     boolean visibleButtons = true;
-
     boolean addNoteOption = false;
-
     boolean isEditingNote = false;
-
     private String editedNotePath = "";
-
     private int editedNoteRow = 0;
-
     private boolean removeNoteEnabled = false;
-
     private boolean isChrome = false;
-
     int type = 0;
 
     /**
      * Notes
      */
-    public Notes(final int type) {
+    public Notes(int type) {
         this.type = type;
-        isChrome = Util.getUserAgent().startsWith("safari")
-                || Util.getUserAgent().startsWith("chrome");
+        isChrome = (Util.getUserAgent().startsWith("safari") || Util.getUserAgent().startsWith("chrome"));
         tableNotes = new FlexTable();
         scrollPanel = new ScrollPanel(tableNotes);
         newNotePanel = new VerticalPanel();
-        addNote = new HTML("<b>" + Main.i18n("general.menu.edit.add.note")
-                + "</b>");
+        addNote = new HTML("<b>" + Main.i18n("general.menu.edit.add.note") + "</b>");
         richTextArea = new RichTextArea();
         richTextArea.setSize("100%", "14em");
         richTextToolbar = new RichTextToolbar(richTextArea);
         richTextArea.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 evaluateButtons();
             }
         });
@@ -145,7 +120,7 @@ public class Notes extends Composite {
         textArea.setPixelSize(550, 160);
         textArea.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 evaluateButtons();
             }
         });
@@ -153,40 +128,38 @@ public class Notes extends Composite {
 
         addButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 addNote();
             }
         });
         addButton.setEnabled(false);
 
-        updateButton = new Button(Main.i18n("button.update"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        setNote(editedNotePath, getTextNote(), editedNoteRow);
-                    }
-                });
+        updateButton = new Button(Main.i18n("button.update"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                setNote(editedNotePath, getTextNote(), editedNoteRow);
+            }
+        });
         updateButton.setEnabled(false);
 
-        cancelButton = new Button(Main.i18n("button.cancel"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        reset();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.cancel"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                reset();
+            }
+        });
         updateButton.setVisible(false);
         cancelButton.setVisible(false);
 
-        newNotePanel.add(Util.vSpace("40"));
+        newNotePanel.add(Util.vSpace("40px"));
         newNotePanel.add(addNote);
         if (isChrome) {
             newNotePanel.add(textArea);
         } else {
             newNotePanel.add(gridRichText);
         }
-        newNotePanel.add(Util.vSpace("10"));
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        newNotePanel.add(Util.vSpace("10px"));
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(cancelButton);
         hPanel.add(new HTML("&nbsp;"));
         hPanel.add(addButton);
@@ -194,17 +167,13 @@ public class Notes extends Composite {
         hPanel.add(updateButton);
         newNotePanel.add(hPanel);
 
-        newNotePanel.setCellHorizontalAlignment(addNote,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        newNotePanel.setCellHorizontalAlignment(addNote, HasAlignment.ALIGN_CENTER);
         if (isChrome) {
-            newNotePanel.setCellHorizontalAlignment(textArea,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            newNotePanel.setCellHorizontalAlignment(textArea, HasAlignment.ALIGN_CENTER);
         } else {
-            newNotePanel.setCellHorizontalAlignment(gridRichText,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            newNotePanel.setCellHorizontalAlignment(gridRichText, HasAlignment.ALIGN_CENTER);
         }
-        newNotePanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        newNotePanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
 
         addButton.setStyleName("okm-AddButton");
         updateButton.setStyleName("okm-YesButton");
@@ -222,7 +191,7 @@ public class Notes extends Composite {
      * 
      * @param doc The document object
      */
-    public void set(final GWTDocument doc) {
+    public void set(GWTDocument doc) {
         reset();
         object = doc;
         setRichTextAreaText("");
@@ -231,8 +200,8 @@ public class Notes extends Composite {
             tableNotes.removeRow(0);
         }
 
-        for (final GWTNote gwtNote : doc.getNotes()) {
-            writeNote(gwtNote);
+        for (Iterator<GWTNote> it = doc.getNotes().iterator(); it.hasNext();) {
+            writeNote(it.next());
         }
 
         writeAddNote();
@@ -243,7 +212,7 @@ public class Notes extends Composite {
      * 
      * @param doc The folder object
      */
-    public void set(final GWTFolder folder) {
+    public void set(GWTFolder folder) {
         reset();
         object = folder;
         setRichTextAreaText("");
@@ -252,8 +221,8 @@ public class Notes extends Composite {
             tableNotes.removeRow(0);
         }
 
-        for (final GWTNote gwtNote : folder.getNotes()) {
-            writeNote(gwtNote);
+        for (Iterator<GWTNote> it = folder.getNotes().iterator(); it.hasNext();) {
+            writeNote(it.next());
         }
 
         writeAddNote();
@@ -264,7 +233,7 @@ public class Notes extends Composite {
      * 
      * @param doc The folder object
      */
-    public void set(final GWTMail mail) {
+    public void set(GWTMail mail) {
         reset();
         object = mail;
         setRichTextAreaText("");
@@ -273,8 +242,8 @@ public class Notes extends Composite {
             tableNotes.removeRow(0);
         }
 
-        for (final GWTNote gwtNote : mail.getNotes()) {
-            writeNote(gwtNote);
+        for (Iterator<GWTNote> it = mail.getNotes().iterator(); it.hasNext();) {
+            writeNote(it.next());
         }
 
         writeAddNote();
@@ -284,11 +253,10 @@ public class Notes extends Composite {
      * writeAddNote
      */
     private void writeAddNote() {
-        final int row = tableNotes.getRowCount();
+        int row = tableNotes.getRowCount();
         tableNotes.setWidget(row, 0, newNotePanel);
         tableNotes.getFlexCellFormatter().setColSpan(row, 0, 2);
-        tableNotes.getCellFormatter().setHorizontalAlignment(row, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        tableNotes.getCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
     }
 
     /**
@@ -298,14 +266,12 @@ public class Notes extends Composite {
      */
     private void writeNote(final GWTNote note) {
         int row = tableNotes.getRowCount();
-        tableNotes.setHTML(row, 0, "<b>" + note.getUser().getUsername()
-                + "</b>");
-        final Image editNote = new Image(OKMBundleResources.INSTANCE.noteEdit());
-        final Image deleteNote = new Image(
-                OKMBundleResources.INSTANCE.noteDelete());
+        tableNotes.setHTML(row, 0, "<b>" + note.getUser().getUsername() + "</b>");
+        Image editNote = new Image(OKMBundleResources.INSTANCE.noteEdit());
+        Image deleteNote = new Image(OKMBundleResources.INSTANCE.noteDelete());
         editNote.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 reset();
                 isEditingNote = true;
                 addButton.setVisible(false);
@@ -319,25 +285,20 @@ public class Notes extends Composite {
 
         deleteNote.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 switch (type) {
                 case DOCUMENT_NOTE:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_DOCUMENT);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_DOCUMENT);
                     break;
                 case FOLDER_NOTE:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_FOLDER);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_FOLDER);
                     break;
                 case MAIL_NOTE:
-                    Main.get().confirmPopup
-                            .setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_MAIL);
+                    Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_DELETE_NOTE_MAIL);
                     break;
                 }
 
-                final NoteToDelete noteToDelete = new NoteToDelete(note
-                        .getPath(), tableNotes.getCellForEvent(event)
-                        .getRowIndex());
+                NoteToDelete noteToDelete = new NoteToDelete(note.getPath(), tableNotes.getCellForEvent(event).getRowIndex());
                 Main.get().confirmPopup.setValue(noteToDelete);
                 Main.get().confirmPopup.show();
             }
@@ -346,12 +307,11 @@ public class Notes extends Composite {
         editNote.setStyleName("okm-Hyperlink");
         deleteNote.setStyleName("okm-Hyperlink");
 
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
-        final HTML space = new HTML("");
-        final HTML space2 = new HTML("");
-        final HTML date = new HTML(dtf.format(note.getDate()));
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
+        HTML space = new HTML("");
+        HTML space2 = new HTML("");
+        HTML date = new HTML(dtf.format(note.getDate()));
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(editNote);
         hPanel.add(space);
 
@@ -361,11 +321,10 @@ public class Notes extends Composite {
 
         hPanel.add(space2);
         hPanel.add(date);
-        hPanel.setCellWidth(space, "5");
-        hPanel.setCellWidth(space2, "5");
+        hPanel.setCellWidth(space, "5px");
+        hPanel.setCellWidth(space2, "5px");
 
-        if (note.getAuthor().equals(
-                Main.get().workspaceUserProperties.getUser().getId())) {
+        if (note.getAuthor().equals(Main.get().workspaceUserProperties.getUser().getId())) {
             if (visibleButtons || addNoteOption) {
                 editNote.setVisible(true);
             } else {
@@ -375,11 +334,9 @@ public class Notes extends Composite {
             editNote.setVisible(false);
         }
 
-        if (note.getAuthor().equals(
-                Main.get().workspaceUserProperties.getUser().getId())
-                || Main.get().workspaceUserProperties.getWorkspace() != null
-                && Main.get().workspaceUserProperties.getWorkspace()
-                        .isAdminRole()) {
+        if (note.getAuthor().equals(Main.get().workspaceUserProperties.getUser().getId())
+                || (Main.get().workspaceUserProperties.getWorkspace() != null && Main.get().workspaceUserProperties.getWorkspace()
+                        .isAdminRole())) {
             if (visibleButtons || addNoteOption) {
                 deleteNote.setVisible(true);
             } else {
@@ -390,17 +347,14 @@ public class Notes extends Composite {
         }
 
         tableNotes.setWidget(row, 1, hPanel);
-        tableNotes.getCellFormatter().setHorizontalAlignment(row, 1,
-                HasHorizontalAlignment.ALIGN_RIGHT);
+        tableNotes.getCellFormatter().setHorizontalAlignment(row, 1, HasAlignment.ALIGN_RIGHT);
         tableNotes.getRowFormatter().setStyleName(row, "okm-Notes-Title");
-        tableNotes.getCellFormatter().setHeight(row, 1, "30");
-        tableNotes.getCellFormatter().setVerticalAlignment(row, 0,
-                HasVerticalAlignment.ALIGN_BOTTOM);
-        tableNotes.getCellFormatter().setVerticalAlignment(row, 1,
-                HasVerticalAlignment.ALIGN_BOTTOM);
+        tableNotes.getCellFormatter().setHeight(row, 1, "30px");
+        tableNotes.getCellFormatter().setVerticalAlignment(row, 0, HasAlignment.ALIGN_BOTTOM);
+        tableNotes.getCellFormatter().setVerticalAlignment(row, 1, HasAlignment.ALIGN_BOTTOM);
         row++;
         tableNotes.setHTML(row, 0, "");
-        tableNotes.getCellFormatter().setHeight(row, 0, "6");
+        tableNotes.getCellFormatter().setHeight(row, 0, "6px");
         tableNotes.getRowFormatter().setStyleName(row, "okm-Notes-Line");
         tableNotes.getFlexCellFormatter().setColSpan(row, 0, 2);
         row++;
@@ -415,8 +369,7 @@ public class Notes extends Composite {
         addButton.setHTML(Main.i18n("button.add"));
         updateButton.setHTML(Main.i18n("button.update"));
         cancelButton.setHTML(Main.i18n("button.cancel"));
-        addNote.setHTML("<b>" + Main.i18n("general.menu.edit.add.note")
-                + "</b>");
+        addNote.setHTML("<b>" + Main.i18n("general.menu.edit.add.note") + "</b>");
         richTextToolbar.langRefresh();
     }
 
@@ -425,7 +378,7 @@ public class Notes extends Composite {
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
+    public void setVisibleButtons(boolean visible) {
         visibleButtons = visible;
         addButton.setVisible(visible);
         addNote.setVisible(visible);
@@ -438,7 +391,7 @@ public class Notes extends Composite {
      * 
      * @param visible The visible value
      */
-    public void setVisibleAddNote(final boolean visible) {
+    public void setVisibleAddNote(boolean visible) {
         addNoteOption = visible && visibleButtons;
         addButton.setVisible(addNoteOption);
         addNote.setVisible(addNoteOption);
@@ -450,50 +403,43 @@ public class Notes extends Composite {
      * Callback addNote 
      */
     final AsyncCallback<GWTNote> callbackAddNote = new AsyncCallback<GWTNote>() {
-        @Override
-        public void onSuccess(final GWTNote result) {
+        public void onSuccess(GWTNote result) {
             tableNotes.removeRow(tableNotes.getRowCount() - 1); // Deletes last row = addComment
             writeNote(result);
             writeAddNote();
             reset();
 
             if (object instanceof GWTDocument) {
-                final GWTDocument document = (GWTDocument) object;
+                GWTDocument document = (GWTDocument) object;
                 document.getNotes().add(result);
 
                 if (!document.isHasNotes()) {
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .addNoteIconToSelectedRow();
+                    Main.get().mainPanel.desktop.browser.fileBrowser.addNoteIconToSelectedRow();
                     document.setHasNotes(true);
                 }
             } else if (object instanceof GWTFolder) {
-                final GWTFolder folder = (GWTFolder) object;
+                GWTFolder folder = (GWTFolder) object;
                 folder.getNotes().add(result);
 
                 // If is added first note must adding some icon on filebrowser
-                if (!folder.isHasNotes()
-                        && !Main.get().activeFolderTree.isPanelSelected()) {
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .addNoteIconToSelectedRow();
+                if (!folder.isHasNotes() && !Main.get().activeFolderTree.isPanelSelected()) {
+                    Main.get().mainPanel.desktop.browser.fileBrowser.addNoteIconToSelectedRow();
                     folder.setHasNotes(true);
                 }
             } else if (object instanceof GWTMail) {
-                final GWTMail mail = (GWTMail) object;
+                GWTMail mail = (GWTMail) object;
                 mail.getNotes().add(result);
 
                 if (!mail.isHasNotes()) {
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .addNoteIconToSelectedRow();
+                    Main.get().mainPanel.desktop.browser.fileBrowser.addNoteIconToSelectedRow();
                     mail.setHasNotes(true);
                 }
             }
 
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument
-                    .fireEvent(HasDocumentEvent.NOTE_ADDED);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.fireEvent(HasDocumentEvent.NOTE_ADDED);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("addNote", caught);
         }
     };
@@ -502,43 +448,19 @@ public class Notes extends Composite {
      * addNote
      */
     private void addNote() {
-        final boolean hasText = isChrome ? textArea.getText().trim().length() > 0
-                : richTextArea.getText().trim().length() > 0;
+        boolean hasText = (isChrome) ? textArea.getText().trim().length() > 0 : richTextArea.getText().trim().length() > 0;
         if (hasText) {
-            noteService.isValidNote(getTextNote(), new AsyncCallback<String>() {
-                @Override
-                public void onSuccess(final String result) {
-                    if (result == null) {
-                        noteService.add(getPath(), getTextNote(),
-                                callbackAddNote);
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable caught) {
-                    Main.get().showError("callbackInvalidNote", caught);
-                }
-            });
+            noteService.add(getPath(), getTextNote(), callbackAddNote);
         }
     }
 
     /**
      * addNote
      */
-    public void addNote(final String text) {
-        noteService.isValidNote(text, new AsyncCallback<String>() {
-            @Override
-            public void onSuccess(final String result) {
-                if (result == null) {
-                    noteService.add(getPath(), text, callbackAddNote);
-                }
-            }
-
-            @Override
-            public void onFailure(final Throwable caught) {
-                Main.get().showError("callbackInvalidNote", caught);
-            }
-        });
+    public void addNote(String text) {
+        if (text.length() > 0) {
+            noteService.add(getPath(), text, callbackAddNote);
+        }
     }
 
     /**
@@ -572,7 +494,7 @@ public class Notes extends Composite {
     /**
      * setTextNoteToEditor
      */
-    private void setTextNoteToEditor(final String text) {
+    private void setTextNoteToEditor(String text) {
         if (isChrome) {
             textArea.setText(text);
         } else {
@@ -605,12 +527,12 @@ public class Notes extends Composite {
     public void deleteNote(final String notePath, final int row) {
         noteService.delete(notePath, new AsyncCallback<Object>() {
             @Override
-            public void onSuccess(final Object result) {
+            public void onSuccess(Object result) {
                 tableNotes.removeRow(row); // row + 0
                 tableNotes.removeRow(row); // row + 1;
                 tableNotes.removeRow(row); // row + 2
 
-                for (final GWTNote note : getNotes()) {
+                for (GWTNote note : getNotes()) {
                     if (note.getPath().equals(notePath)) {
                         getNotes().remove(note);
                         break;
@@ -626,13 +548,12 @@ public class Notes extends Composite {
                         ((GWTMail) object).setHasNotes(false);
                     }
 
-                    Main.get().mainPanel.desktop.browser.fileBrowser
-                            .deleteNoteIconToSelectedRow();
+                    Main.get().mainPanel.desktop.browser.fileBrowser.deleteNoteIconToSelectedRow();
                 }
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("removeNote", caught);
             }
         });
@@ -641,14 +562,14 @@ public class Notes extends Composite {
     /**
      * setNote
      */
-    private void setNote(final String notePath, final String text, final int row) {
+    private void setNote(String notePath, final String text, final int row) {
         noteService.set(notePath, text, new AsyncCallback<Object>() {
             @Override
-            public void onSuccess(final Object result) {
-                final String text = (String) result;
+            public void onSuccess(Object result) {
+                String text = (String) result;
                 tableNotes.setHTML(row, 0, text);
 
-                for (final GWTNote note : getNotes()) {
+                for (GWTNote note : getNotes()) {
                     if (note.getPath().equals(editedNotePath)) {
                         note.setText(text);
                         break;
@@ -659,7 +580,7 @@ public class Notes extends Composite {
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("setNote", caught);
             }
         });
@@ -698,8 +619,7 @@ public class Notes extends Composite {
      * evaluateButton
      */
     private void evaluateButtons() {
-        final boolean buttonsEnabled = isChrome ? textArea.getText().trim()
-                .length() > 0 : richTextArea.getText().trim().length() > 0;
+        boolean buttonsEnabled = (isChrome) ? textArea.getText().trim().length() > 0 : richTextArea.getText().trim().length() > 0;
         if (addButton != null) { // loading case
             addButton.setEnabled(buttonsEnabled);
         }
@@ -711,7 +631,7 @@ public class Notes extends Composite {
     /**
      * setRichTextAreaText
      */
-    private void setRichTextAreaText(final String text) {
+    private void setRichTextAreaText(String text) {
         if (isChrome) {
             textArea.setText(text);
         } else {
@@ -728,13 +648,12 @@ public class Notes extends Composite {
      */
     public class NoteToDelete {
         private String notePath = "";
-
         private int row = 0;
 
         /**
          * NoteToDelete
          */
-        public NoteToDelete(final String notePath, final int row) {
+        public NoteToDelete(String notePath, int row) {
             this.notePath = notePath;
             this.row = row;
         }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,24 +25,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HTMLInfoDecorator implements InfoDecorator {
-    private static Logger log = LoggerFactory
-            .getLogger(HTMLInfoDecorator.class);
-
+    private static Logger log = LoggerFactory.getLogger(HTMLInfoDecorator.class);
     private int idx;
-
     private int total;
-
     private int oldPerCent = -1;
 
-    public HTMLInfoDecorator(final int total) {
+    public HTMLInfoDecorator(int total) {
         this.total = total;
     }
 
     @Override
-    public String print(final String path, final long size, final String error) {
+    public String print(String path, long size, String error) {
         log.debug("print({}, {}, {})", new Object[] { path, size, error });
-        final StringBuffer sb = new StringBuffer();
-        final int perCent = ++idx * 100 / total;
+        StringBuffer sb = new StringBuffer();
+        int perCent = ++idx * 100 / total;
 
         if (perCent > oldPerCent) {
             sb.append(" (");

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,8 @@
 
 package com.openkm.frontend.client.extension.widget.tabworkspace;
 
+import com.google.gwt.user.client.ui.TabBar;
+
 /**
  * HasWorkspaceExtension
  * 
@@ -30,5 +32,7 @@ package com.openkm.frontend.client.extension.widget.tabworkspace;
 public interface HasWorkspaceExtension {
 
     public abstract String getTabText();
+
+    public abstract void setTab(TabBar tabBar, int tabIndex);
 
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,58 +39,49 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 public class DecimalValidator extends Validator<DecimalValidator> {
 
     private TextBoxBase textBox = null;
-
     private SuggestBox suggestBox = null;
 
-    public DecimalValidator(final TextBoxBase text) {
-        textBox = text;
+    public DecimalValidator(TextBoxBase text) {
+        this.textBox = text;
     }
 
-    public DecimalValidator(final SuggestBox suggest) {
-        suggestBox = suggest;
+    public DecimalValidator(SuggestBox suggest) {
+        this.suggestBox = suggest;
     }
 
     @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (textBox != null) {
-            for (final ValidationAction<TextBoxBase> va : getFailureActions()) {
+            for (ValidationAction<TextBoxBase> va : this.getFailureActions())
                 va.invoke(result, textBox);
-            }
         } else {
-            for (final ValidationAction<SuggestBox> va : getFailureActions()) {
+            for (ValidationAction<SuggestBox> va : this.getFailureActions())
                 va.invoke(result, suggestBox);
-            }
         }
     }
 
     @Override
-    public <V extends ValidationMessages> ValidationResult validate(
-            final V messages) {
+    public <V extends ValidationMessages> ValidationResult validate(V messages) {
 
         String text;
-        if (suggestBox != null) {
+        if (suggestBox != null)
             text = suggestBox.getText();
-        } else {
+        else
             text = textBox.getText();
-        }
 
-        if (text.equals("") && !isRequired()) {
+        if (text.equals("") && !isRequired())
             return null;
-        }
 
         String numberPattern = Main.i18n("general.decimal.pattern");
         // Must be only two section
-        final String[] number = text.split(numberPattern);
+        String[] number = text.split(numberPattern);
         if (number.length != 2) {
-            return new ValidationResult(messages.getStandardMessages()
-                    .notADouble());
+            return new ValidationResult(messages.getStandardMessages().notADouble());
         }
 
         numberPattern = "[0-9]*";
-        if (!number[0].matches(numberPattern)
-                || !number[1].matches(numberPattern)) {
-            return new ValidationResult(messages.getStandardMessages()
-                    .notADouble());
+        if (!number[0].matches(numberPattern) || !number[1].matches(numberPattern)) {
+            return new ValidationResult(messages.getStandardMessages().notADouble());
         }
 
         return null;

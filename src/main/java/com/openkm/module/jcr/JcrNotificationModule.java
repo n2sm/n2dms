@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.jcr;
@@ -48,12 +48,10 @@ import com.openkm.module.jcr.stuff.JcrSessionManager;
 import com.openkm.util.UserActivity;
 
 public class JcrNotificationModule implements NotificationModule {
-    private static Logger log = LoggerFactory
-            .getLogger(JcrNotificationModule.class);
+    private static Logger log = LoggerFactory.getLogger(JcrNotificationModule.class);
 
     @Override
-    public synchronized void subscribe(final String token, final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
+    public synchronized void subscribe(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("subscribe({}, {})", token, nodePath);
         Node node = null;
@@ -81,9 +79,8 @@ public class JcrNotificationModule implements NotificationModule {
 
             // Perform subscription
             if (node.isNodeType(Notification.TYPE)) {
-                final Value[] actualUsers = node.getProperty(
-                        Notification.SUBSCRIPTORS).getValues();
-                final String[] newUsers = new String[actualUsers.length + 1];
+                Value[] actualUsers = node.getProperty(Notification.SUBSCRIPTORS).getValues();
+                String[] newUsers = new String[actualUsers.length + 1];
                 boolean alreadyAdded = false;
 
                 for (int i = 0; i < actualUsers.length; i++) {
@@ -101,31 +98,28 @@ public class JcrNotificationModule implements NotificationModule {
                 }
             } else {
                 sNode.addMixin(Notification.TYPE);
-                sNode.setProperty(Notification.SUBSCRIPTORS,
-                        new String[] { session.getUserID() });
+                sNode.setProperty(Notification.SUBSCRIPTORS, new String[] { session.getUserID() });
             }
 
             sNode.save();
 
             // Activity log
-            UserActivity.log(session.getUserID(), "SUBSCRIBE_USER",
-                    node.getUUID(), nodePath, null);
-        } catch (final javax.jcr.AccessDeniedException e) {
+            UserActivity.log(session.getUserID(), "SUBSCRIBE_USER", node.getUUID(), nodePath, null);
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
-            if (lt != null) {
+            if (lt != null)
                 systemSession.removeLockToken(lt);
-            }
             if (token == null) {
                 JCRUtils.logout(session);
             }
@@ -135,9 +129,8 @@ public class JcrNotificationModule implements NotificationModule {
     }
 
     @Override
-    public synchronized void unsubscribe(final String token,
-            final String nodePath) throws PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException {
+    public synchronized void unsubscribe(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("unsubscribe({}, {})", token, nodePath);
         Node node = null;
         Node sNode = null;
@@ -164,9 +157,8 @@ public class JcrNotificationModule implements NotificationModule {
 
             // Perform unsubscription
             if (node.isNodeType(Notification.TYPE)) {
-                final Value[] actualUsers = node.getProperty(
-                        Notification.SUBSCRIPTORS).getValues();
-                final ArrayList<String> newUsers = new ArrayList<String>();
+                Value[] actualUsers = node.getProperty(Notification.SUBSCRIPTORS).getValues();
+                ArrayList<String> newUsers = new ArrayList<String>();
 
                 for (int i = 0; i < actualUsers.length; i++) {
                     if (!actualUsers[i].getString().equals(session.getUserID())) {
@@ -177,32 +169,29 @@ public class JcrNotificationModule implements NotificationModule {
                 if (newUsers.isEmpty()) {
                     sNode.removeMixin(Notification.TYPE);
                 } else {
-                    sNode.setProperty(Notification.SUBSCRIPTORS,
-                            newUsers.toArray(new String[newUsers.size()]));
+                    sNode.setProperty(Notification.SUBSCRIPTORS, (String[]) newUsers.toArray(new String[newUsers.size()]));
                 }
             }
 
             sNode.save();
 
             // Activity log
-            UserActivity.log(session.getUserID(), "UNSUBSCRIBE_USER",
-                    node.getUUID(), nodePath, null);
-        } catch (final javax.jcr.AccessDeniedException e) {
+            UserActivity.log(session.getUserID(), "UNSUBSCRIBE_USER", node.getUUID(), nodePath, null);
+        } catch (javax.jcr.AccessDeniedException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new AccessDeniedException(e.getMessage(), e);
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             JCRUtils.discardsPendingChanges(sNode);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
-            if (lt != null) {
+            if (lt != null)
                 systemSession.removeLockToken(lt);
-            }
             if (token == null) {
                 JCRUtils.logout(session);
             }
@@ -212,11 +201,10 @@ public class JcrNotificationModule implements NotificationModule {
     }
 
     @Override
-    public Set<String> getSubscriptors(final String token, final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
+    public Set<String> getSubscriptors(String token, String nodePath) throws PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("getSusbcriptions({}, {})", token, nodePath);
-        final Set<String> users = new HashSet<String>();
+        Set<String> users = new HashSet<String>();
         Session session = null;
 
         try {
@@ -226,21 +214,19 @@ public class JcrNotificationModule implements NotificationModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node node = session.getRootNode().getNode(
-                    nodePath.substring(1));
+            Node node = session.getRootNode().getNode(nodePath.substring(1));
 
             if (node.isNodeType(Notification.TYPE)) {
-                final Value[] notifyUsers = node.getProperty(
-                        Notification.SUBSCRIPTORS).getValues();
+                Value[] notifyUsers = node.getProperty(Notification.SUBSCRIPTORS).getValues();
 
-                for (final Value notifyUser : notifyUsers) {
-                    users.add(notifyUser.getString());
+                for (int i = 0; i < notifyUsers.length; i++) {
+                    users.add(notifyUsers[i].getString());
                 }
             }
-        } catch (final javax.jcr.PathNotFoundException e) {
+        } catch (javax.jcr.PathNotFoundException e) {
             log.warn(e.getMessage(), e);
             throw new PathNotFoundException(e.getMessage(), e);
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             log.error(e.getMessage(), e);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -254,13 +240,10 @@ public class JcrNotificationModule implements NotificationModule {
     }
 
     @Override
-    public void notify(final String token, final String nodePath,
-            final List<String> users, final String message,
-            final boolean attachment) throws PathNotFoundException,
-            AccessDeniedException, RepositoryException {
-        log.debug("notify({}, {}, {}, {})", new Object[] { token, nodePath,
-                users, message });
-        final List<String> to = new ArrayList<String>();
+    public void notify(String token, String nodePath, List<String> users, List<String> mails, String message, boolean attachment)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException {
+        log.debug("notify({}, {}, {}, {}, {})", new Object[] { token, nodePath, users, mails, message });
+        List<String> to = new ArrayList<String>();
         Session session = null;
 
         if (!users.isEmpty()) {
@@ -274,8 +257,8 @@ public class JcrNotificationModule implements NotificationModule {
                     session = JcrSessionManager.getInstance().get(token);
                 }
 
-                for (final String usr : users) {
-                    final String mail = new JcrAuthModule().getMail(token, usr);
+                for (String usr : users) {
+                    String mail = new JcrAuthModule().getMail(token, usr);
 
                     if (mail != null) {
                         to.add(mail);
@@ -283,24 +266,22 @@ public class JcrNotificationModule implements NotificationModule {
                 }
 
                 // Get session user email address && send notification
-                final String from = new JcrAuthModule().getMail(token,
-                        session.getUserID());
+                String from = new JcrAuthModule().getMail(token, session.getUserID());
 
                 if (!to.isEmpty() && from != null && !from.isEmpty()) {
-                    CommonNotificationModule.sendNotification(
-                            session.getUserID(), nodePath, from, to, message,
+                    Node docNode = session.getRootNode().getNode(nodePath.substring(1));
+                    CommonNotificationModule.sendNotification(session.getUserID(), docNode.getUUID(), nodePath, from, to, message,
                             attachment);
                 }
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 e.printStackTrace();
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                if (token == null) {
+                if (token == null)
                     JCRUtils.logout(session);
-                }
             }
         }
 

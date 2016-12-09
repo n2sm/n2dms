@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,8 +24,7 @@ package com.openkm.frontend.client.widget.searchin;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -42,21 +41,13 @@ import com.openkm.frontend.client.util.Util;
  */
 public class SearchSimple extends Composite {
     private ScrollPanel scrollPanel;
-
     private VerticalPanel vPanel;
-
     public TextBox fullText;
-
     private final static int REFRESH_WAITING_TIME = 100;
-
     private final static String TIME_HELPER_KEY = "SCROLL_SIMPLE_SEARCH";
-
     private boolean loadFinish = false;
-
     private boolean finalResizeInProgess = false;
-
     int width = 0;
-
     int height = 0;
 
     /**
@@ -64,16 +55,14 @@ public class SearchSimple extends Composite {
      */
     public SearchSimple() {
         fullText = new TextBox();
-        fullText.setWidth("365");
+        fullText.setWidth("365px");
         vPanel = new VerticalPanel();
-        final HTML spacer = Util.vSpace("70");
+        HTML spacer = Util.vSpace("70px");
         vPanel.add(spacer);
         vPanel.add(fullText);
-        vPanel.setCellHeight(spacer, "70");
-        vPanel.setCellVerticalAlignment(fullText,
-                HasVerticalAlignment.ALIGN_TOP);
-        vPanel.setCellHorizontalAlignment(fullText,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(spacer, "70px");
+        vPanel.setCellVerticalAlignment(fullText, HasAlignment.ALIGN_TOP);
+        vPanel.setCellHorizontalAlignment(fullText, HasAlignment.ALIGN_CENTER);
         scrollPanel = new ScrollPanel(vPanel);
         fullText.setStyleName("okm-Input");
 
@@ -81,20 +70,17 @@ public class SearchSimple extends Composite {
     }
 
     @Override
-    public void setPixelSize(final int width, final int height) {
+    public void setPixelSize(int width, int height) {
         this.width = width;
         this.height = height;
         scrollPanel.setPixelSize(width, height);
         vPanel.setPixelSize(width, height);
 
         // Solve some problems with chrome
-        if (loadFinish
-                && Util.getUserAgent().equals("chrome")
-                && Main.get().mainPanel.topPanel.tabWorkspace
-                        .getSelectedWorkspace() == UIDockPanelConstants.SEARCH) {
+        if (loadFinish && Util.getUserAgent().equals("chrome")
+                && Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.SEARCH) {
             if (!TimeHelper.hasControlTime(TIME_HELPER_KEY)) {
-                TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY,
-                        REFRESH_WAITING_TIME);
+                TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY, REFRESH_WAITING_TIME);
                 timeControl();
             } else {
                 TimeHelper.changeControlTime(TIME_HELPER_KEY);
@@ -106,8 +92,7 @@ public class SearchSimple extends Composite {
      * timeControl
      */
     private void timeControl() {
-        if (TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY,
-                REFRESH_WAITING_TIME)) {
+        if (TimeHelper.hasElapsedEnoughtTime(TIME_HELPER_KEY, REFRESH_WAITING_TIME)) {
             if (!finalResizeInProgess) {
                 finalResizeInProgess = true;
                 int tmpHeight = height;

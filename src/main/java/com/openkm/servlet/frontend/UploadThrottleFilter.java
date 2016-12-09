@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,37 +40,30 @@ import com.openkm.core.Config;
  */
 public class UploadThrottleFilter implements Filter {
 
-    @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
     }
 
-    @Override
-    public void doFilter(final ServletRequest servletRequest,
-            final ServletResponse servletResponse, final FilterChain filterChain)
+    public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse, final FilterChain filterChain)
             throws IOException, ServletException {
         if (Config.UPLOAD_THROTTLE_FILTER) {
-            final DelayRequestWrapper requestWrapper = new DelayRequestWrapper(
-                    (HttpServletRequest) servletRequest);
+            final DelayRequestWrapper requestWrapper = new DelayRequestWrapper((HttpServletRequest) servletRequest);
             filterChain.doFilter(requestWrapper, servletResponse);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 
-    @Override
     public void destroy() {
     }
 
     public class DelayRequestWrapper extends HttpServletRequestWrapper {
         final private DelayServerInputStream in;
 
-        public DelayRequestWrapper(final HttpServletRequest request)
-                throws IOException {
+        public DelayRequestWrapper(HttpServletRequest request) throws IOException {
             super(request);
             in = new DelayServerInputStream(request.getInputStream());
         }
 
-        @Override
         public ServletInputStream getInputStream() {
             return in;
         }
@@ -78,15 +71,13 @@ public class UploadThrottleFilter implements Filter {
 
     public static class DelayServerInputStream extends ServletInputStream {
         final private ServletInputStream in;
-
         int numOfBytesRead = 0;
 
-        public DelayServerInputStream(final ServletInputStream inputStream) {
+        public DelayServerInputStream(ServletInputStream inputStream) {
             super();
             in = inputStream;
         }
 
-        @Override
         public int read() throws IOException {
             final int chr = in.read();
             numOfBytesRead++;
@@ -95,7 +86,7 @@ public class UploadThrottleFilter implements Filter {
             if (numOfBytesRead % (1024 * 10) == 0) {
                 try {
                     Thread.sleep(100);
-                } catch (final InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }

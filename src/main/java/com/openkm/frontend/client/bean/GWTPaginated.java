@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,44 +34,29 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 @SuppressWarnings("unused")
 public class GWTPaginated implements IsSerializable {
     public static final int COL_NONE = 0;
-
     public static final int COL_TYPE = 1;
-
     public static final int COL_NAME = 2;
-
     public static final int COL_SIZE = 3;
-
     public static final int COL_DATE = 4;
-
     public static final int COL_AUTHOR = 5;
-
     public static final int COL_VERSION = 6;
 
     private int totalFolder = 0;
-
     private int totalDocuments = 0;
-
     private int totalMails = 0;
-
     private int total = 0;
-
     private boolean outOfRange = false;
-
     private int newOffset = 0;
-
     private GWTFolder fld = new GWTFolder(); // Used to do not get serialization error
-
     private GWTDocument doc = new GWTDocument(); // Used to do not get serialization error
-
     private GWTMail mail = new GWTMail(); // Used to do not get serialization error
-
     private List<Object> objects;
 
     public int getTotal() {
         return total;
     }
 
-    public void setTotal(final int total) {
+    public void setTotal(int total) {
         this.total = total;
     }
 
@@ -79,7 +64,7 @@ public class GWTPaginated implements IsSerializable {
         return totalFolder;
     }
 
-    public void setTotalFolder(final int totalFolder) {
+    public void setTotalFolder(int totalFolder) {
         this.totalFolder = totalFolder;
     }
 
@@ -87,7 +72,7 @@ public class GWTPaginated implements IsSerializable {
         return totalDocuments;
     }
 
-    public void setTotalDocuments(final int totalDocuments) {
+    public void setTotalDocuments(int totalDocuments) {
         this.totalDocuments = totalDocuments;
     }
 
@@ -95,7 +80,7 @@ public class GWTPaginated implements IsSerializable {
         return totalMails;
     }
 
-    public void setTotalMails(final int totalMails) {
+    public void setTotalMails(int totalMails) {
         this.totalMails = totalMails;
     }
 
@@ -103,7 +88,7 @@ public class GWTPaginated implements IsSerializable {
         return outOfRange;
     }
 
-    public void setOutOfRange(final boolean outOfRange) {
+    public void setOutOfRange(boolean outOfRange) {
         this.outOfRange = outOfRange;
     }
 
@@ -111,7 +96,7 @@ public class GWTPaginated implements IsSerializable {
         return newOffset;
     }
 
-    public void setNewOffset(final int newOffset) {
+    public void setNewOffset(int newOffset) {
         this.newOffset = newOffset;
     }
 
@@ -119,7 +104,7 @@ public class GWTPaginated implements IsSerializable {
         return objects;
     }
 
-    public void setObjects(final List<Object> objects) {
+    public void setObjects(List<Object> objects) {
         this.objects = objects;
     }
 }

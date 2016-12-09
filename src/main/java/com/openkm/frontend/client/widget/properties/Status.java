@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,8 +22,7 @@
 package com.openkm.frontend.client.widget.properties;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.openkm.frontend.client.Main;
@@ -37,34 +36,22 @@ import com.openkm.frontend.client.widget.foldertree.ExtendedPopupPanel;
  * Status
  * 
  * @author jllort
- *
  */
 public class Status extends ExtendedPopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
 
     private boolean flag_versionHistory = false;
-
     private boolean flag_groupProperties = false;
-
     private boolean flag_UserSecurity = false;
-
     private boolean flag_RoleSecurity = false;
-
     private boolean flag_keywords = false;
-
     private boolean flag_getVersionHistorySize = false;
-
     private boolean flag_purgeVersionHistory = false;
-
     private boolean flag_restoreVersion = false;
-
     private boolean flag_Categories = false;
 
     /**
@@ -81,11 +68,9 @@ public class Status extends ExtendedPopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -103,36 +88,28 @@ public class Status extends ExtendedPopupPanel {
      * @return
      */
     public boolean isPanelRefreshing() {
-        return flag_versionHistory || flag_UserSecurity || flag_RoleSecurity
-                || flag_groupProperties || flag_getVersionHistorySize
-                || flag_keywords || flag_purgeVersionHistory
-                || flag_restoreVersion || flag_Categories;
+        return (flag_versionHistory || flag_UserSecurity || flag_RoleSecurity || flag_groupProperties || flag_getVersionHistorySize
+                || flag_keywords || flag_purgeVersionHistory || flag_restoreVersion || flag_Categories);
     }
 
     /**
      * Refreshing the panel
      */
     public void refresh() {
-        if (flag_versionHistory || flag_UserSecurity || flag_RoleSecurity
-                || flag_groupProperties || flag_getVersionHistorySize
-                || flag_keywords || flag_purgeVersionHistory
-                || flag_restoreVersion || flag_Categories) {
-            final int left = (Main.get().mainPanel.desktop.getRight() - 220)
-                    / 2 + Main.get().mainPanel.desktop.getLeft()
-                    + ExtendedDockPanel.VERTICAL_BORDER_PANEL_WIDTH
-                    + Desktop.SPLITTER_WIDTH;
-            final int top = (Main.get().mainPanel.desktop.browser.bottomHeight - 40)
-                    / 2
-                    + TopPanel.PANEL_HEIGHT
-                    + Main.get().mainPanel.desktop.browser.topHeight + 10;
+        if (flag_versionHistory || flag_UserSecurity || flag_RoleSecurity || flag_groupProperties || flag_getVersionHistorySize
+                || flag_keywords || flag_purgeVersionHistory || flag_restoreVersion || flag_Categories) {
+            int left =
+                    ((Main.get().mainPanel.desktop.getRight() - 220) / 2) + Main.get().mainPanel.desktop.getLeft()
+                            + ExtendedDockPanel.VERTICAL_BORDER_PANEL_WIDTH + Desktop.SPLITTER_WIDTH;
+            int top =
+                    ((Main.get().mainPanel.desktop.browser.bottomHeight - 40) / 2) + TopPanel.PANEL_HEIGHT
+                            + Main.get().mainPanel.desktop.browser.topHeight + 10;
             setPopupPosition(left, top);
-            Main.get().mainPanel.desktop.browser.tabMultiple
-                    .setStyleName("okm-PanelRefreshing");
+            Main.get().mainPanel.desktop.browser.tabMultiple.setStyleName("okm-PanelRefreshing");
             super.show();
         } else {
             super.hide();
-            Main.get().mainPanel.desktop.browser.tabMultiple
-                    .removeStyleName("okm-PanelRefreshing");
+            Main.get().mainPanel.desktop.browser.tabMultiple.removeStyleName("okm-PanelRefreshing");
         }
     }
 

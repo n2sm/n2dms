@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -24,79 +24,74 @@ package com.openkm.servlet.frontend;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openkm.api.OKMFolder;
+import com.openkm.api.OKMPropertyGroup;
 import com.openkm.api.OKMSearch;
 import com.openkm.bean.Folder;
+import com.openkm.bean.PropertyGroup;
 import com.openkm.bean.Repository;
+import com.openkm.bean.form.CheckBox;
+import com.openkm.bean.form.FormElement;
+import com.openkm.bean.form.Option;
+import com.openkm.bean.form.Select;
+import com.openkm.bean.form.SuggestBox;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.ItemExistsException;
 import com.openkm.core.LockException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
+import com.openkm.dao.KeyValueDAO;
+import com.openkm.dao.bean.KeyValue;
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMFolderService;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 import com.openkm.servlet.frontend.util.FolderComparator;
 import com.openkm.util.GWTUtil;
+import com.openkm.util.pagination.FilterUtils;
 
 /**
  * Servlet Class
  */
-public class FolderServlet extends OKMRemoteServiceServlet implements
-        OKMFolderService {
+public class FolderServlet extends OKMRemoteServiceServlet implements OKMFolderService {
     private static Logger log = LoggerFactory.getLogger(FolderServlet.class);
-
     private static final long serialVersionUID = -4436438730167948558L;
 
     @Override
-    public GWTFolder create(final String fldPath, final String fldPathParent)
-            throws OKMException {
+    public GWTFolder create(String fldPath, String fldPathParent) throws OKMException {
         log.debug("create({}, {})", fldPath, fldPathParent);
         GWTFolder gWTFolder = new GWTFolder();
-        final Folder folder = new Folder();
+        Folder folder = new Folder();
         folder.setPath(fldPathParent + "/" + fldPath);
         updateSessionManager();
 
         try {
-            gWTFolder = GWTUtil.copy(
-                    OKMFolder.getInstance().create(null, folder),
-                    getUserWorkspaceSession());
-        } catch (final ItemExistsException e) {
+            gWTFolder = GWTUtil.copy(OKMFolder.getInstance().create(null, folder), getUserWorkspaceSession());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("create: {}", gWTFolder);
@@ -104,90 +99,67 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void delete(final String fldPath) throws OKMException {
+    public void delete(String fldPath) throws OKMException {
         log.debug("delete({})", fldPath);
         updateSessionManager();
 
         try {
             OKMFolder.getInstance().delete(null, fldPath);
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("delete: void");
     }
 
     @Override
-    public List<GWTFolder> getCategorizedChilds(final String fldPath)
-            throws OKMException {
+    public List<GWTFolder> getCategorizedChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException {
         log.debug("getCategorizedChilds({})", fldPath);
-        final List<GWTFolder> folderList = new ArrayList<GWTFolder>();
+        List<GWTFolder> folderList = new ArrayList<GWTFolder>();
         updateSessionManager();
 
         try {
             if (fldPath.startsWith("/" + Repository.CATEGORIES)) {
-                // TODO: Possible optimization getting folder really could not
-                // be needed we've got UUID in GWT UI
-                final String uuid = OKMFolder.getInstance()
-                        .getProperties(null, fldPath).getUuid();
-                final List<Folder> results = OKMSearch.getInstance()
-                        .getCategorizedFolders(null, uuid);
+                // TODO: Possible optimization getting folder really could not be needed we've got UUID in GWT UI
+                String uuid = OKMFolder.getInstance().getProperties(null, fldPath).getUuid();
+                List<Folder> results = OKMSearch.getInstance().getCategorizedFolders(null, uuid);
 
-                for (final Folder folder : results) {
-                    folderList.add(GWTUtil.copy(folder,
-                            getUserWorkspaceSession()));
+                for (Folder folder : results) {
+                    folderList.add(GWTUtil.copy(folder, getUserWorkspaceSession()));
                 }
             }
-            Collections.sort(folderList,
-                    FolderComparator.getInstance(getLanguage()));
-        } catch (final RepositoryException e) {
+            if (mapFilter != null) {
+                FilterUtils.filter(getUserWorkspaceSession(), folderList, mapFilter);
+            }
+            Collections.sort(folderList, FolderComparator.getInstance(getLanguage()));
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getCategorizedChilds: {}", folderList);
@@ -195,32 +167,28 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTFolder> getThesaurusChilds(final String fldPath)
-            throws OKMException {
+    public List<GWTFolder> getThesaurusChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException {
         log.debug("getThesaurusChilds({})", fldPath);
-        final List<GWTFolder> folderList = new ArrayList<GWTFolder>();
+        List<GWTFolder> folderList = new ArrayList<GWTFolder>();
         updateSessionManager();
 
         try {
             // Thesaurus childs
             if (fldPath.startsWith("/" + Repository.THESAURUS)) {
-                final String keyword = fldPath.substring(
-                        fldPath.lastIndexOf("/") + 1).replace(" ", "_");
-                final List<Folder> results = OKMSearch.getInstance()
-                        .getFoldersByKeyword(null, keyword);
+                String keyword = fldPath.substring(fldPath.lastIndexOf("/") + 1).replace(" ", "_");
+                List<Folder> results = OKMSearch.getInstance().getFoldersByKeyword(null, keyword);
 
-                for (final Folder fld : results) {
-                    folderList
-                            .add(GWTUtil.copy(fld, getUserWorkspaceSession()));
+                for (Folder fld : results) {
+                    folderList.add(GWTUtil.copy(fld, getUserWorkspaceSession()));
                 }
             }
-            Collections.sort(folderList,
-                    FolderComparator.getInstance(getLanguage()));
-        } catch (final Exception e) {
+            if (mapFilter != null) {
+                FilterUtils.filter(getUserWorkspaceSession(), folderList, mapFilter);
+            }
+            Collections.sort(folderList, FolderComparator.getInstance(getLanguage()));
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getThesaurusChilds: {}", folderList);
@@ -228,42 +196,146 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public List<GWTFolder> getChilds(final String fldPath,
-            final boolean extraColumns) throws OKMException {
-        log.debug("getChilds({})", fldPath);
-        final List<GWTFolder> folderList = new ArrayList<GWTFolder>();
+    public List<GWTFolder> getMetadataChilds(String fldPath, Map<String, GWTFilter> mapFilter) throws OKMException {
+        log.debug("getMetadataChilds({})", fldPath);
+        List<GWTFolder> folderList = new ArrayList<GWTFolder>();
         updateSessionManager();
 
         try {
-            for (final Folder folder : OKMFolder.getInstance().getChildren(
-                    null, fldPath)) {
-                final GWTFolder gWTFolder = extraColumns ? GWTUtil.copy(folder,
-                        getUserWorkspaceSession()) : GWTUtil.copy(folder, null);
-                folderList.add(gWTFolder);
+            // Metadata value level
+            if (fldPath.startsWith("/" + Repository.METADATA) && (fldPath.split("/").length - 1) == 4) {
+                String subFolder[] = fldPath.split("/");
+                String group = subFolder[2];
+                String property = subFolder[3];
+                String value = subFolder[4];
+                List<Folder> results = OKMSearch.getInstance().getFoldersByPropertyValue(null, group, property, value);
+
+                for (Folder fld : results) {
+                    folderList.add(GWTUtil.copy(fld, getUserWorkspaceSession()));
+                }
+            }
+            if (mapFilter != null) {
+                FilterUtils.filter(getUserWorkspaceSession(), folderList, mapFilter);
+            }
+            Collections.sort(folderList, FolderComparator.getInstance(getLanguage()));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
+        }
+
+        log.debug("getMetadataChilds: {}", folderList);
+        return folderList;
+    }
+
+    @Override
+    public List<GWTFolder> getChilds(String fldPath, boolean extraColumns, Map<String, GWTFilter> mapFilter) throws OKMException {
+        log.debug("getChilds({})", fldPath);
+        List<GWTFolder> folderList = new ArrayList<GWTFolder>();
+        updateSessionManager();
+
+        try {
+            if (fldPath.startsWith("/" + Repository.METADATA)) {
+                switch (fldPath.split("/").length - 1) {
+                case 1: // getting group level
+                    for (PropertyGroup pg : OKMPropertyGroup.getInstance().getAllGroups(null)) {
+                        boolean hasValidChilds = false; // Only represent metadata groups which have some
+                                                        // representable object ( select or suggestbox )
+
+                        for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, pg.getName())) {
+                            if (formElement instanceof Select || formElement instanceof SuggestBox || formElement instanceof CheckBox) {
+                                hasValidChilds = true;
+                                break;
+                            }
+                        }
+
+                        if (hasValidChilds) {
+                            GWTFolder gWTFolder = new GWTFolder();
+                            String path = fldPath + "/" + pg.getName();
+                            gWTFolder.initMetadata(path, pg.getLabel(),
+                                    OKMPropertyGroup.getInstance().getPropertyGroupForm(null, pg.getName()).size() > 0);
+                            folderList.add(gWTFolder);
+                        }
+                    }
+                    break;
+
+                case 2: // getting property level
+                    String grpName = fldPath.substring(fldPath.lastIndexOf("/") + 1);
+                    for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                        if (formElement instanceof Select || formElement instanceof SuggestBox || formElement instanceof CheckBox) {
+                            GWTFolder gWTFolder = new GWTFolder();
+                            String path = fldPath + "/" + formElement.getName();
+                            gWTFolder.initMetadata(path, formElement.getLabel(), false);
+                            folderList.add(gWTFolder);
+                        }
+                    }
+                    break;
+
+                case 3: // getting value level
+                    String subFolder[] = fldPath.split("/");
+                    grpName = subFolder[2];
+                    String propertyName = subFolder[3];
+
+                    for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                        if (formElement.getName().equals(propertyName)) {
+                            if (formElement instanceof Select) {
+                                for (Option option : ((Select) formElement).getOptions()) {
+                                    GWTFolder gWTFolder = new GWTFolder();
+                                    String path = fldPath + "/" + option.getValue();
+                                    gWTFolder.initMetadata(path, option.getLabel(), false);
+                                    folderList.add(gWTFolder);
+                                }
+                            } else if (formElement instanceof SuggestBox) {
+                                SuggestBox sb = ((SuggestBox) formElement);
+                                String sqlFilter = sb.getFilterQuery();
+
+                                // replacing filter parameter, if exist
+                                sqlFilter = sqlFilter.replaceAll("\\{0\\}", "");
+
+                                for (KeyValue keyValue : KeyValueDAO.getKeyValues(sb.getTable(), sqlFilter)) {
+                                    GWTFolder gWTFolder = new GWTFolder();
+                                    String path = fldPath + "/" + keyValue.getKey();
+                                    gWTFolder.initMetadata(path, keyValue.getValue(), false);
+                                    folderList.add(gWTFolder);
+                                }
+                            } else if (formElement instanceof CheckBox) {
+                                GWTFolder gWTFolder = new GWTFolder();
+                                String path = fldPath + "/true";
+                                gWTFolder.initMetadata(path, "true", false);
+                                folderList.add(gWTFolder);
+                                gWTFolder = new GWTFolder();
+                                path = fldPath + "/false";
+                                gWTFolder.initMetadata(path, "false", false);
+                                folderList.add(gWTFolder);
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            } else {
+                for (Folder folder : OKMFolder.getInstance().getChildren(null, fldPath)) {
+                    GWTFolder gWTFolder = (extraColumns) ? GWTUtil.copy(folder, getUserWorkspaceSession()) : GWTUtil.copy(folder, null);
+                    folderList.add(gWTFolder);
+                }
             }
 
-            Collections.sort(folderList,
-                    FolderComparator.getInstance(getLanguage()));
-        } catch (final RepositoryException e) {
+            if (mapFilter != null) {
+                FilterUtils.filter(getUserWorkspaceSession(), folderList, mapFilter);
+            }
+
+            Collections.sort(folderList, FolderComparator.getInstance(getLanguage()));
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getChilds: {}", folderList);
@@ -271,46 +343,31 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public GWTFolder rename(final String fldId, final String newName)
-            throws OKMException {
+    public GWTFolder rename(String fldId, String newName) throws OKMException {
         log.debug("rename({}, {})", fldId, newName);
         GWTFolder gWTFolder = new GWTFolder();
         updateSessionManager();
 
         try {
-            gWTFolder = GWTUtil.copy(
-                    OKMFolder.getInstance().rename(null, fldId, newName),
-                    getUserWorkspaceSession());
-        } catch (final ItemExistsException e) {
+            gWTFolder = GWTUtil.copy(OKMFolder.getInstance().rename(null, fldId, newName), getUserWorkspaceSession());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("rename: {}", gWTFolder);
@@ -318,115 +375,154 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void move(final String fldPath, final String dstPath)
-            throws OKMException {
+    public void move(String fldPath, String dstPath) throws OKMException {
         log.debug("move({}, {})", fldPath, dstPath);
         updateSessionManager();
 
         try {
             OKMFolder.getInstance().move(null, fldPath, dstPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("move: void");
     }
 
     @Override
-    public void purge(final String fldPath) throws OKMException {
+    public void purge(String fldPath) throws OKMException {
         log.debug("purge({})", fldPath);
         updateSessionManager();
 
         try {
             OKMFolder.getInstance().purge(null, fldPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("purge: void");
     }
 
     @Override
-    public GWTFolder getProperties(final String fldPath) throws OKMException {
+    public GWTFolder getProperties(String fldPath) throws OKMException {
         log.debug("getProperties({})", fldPath);
         GWTFolder gWTFolder = new GWTFolder();
         updateSessionManager();
 
         try {
-            final Folder fld = OKMFolder.getInstance().getProperties(null,
-                    fldPath);
-            gWTFolder = GWTUtil.copy(fld, getUserWorkspaceSession());
-        } catch (final PathNotFoundException e) {
+            if (fldPath.startsWith("/" + Repository.METADATA)) {
+                String grpName = "";
+                String propertyName = "";
+                String subFolder[] = fldPath.split("/");
+
+                switch (fldPath.split("/").length - 1) {
+                case 1:
+                    gWTFolder.initMetadata(fldPath, OKMPropertyGroup.getInstance().getAllGroups(null).size() > 0);
+                    break;
+
+                case 2: // group level
+                    grpName = fldPath.substring(fldPath.lastIndexOf("/") + 1);
+                    String label = "";
+
+                    for (PropertyGroup pg : OKMPropertyGroup.getInstance().getAllGroups(null)) {
+                        if (pg.getName().equals(grpName)) {
+                            label = pg.getLabel();
+                            break;
+                        }
+                    }
+
+                    gWTFolder.initMetadata(fldPath, label, OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName).size() > 0);
+                    break;
+
+                case 3: // property level
+                    grpName = subFolder[2];
+                    propertyName = subFolder[3];
+
+                    for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                        if (formElement.getName().equals(propertyName)) {
+                            gWTFolder.initMetadata(fldPath, formElement.getLabel(), false);
+                            break;
+                        }
+                    }
+                    break;
+
+                case 4: // value level
+                    grpName = subFolder[2];
+                    propertyName = subFolder[3];
+                    String value = subFolder[4];
+
+                    for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                        if (formElement.getName().equals(propertyName)) {
+                            if (formElement instanceof Select) {
+                                for (Option option : ((Select) formElement).getOptions()) {
+                                    if (option.getValue().equals(value)) {
+                                        gWTFolder.initMetadata(fldPath, option.getLabel(), false);
+                                        break;
+                                    }
+                                }
+                            } else if (formElement instanceof SuggestBox) {
+                                SuggestBox sb = ((SuggestBox) formElement);
+                                String sqlFilter = sb.getFilterQuery();
+                                sqlFilter = sqlFilter.replaceAll("\\{0\\}", ""); // replacing filter parameter, if
+                                                                                 // exist
+                                for (KeyValue keyValue : KeyValueDAO.getKeyValues(sb.getTable(), sqlFilter)) {
+                                    if (keyValue.getKey().equals(value)) {
+                                        gWTFolder.initMetadata(fldPath, keyValue.getValue(), false);
+                                        break;
+                                    }
+                                }
+                            } else if (formElement instanceof CheckBox) {
+                                gWTFolder.initMetadata(fldPath, value, false);
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            } else {
+                Folder fld = OKMFolder.getInstance().getProperties(null, fldPath);
+                gWTFolder = GWTUtil.copy(fld, getUserWorkspaceSession());
+            }
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("getProperties: {}", gWTFolder);
@@ -434,76 +530,59 @@ public class FolderServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void copy(final String fldPath, final String dstPath)
-            throws OKMException {
+    public void copy(String fldPath, String dstPath) throws OKMException {
         log.debug("copy({}, {})", fldPath, dstPath);
         updateSessionManager();
 
         try {
             OKMFolder.getInstance().copy(null, fldPath, dstPath);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (ItemExistsException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
 
         log.debug("copy: void");
     }
 
     @Override
-    public Boolean isValid(final String fldPath) throws OKMException {
+    public Boolean isValid(String fldPath) throws OKMException {
         log.debug("isValid({})", fldPath);
         updateSessionManager();
 
         try {
-            return Boolean.valueOf(OKMFolder.getInstance().isValid(null,
-                    fldPath));
-        } catch (final PathNotFoundException e) {
+            // Evaluate special case metadata that really do not exist this path in repository
+            if (fldPath.startsWith(("/" + Repository.METADATA))) {
+                return true;
+            } else {
+                return Boolean.valueOf(OKMFolder.getInstance().isValid(null, fldPath));
+            }
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMFolderService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final Exception e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService,
-                            ErrorCode.CAUSE_General), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMFolderService, ErrorCode.CAUSE_General), e.getMessage());
         }
     }
 }

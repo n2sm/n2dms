@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,31 +49,23 @@ import com.openkm.bean.Mail;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.util.PathUtils;
 
-public class CategoryResource implements CollectionResource,
-        PropFindableResource, GetableResource, QuotaResource {
+public class CategoryResource implements CollectionResource, PropFindableResource, GetableResource, QuotaResource {
     private final Logger log = LoggerFactory.getLogger(CategoryResource.class);
-
     private final List<Document> docChilds;
-
     private final List<Folder> fldChilds;
-
     private final List<Mail> mailChilds;
-
     private Folder cat;
-
     private final Path path;
 
-    public CategoryResource(final Folder cat) {
-        fldChilds = null;
-        docChilds = null;
-        mailChilds = null;
-        path = null;
+    public CategoryResource(Folder cat) {
+        this.fldChilds = null;
+        this.docChilds = null;
+        this.mailChilds = null;
+        this.path = null;
         this.cat = ResourceUtils.fixResourcePath(cat);
     }
 
-    public CategoryResource(final Path path, final Folder cat,
-            final List<Folder> fldChilds, final List<Document> docChilds,
-            final List<Mail> mailChilds) {
+    public CategoryResource(Path path, Folder cat, List<Folder> fldChilds, List<Document> docChilds, List<Mail> mailChilds) {
         this.fldChilds = fldChilds;
         this.docChilds = docChilds;
         this.mailChilds = mailChilds;
@@ -96,14 +88,13 @@ public class CategoryResource implements CollectionResource,
     }
 
     @Override
-    public Object authenticate(final String user, final String password) {
+    public Object authenticate(String user, String password) {
         // log.debug("authenticate({}, {})", new Object[] { user, password });
         return ResourceFactoryImpl.REALM;
     }
 
     @Override
-    public boolean authorise(final Request request, final Method method,
-            final Auth auth) {
+    public boolean authorise(Request request, Method method, Auth auth) {
         // log.debug("authorise({}, {}, {})", new Object[] {
         // request.getAbsolutePath(), method, auth });
         return true;
@@ -125,19 +116,19 @@ public class CategoryResource implements CollectionResource,
     }
 
     @Override
-    public String checkRedirect(final Request request) {
+    public String checkRedirect(Request request) {
         return null;
     }
 
     @Override
-    public Resource child(final String childName) {
+    public Resource child(String childName) {
         log.debug("child({})", childName);
 
         try {
             return ResourceUtils.getNode(path, cat.getPath() + "/" + childName);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error("PathNotFoundException: " + e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Exception: " + e.getMessage());
         }
 
@@ -147,22 +138,22 @@ public class CategoryResource implements CollectionResource,
     @Override
     public List<? extends Resource> getChildren() {
         log.info("getChildren()");
-        final List<Resource> resources = new ArrayList<Resource>();
+        List<Resource> resources = new ArrayList<Resource>();
 
         if (fldChilds != null) {
-            for (final Folder fld : fldChilds) {
+            for (Folder fld : fldChilds) {
                 resources.add(new CategoryResource(fld));
             }
         }
 
         if (docChilds != null) {
-            for (final Document doc : docChilds) {
+            for (Document doc : docChilds) {
                 resources.add(new DocumentResource(doc));
             }
         }
 
         if (mailChilds != null) {
-            for (final Mail mail : mailChilds) {
+            for (Mail mail : mailChilds) {
                 resources.add(new MailResource(mail));
             }
         }
@@ -171,21 +162,19 @@ public class CategoryResource implements CollectionResource,
     }
 
     @Override
-    public void sendContent(final OutputStream out, final Range range,
-            final Map<String, String> params, final String contentType)
-            throws IOException, NotAuthorizedException, BadRequestException {
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException,
+            NotAuthorizedException, BadRequestException {
         log.debug("sendContent({}, {})", params, contentType);
-        ResourceUtils
-                .createContent(out, path, fldChilds, docChilds, mailChilds);
+        ResourceUtils.createContent(out, path, fldChilds, docChilds, mailChilds);
     }
 
     @Override
-    public Long getMaxAgeSeconds(final Auth auth) {
+    public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
 
     @Override
-    public String getContentType(final String accepts) {
+    public String getContentType(String accepts) {
         return null;
     }
 
@@ -206,7 +195,7 @@ public class CategoryResource implements CollectionResource,
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("cat=").append(cat);
         sb.append("}");

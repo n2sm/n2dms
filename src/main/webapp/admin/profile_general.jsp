@@ -4,7 +4,16 @@
   <table>
     <tr>
       <td>Name</td>
-      <td><input class=":required :only_on_blur" name="prf_name" value="${prf.name}"/></td>
+      <td>
+        <c:choose>
+          <c:when test="${action == 'delete' || prf.name eq 'Default'}">
+            <input class=":required :only_on_blur" name="prf_name" value="${prf.name}" readonly="readonly"/>
+          </c:when>
+          <c:otherwise>
+            <input class=":required :only_on_blur" name="prf_name" value="${prf.name}"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
     </tr>
     <tr>
       <td>Active</td>

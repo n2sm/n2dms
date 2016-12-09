@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,24 +39,18 @@ import com.openkm.frontend.client.widget.MenuBase;
 public class MailMenu extends MenuBase {
 
     private ToolBarOption toolBarOption;
-
     private MenuBar dirMenu;
-
     private MenuItem delete;
-
     private MenuItem rename;
-
     private MenuItem move;
-
     private MenuItem copy;
-
+    private MenuItem convert;
     private MenuItem note;
-
     private MenuItem category;
-
     private MenuItem keyword;
-
     private MenuItem propertyGroup;
+    private MenuItem updatePropertyGroup;
+    private MenuItem merge;
 
     /**
      * MailMenu
@@ -67,41 +61,43 @@ public class MailMenu extends MenuBase {
 
         // First initialize language values
         dirMenu = new MenuBar(true);
-        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("filebrowser.menu.delete")), true, deleteFile);
+        delete = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("filebrowser.menu.delete")), true, deleteFile);
         delete.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(delete);
-        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("general.menu.edit.rename")), true, renameFile);
+        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("general.menu.edit.rename")), true, renameFile);
         rename.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(rename);
-        move = new MenuItem(Util.menuHTML("img/icon/actions/move_document.gif",
-                Main.i18n("general.menu.edit.move")), true, moveFile);
+        move = new MenuItem(Util.menuHTML("img/icon/actions/move_document.gif", Main.i18n("general.menu.edit.move")), true, moveFile);
         move.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(move);
-        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")), true, copyFile);
+        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")), true, copyFile);
         copy.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(copy);
-        note = new MenuItem(Util.menuHTML("img/icon/actions/add_note.png",
-                Main.i18n("general.menu.edit.add.note")), true, addNote);
+        convert = new MenuItem(Util.menuHTML("img/icon/menu/convert.png", Main.i18n("general.menu.tools.convert")), true, showConvert);
+        convert.addStyleName("okm-MainMenuItem");
+        dirMenu.addItem(convert);
+        note = new MenuItem(Util.menuHTML("img/icon/actions/add_note.png", Main.i18n("general.menu.edit.add.note")), true, addNote);
         note.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(note);
-        category = new MenuItem(
-                Util.menuHTML("img/icon/stackpanel/table_key.gif",
-                        Main.i18n("category.add")), true, addCategory);
+        category = new MenuItem(Util.menuHTML("img/icon/stackpanel/table_key.gif", Main.i18n("category.add")), true, addCategory);
         category.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(category);
-        keyword = new MenuItem(Util.menuHTML("img/icon/actions/book_add.png",
-                Main.i18n("keyword.add")), true, addKeyword);
+        keyword = new MenuItem(Util.menuHTML("img/icon/actions/book_add.png", Main.i18n("keyword.add")), true, addKeyword);
         keyword.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(keyword);
-        propertyGroup = new MenuItem(Util.menuHTML(
-                "img/icon/actions/add_property_group.gif",
-                Main.i18n("general.menu.edit.add.property.group")), true,
-                addPropertyGroup);
+        propertyGroup =
+                new MenuItem(Util.menuHTML("img/icon/actions/add_property_group.gif", Main.i18n("general.menu.edit.add.property.group")),
+                        true, addPropertyGroup);
         propertyGroup.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(propertyGroup);
+        updatePropertyGroup =
+                new MenuItem(Util.menuHTML("img/icon/actions/update_property_group.png",
+                        Main.i18n("general.menu.edit.update.property.group")), true, updatePropertyGroupOKM);
+        updatePropertyGroup.addStyleName("okm-MenuItem-strike");
+        dirMenu.addItem(updatePropertyGroup);
+        merge = new MenuItem(Util.menuHTML("img/icon/actions/merge_pdf.png", Main.i18n("general.menu.edit.merge.pdf")), true, mergePdf);
+        merge.addStyleName("okm-MenuItem-strike");
+        dirMenu.addItem(merge);
 
         dirMenu.setStyleName("okm-MenuBar");
         initWidget(dirMenu);
@@ -109,7 +105,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to lock file
     Command deleteFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.deleteOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeDelete();
@@ -120,7 +115,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to rename file
     Command renameFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.renameOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeRename();
@@ -131,15 +125,9 @@ public class MailMenu extends MenuBase {
 
     // Command menu to rename file
     Command moveFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.moveOption) {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMassive()) {
-                    Main.get().activeFolderTree.massiveMove();
-                } else {
-                    Main.get().mainPanel.desktop.browser.fileBrowser.move();
-                }
+                Main.get().mainPanel.topPanel.toolBar.executeMove();
                 hide();
             }
         }
@@ -147,15 +135,19 @@ public class MailMenu extends MenuBase {
 
     // Command menu to rename file
     Command copyFile = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.copyOption) {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMassive()) {
-                    Main.get().activeFolderTree.massiveCopy();
-                } else {
-                    Main.get().mainPanel.desktop.browser.fileBrowser.copy();
-                }
+                Main.get().mainPanel.topPanel.toolBar.executeCopy();
+                hide();
+            }
+        }
+    };
+
+    // Command menu to convert
+    Command showConvert = new Command() {
+        public void execute() {
+            if (toolBarOption.convertOption) {
+                Main.get().mainPanel.topPanel.toolBar.executeConvert();
                 hide();
             }
         }
@@ -163,7 +155,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to add note
     Command addNote = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addNoteOption) {
                 Main.get().mainPanel.topPanel.toolBar.addNote();
@@ -174,7 +165,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to add category
     Command addCategory = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addCategoryOption) {
                 Main.get().mainPanel.topPanel.toolBar.addCategory();
@@ -185,7 +175,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to add category
     Command addKeyword = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addKeywordOption) {
                 Main.get().mainPanel.topPanel.toolBar.addKeyword();
@@ -196,7 +185,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to add property group
     Command addPropertyGroup = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.addPropertyGroupOption) {
                 Main.get().mainPanel.topPanel.toolBar.addPropertyGroup();
@@ -205,29 +193,44 @@ public class MailMenu extends MenuBase {
         }
     };
 
+    // Command menu to update property group
+    Command updatePropertyGroupOKM = new Command() {
+        public void execute() {
+            if (toolBarOption.updatePropertyGroupOption) {
+                Main.get().mainPanel.topPanel.toolBar.updatePropertyGroup();
+                hide();
+            }
+        }
+    };
+
+    // Command menu to merge pdf
+    Command mergePdf = new Command() {
+        public void execute() {
+            if (toolBarOption.mergePdfOption) {
+                Main.get().mainPanel.topPanel.toolBar.mergePdf();
+                hide();
+            }
+        }
+    };
+
     @Override
     public void langRefresh() {
-        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("filebrowser.menu.delete")));
-        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("general.menu.edit.rename")));
-        move.setHTML(Util.menuHTML("img/icon/actions/move_document.gif",
-                Main.i18n("general.menu.edit.move")));
-        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("general.menu.edit.copy")));
-        note.setHTML(Util.menuHTML("img/icon/actions/add_note.png",
-                Main.i18n("general.menu.edit.add.note")));
-        category.setHTML(Util.menuHTML("img/icon/stackpanel/table_key.gif",
-                Main.i18n("category.add")));
-        keyword.setHTML(Util.menuHTML("img/icon/actions/book_add.png",
-                Main.i18n("keyword.add")));
-        propertyGroup.setHTML(Util.menuHTML(
-                "img/icon/actions/add_property_group.gif",
-                Main.i18n("general.menu.edit.add.property.group")));
+        delete.setHTML(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("filebrowser.menu.delete")));
+        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("general.menu.edit.rename")));
+        move.setHTML(Util.menuHTML("img/icon/actions/move_document.gif", Main.i18n("general.menu.edit.move")));
+        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("general.menu.edit.copy")));
+        convert.setHTML(Util.menuHTML("img/icon/menu/convert.png", Main.i18n("general.menu.tools.convert")));
+        note.setHTML(Util.menuHTML("img/icon/actions/add_note.png", Main.i18n("general.menu.edit.add.note")));
+        category.setHTML(Util.menuHTML("img/icon/stackpanel/table_key.gif", Main.i18n("category.add")));
+        keyword.setHTML(Util.menuHTML("img/icon/actions/book_add.png", Main.i18n("keyword.add")));
+        propertyGroup.setHTML(Util.menuHTML("img/icon/actions/add_property_group.gif", Main.i18n("general.menu.edit.add.property.group")));
+        updatePropertyGroup.setHTML(Util.menuHTML("img/icon/actions/update_property_group.png",
+                Main.i18n("general.menu.edit.update.property.group")));
+        merge.setHTML(Util.menuHTML("img/icon/actions/merge_pdf.png", Main.i18n("general.menu.edit.merge.pdf")));
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         this.toolBarOption = toolBarOption;
         toolBarOption.bookmarkOption = true;
         evaluateMenuOptions();
@@ -242,7 +245,6 @@ public class MailMenu extends MenuBase {
     /**
      * Evaluates menu options
      */
-    @Override
     public void evaluateMenuOptions() {
         if (toolBarOption.deleteOption) {
             enable(delete);
@@ -264,6 +266,11 @@ public class MailMenu extends MenuBase {
         } else {
             disable(copy);
         }
+        if (toolBarOption.convertOption) {
+            enable(convert);
+        } else {
+            disable(convert);
+        }
         if (toolBarOption.addNoteOption) {
             enable(note);
         } else {
@@ -284,6 +291,16 @@ public class MailMenu extends MenuBase {
         } else {
             disable(propertyGroup);
         }
+        if (toolBarOption.updatePropertyGroupOption) {
+            enable(updatePropertyGroup);
+        } else {
+            disable(updatePropertyGroup);
+        }
+        if (toolBarOption.mergePdfOption) {
+            enable(merge);
+        } else {
+            disable(merge);
+        }
     }
 
     /**
@@ -294,7 +311,7 @@ public class MailMenu extends MenuBase {
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
         if (!option.isDeleteOption()) {
             dirMenu.removeItem(delete);
         }
@@ -307,6 +324,9 @@ public class MailMenu extends MenuBase {
         if (!option.isCopyOption()) {
             dirMenu.removeItem(copy);
         }
+        if (!option.isConvertOption()) {
+            dirMenu.removeItem(convert);
+        }
         if (!option.isAddNoteOption()) {
             dirMenu.removeItem(note);
         }
@@ -318,6 +338,12 @@ public class MailMenu extends MenuBase {
         }
         if (!option.isAddPropertyGroupOption()) {
             dirMenu.removeItem(propertyGroup);
+        }
+        if (!option.isUpdatePropertyGroupOption()) {
+            dirMenu.removeItem(updatePropertyGroup);
+        }
+        if (!option.isMergePdfOption()) {
+            dirMenu.removeItem(merge);
         }
     }
 
@@ -335,5 +361,21 @@ public class MailMenu extends MenuBase {
             toolBarOption.addPropertyGroupOption = false;
         }
         disable(propertyGroup);
+    }
+
+    @Override
+    public void disablePdfMerge() {
+        if (dirMenu != null) { // Condition caused by loading case
+            toolBarOption.mergePdfOption = false;
+        }
+        disable(merge);
+    }
+
+    @Override
+    public void enablePdfMerge() {
+        if (dirMenu != null) { // Condition caused by loading case
+            toolBarOption.mergePdfOption = true;
+        }
+        enable(merge);
     }
 }

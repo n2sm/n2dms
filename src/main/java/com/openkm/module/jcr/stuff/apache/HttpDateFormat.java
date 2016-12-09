@@ -26,10 +26,9 @@ import java.util.TimeZone;
  */
 public class HttpDateFormat extends SimpleDateFormat {
     private static final long serialVersionUID = 1L;
-
     private static final TimeZone GMT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
-    public HttpDateFormat(final String pattern) {
+    public HttpDateFormat(String pattern) {
         super(pattern, Locale.ENGLISH);
         super.setTimeZone(GMT_TIMEZONE);
     }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -24,13 +24,16 @@ package com.openkm.servlet.admin;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openkm.core.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,30 +55,29 @@ import com.openkm.util.WebUtils;
  */
 public class AutomationServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(AutomationServlet.class);
+    private static String ats[] = { AutomationRule.AT_PRE, AutomationRule.AT_POST };
+    private static final Map<String, String> events = new LinkedHashMap<String, String>() {
+        private static final long serialVersionUID = 1L;
+        {
+            put(AutomationRule.EVENT_DOCUMENT_CREATE, "Document creation");
+            put(AutomationRule.EVENT_DOCUMENT_UPDATE, "Document update");
+            put(AutomationRule.EVENT_DOCUMENT_MOVE, "Document move");
+            put(AutomationRule.EVENT_FOLDER_CREATE, "Folder creation");
+            put(AutomationRule.EVENT_MAIL_CREATE, "Mail creation");
+            put(AutomationRule.EVENT_PROPERTY_GROUP_ADD, "Add property group");
+            put(AutomationRule.EVENT_PROPERTY_GROUP_SET, "Set property group");
+            put(AutomationRule.EVENT_TEXT_EXTRACTOR, "Text extraction");
+            put(AutomationRule.EVENT_CONVERSION_PDF, "Convert to PDF");
+            put(AutomationRule.EVENT_CONVERSION_SWF, "Convert to SWF");
+        }
+    };
 
-    private static Logger log = LoggerFactory
-            .getLogger(AutomationServlet.class);
-
-    private static String ats[] = { AutomationRule.AT_PRE,
-            AutomationRule.AT_POST };
-
-    private static String events[] = { AutomationRule.EVENT_DOCUMENT_CREATE,
-            AutomationRule.EVENT_DOCUMENT_MOVE,
-            AutomationRule.EVENT_FOLDER_CREATE,
-            AutomationRule.EVENT_PROPERTY_GROUP_ADD,
-            AutomationRule.EVENT_PROPERTY_GROUP_SET,
-            AutomationRule.EVENT_TEXT_EXTRACTOR,
-            AutomationRule.EVENT_CONVERSION_PDF,
-            AutomationRule.EVENT_CONVERSION_SWF };
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
@@ -109,21 +111,20 @@ public class AutomationServlet extends BaseServlet {
 
             if (action.equals("") || WebUtils.getBoolean(request, "persist")) {
                 ruleList(userId, request, response);
-            } else if (action.equals("createAction")
-                    || action.equals("createValidation")
-                    || action.equals("deleteAction")
-                    || action.equals("editAction")
-                    || action.equals("deleteValidation")
-                    || action.equals("editValidation")) {
+            } else if (action.equals("createAction") || action.equals("createValidation") || action.equals("deleteAction")
+                    || action.equals("editAction") || action.equals("deleteValidation") || action.equals("editValidation")) {
                 definitionList(userId, request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final PathNotFoundException e) {
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final RepositoryException e) {
+        } catch (PathNotFoundException e) {
+            log.error(e.getMessage(), e);
+            sendErrorRedirect(request, response, e);
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -132,16 +133,13 @@ public class AutomationServlet extends BaseServlet {
     /**
      * List rules
      */
-    private void ruleList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        log.debug("ruleList({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
-        sc.setAttribute("automationRules", AutomationDAO.getInstance()
-                .findAll());
-        sc.getRequestDispatcher("/admin/automation_rule_list.jsp").forward(
-                request, response);
+    private void ruleList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("ruleList({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        sc.setAttribute("automationRules", AutomationDAO.getInstance().findAll());
+        sc.setAttribute("events", events);
+        sc.getRequestDispatcher("/admin/automation_rule_list.jsp").forward(request, response);
 
         // Activity log
         UserActivity.log(userId, "ADMIN_AUTOMATION_LIST", null, null, null);
@@ -151,70 +149,61 @@ public class AutomationServlet extends BaseServlet {
     /**
      * List rules
      */
-    private void definitionList(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PathNotFoundException, RepositoryException {
-        log.debug("definitionList({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
-        final long arId = WebUtils.getLong(request, "ar_id");
-        final AutomationRule aRule = AutomationDAO.getInstance().findByPk(arId);
+    private void definitionList(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        log.debug("definitionList({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        long arId = WebUtils.getLong(request, "ar_id");
+        AutomationRule aRule = AutomationDAO.getInstance().findByPk(arId);
 
-        for (final AutomationValidation av : aRule.getValidations()) {
+        for (AutomationValidation av : aRule.getValidations()) {
             for (int i = 0; i < av.getParams().size(); i++) {
-                av.getParams().set(
-                        i,
-                        convertToHumanValue(av.getParams().get(i),
-                                av.getType(), i));
+                av.getParams().set(i, convertToHumanValue(av.getParams().get(i), av.getType(), i));
+            }
+        }
+
+        for (AutomationAction aa : aRule.getActions()) {
+            for (int i = 0; i < aa.getParams().size(); i++) {
+                aa.getParams().set(i, convertToHumanValue(aa.getParams().get(i), aa.getType(), i));
             }
         }
 
         sc.setAttribute("ar", aRule);
-        sc.setAttribute("metadaActions", AutomationDAO.getInstance()
-                .findMetadataActionsByAt(aRule.getAt()));
-        sc.setAttribute("metadaValidations", AutomationDAO.getInstance()
-                .findMetadataValidationsByAt(aRule.getAt()));
-        sc.getRequestDispatcher("/admin/automation_definition_list.jsp")
-                .forward(request, response);
+        sc.setAttribute("metadaActions", AutomationDAO.getInstance().findMetadataActionsByAt(aRule.getAt()));
+        sc.setAttribute("metadaValidations", AutomationDAO.getInstance().findMetadataValidationsByAt(aRule.getAt()));
+        sc.getRequestDispatcher("/admin/automation_definition_list.jsp").forward(request, response);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_GET_DEFINITION_LIST", null,
-                null, null);
+        UserActivity.log(userId, "ADMIN_AUTOMATION_GET_DEFINITION_LIST", null, null, null);
         log.debug("definitionList: void");
     }
 
     /**
      * getMetadataAction
      */
-    private void getMetadata(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        final long amId = WebUtils.getLong(request, "amId");
-        final Gson son = new Gson();
-        final AutomationMetadata am = AutomationDAO.getInstance()
-                .findMetadataByPk(amId);
-        final String json = son.toJson(am);
-        final PrintWriter writer = response.getWriter();
+    private void getMetadata(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        long amId = WebUtils.getLong(request, "amId");
+        Gson son = new Gson();
+        AutomationMetadata am = AutomationDAO.getInstance().findMetadataByPk(amId);
+        String json = son.toJson(am);
+        PrintWriter writer = response.getWriter();
         writer.print(json);
         writer.flush();
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_GET_METADATA",
-                Long.toString(amId), null, am.getName());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_GET_METADATA", Long.toString(amId), null, am.getName());
     }
 
     /**
      * New automation
      */
-    private void create(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("create({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void create(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("create({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final AutomationRule ar = new AutomationRule();
+            AutomationRule ar = new AutomationRule();
             ar.setName(WebUtils.getString(request, "ar_name"));
             ar.setOrder(WebUtils.getInt(request, "ar_order"));
             ar.setExclusive(WebUtils.getBoolean(request, "ar_exclusive"));
@@ -224,18 +213,16 @@ public class AutomationServlet extends BaseServlet {
             AutomationDAO.getInstance().create(ar);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_AUTOMATION_CREATE",
-                    Long.toString(ar.getId()), null, ar.toString());
+            UserActivity.log(userId, "ADMIN_AUTOMATION_CREATE", Long.toString(ar.getId()), null, ar.toString());
         } else {
-            final ServletContext sc = getServletContext();
-            final AutomationRule ar = new AutomationRule();
+            ServletContext sc = getServletContext();
+            AutomationRule ar = new AutomationRule();
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("ar", ar);
             sc.setAttribute("ats", ats);
             sc.setAttribute("events", events);
-            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(
-                    request, response);
+            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(request, response);
         }
 
         log.debug("create: void");
@@ -243,49 +230,50 @@ public class AutomationServlet extends BaseServlet {
 
     /**
      * New metadata action
+     * @throws RepositoryException 
+     * @throws PathNotFoundException 
      */
-    private void createAction(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        final long arId = WebUtils.getLong(request, "ar_id");
-        final AutomationAction aa = new AutomationAction();
+    private void createAction(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        long arId = WebUtils.getLong(request, "ar_id");
+        AutomationAction aa = new AutomationAction();
         aa.setType(WebUtils.getLong(request, "am_id"));
         aa.setOrder(WebUtils.getInt(request, "am_order"));
         aa.setActive(WebUtils.getBoolean(request, "am_active"));
-        final List<String> params = new ArrayList<String>();
-        final String am_param00 = WebUtils.getString(request, "am_param00");
-        final String am_param01 = WebUtils.getString(request, "am_param01");
+        List<String> params = new ArrayList<String>();
+        String am_param00 = WebUtils.getString(request, "am_param00");
+        String am_param01 = WebUtils.getString(request, "am_param01");
 
         if (!am_param00.equals("")) {
-            params.add(am_param00);
+            am_param00 = convertToInternalValue(am_param00, aa.getType(), 0);
         }
 
         if (!am_param01.equals("")) {
-            params.add(am_param01);
+            am_param01 = convertToInternalValue(am_param01, aa.getType(), 1);
         }
 
+        params.add(am_param00);
+        params.add(am_param01);
         aa.setParams(params);
         AutomationDAO.getInstance().createAction(aa);
-        final AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
+        AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
         ar.getActions().add(aa);
         AutomationDAO.getInstance().update(ar);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_ADD_ACTION",
-                Long.toString(ar.getId()), null, ar.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_ADD_ACTION", Long.toString(ar.getId()), null, ar.toString());
     }
 
     /**
      * Delete action
      */
-    private void deleteAction(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        final long aaId = WebUtils.getLong(request, "aa_id");
-        final long arId = WebUtils.getLong(request, "ar_id");
-        final AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
+    private void deleteAction(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException {
+        long aaId = WebUtils.getLong(request, "aa_id");
+        long arId = WebUtils.getLong(request, "ar_id");
+        AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
 
-        for (final AutomationAction action : ar.getActions()) {
+        for (AutomationAction action : ar.getActions()) {
             if (action.getId() == aaId) {
                 ar.getActions().remove(action);
                 break;
@@ -296,119 +284,111 @@ public class AutomationServlet extends BaseServlet {
         AutomationDAO.getInstance().deleteAction(aaId);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE_ACTION",
-                Long.toString(ar.getId()), null, ar.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE_ACTION", Long.toString(ar.getId()), null, ar.toString());
     }
 
     /**
      * Edit action
+     * @throws RepositoryException 
+     * @throws PathNotFoundException 
      */
-    private void editAction(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        final long aaId = WebUtils.getLong(request, "aa_id");
-        final AutomationAction aa = AutomationDAO.getInstance().findActionByPk(
-                aaId);
+    private void editAction(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        long aaId = WebUtils.getLong(request, "aa_id");
+        AutomationAction aa = AutomationDAO.getInstance().findActionByPk(aaId);
         aa.setOrder(WebUtils.getInt(request, "am_order"));
         aa.setActive(WebUtils.getBoolean(request, "am_active"));
-        final List<String> params = new ArrayList<String>();
-        final String am_param00 = WebUtils.getString(request, "am_param00");
-        final String am_param01 = WebUtils.getString(request, "am_param01");
+        List<String> params = new ArrayList<String>();
+        String am_param00 = WebUtils.getString(request, "am_param00");
+        String am_param01 = WebUtils.getString(request, "am_param01");
 
         if (!am_param00.equals("")) {
-            params.add(am_param00);
+            am_param00 = convertToInternalValue(am_param00, aa.getType(), 0);
         }
-
         if (!am_param01.equals("")) {
-            params.add(am_param01);
+            am_param01 = convertToInternalValue(am_param01, aa.getType(), 1);
         }
-
+        params.add(am_param00);
+        params.add(am_param01);
         aa.setParams(params);
         AutomationDAO.getInstance().updateAction(aa);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_	EDIT_ACTION",
-                Long.toString(aa.getId()), null, aa.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_	EDIT_ACTION", Long.toString(aa.getId()), null, aa.toString());
     }
 
     /**
      * Edit validation
      */
-    private void editValidation(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PathNotFoundException, RepositoryException {
-        final long avId = WebUtils.getLong(request, "av_id");
-        final AutomationValidation av = AutomationDAO.getInstance()
-                .findValidationByPk(avId);
+    private void editValidation(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        long avId = WebUtils.getLong(request, "av_id");
+        AutomationValidation av = AutomationDAO.getInstance().findValidationByPk(avId);
         av.setOrder(WebUtils.getInt(request, "am_order"));
         av.setActive(WebUtils.getBoolean(request, "am_active"));
-        final List<String> params = new ArrayList<String>();
-        final String am_param00 = WebUtils.getString(request, "am_param00");
-        final String am_param01 = WebUtils.getString(request, "am_param01");
+        List<String> params = new ArrayList<String>();
+        String am_param00 = WebUtils.getString(request, "am_param00");
+        String am_param01 = WebUtils.getString(request, "am_param01");
 
         if (!am_param00.equals("")) {
-            params.add(convertToInternalValue(am_param00, av.getType(), 0));
+            am_param00 = convertToInternalValue(am_param00, av.getType(), 0);
         }
-
         if (!am_param01.equals("")) {
-            params.add(convertToInternalValue(am_param01, av.getType(), 1));
+            am_param01 = convertToInternalValue(am_param01, av.getType(), 1);
         }
 
+        params.add(am_param00);
+        params.add(am_param01);
         av.setParams(params);
         AutomationDAO.getInstance().updateValidation(av);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_	EDIT_VALIDATION",
-                Long.toString(av.getId()), null, av.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_	EDIT_VALIDATION", Long.toString(av.getId()), null, av.toString());
     }
 
     /**
      * New metadata validation
      */
-    private void createValidation(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PathNotFoundException, RepositoryException {
-        final long arId = WebUtils.getLong(request, "ar_id");
-        final AutomationValidation av = new AutomationValidation();
+    private void createValidation(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        long arId = WebUtils.getLong(request, "ar_id");
+        AutomationValidation av = new AutomationValidation();
         av.setType(WebUtils.getLong(request, "am_id"));
         av.setOrder(WebUtils.getInt(request, "am_order"));
         av.setActive(WebUtils.getBoolean(request, "am_active"));
-        final List<String> params = new ArrayList<String>();
-        final String am_param00 = WebUtils.getString(request, "am_param00");
-        final String am_param01 = WebUtils.getString(request, "am_param01");
+        List<String> params = new ArrayList<String>();
+        String am_param00 = WebUtils.getString(request, "am_param00");
+        String am_param01 = WebUtils.getString(request, "am_param01");
 
         if (!am_param00.equals("")) {
-            params.add(convertToInternalValue(am_param00, av.getType(), 0));
+            am_param00 = convertToInternalValue(am_param00, av.getType(), 0);
         }
-
         if (!am_param01.equals("")) {
-            params.add(convertToInternalValue(am_param01, av.getType(), 1));
+            am_param01 = convertToInternalValue(am_param01, av.getType(), 1);
         }
 
+        params.add(am_param00);
+        params.add(am_param01);
         av.setParams(params);
         AutomationDAO.getInstance().createValidation(av);
-        final AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
+        AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
         ar.getValidations().add(av);
         AutomationDAO.getInstance().update(ar);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_ADD_VALIDATION",
-                Long.toString(ar.getId()), null, ar.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_ADD_VALIDATION", Long.toString(ar.getId()), null, ar.toString());
     }
 
     /**
      * Delete validation
      */
-    private void deleteValidation(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException {
-        final long avId = WebUtils.getLong(request, "av_id");
-        final long arId = WebUtils.getLong(request, "ar_id");
-        final AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
+    private void deleteValidation(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException {
+        long avId = WebUtils.getLong(request, "av_id");
+        long arId = WebUtils.getLong(request, "ar_id");
+        AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
 
-        for (final AutomationValidation validation : ar.getValidations()) {
+        for (AutomationValidation validation : ar.getValidations()) {
             if (validation.getId() == avId) {
                 ar.getValidations().remove(validation);
                 break;
@@ -419,23 +399,19 @@ public class AutomationServlet extends BaseServlet {
         AutomationDAO.getInstance().deleteValidation(avId);
 
         // Activity log
-        UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE_VALIDATION",
-                Long.toString(ar.getId()), null, ar.toString());
+        UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE_VALIDATION", Long.toString(ar.getId()), null, ar.toString());
     }
 
     /**
      * Edit automation
      */
-    private void edit(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("edit({}, {}, {})",
-                new Object[] { userId, request, response });
+    private void edit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("edit({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final long arId = WebUtils.getLong(request, "ar_id");
-            final AutomationRule ar = AutomationDAO.getInstance()
-                    .findByPk(arId);
+            long arId = WebUtils.getLong(request, "ar_id");
+            AutomationRule ar = AutomationDAO.getInstance().findByPk(arId);
             ar.setName(WebUtils.getString(request, "ar_name"));
             ar.setOrder(WebUtils.getInt(request, "ar_order"));
             ar.setExclusive(WebUtils.getBoolean(request, "ar_exclusive"));
@@ -444,18 +420,16 @@ public class AutomationServlet extends BaseServlet {
             AutomationDAO.getInstance().update(ar);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_AUTOMATION_EDIT",
-                    Long.toString(ar.getId()), null, ar.toString());
+            UserActivity.log(userId, "ADMIN_AUTOMATION_EDIT", Long.toString(ar.getId()), null, ar.toString());
         } else {
-            final ServletContext sc = getServletContext();
-            final long arId = WebUtils.getLong(request, "ar_id");
+            ServletContext sc = getServletContext();
+            long arId = WebUtils.getLong(request, "ar_id");
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("ar", AutomationDAO.getInstance().findByPk(arId));
             sc.setAttribute("ats", ats);
             sc.setAttribute("events", events);
-            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(
-                    request, response);
+            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(request, response);
         }
 
         log.debug("edit: void");
@@ -464,41 +438,44 @@ public class AutomationServlet extends BaseServlet {
     /**
      * Load Metadata form
      */
-    private void loadMetadataForm(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws ServletException, IOException, DatabaseException,
-            PathNotFoundException, RepositoryException {
-        final ServletContext sc = getServletContext();
-        final String action = WebUtils.getString(request, "newAction");
+    private void loadMetadataForm(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException,
+            IOException, DatabaseException, AccessDeniedException, PathNotFoundException, RepositoryException {
+        ServletContext sc = getServletContext();
+        String action = WebUtils.getString(request, "newAction");
         sc.setAttribute("action", action);
         sc.setAttribute("ar_id", WebUtils.getString(request, "ar_id"));
-        final long amId = WebUtils.getLong(request, "am_id");
+        long amId = WebUtils.getLong(request, "am_id");
         sc.setAttribute("am_id", amId);
 
         if (action.equals("createAction") || action.equals("createValidation")) {
-            sc.setAttribute("am",
-                    AutomationDAO.getInstance().findMetadataByPk(amId));
+            sc.setAttribute("am", AutomationDAO.getInstance().findMetadataByPk(amId));
             sc.setAttribute("aa_id", "");
             sc.setAttribute("av_id", "");
             sc.setAttribute("am_order", "0");
             sc.setAttribute("am_param00", "");
             sc.setAttribute("am_param01", "");
         } else if (action.equals("deleteAction") || action.equals("editAction")) {
-            final long aaId = WebUtils.getLong(request, "aa_id");
+            long aaId = WebUtils.getLong(request, "aa_id");
             sc.setAttribute("aa_id", aaId);
             sc.setAttribute("av_id", "");
-            final AutomationMetadata am = AutomationDAO.getInstance()
-                    .findMetadataByPk(amId);
-            final AutomationAction aa = AutomationDAO.getInstance()
-                    .findActionByPk(aaId);
+            AutomationMetadata am = AutomationDAO.getInstance().findMetadataByPk(amId);
+            AutomationAction aa = AutomationDAO.getInstance().findActionByPk(aaId);
 
             for (int i = 0; i < aa.getParams().size(); i++) {
                 switch (i) {
                 case 0:
-                    sc.setAttribute("am_param00", aa.getParams().get(0));
+                    if (aa.getParams().get(0) != null && !aa.getParams().get(0).equals("")) {
+                        sc.setAttribute("am_param00", convertToHumanValue(aa.getParams().get(0), aa.getType(), 0));
+                    } else {
+                        sc.setAttribute("am_param00", "");
+                    }
                     break;
                 case 1:
-                    sc.setAttribute("am_param01", aa.getParams().get(1));
+                    if (aa.getParams().get(1) != null && !aa.getParams().get(1).equals("")) {
+                        sc.setAttribute("am_param01", convertToHumanValue(aa.getParams().get(1), aa.getType(), 1));
+                    } else {
+                        sc.setAttribute("am_param01", "");
+                    }
                     break;
                 }
             }
@@ -506,29 +483,28 @@ public class AutomationServlet extends BaseServlet {
             sc.setAttribute("am_order", String.valueOf(aa.getOrder()));
             am.setActive(aa.isActive());
             sc.setAttribute("am", am);
-        } else if (action.equals("deleteValidation")
-                || action.equals("editValidation")) {
-            final long avId = WebUtils.getLong(request, "av_id");
+        } else if (action.equals("deleteValidation") || action.equals("editValidation")) {
+            long avId = WebUtils.getLong(request, "av_id");
             sc.setAttribute("aa_id", "");
             sc.setAttribute("av_id", avId);
-            final AutomationMetadata am = AutomationDAO.getInstance()
-                    .findMetadataByPk(amId);
-            final AutomationValidation av = AutomationDAO.getInstance()
-                    .findValidationByPk(avId);
+            AutomationMetadata am = AutomationDAO.getInstance().findMetadataByPk(amId);
+            AutomationValidation av = AutomationDAO.getInstance().findValidationByPk(avId);
 
             for (int i = 0; i < av.getParams().size(); i++) {
                 switch (i) {
                 case 0:
-                    sc.setAttribute(
-                            "am_param00",
-                            convertToHumanValue(av.getParams().get(0),
-                                    av.getType(), 0));
+                    if (av.getParams().get(0) != null && !av.getParams().get(0).equals("")) {
+                        sc.setAttribute("am_param00", convertToHumanValue(av.getParams().get(0), av.getType(), 0));
+                    } else {
+                        sc.setAttribute("am_param00", "");
+                    }
                     break;
                 case 1:
-                    sc.setAttribute(
-                            "am_param01",
-                            convertToHumanValue(av.getParams().get(1),
-                                    av.getType(), 1));
+                    if (av.getParams().get(1) != null && !av.getParams().get(1).equals("")) {
+                        sc.setAttribute("am_param01", convertToHumanValue(av.getParams().get(1), av.getType(), 1));
+                    } else {
+                        sc.setAttribute("am_param01", "");
+                    }
                     break;
                 }
             }
@@ -538,36 +514,31 @@ public class AutomationServlet extends BaseServlet {
             sc.setAttribute("am", am);
         }
 
-        sc.getRequestDispatcher("/admin/automation_definition_form.jsp")
-                .forward(request, response);
+        sc.getRequestDispatcher("/admin/automation_definition_form.jsp").forward(request, response);
     }
 
     /**
      * Delete automation
      */
-    private void delete(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("delete({}, {}, {})", new Object[] { userId, request,
-                response });
+    private void delete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("delete({}, {}, {})", new Object[] { userId, request, response });
 
         if (WebUtils.getBoolean(request, "persist")) {
-            final long arId = WebUtils.getLong(request, "ar_id");
+            long arId = WebUtils.getLong(request, "ar_id");
             AutomationDAO.getInstance().delete(arId);
 
             // Activity log
-            UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE",
-                    Long.toString(arId), null, null);
+            UserActivity.log(userId, "ADMIN_AUTOMATION_DELETE", Long.toString(arId), null, null);
         } else {
-            final ServletContext sc = getServletContext();
-            final long arId = WebUtils.getLong(request, "ar_id");
+            ServletContext sc = getServletContext();
+            long arId = WebUtils.getLong(request, "ar_id");
             sc.setAttribute("action", WebUtils.getString(request, "action"));
             sc.setAttribute("persist", true);
             sc.setAttribute("ar", AutomationDAO.getInstance().findByPk(arId));
             sc.setAttribute("ats", ats);
             sc.setAttribute("events", events);
-            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(
-                    request, response);
+            sc.getRequestDispatcher("/admin/automation_rule_edit.jsp").forward(request, response);
         }
 
         log.debug("edit: void");
@@ -576,22 +547,21 @@ public class AutomationServlet extends BaseServlet {
     /**
      * convertToInternalValue
      */
-    private String convertToInternalValue(String value, final long amId,
-            final int param) throws DatabaseException, PathNotFoundException,
-            RepositoryException {
-        final AutomationMetadata am = AutomationDAO.getInstance()
-                .findMetadataByPk(amId);
+    private String convertToInternalValue(String value, long amId, int param) throws DatabaseException, AccessDeniedException,
+            PathNotFoundException, RepositoryException {
+        AutomationMetadata am = AutomationDAO.getInstance().findMetadataByPk(amId);
 
         // Convert folder path to UUID
-        switch (param) {
-        case 0:
-            if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource00())) {
-                value = OKMRepository.getInstance().getNodeUuid(null, value);
-            }
-        case 1:
-            if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource01())) {
-                return value = OKMRepository.getInstance().getNodeUuid(null,
-                        value);
+        if (value != null && !value.equals("")) {
+            switch (param) {
+            case 0:
+                if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource00())) {
+                    value = OKMRepository.getInstance().getNodeUuid(null, value);
+                }
+            case 1:
+                if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource01())) {
+                    value = OKMRepository.getInstance().getNodeUuid(null, value);
+                }
             }
         }
 
@@ -601,22 +571,21 @@ public class AutomationServlet extends BaseServlet {
     /**
      * convertToHumanValue
      */
-    private String convertToHumanValue(String value, final long amId,
-            final int param) throws DatabaseException, PathNotFoundException,
-            RepositoryException {
-        final AutomationMetadata am = AutomationDAO.getInstance()
-                .findMetadataByPk(amId);
+    private String convertToHumanValue(String value, long amId, int param) throws DatabaseException, AccessDeniedException,
+            PathNotFoundException, RepositoryException {
+        AutomationMetadata am = AutomationDAO.getInstance().findMetadataByPk(amId);
 
         // Convert folder path to UUID
-        switch (param) {
-        case 0:
-            if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource00())) {
-                value = OKMRepository.getInstance().getNodePath(null, value);
-            }
-        case 1:
-            if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource01())) {
-                return value = OKMRepository.getInstance().getNodePath(null,
-                        value);
+        if (value != null && !value.equals("")) {
+            switch (param) {
+            case 0:
+                if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource00())) {
+                    value = OKMRepository.getInstance().getNodePath(null, value);
+                }
+            case 1:
+                if (AutomationMetadata.SOURCE_FOLDER.equals(am.getSource01())) {
+                    value = OKMRepository.getInstance().getNodePath(null, value);
+                }
             }
         }
 

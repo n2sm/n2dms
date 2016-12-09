@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,38 +25,25 @@ import java.io.Serializable;
 
 public class Profile implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long id;
-
     private String name;
-
     private boolean active;
-
     private ProfileChat prfChat = new ProfileChat();
-
-    private ProfileExplorer prfExplorer = new ProfileExplorer();
-
+    private ProfilePagination prfPagination = new ProfilePagination();
     private ProfileDashboard prfDashboard = new ProfileDashboard();
-
     private ProfileMenu prfMenu = new ProfileMenu();
-
     private ProfileMisc prfMisc = new ProfileMisc();
-
     private ProfileStack prfStack = new ProfileStack();
-
     private ProfileTab prfTab = new ProfileTab();
-
     private ProfileWizard prfWizard = new ProfileWizard();
-
     private ProfileToolbar prfToolbar = new ProfileToolbar();
-
     private ProfileFileBrowser prfFileBrowser = new ProfileFileBrowser();
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -64,7 +51,7 @@ public class Profile implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -72,7 +59,7 @@ public class Profile implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -80,23 +67,23 @@ public class Profile implements Serializable {
         return prfChat;
     }
 
-    public void setPrfChat(final ProfileChat prfChat) {
+    public void setPrfChat(ProfileChat prfChat) {
         this.prfChat = prfChat;
     }
 
-    public ProfileExplorer getPrfExplorer() {
-        return prfExplorer;
+    public ProfilePagination getPrfPagination() {
+        return prfPagination;
     }
 
-    public void setPrfExplorer(final ProfileExplorer prfExplorer) {
-        this.prfExplorer = prfExplorer;
+    public void setPrfPagination(ProfilePagination prfPagination) {
+        this.prfPagination = prfPagination;
     }
 
     public ProfileDashboard getPrfDashboard() {
         return prfDashboard;
     }
 
-    public void setPrfDashboard(final ProfileDashboard prfDashboard) {
+    public void setPrfDashboard(ProfileDashboard prfDashboard) {
         this.prfDashboard = prfDashboard;
     }
 
@@ -104,7 +91,7 @@ public class Profile implements Serializable {
         return prfMenu;
     }
 
-    public void setPrfMenu(final ProfileMenu prfMenu) {
+    public void setPrfMenu(ProfileMenu prfMenu) {
         this.prfMenu = prfMenu;
     }
 
@@ -112,7 +99,7 @@ public class Profile implements Serializable {
         return prfMisc;
     }
 
-    public void setPrfMisc(final ProfileMisc prfMisc) {
+    public void setPrfMisc(ProfileMisc prfMisc) {
         this.prfMisc = prfMisc;
     }
 
@@ -120,7 +107,7 @@ public class Profile implements Serializable {
         return prfStack;
     }
 
-    public void setPrfStack(final ProfileStack prfStack) {
+    public void setPrfStack(ProfileStack prfStack) {
         this.prfStack = prfStack;
     }
 
@@ -128,7 +115,7 @@ public class Profile implements Serializable {
         return prfTab;
     }
 
-    public void setPrfTab(final ProfileTab prfTab) {
+    public void setPrfTab(ProfileTab prfTab) {
         this.prfTab = prfTab;
     }
 
@@ -136,7 +123,7 @@ public class Profile implements Serializable {
         return prfWizard;
     }
 
-    public void setPrfWizard(final ProfileWizard prfWizard) {
+    public void setPrfWizard(ProfileWizard prfWizard) {
         this.prfWizard = prfWizard;
     }
 
@@ -144,7 +131,7 @@ public class Profile implements Serializable {
         return prfToolbar;
     }
 
-    public void setPrfToolbar(final ProfileToolbar prfToolbar) {
+    public void setPrfToolbar(ProfileToolbar prfToolbar) {
         this.prfToolbar = prfToolbar;
     }
 
@@ -152,13 +139,12 @@ public class Profile implements Serializable {
         return prfFileBrowser;
     }
 
-    public void setPrfFileBrowser(final ProfileFileBrowser prfFileBrowser) {
+    public void setPrfFileBrowser(ProfileFileBrowser prfFileBrowser) {
         this.prfFileBrowser = prfFileBrowser;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);
@@ -168,8 +154,8 @@ public class Profile implements Serializable {
         sb.append(active);
         sb.append(", prfChat=");
         sb.append(prfChat);
-        sb.append(", prfExplorer=");
-        sb.append(prfExplorer);
+        sb.append(", prfPagination=");
+        sb.append(prfPagination);
         sb.append(", prfDashboard=");
         sb.append(prfDashboard);
         sb.append(", prfMenu=");

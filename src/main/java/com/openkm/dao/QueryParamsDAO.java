@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,8 +21,9 @@
 
 package com.openkm.dao;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -43,7 +44,7 @@ public class QueryParamsDAO {
     /**
      * Create
      */
-    public static long create(final QueryParams qp) throws DatabaseException {
+    public static long create(QueryParams qp) throws DatabaseException {
         log.debug("create({})", qp);
         Session session = null;
         Transaction tx = null;
@@ -51,27 +52,26 @@ public class QueryParamsDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Long id = (Long) session.save(qp);
-            final QueryParams qpTmp = (QueryParams) session.load(
-                    QueryParams.class, id);
+            Long id = (Long) session.save(qp);
+            QueryParams qpTmp = (QueryParams) session.load(QueryParams.class, id);
 
-            for (final String keyword : qp.getKeywords()) {
+            for (String keyword : qp.getKeywords()) {
                 qpTmp.getKeywords().add(keyword);
             }
 
-            for (final String category : qp.getCategories()) {
+            for (String category : qp.getCategories()) {
                 qpTmp.getCategories().add(category);
             }
 
-            for (final Map.Entry<String, String> entry : qp.getProperties()
-                    .entrySet()) {
+            for (Iterator<Entry<String, String>> it = qp.getProperties().entrySet().iterator(); it.hasNext();) {
+                Entry<String, String> entry = it.next();
                 qpTmp.getProperties().put(entry.getKey(), entry.getValue());
             }
 
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -82,7 +82,7 @@ public class QueryParamsDAO {
     /**
      * Update
      */
-    public static void update(final QueryParams qp) throws DatabaseException {
+    public static void update(QueryParams qp) throws DatabaseException {
         log.debug("update({})", qp);
         Session session = null;
         Transaction tx = null;
@@ -92,7 +92,7 @@ public class QueryParamsDAO {
             tx = session.beginTransaction();
             session.update(qp);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -105,7 +105,7 @@ public class QueryParamsDAO {
     /**
      * Delete
      */
-    public static void delete(final long qpId) throws DatabaseException {
+    public static void delete(long qpId) throws DatabaseException {
         log.debug("delete({})", qpId);
         Session session = null;
         Transaction tx = null;
@@ -113,11 +113,10 @@ public class QueryParamsDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final QueryParams qp = (QueryParams) session.load(
-                    QueryParams.class, qpId);
+            QueryParams qp = (QueryParams) session.load(QueryParams.class, qpId);
             session.delete(qp);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -130,21 +129,19 @@ public class QueryParamsDAO {
     /**
      * Find by pk
      */
-    public static QueryParams findByPk(final long qpId)
-            throws DatabaseException {
+    public static QueryParams findByPk(long qpId) throws DatabaseException {
         log.debug("findByPk({})", qpId);
-        final String qs = "from QueryParams qp where qp.id=:id";
+        String qs = "from QueryParams qp where qp.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", qpId);
-            final QueryParams ret = (QueryParams) q.setMaxResults(1)
-                    .uniqueResult();
+            QueryParams ret = (QueryParams) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -155,74 +152,21 @@ public class QueryParamsDAO {
      * Find by user
      */
     @SuppressWarnings("unchecked")
-    public static List<QueryParams> findByUser(final String user)
-            throws DatabaseException {
+    public static List<QueryParams> findByUser(String user) throws DatabaseException {
         log.debug("findByUser({})", user);
-        final String qs = "from QueryParams qp where qp.user=:user";
+        String qs = "from QueryParams qp where qp.user=:user";
         Session session = null;
-        final Transaction tx = null;
+        Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
-            final List<QueryParams> ret = q.list();
+            List<QueryParams> ret = q.list();
             HibernateUtil.commit(tx);
             log.debug("findByUser: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
-            HibernateUtil.rollback(tx);
-            throw new DatabaseException(e.getMessage(), e);
-        } finally {
-            HibernateUtil.close(session);
-        }
-    }
-
-    /**
-     * Share
-     */
-    public static void share(final long qpId, final String user)
-            throws DatabaseException {
-        log.debug("share({})", qpId);
-        Session session = null;
-        Transaction tx = null;
-
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            final QueryParams qp = (QueryParams) session.load(
-                    QueryParams.class, qpId);
-            qp.getShared().add(user);
-            session.update(qp);
-            HibernateUtil.commit(tx);
-            log.debug("share: void");
-        } catch (final HibernateException e) {
-            HibernateUtil.rollback(tx);
-            throw new DatabaseException(e.getMessage(), e);
-        } finally {
-            HibernateUtil.close(session);
-        }
-    }
-
-    /**
-     * Unshare
-     */
-    public static void unshare(final long qpId, final String user)
-            throws DatabaseException {
-        log.debug("share({})", qpId);
-        Session session = null;
-        Transaction tx = null;
-
-        try {
-            session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            final QueryParams qp = (QueryParams) session.load(
-                    QueryParams.class, qpId);
-            qp.getShared().remove(user);
-            session.update(qp);
-            HibernateUtil.commit(tx);
-            log.debug("share: void");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

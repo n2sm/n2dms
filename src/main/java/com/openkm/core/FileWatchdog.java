@@ -17,7 +17,6 @@ public abstract class FileWatchdog extends Thread {
      * seconds.
      */
     static final public long DEFAULT_DELAY = 60000;
-
     /**
      * The name of the file to observe for changes.
      */
@@ -30,14 +29,11 @@ public abstract class FileWatchdog extends Thread {
     protected long delay = DEFAULT_DELAY;
 
     File file;
-
     long lastModif = 0;
-
     boolean warnedAlready = false;
-
     boolean interrupted = false;
 
-    protected FileWatchdog(final String filename) {
+    protected FileWatchdog(String filename) {
         this.filename = filename;
         file = new File(filename);
         setDaemon(true);
@@ -47,11 +43,10 @@ public abstract class FileWatchdog extends Thread {
     /**
      * Set the delay to observe between each check of the file changes.
      */
-    public void setDelay(final long delay) {
+    public void setDelay(long delay) {
         this.delay = delay;
     }
 
-    @Override
     public void interrupt() {
         interrupted = true;
     }
@@ -62,15 +57,14 @@ public abstract class FileWatchdog extends Thread {
         boolean fileExists;
         try {
             fileExists = file.exists();
-        } catch (final SecurityException e) {
-            log.warn("Was not allowed to read check file existance, file:["
-                    + filename + "].");
+        } catch (SecurityException e) {
+            log.warn("Was not allowed to read check file existance, file:[" + filename + "].");
             interrupted = true; // there is no point in continuing
             return;
         }
 
         if (fileExists) {
-            final long l = file.lastModified(); // this can also throw a SecurityException
+            long l = file.lastModified(); // this can also throw a SecurityException
 
             if (l > lastModif) { // however, if we reached this point this
                 lastModif = l; // is very unlikely.
@@ -85,12 +79,11 @@ public abstract class FileWatchdog extends Thread {
         }
     }
 
-    @Override
     public void run() {
         while (!interrupted) {
             try {
                 Thread.sleep(delay);
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 // no interruption expected
             }
 

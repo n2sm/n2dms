@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,19 +30,10 @@ import com.openkm.dao.bean.AutomationMetadata;
 
 @SuppressWarnings("serial")
 public class AutomationFormElementTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String type;
-
     private String source;
-
     private String value;
-
     private String name;
-
     private boolean readonly;
 
     @Override
@@ -52,113 +43,90 @@ public class AutomationFormElementTag extends TagSupport {
         if (type.equals(AutomationMetadata.TYPE_TEXT)) {
             if (source != null) {
                 if (source.equals("")) {
-                    html += "<input class=\":required :only_on_blur\" size=\"40\" type=\"text\" name=\""
-                            + name
-                            + "\" id=\""
-                            + name
-                            + "\" value=\""
-                            + (value == null ? "" : value)
-                            + "\" "
-                            + (readonly ? "readonly=\"readonly\"" : "") + ">";
+                    html +=
+                            "<input class=\":required :only_on_blur\" size=\"40\" type=\"text\" name=\"" + name + "\" id=\"" + name
+                                    + "\" value=\"" + ((value == null) ? "" : value) + "\" " + ((readonly) ? "readonly=\"readonly\"" : "")
+                                    + ">";
                 } else if (source.equals(AutomationMetadata.SOURCE_FOLDER)) {
                     // @formatter:off
-                    html += "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
-                            + "<tr><td>"
-                            + "<input class=\":required :only_on_blur\" size=\"40\" type=\"text\" name=\""
-                            + name
-                            + "\" id=\""
-                            + name
-                            + "\" value=\""
-                            + (value == null ? "" : value)
-                            + "\" "
-                            + "readonly=\"readonly\">"
-                            + "</td><td>&nbsp;"
-                            + "<a class=\"ds\" href=\"../extension/DataBrowser?action=repo&sel=fld&dst="
-                            + name
-                            + "\"><img src=\"img/action/browse_repo.png\"/></a>"
-                            + "</td></tr>" + "</table>";
-                    // @formatter:on
+					html += "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
+							+ "<tr><td>"
+							+ "<input class=\":required :only_on_blur\" size=\"40\" type=\"text\" name=\"" + name
+							+ "\" id=\"" + name + "\" value=\"" + ((value == null) ? "" : value) + "\" "
+							+ "readonly=\"readonly\">"
+							+ "</td><td>&nbsp;"
+							+ "<a class=\"ds\" href=\"../extension/DataBrowser?action=repo&sel=fld&dst=" + name
+							+ "\"><img src=\"img/action/browse_repo.png\"/></a>"
+							+ "</td></tr>"
+							+ "</table>";
+					// @formatter:on
                 }
             }
         } else if (type.equals(AutomationMetadata.TYPE_INTEGER)) {
-            html += "<input class=\":integer :required :only_on_blur\" size=\"40\" type=\"text\" name=\""
-                    + name
-                    + "\" id=\""
-                    + name
-                    + "\" value=\""
-                    + (value == null ? "" : value)
-                    + "\" "
-                    + (readonly ? "readonly=\"readonly\"" : "") + ">";
+            html +=
+                    "<input class=\":integer :required :only_on_blur\" size=\"40\" type=\"text\" name=\"" + name + "\" id=\"" + name
+                            + "\" value=\"" + ((value == null) ? "" : value) + "\" " + ((readonly) ? "readonly=\"readonly\"" : "") + ">";
         } else if (type.equals(AutomationMetadata.TYPE_BOOLEAN)) {
             if (readonly) {
-                html += "<input type=\"hidden\" name=\"" + name + "\" id=\""
-                        + name + "\">" + (value == null ? "" : value);
+                html += "<input type=\"hidden\" name=\"" + name + "\" id=\"" + name + "\">" + ((value == null) ? "" : value);
             } else {
                 html += "<select name=\"" + name + "\" id=\"" + name + "\">";
+
                 if (value != null) {
                     if (Boolean.valueOf(value).booleanValue()) {
-                        html += "<option value=\""
-                                + String.valueOf(Boolean.FALSE)
-                                + "\">false</option>";
-                        html += "<option value=\""
-                                + String.valueOf(Boolean.TRUE)
-                                + "\" selected=\"selected\">true</option>";
+                        html += "<option value=\"" + String.valueOf(Boolean.FALSE) + "\">false</option>";
+                        html += "<option value=\"" + String.valueOf(Boolean.TRUE) + "\" selected=\"selected\">true</option>";
                     } else {
-                        html += "<option value=\""
-                                + String.valueOf(Boolean.FALSE)
-                                + "\" selected=\"selected\">false</option>";
-                        html += "<option value=\""
-                                + String.valueOf(Boolean.TRUE)
-                                + "\">true</option>";
+                        html += "<option value=\"" + String.valueOf(Boolean.FALSE) + "\" selected=\"selected\">false</option>";
+                        html += "<option value=\"" + String.valueOf(Boolean.TRUE) + "\">true</option>";
                     }
                 } else {
-                    html += "<option value=\"" + String.valueOf(Boolean.FALSE)
-                            + "\">false</option>";
-                    html += "<option value=\"" + String.valueOf(Boolean.TRUE)
-                            + "\">true</option>";
+                    html += "<option value=\"" + String.valueOf(Boolean.FALSE) + "\">false</option>";
+                    html += "<option value=\"" + String.valueOf(Boolean.TRUE) + "\">true</option>";
                 }
+
                 html += "</select>";
             }
         } else if (type.equals(AutomationMetadata.TYPE_TEXTAREA)) {
             // @formatter:off
-            // Table
-            html += "<table class=\"form\">" + "<tr><td>";
-            // Text are
-            html += "<textarea cols=\"80\" rows=\"25\" name=\"" + name
-                    + "\" id=\"" + name + "\">" + (value != null ? value : "")
-                    + "</textarea>";
-            // Js and css resources
-            html += "<link rel=\"stylesheet\" type=\"text/css\" href=\"js/codemirror/lib/codemirror.css\" />\n"
-                    + "<link rel=\"stylesheet\" type=\"text/css\" href=\"js/codemirror/mode/clike/clike.css\" />\n"
-                    + "<style type=\"text/css\">"
-                    + ".CodeMirror { width: 600px; height: 300px; background-color: #f8f6c2; }\n"
-                    + ".activeline { background: #f0fcff !important; }\n"
-                    + "</style>\n"
-                    + "<script type=\"text/javascript\" src=\"js/codemirror/lib/codemirror.js\"></script>\n"
-                    + "<script type=\"text/javascript\" src=\"js/codemirror/mode/clike/clike.js\"></script>\n";
-            // Initilizing codemirror
-            html += "<script type=\"text/javascript\">\n"
-                    + "cm = CodeMirror.fromTextArea(document.getElementById('"
-                    + name
-                    + "'), {\n"
-                    + "lineNumbers: true,\n"
-                    + "matchBrackets: true,\n"
-                    + "indentUnit: 4,\n"
-                    + "mode: \"text/x-java\",\n"
-                    + "onCursorActivity: function() {\n"
-                    + "cm.setLineClass(hlLine, null);\n"
-                    + "hlLine = cm.setLineClass(cm.getCursor().line, \"activeline\");\n"
-                    + "}\n" + "});\n" + "\n"
-                    + "hlLine = cm.setLineClass(0, \"activeline\");\n"
-                    + "</script>\n";
-            // closing table
-            html += "</td></tr>" + "</table>";
-            // @formatter:on
+			// Table
+			html += "<table class=\"form\">"
+				    +"<tr><td>";
+				// Text are
+				html += "<textarea cols=\"80\" rows=\"25\" name=\""+name+"\" id=\""+name+"\">"+((value!=null)?value:"")+"</textarea>";
+				// Js and css resources
+				html += "<link rel=\"stylesheet\" type=\"text/css\" href=\"js/codemirror/lib/codemirror.css\" />\n"
+						+"<link rel=\"stylesheet\" type=\"text/css\" href=\"js/codemirror/mode/clike/clike.css\" />\n"
+						+"<style type=\"text/css\">"
+							+".CodeMirror { width: 600px; height: 300px; background-color: #f8f6c2; }\n"
+							+".activeline { background: #f0fcff !important; }\n"
+						+"</style>\n"
+						+"<script type=\"text/javascript\" src=\"js/codemirror/lib/codemirror.js\"></script>\n"
+						+"<script type=\"text/javascript\" src=\"js/codemirror/mode/clike/clike.js\"></script>\n";
+				// Initilizing codemirror
+				html += "<script type=\"text/javascript\">\n"
+						+"cm = CodeMirror.fromTextArea(document.getElementById('"+name+"'), {\n"
+							+"lineNumbers: true,\n"
+							+"matchBrackets: true,\n"
+							+"indentUnit: 4,\n"
+							+"mode: \"text/x-java\",\n"
+							+"onCursorActivity: function() {\n"
+								+"cm.setLineClass(hlLine, null);\n"
+								+"hlLine = cm.setLineClass(cm.getCursor().line, \"activeline\");\n"
+							+"}\n"
+						+"});\n"
+						+"\n"
+						+"hlLine = cm.setLineClass(0, \"activeline\");\n"
+						+"</script>\n";
+			// closing table
+			html += "</td></tr>"
+				    +"</table>";
+			// @formatter:on
         }
 
         try {
             pageContext.getOut().write(html);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -179,7 +147,7 @@ public class AutomationFormElementTag extends TagSupport {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -187,7 +155,7 @@ public class AutomationFormElementTag extends TagSupport {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -195,7 +163,7 @@ public class AutomationFormElementTag extends TagSupport {
         return source;
     }
 
-    public void setSource(final String source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
@@ -203,7 +171,7 @@ public class AutomationFormElementTag extends TagSupport {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -211,7 +179,7 @@ public class AutomationFormElementTag extends TagSupport {
         return readonly;
     }
 
-    public void setreadonly(final boolean readonly) {
+    public void setreadonly(boolean readonly) {
         this.readonly = readonly;
     }
 }

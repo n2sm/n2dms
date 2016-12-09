@@ -1,7 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -64,8 +64,8 @@
               </c:choose>
             </b>
           </td>
-          <td><fmt:formatDate value="${token.start.time}" type="both"/></td>
-          <td><fmt:formatDate value="${token.end.time}" type="both"/></td>
+          <td><u:formatDate calendar="${token.start}"/></td>
+          <td><u:formatDate calendar="${token.end}"/></td>
         </tr>
       </table>
       <h2>Transitions</h2>

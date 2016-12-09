@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,7 +40,6 @@ import com.openkm.module.db.stuff.SecurityHelper;
 
 public class NodeNoteDAO {
     private static Logger log = LoggerFactory.getLogger(NodeNoteDAO.class);
-
     private static NodeNoteDAO single = new NodeNoteDAO();
 
     private NodeNoteDAO() {
@@ -54,10 +53,9 @@ public class NodeNoteDAO {
      * Find by parent
      */
     @SuppressWarnings("unchecked")
-    public List<NodeNote> findByParent(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    public List<NodeNote> findByParent(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByParent({})", parentUuid);
-        final String qs = "from NodeNote nn where nn.parent=:parent order by nn.created";
+        String qs = "from NodeNote nn where nn.parent=:parent order by nn.created";
         Session session = null;
         Transaction tx = null;
 
@@ -66,24 +64,23 @@ public class NodeNoteDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                    parentUuid);
+            NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
             SecurityHelper.checkRead(parentNode);
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("parent", parentUuid);
-            final List<NodeNote> ret = q.list();
+            List<NodeNote> ret = q.list();
             initialize(ret);
             HibernateUtil.commit(tx);
             log.debug("findByParent: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -94,8 +91,7 @@ public class NodeNoteDAO {
     /**
      * Find by path
      */
-    public NodeNote findByPk(final String uuid) throws PathNotFoundException,
-            DatabaseException {
+    public NodeNote findByPk(String uuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByPk({})", uuid);
         Session session = null;
         Transaction tx = null;
@@ -105,21 +101,21 @@ public class NodeNoteDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = getParentNode(session, uuid);
+            NodeBase parentNode = getParentNode(session, uuid);
             SecurityHelper.checkRead(parentNode);
 
-            final NodeNote ret = (NodeNote) session.load(NodeNote.class, uuid);
+            NodeNote ret = (NodeNote) session.load(NodeNote.class, uuid);
             initialize(ret);
             HibernateUtil.commit(tx);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -130,8 +126,7 @@ public class NodeNoteDAO {
     /**
      * Create
      */
-    public void create(final NodeNote nNote) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
+    public void create(NodeNote nNote) throws PathNotFoundException, AccessDeniedException, DatabaseException {
         log.debug("create({})", nNote);
         Session session = null;
         Transaction tx = null;
@@ -141,24 +136,23 @@ public class NodeNoteDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                    nNote.getParent());
+            NodeBase parentNode = (NodeBase) session.load(NodeBase.class, nNote.getParent());
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
 
             session.save(nNote);
             HibernateUtil.commit(tx);
             log.debug("create: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -169,8 +163,7 @@ public class NodeNoteDAO {
     /**
      * Delete
      */
-    public void delete(final String uuid) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
+    public void delete(String uuid) throws PathNotFoundException, AccessDeniedException, DatabaseException {
         log.debug("delete({})", uuid);
         Session session = null;
         Transaction tx = null;
@@ -180,24 +173,23 @@ public class NodeNoteDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = getParentNode(session, uuid);
+            NodeBase parentNode = getParentNode(session, uuid);
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
 
-            final NodeNote nNote = (NodeNote) session
-                    .load(NodeNote.class, uuid);
+            NodeNote nNote = (NodeNote) session.load(NodeNote.class, uuid);
             session.delete(nNote);
             HibernateUtil.commit(tx);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -210,8 +202,7 @@ public class NodeNoteDAO {
     /**
      * Update
      */
-    public void update(final NodeNote nNote) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
+    public void update(NodeNote nNote) throws PathNotFoundException, AccessDeniedException, DatabaseException {
         log.debug("update({})", nNote);
         Session session = null;
         Transaction tx = null;
@@ -221,22 +212,22 @@ public class NodeNoteDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = getParentNode(session, nNote.getUuid());
+            NodeBase parentNode = getParentNode(session, nNote.getUuid());
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
 
             session.update(nNote);
             HibernateUtil.commit(tx);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -250,32 +241,34 @@ public class NodeNoteDAO {
      * Purge in depth helper
      */
     @SuppressWarnings("unchecked")
-    public void purgeHelper(final Session session, final String parentUuid)
-            throws HibernateException {
-        final String qs = "from NodeNote nn where nn.parent=:parent";
-        final Query q = session.createQuery(qs);
+    public void purgeHelper(Session session, String parentUuid) throws HibernateException {
+        String qs = "from NodeNote nn where nn.parent=:parent";
+        long begin = System.currentTimeMillis();
+        Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
-        final List<NodeNote> listNotes = q.list();
+        List<NodeNote> listNotes = q.list();
 
-        for (final NodeNote nNote : listNotes) {
+        for (NodeNote nNote : listNotes) {
             session.delete(nNote);
         }
+
+        log.trace("purgeHelper.Time: {}", System.currentTimeMillis() - begin);
     }
 
     /**
      * Get parent node
      */
-    public NodeBase getParentNode(final String uuid) throws DatabaseException {
+    public NodeBase getParentNode(String uuid) throws DatabaseException {
         log.debug("getParentNode({})", uuid);
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final NodeBase parentNode = getParentNode(session, uuid);
+            NodeBase parentNode = getParentNode(session, uuid);
             NodeBaseDAO.getInstance().initialize(parentNode);
             log.debug("getParentNode: {}", parentNode);
             return parentNode;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -285,15 +278,13 @@ public class NodeNoteDAO {
     /**
      * Get parent node
      */
-    private NodeBase getParentNode(final Session session, final String uuid)
-            throws HibernateException {
+    private NodeBase getParentNode(Session session, String uuid) throws HibernateException {
         log.debug("getParentNode({}, {})", session, uuid);
-        final String qs = "select nn.parent from NodeNote nn where nn.uuid=:uuid";
-        final Query q = session.createQuery(qs);
+        String qs = "select nn.parent from NodeNote nn where nn.uuid=:uuid";
+        Query q = session.createQuery(qs);
         q.setString("uuid", uuid);
-        final String parentUuid = (String) q.setMaxResults(1).uniqueResult();
-        final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                parentUuid);
+        String parentUuid = (String) q.setMaxResults(1).uniqueResult();
+        NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
         log.debug("getParentNode: {}", parentNode);
         return parentNode;
     }
@@ -301,7 +292,7 @@ public class NodeNoteDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final NodeNote nNote) {
+    private void initialize(NodeNote nNote) {
         if (nNote != null) {
             Hibernate.initialize(nNote);
         }
@@ -310,8 +301,8 @@ public class NodeNoteDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final List<NodeNote> nNoteList) {
-        for (final NodeNote nNote : nNoteList) {
+    private void initialize(List<NodeNote> nNoteList) {
+        for (NodeNote nNote : nNoteList) {
             initialize(nNote);
         }
     }

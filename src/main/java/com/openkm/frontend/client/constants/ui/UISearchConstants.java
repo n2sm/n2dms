@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,6 +31,5 @@ public class UISearchConstants {
 
     // Navigator stack panel definition
     public static final int SEARCH_SAVED = 0;
-
     public static final int SEARCH_USER_NEWS = 1;
 }

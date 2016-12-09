@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,8 +25,8 @@ import com.google.gwt.user.client.ui.FlexTable;
 
 import eu.maydu.gwt.validation.client.ValidationAction;
 import eu.maydu.gwt.validation.client.ValidationResult;
-import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.Validator;
+import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.i18n.StandardValidationMessages;
 import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 
@@ -36,34 +36,30 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
  * @author jllort
  *
  */
-public class NotEmptyFlextTableValidator extends
-        Validator<NotEmptyFlextTableValidator> {
+public class NotEmptyFlextTableValidator extends Validator<NotEmptyFlextTableValidator> {
 
     private FlexTable flexTable = null;
 
-    public NotEmptyFlextTableValidator(final FlexTable flexTable) {
+    public NotEmptyFlextTableValidator(FlexTable flexTable) {
         this.flexTable = flexTable;
-        setCustomMsgKey(null);
-        preventsPropagationOfValidationChain();
+        this.setCustomMsgKey(null);
+        this.preventsPropagationOfValidationChain();
     }
 
     @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (flexTable != null) {
-            for (final ValidationAction<FlexTable> va : getFailureActions()) {
+            for (ValidationAction<FlexTable> va : this.getFailureActions())
                 va.invoke(result, flexTable);
-            }
         }
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         if (flexTable.getRowCount() == 0) {
-            final ValidationResult result = new ValidationResult();
-            final ValidationError error = result.new ValidationError(null,
-                    getErrorMessage(allMessages, messages.mustSelectValue()));
+            ValidationResult result = new ValidationResult();
+            ValidationError error = result.new ValidationError(null, getErrorMessage(allMessages, messages.mustSelectValue()));
             result.getErrors().add(error);
             return result;
         }

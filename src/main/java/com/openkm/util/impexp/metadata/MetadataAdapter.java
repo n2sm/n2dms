@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.api.OKMAuth;
 import com.openkm.api.OKMPropertyGroup;
-import com.openkm.api.OKMScripting;
 import com.openkm.bean.Document;
 import com.openkm.bean.Folder;
 import com.openkm.bean.Mail;
@@ -57,15 +56,13 @@ import com.openkm.util.PathUtils;
 
 public abstract class MetadataAdapter {
     private static Logger log = LoggerFactory.getLogger(MetadataAdapter.class);
-
     protected String token = null;
-
     protected boolean uuid = false;
 
     protected MetadataAdapter() {
     }
 
-    public static MetadataAdapter getInstance(final String token) {
+    public static MetadataAdapter getInstance(String token) {
         if (Config.REPOSITORY_NATIVE) {
             return new DbMetadataAdapter(token);
         } else {
@@ -76,19 +73,17 @@ public abstract class MetadataAdapter {
     /**
      * Set if the documents and folder UUID should be restored on import.
      */
-    public void setRestoreUuid(final boolean uuid) {
+    public void setRestoreUuid(boolean uuid) {
         this.uuid = uuid;
     }
 
     /**
      * Performs metadata conversion.
      */
-    public DocumentMetadata getMetadata(final Document doc)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException, IOException,
-            ParseException, NoSuchGroupException {
+    public DocumentMetadata getMetadata(Document doc) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException, IOException, ParseException, NoSuchGroupException {
         log.debug("getMetadata({})", new Object[] { doc });
-        final DocumentMetadata dmd = new DocumentMetadata();
+        DocumentMetadata dmd = new DocumentMetadata();
         dmd.setUuid(doc.getUuid());
         dmd.setAuthor(doc.getAuthor());
         dmd.setName(PathUtils.getName(doc.getPath()));
@@ -101,24 +96,20 @@ public abstract class MetadataAdapter {
         dmd.setVersion(getMetadata(doc.getActualVersion(), doc.getMimeType()));
 
         // Categories
-        for (final Folder cat : doc.getCategories()) {
-            final CategoryMetadata cmd = new CategoryMetadata();
+        for (Folder cat : doc.getCategories()) {
+            CategoryMetadata cmd = new CategoryMetadata();
             cmd.setUuid(cat.getUuid());
             cmd.setPath(cat.getPath());
             dmd.getCategories().add(cmd);
         }
 
         // Notes
-        for (final Note nt : doc.getNotes()) {
+        for (Note nt : doc.getNotes()) {
             dmd.getNotes().add(getMetadata(nt));
         }
 
-        // Scripting
-        final OKMScripting okmScripting = OKMScripting.getInstance();
-        dmd.setScripting(okmScripting.getScript(token, doc.getPath()));
-
         // Security
-        final OKMAuth okmAuth = OKMAuth.getInstance();
+        OKMAuth okmAuth = OKMAuth.getInstance();
         dmd.setGrantedUsers(okmAuth.getGrantedUsers(token, doc.getPath()));
         dmd.setGrantedRoles(okmAuth.getGrantedRoles(token, doc.getPath()));
 
@@ -132,12 +123,10 @@ public abstract class MetadataAdapter {
     /**
      * Performs metadata conversion.
      */
-    public FolderMetadata getMetadata(final Folder fld)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException, IOException,
-            ParseException, NoSuchGroupException {
+    public FolderMetadata getMetadata(Folder fld) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException, IOException, ParseException, NoSuchGroupException {
         log.debug("getMetadata({})", new Object[] { fld });
-        final FolderMetadata fmd = new FolderMetadata();
+        FolderMetadata fmd = new FolderMetadata();
         fmd.setUuid(fld.getUuid());
         fmd.setAuthor(fld.getAuthor());
         fmd.setName(PathUtils.getName(fld.getPath()));
@@ -147,24 +136,20 @@ public abstract class MetadataAdapter {
         fmd.setSubscriptors(fld.getSubscriptors());
 
         // Categories
-        for (final Folder cat : fld.getCategories()) {
-            final CategoryMetadata cmd = new CategoryMetadata();
+        for (Folder cat : fld.getCategories()) {
+            CategoryMetadata cmd = new CategoryMetadata();
             cmd.setUuid(cat.getUuid());
             cmd.setPath(cat.getPath());
             fmd.getCategories().add(cmd);
         }
 
         // Notes
-        for (final Note nt : fld.getNotes()) {
+        for (Note nt : fld.getNotes()) {
             fmd.getNotes().add(getMetadata(nt));
         }
 
-        // Scripting
-        final OKMScripting okmScripting = OKMScripting.getInstance();
-        fmd.setScripting(okmScripting.getScript(token, fld.getPath()));
-
         // Security
-        final OKMAuth okmAuth = OKMAuth.getInstance();
+        OKMAuth okmAuth = OKMAuth.getInstance();
         fmd.setGrantedUsers(okmAuth.getGrantedUsers(token, fld.getPath()));
         fmd.setGrantedRoles(okmAuth.getGrantedRoles(token, fld.getPath()));
 
@@ -178,12 +163,10 @@ public abstract class MetadataAdapter {
     /**
      * Performs metadata conversion.
      */
-    public MailMetadata getMetadata(final Mail mail)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException, IOException,
-            ParseException, NoSuchGroupException {
+    public MailMetadata getMetadata(Mail mail) throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException,
+            IOException, ParseException, NoSuchGroupException {
         log.debug("getMetadata({})", new Object[] { mail });
-        final MailMetadata mmd = new MailMetadata();
+        MailMetadata mmd = new MailMetadata();
         mmd.setUuid(mail.getUuid());
         mmd.setPath(mail.getPath());
         mmd.setName(PathUtils.getName(mail.getPath()));
@@ -201,24 +184,20 @@ public abstract class MetadataAdapter {
         mmd.setKeywords(mail.getKeywords());
 
         // Categories
-        for (final Folder cat : mail.getCategories()) {
-            final CategoryMetadata cmd = new CategoryMetadata();
+        for (Folder cat : mail.getCategories()) {
+            CategoryMetadata cmd = new CategoryMetadata();
             cmd.setUuid(cat.getUuid());
             cmd.setPath(cat.getPath());
             mmd.getCategories().add(cmd);
         }
 
         // Notes
-        for (final Note nt : mail.getNotes()) {
+        for (Note nt : mail.getNotes()) {
             mmd.getNotes().add(getMetadata(nt));
         }
 
-        // Scripting
-        final OKMScripting okmScripting = OKMScripting.getInstance();
-        mmd.setScripting(okmScripting.getScript(token, mail.getPath()));
-
         // Security
-        final OKMAuth okmAuth = OKMAuth.getInstance();
+        OKMAuth okmAuth = OKMAuth.getInstance();
         mmd.setGrantedUsers(okmAuth.getGrantedUsers(token, mail.getPath()));
         mmd.setGrantedRoles(okmAuth.getGrantedRoles(token, mail.getPath()));
 
@@ -232,9 +211,9 @@ public abstract class MetadataAdapter {
     /**
      * Performs metadata conversion.
      */
-    public VersionMetadata getMetadata(final Version ver, final String mimeType) {
+    public VersionMetadata getMetadata(Version ver, String mimeType) {
         log.debug("getMetadata({})", new Object[] { ver });
-        final VersionMetadata vmd = new VersionMetadata();
+        VersionMetadata vmd = new VersionMetadata();
         vmd.setAuthor(ver.getAuthor());
         vmd.setName(ver.getName());
         vmd.setCreated(ver.getCreated());
@@ -248,9 +227,9 @@ public abstract class MetadataAdapter {
     /**
      * Performs metadata conversion.
      */
-    private NoteMetadata getMetadata(final Note nt) {
+    private NoteMetadata getMetadata(Note nt) {
         log.debug("getMetadata({})", new Object[] { nt });
-        final NoteMetadata nmd = new NoteMetadata();
+        NoteMetadata nmd = new NoteMetadata();
         nmd.setUser(nt.getAuthor());
         nmd.setDate(nt.getDate());
         nmd.setText(nt.getText());
@@ -262,10 +241,10 @@ public abstract class MetadataAdapter {
     /**
      * Convert between value formats.
      */
-    private List<String> getValues(final String[] values) {
-        final List<String> ret = new ArrayList<String>();
+    private List<String> getValues(String[] values) {
+        List<String> ret = new ArrayList<String>();
 
-        for (final String val : values) {
+        for (String val : values) {
             ret.add(val);
         }
 
@@ -275,39 +254,36 @@ public abstract class MetadataAdapter {
     /**
      * Perform specific PropertyGroup extraction.
      */
-    private List<PropertyGroupMetadata> getPropertyGroupsMetada(
-            final String path) throws IOException, ParseException,
-            PathNotFoundException, RepositoryException, DatabaseException,
-            NoSuchGroupException {
-        final List<PropertyGroupMetadata> propGrpMeta = new ArrayList<PropertyGroupMetadata>();
-        final OKMPropertyGroup okmPropGrp = OKMPropertyGroup.getInstance();
+    private List<PropertyGroupMetadata> getPropertyGroupsMetada(String path) throws IOException, ParseException, AccessDeniedException,
+            PathNotFoundException, RepositoryException, DatabaseException, NoSuchGroupException {
+        List<PropertyGroupMetadata> propGrpMeta = new ArrayList<PropertyGroupMetadata>();
+        OKMPropertyGroup okmPropGrp = OKMPropertyGroup.getInstance();
 
-        for (final PropertyGroup propGrp : okmPropGrp.getGroups(token, path)) {
-            final PropertyGroupMetadata pgmd = new PropertyGroupMetadata();
-            final List<PropertyMetadata> pmds = new ArrayList<PropertyMetadata>();
+        for (PropertyGroup propGrp : okmPropGrp.getGroups(token, path)) {
+            PropertyGroupMetadata pgmd = new PropertyGroupMetadata();
+            List<PropertyMetadata> pmds = new ArrayList<PropertyMetadata>();
 
-            for (final FormElement fe : okmPropGrp.getProperties(token, path,
-                    propGrp.getName())) {
-                final PropertyMetadata pmd = new PropertyMetadata();
+            for (FormElement fe : okmPropGrp.getProperties(token, path, propGrp.getName())) {
+                PropertyMetadata pmd = new PropertyMetadata();
                 pmd.setName(fe.getName());
 
                 if (fe instanceof Input) {
-                    final Input i = (Input) fe;
+                    Input i = (Input) fe;
                     pmd.setValue(i.getValue());
                 } else if (fe instanceof SuggestBox) {
-                    final SuggestBox sb = (SuggestBox) fe;
+                    SuggestBox sb = (SuggestBox) fe;
                     pmd.setValue(sb.getValue());
                 } else if (fe instanceof TextArea) {
-                    final TextArea ta = (TextArea) fe;
+                    TextArea ta = (TextArea) fe;
                     pmd.setValue(ta.getValue());
                 } else if (fe instanceof CheckBox) {
-                    final CheckBox cb = (CheckBox) fe;
+                    CheckBox cb = (CheckBox) fe;
                     pmd.setValue(Boolean.toString(cb.getValue()));
                 } else if (fe instanceof Select) {
-                    final List<String> values = new ArrayList<String>();
-                    final Select s = (Select) fe;
+                    List<String> values = new ArrayList<String>();
+                    Select s = (Select) fe;
 
-                    for (final Option opt : s.getOptions()) {
+                    for (Option opt : s.getOptions()) {
                         if (opt.isSelected()) {
                             values.add(opt.getValue());
                         }
@@ -332,26 +308,22 @@ public abstract class MetadataAdapter {
     /**
      * Perform specific document metadata import.
      */
-    public abstract void importWithMetadata(DocumentMetadata dmd, InputStream is)
-            throws ItemExistsException, RepositoryException, DatabaseException,
-            IOException;
+    public abstract void importWithMetadata(DocumentMetadata dmd, InputStream is) throws ItemExistsException, RepositoryException,
+            DatabaseException, IOException;
 
     /**
      * Perform specific version metadata import.
      */
-    public abstract void importWithMetadata(String parentPath,
-            VersionMetadata vmd, InputStream is) throws ItemExistsException,
+    public abstract void importWithMetadata(String parentPath, VersionMetadata vmd, InputStream is) throws ItemExistsException,
             RepositoryException, DatabaseException, IOException;
 
     /**
      * Perform specific folder metadata import.
      */
-    public abstract void importWithMetadata(FolderMetadata fmd)
-            throws ItemExistsException, RepositoryException, DatabaseException;
+    public abstract void importWithMetadata(FolderMetadata fmd) throws ItemExistsException, RepositoryException, DatabaseException;
 
     /**
      * Perform specific mail metadata import.
      */
-    public abstract void importWithMetadata(MailMetadata mmd)
-            throws ItemExistsException, RepositoryException, DatabaseException;
+    public abstract void importWithMetadata(MailMetadata mmd) throws ItemExistsException, RepositoryException, DatabaseException;
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,18 +36,15 @@ import com.openkm.frontend.client.OKMException;
  */
 @RemoteServiceRelativePath("DatabaseMetadata")
 public interface OKMDatabaseMetadataService extends RemoteService {
-    public List<Map<String, String>> executeValueQuery(String table,
-            String filter, String order) throws OKMException;
+    public List<Map<String, String>> executeValueQuery(String table, String filter, String order) throws OKMException;
 
     public void updateValue(Map<String, String> map) throws OKMException;
 
     public Double createValue(Map<String, String> map) throws OKMException;
 
-    public List<List<Map<String, String>>> executeMultiValueQuery(
-            List<String> tables, String query) throws OKMException;
+    public List<List<Map<String, String>>> executeMultiValueQuery(List<String> tables, String query) throws OKMException;
 
-    public Double getNextSequenceValue(String table, String column)
-            throws OKMException;
+    public Double getNextSequenceValue(String table, String column) throws OKMException;
 
     public void deleteValue(Map<String, String> map) throws OKMException;
 }

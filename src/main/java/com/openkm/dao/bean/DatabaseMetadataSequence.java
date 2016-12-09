@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -59,7 +59,7 @@ public class DatabaseMetadataSequence implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -67,7 +67,7 @@ public class DatabaseMetadataSequence implements Serializable {
         return table;
     }
 
-    public void setTable(final String table) {
+    public void setTable(String table) {
         this.table = table;
     }
 
@@ -75,7 +75,7 @@ public class DatabaseMetadataSequence implements Serializable {
         return column;
     }
 
-    public void setColumn(final String column) {
+    public void setColumn(String column) {
         this.column = column;
     }
 
@@ -83,13 +83,12 @@ public class DatabaseMetadataSequence implements Serializable {
         return value;
     }
 
-    public void setValue(final long value) {
+    public void setValue(long value) {
         this.value = value;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

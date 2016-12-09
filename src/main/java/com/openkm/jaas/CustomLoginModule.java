@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -54,30 +54,22 @@ import com.openkm.util.SecureStore;
  * @author pavila
  */
 public class CustomLoginModule implements LoginModule {
-    private static Logger log = LoggerFactory
-            .getLogger(CustomLoginModule.class);
-
+    private static Logger log = LoggerFactory.getLogger(CustomLoginModule.class);
     private Subject subject;
-
     private CallbackHandler callbackHandler;
-
     private String password;
-
     private String name;
-
     private boolean customCallbackHandler = false;
 
     /**
      * For testing purposes
      */
-    public static void main(final String args[]) throws LoginException {
+    public static void main(String args[]) throws LoginException {
         if (args.length != 2) {
-            System.out
-                    .println("Usage: java CustomLoginModule -Djava.security.auth.login.config=jaas.config <user> <password>");
+            System.out.println("Usage: java CustomLoginModule -Djava.security.auth.login.config=jaas.config <user> <password>");
         } else {
-            final MyCallbackHandler mch = new CustomLoginModule.MyCallbackHandler(
-                    args[0], args[1]);
-            final LoginContext lc = new LoginContext("OpenKM", mch);
+            MyCallbackHandler mch = new CustomLoginModule.MyCallbackHandler(args[0], args[1]);
+            LoginContext lc = new LoginContext("OpenKM", mch);
             lc.login();
             log.info("Authentication successful for {}", lc.getSubject());
             lc.logout();
@@ -85,9 +77,7 @@ public class CustomLoginModule implements LoginModule {
     }
 
     @Override
-    public void initialize(final Subject subject,
-            final CallbackHandler callbackHandler,
-            final Map<String, ?> sharedState, final Map<String, ?> options) {
+    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         this.subject = subject;
         this.callbackHandler = callbackHandler;
     }
@@ -98,31 +88,31 @@ public class CustomLoginModule implements LoginModule {
             authenticate();
             populateRoles();
             return true;
-        } catch (final PrincipalAdapterException pae) {
+        } catch (PrincipalAdapterException pae) {
             throw new LoginException(pae.getMessage());
-        } catch (final NoSuchAlgorithmException nsae) {
+        } catch (NoSuchAlgorithmException nsae) {
             throw new LoginException(nsae.getMessage());
         }
     }
 
     @Override
     public boolean login() throws LoginException {
-        final NameCallback ncb = new NameCallback("User: ");
-        final PasswordCallback pcb = new PasswordCallback("Password: ", true);
+        NameCallback ncb = new NameCallback("User: ");
+        PasswordCallback pcb = new PasswordCallback("Password: ", true);
 
         try {
             callbackHandler.handle(new Callback[] { ncb, pcb });
             name = ncb.getName();
             password = new String(pcb.getPassword());
-        } catch (final UnsupportedCallbackException e) {
+        } catch (UnsupportedCallbackException e) {
             try {
                 callbackHandler.handle(new Callback[] { ncb });
                 name = ncb.getName();
                 customCallbackHandler = true;
-            } catch (final Exception e1) {
+            } catch (Exception e1) {
                 throw new LoginException(e.getMessage());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -153,9 +143,9 @@ public class CustomLoginModule implements LoginModule {
      * Add user's roles to subject being authenticated
      */
     private void populateRoles() throws PrincipalAdapterException {
-        final PrincipalAdapter pa = CommonAuthModule.getPrincipalAdapter();
+        PrincipalAdapter pa = CommonAuthModule.getPrincipalAdapter();
 
-        for (final String role : pa.getRolesByUser(name)) {
+        for (String role : pa.getRolesByUser(name)) {
             subject.getPrincipals().add(new RoleImpl(role));
         }
 
@@ -165,15 +155,12 @@ public class CustomLoginModule implements LoginModule {
     /**
      * Check if user and password are valid
      */
-    private void authenticate() throws PrincipalAdapterException,
-            NoSuchAlgorithmException, LoginException {
-        final PrincipalAdapter pa = CommonAuthModule.getPrincipalAdapter();
-        final String ppass = pa.getPassword(name);
-        log.debug("User: {}, Password: {}, DBPassword: {}", new Object[] {
-                name, password, ppass });
+    private void authenticate() throws PrincipalAdapterException, NoSuchAlgorithmException, LoginException {
+        PrincipalAdapter pa = CommonAuthModule.getPrincipalAdapter();
+        String ppass = pa.getPassword(name);
+        log.debug("User: {}, Password: {}, DBPassword: {}", new Object[] { name, password, ppass });
 
-        if (customCallbackHandler
-                || ppass.equals(SecureStore.md5Encode(password.getBytes()))) {
+        if (customCallbackHandler || ppass.equals(SecureStore.md5Encode(password.getBytes()))) {
             subject.getPrincipals().add(new UserImpl(name));
         } else {
             throw new LoginException("Password does not match");
@@ -187,29 +174,26 @@ public class CustomLoginModule implements LoginModule {
      */
     static class MyCallbackHandler implements CallbackHandler {
         private String user;
-
         private String password;
 
-        public MyCallbackHandler(final String user, final String password) {
+        public MyCallbackHandler(String user, String password) {
             this.user = user;
             this.password = password;
         }
 
         @Override
-        public void handle(final Callback[] cb) throws IOException,
-                UnsupportedCallbackException {
-            for (final Callback element : cb) {
-                if (element instanceof NameCallback) {
-                    final NameCallback nc = (NameCallback) element;
+        public void handle(Callback[] cb) throws IOException, UnsupportedCallbackException {
+            for (int i = 0; i < cb.length; i++) {
+                if (cb[i] instanceof NameCallback) {
+                    NameCallback nc = (NameCallback) cb[i];
                     nc.setName(user);
                     log.info("User: {}", user);
-                } else if (element instanceof PasswordCallback) {
-                    final PasswordCallback pc = (PasswordCallback) element;
+                } else if (cb[i] instanceof PasswordCallback) {
+                    PasswordCallback pc = (PasswordCallback) cb[i];
                     pc.setPassword(password.toCharArray());
                     log.info("Password: {}", password);
                 } else {
-                    throw new UnsupportedCallbackException(element,
-                            "MyCallbackHandler");
+                    throw new UnsupportedCallbackException(cb[i], "MyCallbackHandler");
                 }
             }
         }

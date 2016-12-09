@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,20 +23,16 @@ package com.openkm.util.impexp;
 
 public class ImpExpStats {
     private boolean ok = true;
-
     private long documents;
-
     private long folders;
-
     private long mails;
-
     private long size;
 
     public boolean isOk() {
         return ok;
     }
 
-    public void setOk(final boolean ok) {
+    public void setOk(boolean ok) {
         this.ok = ok;
     }
 
@@ -44,7 +40,7 @@ public class ImpExpStats {
         return documents;
     }
 
-    public void setDocuments(final long documents) {
+    public void setDocuments(long documents) {
         this.documents = documents;
     }
 
@@ -52,7 +48,7 @@ public class ImpExpStats {
         return folders;
     }
 
-    public void setFolders(final long folders) {
+    public void setFolders(long folders) {
         this.folders = folders;
     }
 
@@ -60,7 +56,7 @@ public class ImpExpStats {
         return mails;
     }
 
-    public void setMails(final long mails) {
+    public void setMails(long mails) {
         this.mails = mails;
     }
 
@@ -68,13 +64,12 @@ public class ImpExpStats {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("documents=");
         sb.append(documents);

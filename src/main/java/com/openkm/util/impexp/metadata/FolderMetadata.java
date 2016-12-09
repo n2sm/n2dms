@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,19 +32,12 @@ import java.util.Set;
 public class FolderMetadata {
     // okm:folder
     private String uuid;
-
     private String author;
-
     private String name;
-
     private String path;
-
     private Calendar created;
-
     private String description;
-
     private Set<String> keywords = new HashSet<String>();
-
     private Set<CategoryMetadata> categories = new HashSet<CategoryMetadata>();
 
     // mix:notification
@@ -61,14 +54,13 @@ public class FolderMetadata {
 
     // mix:accessControlled
     private Map<String, Integer> grantedUsers = new HashMap<String, Integer>();
-
     private Map<String, Integer> grantedRoles = new HashMap<String, Integer>();
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -76,7 +68,7 @@ public class FolderMetadata {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -84,7 +76,7 @@ public class FolderMetadata {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -92,7 +84,7 @@ public class FolderMetadata {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -100,7 +92,7 @@ public class FolderMetadata {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -108,7 +100,7 @@ public class FolderMetadata {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -116,7 +108,7 @@ public class FolderMetadata {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -124,7 +116,7 @@ public class FolderMetadata {
         return categories;
     }
 
-    public void setCategories(final Set<CategoryMetadata> categories) {
+    public void setCategories(Set<CategoryMetadata> categories) {
         this.categories = categories;
     }
 
@@ -132,7 +124,7 @@ public class FolderMetadata {
         return subscriptors;
     }
 
-    public void setSubscriptors(final Set<String> subscriptors) {
+    public void setSubscriptors(Set<String> subscriptors) {
         this.subscriptors = subscriptors;
     }
 
@@ -140,7 +132,7 @@ public class FolderMetadata {
         return scripting;
     }
 
-    public void setScripting(final String scripting) {
+    public void setScripting(String scripting) {
         this.scripting = scripting;
     }
 
@@ -148,7 +140,7 @@ public class FolderMetadata {
         return notes;
     }
 
-    public void setNotes(final List<NoteMetadata> notes) {
+    public void setNotes(List<NoteMetadata> notes) {
         this.notes = notes;
     }
 
@@ -156,8 +148,7 @@ public class FolderMetadata {
         return propertyGroups;
     }
 
-    public void setPropertyGroups(
-            final List<PropertyGroupMetadata> propertyGroups) {
+    public void setPropertyGroups(List<PropertyGroupMetadata> propertyGroups) {
         this.propertyGroups = propertyGroups;
     }
 
@@ -165,7 +156,7 @@ public class FolderMetadata {
         return grantedUsers;
     }
 
-    public void setGrantedUsers(final Map<String, Integer> grantedUsers) {
+    public void setGrantedUsers(Map<String, Integer> grantedUsers) {
         this.grantedUsers = grantedUsers;
     }
 
@@ -173,13 +164,12 @@ public class FolderMetadata {
         return grantedRoles;
     }
 
-    public void setGrantedRoles(final Map<String, Integer> grantedRoles) {
+    public void setGrantedRoles(Map<String, Integer> grantedRoles) {
         this.grantedRoles = grantedRoles;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=");
         sb.append(uuid);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,7 +39,6 @@ public class PersonalTree extends FolderTree {
     /**
      * Inits on first load
      */
-    @Override
     public void init() {
         menuPopup = new MenuPopup(new PersonalMenu());
         menuPopup.setStyleName("okm-Tree-MenuPopup");
@@ -48,8 +47,7 @@ public class PersonalTree extends FolderTree {
 
         // Sets the context on list context search values
         Main.get().repositoryContext.setContextPersonal(folderRoot.getPath());
-        Main.get().mainPanel.search.searchBrowser.searchIn.setContextValue(
-                folderRoot.getPath(), UIDesktopConstants.NAVIGATOR_PERSONAL);
+        Main.get().mainPanel.search.searchBrowser.searchIn.setContextValue(folderRoot.getPath(), UIDesktopConstants.NAVIGATOR_PERSONAL);
 
         actualItem.setUserObject(folderRoot);
         evaluesFolderIcon(actualItem);
@@ -60,12 +58,9 @@ public class PersonalTree extends FolderTree {
     /**
      * Move folder on file browser ( only trash mode )
      */
-    @Override
     public void move() {
-        final GWTFolder folderToRestore = (GWTFolder) actualItem
-                .getUserObject();
-        folderSelectPopup
-                .setEntryPoint(FolderSelectPopup.ENTRYPOINT_MY_DOCUMENTS);
+        GWTFolder folderToRestore = (GWTFolder) actualItem.getUserObject();
+        folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_MY_DOCUMENTS);
         folderSelectPopup.setToMove(folderToRestore);
         showDirectorySelectPopup();
         hideMenuPopup();
@@ -74,11 +69,9 @@ public class PersonalTree extends FolderTree {
     /**
      * Copy folder on file browser ( only trash mode )
      */
-    @Override
     public void copy() {
-        final GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
-        folderSelectPopup
-                .setEntryPoint(FolderSelectPopup.ENTRYPOINT_MY_DOCUMENTS);
+        GWTFolder folderToCopy = (GWTFolder) actualItem.getUserObject();
+        folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_MY_DOCUMENTS);
         folderSelectPopup.setToCopy(folderToCopy);
         showDirectorySelectPopup();
         hideMenuPopup();

@@ -27,20 +27,14 @@ public class Namespace {
     @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(Namespace.class);
 
-    public static final Namespace EMPTY_NAMESPACE = Namespace.getNamespace("",
-            "");
-
-    public static final Namespace XML_NAMESPACE = Namespace.getNamespace("xml",
-            "http://www.w3.org/XML/1998/namespace");
-
-    public static final Namespace XMLNS_NAMESPACE = Namespace.getNamespace(
-            "xmlns", "http://www.w3.org/2000/xmlns/");
+    public static final Namespace EMPTY_NAMESPACE = Namespace.getNamespace("", "");
+    public static final Namespace XML_NAMESPACE = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
+    public static final Namespace XMLNS_NAMESPACE = Namespace.getNamespace("xmlns", "http://www.w3.org/2000/xmlns/");
 
     private final String prefix;
-
     private final String uri;
 
-    private Namespace(final String prefix, final String uri) {
+    private Namespace(String prefix, String uri) {
         this.prefix = prefix;
         this.uri = uri;
     }
@@ -53,17 +47,15 @@ public class Namespace {
         return uri;
     }
 
-    public boolean isSame(final String namespaceURI) {
+    public boolean isSame(String namespaceURI) {
         return uri.equals(namespaceURI);
     }
 
-    @Override
     public int hashCode() {
         return uri.hashCode();
     }
 
-    @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == this) {
             return true;
         }
@@ -83,7 +75,7 @@ public class Namespace {
         return new Namespace(prefix, uri);
     }
 
-    public static Namespace getNamespace(final String uri) {
+    public static Namespace getNamespace(String uri) {
         return getNamespace("", uri);
     }
 }

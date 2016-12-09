@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.mainmenu;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -48,22 +49,15 @@ import com.openkm.frontend.client.widget.startup.StartUp;
  */
 public class Bookmark {
 
-    private final OKMBookmarkServiceAsync bookmarkService = (OKMBookmarkServiceAsync) GWT
-            .create(OKMBookmarkService.class);
-
-    private final OKMUserConfigServiceAsync userConfigService = (OKMUserConfigServiceAsync) GWT
-            .create(OKMUserConfigService.class);
+    private final OKMBookmarkServiceAsync bookmarkService = (OKMBookmarkServiceAsync) GWT.create(OKMBookmarkService.class);
+    private final OKMUserConfigServiceAsync userConfigService = (OKMUserConfigServiceAsync) GWT.create(OKMUserConfigService.class);
 
     public static final String BOOKMARK_DOCUMENT = "okm:document";
-
     public static final String BOOKMARK_FOLDER = "okm:folder";
 
     private List<MenuItem> bookmarks = new ArrayList<MenuItem>();
-
     private String uuid = "";
-
     private String nodePath = "";
-
     private boolean document = false;
 
     /**
@@ -83,16 +77,16 @@ public class Bookmark {
      * Callback get all
      */
     final AsyncCallback<List<GWTBookmark>> callbackGetAll = new AsyncCallback<List<GWTBookmark>>() {
-        @Override
-        public void onSuccess(final List<GWTBookmark> result) {
-            final List<GWTBookmark> bookmarkList = result;
-            final MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
+        public void onSuccess(List<GWTBookmark> result) {
+            List<GWTBookmark> bookmarkList = result;
+            MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
 
             // Resets all bookmark menu
             resetMenu();
             bookmarks = new ArrayList<MenuItem>();
 
-            for (final GWTBookmark bookmark : bookmarkList) {
+            for (Iterator<GWTBookmark> it = bookmarkList.iterator(); it.hasNext();) {
+                final GWTBookmark bookmark = it.next();
                 String icon = "";
 
                 if (bookmark.getType().equals(BOOKMARK_DOCUMENT)) {
@@ -101,42 +95,27 @@ public class Bookmark {
                     icon = "img/icon/menu/folder_bookmark.gif";
                 }
 
-                final MenuItem tmpBookmark = new MenuItem(Util.menuHTML(icon,
-                        bookmark.getName()), true, new Command() {
-                    @Override
+                MenuItem tmpBookmark = new MenuItem(Util.menuHTML(icon, bookmark.getName()), true, new Command() {
                     public void execute() {
-                        bookmarkService.get(bookmark.getId(),
-                                new AsyncCallback<GWTBookmark>() {
-                                    @Override
-                                    public void onSuccess(
-                                            final GWTBookmark result) {
-                                        final String validPath = result
-                                                .getPath();
-                                        if (result.getType().equals(
-                                                BOOKMARK_DOCUMENT)
-                                                && validPath != null
-                                                && !validPath.equals("")) {
-                                            // Opens folder passed by parameter
-                                            final String path = validPath
-                                                    .substring(0, validPath
-                                                            .lastIndexOf("/"));
-                                            CommonUI.openPath(path, validPath);
+                        bookmarkService.get(bookmark.getId(), new AsyncCallback<GWTBookmark>() {
+                            @Override
+                            public void onSuccess(GWTBookmark result) {
+                                String validPath = result.getPath();
+                                if (result.getType().equals(BOOKMARK_DOCUMENT) && validPath != null && !validPath.equals("")) {
+                                    // Opens folder passed by parameter
+                                    CommonUI.openPath(Util.getParent(validPath), validPath);
 
-                                        } else if (bookmark.getType().equals(
-                                                BOOKMARK_FOLDER)
-                                                && validPath != null
-                                                && !validPath.equals("")) {
-                                            // Opens document passed by parameter
-                                            CommonUI.openPath(validPath, "");
-                                        }
-                                    }
+                                } else if (bookmark.getType().equals(BOOKMARK_FOLDER) && validPath != null && !validPath.equals("")) {
+                                    // Opens document passed by parameter
+                                    CommonUI.openPath(validPath, "");
+                                }
+                            }
 
-                                    @Override
-                                    public void onFailure(final Throwable caught) {
-                                        Main.get().showError("getBookmark",
-                                                caught);
-                                    }
-                                });
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Main.get().showError("getBookmark", caught);
+                            }
+                        });
                     }
                 });
 
@@ -148,8 +127,7 @@ public class Bookmark {
             Main.get().startUp.nextStatus(StartUp.STARTUP_INIT_TREE_NODES); // Sets the next status to loading
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getAll", caught);
         }
     };
@@ -158,10 +136,9 @@ public class Bookmark {
      * Callback add
      */
     final AsyncCallback<GWTBookmark> callbackAdd = new AsyncCallback<GWTBookmark>() {
-        @Override
-        public void onSuccess(final GWTBookmark result) {
+        public void onSuccess(GWTBookmark result) {
 
-            final MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
+            MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
             final GWTBookmark bookmark = result;
 
             String icon = "";
@@ -172,39 +149,27 @@ public class Bookmark {
                 icon = "img/icon/menu/folder_bookmark.gif";
             }
 
-            final MenuItem tmpBookmark = new MenuItem(Util.menuHTML(icon,
-                    bookmark.getName()), true, new Command() {
-                @Override
+            MenuItem tmpBookmark = new MenuItem(Util.menuHTML(icon, bookmark.getName()), true, new Command() {
                 public void execute() {
-                    bookmarkService.get(bookmark.getId(),
-                            new AsyncCallback<GWTBookmark>() {
-                                @Override
-                                public void onSuccess(final GWTBookmark result) {
-                                    final String validPath = result.getPath();
+                    bookmarkService.get(bookmark.getId(), new AsyncCallback<GWTBookmark>() {
+                        @Override
+                        public void onSuccess(GWTBookmark result) {
+                            String validPath = result.getPath();
 
-                                    if (result.getType().equals(
-                                            BOOKMARK_DOCUMENT)
-                                            && validPath != null
-                                            && !validPath.equals("")) {
-                                        // Opens folder passed by parameter
-                                        final String path = validPath
-                                                .substring(0, validPath
-                                                        .lastIndexOf("/"));
-                                        CommonUI.openPath(path, validPath);
-                                    } else if (bookmark.getType().equals(
-                                            BOOKMARK_FOLDER)
-                                            && validPath != null
-                                            && !validPath.equals("")) {
-                                        // Opens document passed by parameter
-                                        CommonUI.openPath(validPath, "");
-                                    }
-                                }
+                            if (result.getType().equals(BOOKMARK_DOCUMENT) && validPath != null && !validPath.equals("")) {
+                                // Opens folder passed by parameter
+                                CommonUI.openPath(Util.getParent(validPath), validPath);
+                            } else if (bookmark.getType().equals(BOOKMARK_FOLDER) && validPath != null && !validPath.equals("")) {
+                                // Opens document passed by parameter
+                                CommonUI.openPath(validPath, "");
+                            }
+                        }
 
-                                @Override
-                                public void onFailure(final Throwable caught) {
-                                    Main.get().showError("getBookmark", caught);
-                                }
-                            });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Main.get().showError("getBookmark", caught);
+                        }
+                    });
                 }
             });
 
@@ -213,8 +178,7 @@ public class Bookmark {
             bookmarks.add(tmpBookmark); // Save menuItem to list to refreshing management
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("add", caught);
         }
     };
@@ -223,22 +187,17 @@ public class Bookmark {
      * Callback set user home
      */
     final AsyncCallback<Object> callbackSetUserHome = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            final String user = Main.get().workspaceUserProperties.getUser()
-                    .getId();
+        public void onSuccess(Object result) {
+            String user = Main.get().workspaceUserProperties.getUser().getId();
 
             if (document) {
-                Main.get().mainPanel.topPanel.toolBar.setUserHome(user, uuid,
-                        nodePath, BOOKMARK_DOCUMENT);
+                Main.get().mainPanel.topPanel.toolBar.setUserHome(user, uuid, nodePath, BOOKMARK_DOCUMENT);
             } else {
-                Main.get().mainPanel.topPanel.toolBar.setUserHome(user, uuid,
-                        nodePath, BOOKMARK_FOLDER);
+                Main.get().mainPanel.topPanel.toolBar.setUserHome(user, uuid, nodePath, BOOKMARK_FOLDER);
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("setUserHome", caught);
         }
     };
@@ -248,10 +207,10 @@ public class Bookmark {
      */
     private void resetMenu() {
         if (!bookmarks.isEmpty()) {
-            final MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
+            MenuBar subMenuBookmark = Main.get().mainPanel.topPanel.mainMenu.subMenuBookmark;
 
-            for (final MenuItem menuItem : bookmarks) {
-                subMenuBookmark.removeItem(menuItem);
+            for (Iterator<MenuItem> it = bookmarks.iterator(); it.hasNext();) {
+                subMenuBookmark.removeItem(it.next());
             }
         }
     }
@@ -271,7 +230,7 @@ public class Bookmark {
      * @param name String The bookmark name
      * @param document boolean is document
      */
-    public void add(final String nodePath, final String name) {
+    public void add(String nodePath, String name) {
         bookmarkService.add(nodePath, name, callbackAdd);
     }
 
@@ -291,13 +250,11 @@ public class Bookmark {
      * @param nodePath String The node path
      * @param document boolean is document
      */
-    public void confirmSetHome(final String uuid, final String nodePath,
-            final boolean document) {
+    public void confirmSetHome(String uuid, String nodePath, boolean document) {
         this.uuid = uuid;
         this.nodePath = nodePath;
         this.document = document;
-        Main.get().confirmPopup
-                .setConfirm(ConfirmPopup.CONFIRM_SET_DEFAULT_HOME);
+        Main.get().confirmPopup.setConfirm(ConfirmPopup.CONFIRM_SET_DEFAULT_HOME);
         Main.get().confirmPopup.show();
     }
 }

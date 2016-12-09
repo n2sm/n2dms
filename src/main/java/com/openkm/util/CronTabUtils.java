@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,16 +38,12 @@ public class CronTabUtils {
     /**
      * Create internal cron tasks
      */
-    public static void createOrUpdate(final String name,
-            final String expression, final String content)
-            throws DatabaseException, PrincipalAdapterException {
-        log.debug("createOrUpdate({}, {}, {})", new Object[] { name,
-                expression, content });
+    public static void createOrUpdate(String name, String expression, String content) throws DatabaseException, PrincipalAdapterException {
+        log.debug("createOrUpdate({}, {}, {})", new Object[] { name, expression, content });
         CronTab ct = CronTabDAO.findByName(name);
 
         if (ct == null) {
-            final String mail = CommonAuthModule.getMail(null,
-                    Config.ADMIN_USER);
+            String mail = CommonAuthModule.getMail(Config.ADMIN_USER);
 
             ct = new CronTab();
             ct.setActive(true);
@@ -78,12 +74,12 @@ public class CronTabUtils {
     /**
      * Change "Text Extractor Worker" or "Text extractor worker" to "TextExtractorWorker".
      */
-    private static String toFileName(final String str) {
-        final StringBuilder sb = new StringBuilder();
+    private static String toFileName(String str) {
+        StringBuilder sb = new StringBuilder();
         boolean toUpper = true;
 
         for (int i = 0; i < str.length(); i++) {
-            final char c = str.charAt(i);
+            char c = str.charAt(i);
 
             if (c == ' ') {
                 toUpper = true;

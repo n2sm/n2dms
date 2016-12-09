@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,18 +29,12 @@ package com.openkm.frontend.client.constants;
  */
 public class GWTRepository {
     public static final String ROOT = "okm:root";
-
     public static final String TRASH = "okm:trash";
-
     public static final String TEMPLATES = "okm:templates";
-
     public static final String THESAURUS = "okm:thesaurus";
-
     public static final String CATEGORIES = "okm:categories";
-
     public static final String PERSONAL = "okm:personal";
-
     public static final String MAIL = "okm:mail";
-
+    public static final String METADATA = "okm:metadata";
     public static final String SYS_CONFIG = "okm:config";
 }

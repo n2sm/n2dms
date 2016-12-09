@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,9 +35,7 @@ public interface UserConfigModule {
      * @param nodePath A node path to be set as user home folder.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void setHome(String token, String nodePath)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException;
+    public void setHome(String token, String nodePath) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Get user config
@@ -45,6 +43,5 @@ public interface UserConfigModule {
      * @throws PathNotFoundException If the indicated bookmark doesn't exist.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public UserConfig getConfig(String token) throws RepositoryException,
-            DatabaseException;
+    public UserConfig getConfig(String token) throws AccessDeniedException, RepositoryException, DatabaseException;
 }

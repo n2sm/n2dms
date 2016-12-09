@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,35 +30,20 @@ import com.openkm.core.Config;
  */
 public class ModuleManager {
     private static AuthModule authModule = null;
-
     private static RepositoryModule repositoryModule = null;
-
     private static FolderModule folderModule = null;
-
     private static DocumentModule documentModule = null;
-
     private static NoteModule noteModule = null;
-
     private static SearchModule searchModule = null;
-
     private static PropertyGroupModule propertyGroupModule = null;
-
     private static NotificationModule notificationModule = null;
-
     private static BookmarkModule bookmarkModule = null;
-
     private static DashboardModule dashboardModule = null;
-
     private static WorkflowModule workflowModule = null;
-
     private static ScriptingModule scriptingModule = null;
-
     private static StatsModule statsModule = null;
-
     private static MailModule mailModule = null;
-
     private static PropertyModule propertyModule = null;
-
     private static UserConfigModule userConfigModule = null;
 
     /**
@@ -224,21 +209,6 @@ public class ModuleManager {
         }
 
         return workflowModule;
-    }
-
-    /**
-     * 
-     */
-    public static synchronized ScriptingModule getScriptingModule() {
-        if (scriptingModule == null) {
-            if (Config.REPOSITORY_NATIVE) {
-                scriptingModule = new com.openkm.module.db.DbScriptingModule();
-            } else {
-                scriptingModule = new com.openkm.module.jcr.JcrScriptingModule();
-            }
-        }
-
-        return scriptingModule;
     }
 
     /**

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,7 +39,6 @@ import com.openkm.webdav.resource.ResourceFactoryFactoryImpl;
 
 public final class WebDavService {
     private static final WebDavService INSTANCE = new WebDavService();
-
     protected ServletHttpManager httpManager;
 
     public static WebDavService get() {
@@ -53,7 +52,7 @@ public final class WebDavService {
     public void init() {
         try {
             initFromFactoryFactory();
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             e.printStackTrace();
         }
     }
@@ -65,13 +64,9 @@ public final class WebDavService {
     /**
      * 
      */
-    public void handleRequest(final HttpServletRequest request,
-            final HttpServletResponse response, final ServletContext ctx)
-            throws IOException {
-        final Request miltonRequest = new com.bradmcevoy.http.ServletRequest(
-                request, ctx);
-        final Response miltonResponse = new com.bradmcevoy.http.ServletResponse(
-                response);
+    public void handleRequest(HttpServletRequest request, HttpServletResponse response, ServletContext ctx) throws IOException {
+        Request miltonRequest = new com.bradmcevoy.http.ServletRequest(request, ctx);
+        Response miltonResponse = new com.bradmcevoy.http.ServletResponse(response);
         httpManager.process(miltonRequest, miltonResponse);
     }
 
@@ -79,13 +74,11 @@ public final class WebDavService {
      * 
      */
     protected void initFromFactoryFactory() throws ServletException {
-        final ResourceFactoryFactory rff = new ResourceFactoryFactoryImpl();
+        ResourceFactoryFactory rff = new ResourceFactoryFactoryImpl();
         rff.init();
-        final ResourceFactory rf = rff.createResourceFactory();
-        final WebDavResponseHandler responseHandler = rff
-                .createResponseHandler();
-        httpManager = new ServletHttpManager(rf, responseHandler,
-                new AuthenticationService());
+        ResourceFactory rf = rff.createResourceFactory();
+        WebDavResponseHandler responseHandler = rff.createResponseHandler();
+        httpManager = new ServletHttpManager(rf, responseHandler, new AuthenticationService());
         httpManager.setEnableExpectContinue(false);
     }
 }

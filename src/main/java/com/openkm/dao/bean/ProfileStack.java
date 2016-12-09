@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,26 +25,20 @@ import java.io.Serializable;
 
 public class ProfileStack implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean taxonomyVisible;
-
     private boolean categoriesVisible;
-
     private boolean thesaurusVisible;
-
     private boolean templatesVisible;
-
     private boolean personalVisible;
-
     private boolean mailVisible;
-
+    private boolean metadataVisible;
     private boolean trashVisible;
 
     public boolean isTaxonomyVisible() {
         return taxonomyVisible;
     }
 
-    public void setTaxonomyVisible(final boolean taxonomyVisible) {
+    public void setTaxonomyVisible(boolean taxonomyVisible) {
         this.taxonomyVisible = taxonomyVisible;
     }
 
@@ -52,7 +46,7 @@ public class ProfileStack implements Serializable {
         return categoriesVisible;
     }
 
-    public void setCategoriesVisible(final boolean categoriesVisible) {
+    public void setCategoriesVisible(boolean categoriesVisible) {
         this.categoriesVisible = categoriesVisible;
     }
 
@@ -60,7 +54,7 @@ public class ProfileStack implements Serializable {
         return thesaurusVisible;
     }
 
-    public void setThesaurusVisible(final boolean thesaurusVisible) {
+    public void setThesaurusVisible(boolean thesaurusVisible) {
         this.thesaurusVisible = thesaurusVisible;
     }
 
@@ -68,7 +62,7 @@ public class ProfileStack implements Serializable {
         return templatesVisible;
     }
 
-    public void setTemplatesVisible(final boolean templatesVisible) {
+    public void setTemplatesVisible(boolean templatesVisible) {
         this.templatesVisible = templatesVisible;
     }
 
@@ -76,7 +70,7 @@ public class ProfileStack implements Serializable {
         return personalVisible;
     }
 
-    public void setPersonalVisible(final boolean personalVisible) {
+    public void setPersonalVisible(boolean personalVisible) {
         this.personalVisible = personalVisible;
     }
 
@@ -84,21 +78,28 @@ public class ProfileStack implements Serializable {
         return mailVisible;
     }
 
-    public void setMailVisible(final boolean mailVisible) {
+    public void setMailVisible(boolean mailVisible) {
         this.mailVisible = mailVisible;
+    }
+
+    public boolean isMetadataVisible() {
+        return metadataVisible;
+    }
+
+    public void setMetadataVisible(boolean metadataVisible) {
+        this.metadataVisible = metadataVisible;
     }
 
     public boolean isTrashVisible() {
         return trashVisible;
     }
 
-    public void setTrashVisible(final boolean trashVisible) {
+    public void setTrashVisible(boolean trashVisible) {
         this.trashVisible = trashVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("taxonomyVisible=");
         sb.append(taxonomyVisible);
@@ -112,6 +113,8 @@ public class ProfileStack implements Serializable {
         sb.append(personalVisible);
         sb.append(", mailVisible=");
         sb.append(mailVisible);
+        sb.append(", metadataVisible=");
+        sb.append(metadataVisible);
         sb.append(", trashVisible=");
         sb.append(trashVisible);
         sb.append("}");

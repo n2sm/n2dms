@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,17 +47,13 @@ import com.openkm.kea.tree.KEATree;
  */
 public class RegisterThesaurusServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static final String[][] breadcrumb = new String[][] { new String[] {
-            "experimental.jsp", "Experimental" }, };
+    private static final String[][] breadcrumb = new String[][] { new String[] { "experimental.jsp", "Experimental" }, };
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (isAdmin(request)) {
+        if (checkMultipleInstancesAccess(request, response)) {
             if (method.equals(METHOD_GET)) {
                 doGet(request, response);
             } else if (method.equals(METHOD_POST)) {
@@ -67,14 +63,12 @@ public class RegisterThesaurusServlet extends BaseServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final int level = request.getParameter("level") != null
-                && !request.getParameter("level").equals("") ? Integer
-                .parseInt(request.getParameter("level")) : 0;
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        int level =
+                (request.getParameter("level") != null && !request.getParameter("level").equals("")) ? Integer.parseInt(request
+                        .getParameter("level")) : 0;
         updateSessionManager(request);
-        final PrintWriter out = response.getWriter();
+        PrintWriter out = response.getWriter();
         response.setContentType(MimeTypeConfig.MIME_HTML);
         header(out, "Register thesaurus", breadcrumb);
         out.flush();
@@ -82,29 +76,27 @@ public class RegisterThesaurusServlet extends BaseServlet {
         if (!Config.KEA_THESAURUS_OWL_FILE.equals("")) {
             out.println("<b>Starting thesaurus creation, this could take some hours.</b><br>");
             out.println("<b>Don't close this window meanwhile OpenKM is creating thesaurus.</b><br>");
-            out.println("It'll be displayed creation information while creating nodes until level "
-                    + (level + 1)
+            out.println("It'll be displayed creation information while creating nodes until level " + (level + 1)
                     + ", please be patient because tree deep level could be big.<br><br>");
             out.flush();
 
             try {
-                KEATree.generateTree(null, level, "/" + Repository.THESAURUS,
-                        new Vector<String>(), out);
-            } catch (final PathNotFoundException e) {
+                KEATree.generateTree(null, level, "/" + Repository.THESAURUS, new Vector<String>(), out);
+            } catch (PathNotFoundException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final ItemExistsException e) {
+            } catch (ItemExistsException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final AccessDeniedException e) {
+            } catch (AccessDeniedException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final RepositoryException e) {
+            } catch (RepositoryException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final DatabaseException e) {
+            } catch (DatabaseException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final ExtensionException e) {
+            } catch (ExtensionException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final AutomationException e) {
+            } catch (AutomationException e) {
                 sendErrorRedirect(request, response, e);
-            } catch (final LockException e) {
+            } catch (LockException e) {
                 sendErrorRedirect(request, response, e);
             }
 

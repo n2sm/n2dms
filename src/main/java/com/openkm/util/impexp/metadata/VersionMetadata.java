@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,22 +26,17 @@ import java.util.Calendar;
 public class VersionMetadata {
     // okm:resource
     private String author;
-
     private String name;
-
     private Calendar created;
-
     private long size;
-
     private String mimeType;
-
     private String comment;
 
     public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -49,7 +44,7 @@ public class VersionMetadata {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -57,7 +52,7 @@ public class VersionMetadata {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -65,7 +60,7 @@ public class VersionMetadata {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -73,7 +68,7 @@ public class VersionMetadata {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -81,13 +76,12 @@ public class VersionMetadata {
         return comment;
     }
 
-    public void setComment(final String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("author=");
         sb.append(author);

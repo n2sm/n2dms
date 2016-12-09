@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -51,18 +51,18 @@ public class ExtensionDAO {
     @SuppressWarnings("unchecked")
     public static List<Extension> findAll() throws DatabaseException {
         log.debug("findAll({})");
-        final String qs = "select ex from Extension ex order by ex.name asc";
+        String qs = "select ex from Extension ex order by ex.name asc";
         Session session = null;
-        final Transaction tx = null;
+        Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<Extension> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<Extension> ret = q.list();
 
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -76,18 +76,18 @@ public class ExtensionDAO {
     @SuppressWarnings("unchecked")
     public static List<String> findAllUuids() throws DatabaseException {
         log.debug("findAllUuids({})");
-        final String qs = "select ex.uuid from Extension ex order by ex.name asc";
+        String qs = "select ex.uuid from Extension ex order by ex.name asc";
         Session session = null;
-        final Transaction tx = null;
+        Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<String> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<String> ret = q.list();
 
             log.debug("findAllUuids: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

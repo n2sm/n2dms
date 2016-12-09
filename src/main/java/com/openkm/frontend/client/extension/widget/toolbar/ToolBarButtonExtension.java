@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,11 +31,9 @@ import com.openkm.frontend.client.widget.toolbar.ToolBarButton;
  * @author jllort
  *
  */
-public abstract class ToolBarButtonExtension extends ToolBarButton implements
-        HasPermissionsExtension, HasEnabledExtension {
+public abstract class ToolBarButtonExtension extends ToolBarButton implements HasPermissionsExtension, HasEnabledExtension {
 
-    public ToolBarButtonExtension(final Image image, final String title,
-            final ClickHandler handler) {
+    public ToolBarButtonExtension(Image image, String title, ClickHandler handler) {
         super(image, title, handler);
     }
 }

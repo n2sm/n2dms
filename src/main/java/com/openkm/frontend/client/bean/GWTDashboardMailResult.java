@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,16 +31,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTDashboardMailResult implements IsSerializable {
     private GWTMail mail;
-
     private boolean visited;
-
     private Date date;
 
     public GWTMail getMail() {
         return mail;
     }
 
-    public void setMail(final GWTMail mail) {
+    public void setMail(GWTMail mail) {
         this.mail = mail;
     }
 
@@ -48,7 +46,7 @@ public class GWTDashboardMailResult implements IsSerializable {
         return visited;
     }
 
-    public void setVisited(final boolean visited) {
+    public void setVisited(boolean visited) {
         this.visited = visited;
     }
 
@@ -56,13 +54,12 @@ public class GWTDashboardMailResult implements IsSerializable {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("GWTMail=");
         sb.append(mail);

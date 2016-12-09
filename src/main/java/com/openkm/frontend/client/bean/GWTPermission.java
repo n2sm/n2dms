@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,26 +33,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTPermission implements IsSerializable, Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final int REMOVED = 0;
-
     public static final int READ = 1;
-
     public static final int WRITE = 2;
-
     public static final int DELETE = 4;
-
     public static final int SECURITY = 8;
 
     private String item;
-
     private int permissions;
 
     public String getItem() {
         return item;
     }
 
-    public void setItem(final String item) {
+    public void setItem(String item) {
         this.item = item;
     }
 
@@ -60,7 +54,7 @@ public class GWTPermission implements IsSerializable, Serializable {
         return permissions;
     }
 
-    public void setPermissions(final int permissions) {
+    public void setPermissions(int permissions) {
         this.permissions = permissions;
     }
 }

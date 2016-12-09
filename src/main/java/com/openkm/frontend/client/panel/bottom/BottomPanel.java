@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,11 +26,11 @@ import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.widget.UserInfo;
 
@@ -41,22 +41,15 @@ import com.openkm.frontend.client.widget.UserInfo;
  *
  */
 public class BottomPanel extends Composite {
-    public static final int PANEL_HEIGHT = 25;
+    public static final int PANEL_HEIGHT = 30;
 
     private HorizontalPanel panel;
-
     private Label statusMsg;
-
     private SimplePanel spLeft;
-
     private SimplePanel spRight;
-
     public UserInfo userInfo;
-
     private String key = "";
-
     private Timer removeStatus;
-
     private String aditionalErrorMsg = "";
 
     /**
@@ -69,32 +62,27 @@ public class BottomPanel extends Composite {
         spRight = new SimplePanel();
         statusMsg = new Label("");
         statusMsg.setStyleName("okm-Input");
-        statusMsg.setSize("340", "15");
-        statusMsg.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        statusMsg.setSize("340px", "15px");
+        statusMsg.setHorizontalAlignment(HasAlignment.ALIGN_LEFT);
 
-        spLeft.setWidth("10");
-        spRight.setWidth("10");
+        spLeft.setWidth("10px");
+        spRight.setWidth("10px");
 
         panel.add(spLeft);
         panel.add(userInfo);
         panel.add(statusMsg);
         panel.add(spRight);
-        panel.setCellWidth(spLeft, "10");
-        panel.setCellWidth(spRight, "10");
-        panel.setCellHorizontalAlignment(userInfo,
-                HasHorizontalAlignment.ALIGN_LEFT);
-        panel.setCellHorizontalAlignment(statusMsg,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-        panel.setCellHorizontalAlignment(spRight,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-        panel.setCellVerticalAlignment(userInfo,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        panel.setCellVerticalAlignment(statusMsg,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        panel.setCellWidth(spLeft, "10px");
+        panel.setCellWidth(spRight, "10px");
+        panel.setCellHorizontalAlignment(userInfo, HasAlignment.ALIGN_LEFT);
+        panel.setCellHorizontalAlignment(statusMsg, HasAlignment.ALIGN_RIGHT);
+        panel.setCellHorizontalAlignment(spRight, HasAlignment.ALIGN_RIGHT);
+        panel.setCellVerticalAlignment(userInfo, HasAlignment.ALIGN_MIDDLE);
+        panel.setCellVerticalAlignment(statusMsg, HasAlignment.ALIGN_MIDDLE);
 
         panel.setStyleName("okm-bottomPanel");
         panel.addStyleName("okm-DisableSelect");
-        panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        panel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
         panel.setSize("100%", "100%");
         initWidget(panel);
     }
@@ -105,8 +93,8 @@ public class BottomPanel extends Composite {
      * @param width the width size
      * @param height the height size
      */
-    public void setSize(final int width, final int height) {
-        panel.setSize("" + width, "" + height);
+    public void setSize(int width, int height) {
+        panel.setSize("" + width + "px", "" + height + "px");
     }
 
     /**
@@ -115,7 +103,7 @@ public class BottomPanel extends Composite {
      * @param key The status value
      * @param error Is error or not
      */
-    public void setStatus(final String msg) {
+    public void setStatus(String msg) {
         aditionalErrorMsg = "";
 
         // Always we ensure remove status here might be disabled to prevent removing new status data
@@ -134,7 +122,7 @@ public class BottomPanel extends Composite {
      * @param key The status value
      * @param error Is error or not
      */
-    public void setStatus(final String key, final boolean error) {
+    public void setStatus(String key, boolean error) {
         this.key = key;
         aditionalErrorMsg = "";
 
@@ -146,12 +134,10 @@ public class BottomPanel extends Composite {
 
         if (error) {
             statusMsg.addStyleName("okm-Input-Error");
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.hour.pattern"));
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.hour.pattern"));
             aditionalErrorMsg = " - " + dtf.format(new Date());
             // On error case we reset status at 2 minutes
             removeStatus = new Timer() {
-                @Override
                 public void run() {
                     resetStatus();
                 }
@@ -171,8 +157,7 @@ public class BottomPanel extends Composite {
      * @param error Is error or not
      * @param errorCode The code error
      */
-    public void setStatus(final String key, final boolean error,
-            final int errorCode) {
+    public void setStatus(String key, boolean error, int errorCode) {
         this.key = key;
         aditionalErrorMsg = "";
 
@@ -184,13 +169,10 @@ public class BottomPanel extends Composite {
 
         if (error) {
             statusMsg.addStyleName("okm-Input-Error");
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                    .i18n("general.hour.pattern"));
-            aditionalErrorMsg = " (" + errorCode + ") - "
-                    + dtf.format(new Date());
+            DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.hour.pattern"));
+            aditionalErrorMsg = " (" + errorCode + ") - " + dtf.format(new Date());
             // On error case we reset status at 2 minutes
             removeStatus = new Timer() {
-                @Override
                 public void run() {
                     resetStatus();
                 }

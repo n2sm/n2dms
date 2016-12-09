@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -48,7 +48,7 @@ public class ReportDAO {
     /**
      * Create
      */
-    public static long create(final Report rp) throws DatabaseException {
+    public static long create(Report rp) throws DatabaseException {
         log.debug("create({})", rp);
         Session session = null;
         Transaction tx = null;
@@ -56,11 +56,11 @@ public class ReportDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Long id = (Long) session.save(rp);
+            Long id = (Long) session.save(rp);
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -71,10 +71,8 @@ public class ReportDAO {
     /**
      * Create report from file
      */
-    public static long createFromFile(final File repFile, final String name,
-            final boolean active) throws DatabaseException, IOException {
-        log.debug("createFromFile({}, {}, {})", new Object[] { repFile, name,
-                active });
+    public static long createFromFile(File repFile, String name, boolean active) throws DatabaseException, IOException {
+        log.debug("createFromFile({}, {}, {})", new Object[] { repFile, name, active });
         Session session = null;
         Transaction tx = null;
         FileInputStream fis = null;
@@ -85,22 +83,21 @@ public class ReportDAO {
             fis = new FileInputStream(repFile);
 
             // Fill bean
-            final Report rp = new Report();
+            Report rp = new Report();
             rp.setName(name);
             rp.setFileName(repFile.getName());
-            rp.setFileMime(MimeTypeConfig.mimeTypes.getContentType(repFile
-                    .getName()));
+            rp.setFileMime(MimeTypeConfig.mimeTypes.getContentType(repFile.getName()));
             rp.setFileContent(SecureStore.b64Encode(IOUtils.toByteArray(fis)));
             rp.setActive(active);
 
-            final Long id = (Long) session.save(rp);
+            Long id = (Long) session.save(rp);
             HibernateUtil.commit(tx);
             log.debug("createFromFile: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             HibernateUtil.rollback(tx);
             throw e;
         } finally {
@@ -112,9 +109,9 @@ public class ReportDAO {
     /**
      * Update
      */
-    public static void update(final Report rp) throws DatabaseException {
+    public static void update(Report rp) throws DatabaseException {
         log.debug("update({})", rp);
-        final String qs = "select rp.fileContent, rp.fileName, rp.fileMime from Report rp where rp.id=:id";
+        String qs = "select rp.fileContent, rp.fileName, rp.fileMime from Report rp where rp.id=:id";
         Session session = null;
         Transaction tx = null;
 
@@ -122,12 +119,10 @@ public class ReportDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            if (rp.getFileContent() == null
-                    || rp.getFileContent().length() == 0) {
-                final Query q = session.createQuery(qs);
+            if (rp.getFileContent() == null || rp.getFileContent().length() == 0) {
+                Query q = session.createQuery(qs);
                 q.setParameter("id", rp.getId());
-                final Object[] data = (Object[]) q.setMaxResults(1)
-                        .uniqueResult();
+                Object[] data = (Object[]) q.setMaxResults(1).uniqueResult();
                 rp.setFileContent((String) data[0]);
                 rp.setFileName((String) data[1]);
                 rp.setFileMime((String) data[2]);
@@ -135,7 +130,7 @@ public class ReportDAO {
 
             session.update(rp);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -148,7 +143,7 @@ public class ReportDAO {
     /**
      * Delete
      */
-    public static void delete(final long rpId) throws DatabaseException {
+    public static void delete(long rpId) throws DatabaseException {
         log.debug("delete({})", rpId);
         Session session = null;
         Transaction tx = null;
@@ -156,10 +151,10 @@ public class ReportDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Report rp = (Report) session.load(Report.class, rpId);
+            Report rp = (Report) session.load(Report.class, rpId);
             session.delete(rp);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -172,19 +167,19 @@ public class ReportDAO {
     /**
      * Find by pk
      */
-    public static Report findByPk(final long rpId) throws DatabaseException {
+    public static Report findByPk(long rpId) throws DatabaseException {
         log.debug("findByPk({})", rpId);
-        final String qs = "from Report rp where rp.id=:id";
+        String qs = "from Report rp where rp.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", rpId);
-            final Report ret = (Report) q.setMaxResults(1).uniqueResult();
+            Report ret = (Report) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -197,16 +192,16 @@ public class ReportDAO {
     @SuppressWarnings("unchecked")
     public static List<Report> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from Report rp order by rp.name";
+        String qs = "from Report rp order by rp.name";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<Report> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<Report> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

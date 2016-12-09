@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,21 +43,16 @@ import com.openkm.frontend.client.service.OKMWorkflowServiceAsync;
  */
 public class WorkflowDashboard extends Composite {
 
-    private final OKMWorkflowServiceAsync workflowService = (OKMWorkflowServiceAsync) GWT
-            .create(OKMWorkflowService.class);
+    private final OKMWorkflowServiceAsync workflowService = (OKMWorkflowServiceAsync) GWT.create(OKMWorkflowService.class);
 
     private final int NUMBER_OF_COLUMNS = 2;
 
     private HorizontalPanel hPanel;
-
     private VerticalPanel vPanelLeft;
-
     private VerticalPanel vPanelRight;
 
     private WorkflowWidget pendingTasks;
-
     private WorkflowWidget pendingPooledTasks;
-
     public WorkflowFormPanel workflowFormPanel;
 
     private boolean showStatus = false;
@@ -73,11 +68,8 @@ public class WorkflowDashboard extends Composite {
         hPanel.add(vPanelLeft);
         hPanel.add(vPanelRight);
 
-        pendingTasks = new WorkflowWidget("dashboard.workflow.pending.tasks",
-                "img/icon/workflow.gif", true);
-        pendingPooledTasks = new WorkflowWidget(
-                "dashboard.workflow.pending.tasks.unassigned",
-                "img/icon/workflow.gif", true);
+        pendingTasks = new WorkflowWidget("dashboard.workflow.pending.tasks", "img/icon/workflow.gif", true);
+        pendingPooledTasks = new WorkflowWidget("dashboard.workflow.pending.tasks.unassigned", "img/icon/workflow.gif", true);
         pendingTasks.setIsWidgetPendingTask();
         pendingPooledTasks.setIsWidgetPooledTask();
         workflowFormPanel = new WorkflowFormPanel();
@@ -106,30 +98,29 @@ public class WorkflowDashboard extends Composite {
      * 
      * @param width
      */
-    public void setWidth(final int width) {
-        final int columnWidth = width / NUMBER_OF_COLUMNS;
+    public void setWidth(int width, int height) {
+        int columnWidth = width / NUMBER_OF_COLUMNS;
 
         // Trying to distribute widgets on columns with max size
         pendingTasks.setWidth(columnWidth);
         pendingPooledTasks.setWidth(columnWidth);
-        workflowFormPanel.setWidth("" + columnWidth);
-        workflowFormPanel.setHeight("100%");
+        workflowFormPanel.setWidth("" + columnWidth + "px");
+        workflowFormPanel.setHeight(String.valueOf(height) + "px");
+        hPanel.setHeight(String.valueOf(height) + "px");
+        vPanelRight.setHeight(String.valueOf(height) + "px");
     }
 
     /**
      * Get subscribed documents callback
      */
     final AsyncCallback<List<GWTTaskInstance>> callbackFindUserTaskInstancess = new AsyncCallback<List<GWTTaskInstance>>() {
-        @Override
-        public void onSuccess(final List<GWTTaskInstance> result) {
+        public void onSuccess(List<GWTTaskInstance> result) {
             pendingTasks.setTasks(result);
-            Main.get().mainPanel.bottomPanel.userInfo.setNewsWorkflows(result
-                    .size());
+            Main.get().mainPanel.bottomPanel.userInfo.setNewsWorkflows(result.size());
             pendingTasks.unsetRefreshing();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("findUserTaskInstances", caught);
             pendingTasks.unsetRefreshing();
         }
@@ -139,16 +130,13 @@ public class WorkflowDashboard extends Composite {
      * Get subscribed pooled task instances callback
      */
     final AsyncCallback<List<GWTTaskInstance>> callbackPooledTaskInstances = new AsyncCallback<List<GWTTaskInstance>>() {
-        @Override
-        public void onSuccess(final List<GWTTaskInstance> result) {
+        public void onSuccess(List<GWTTaskInstance> result) {
             pendingPooledTasks.setTasks(result);
-            Main.get().mainPanel.bottomPanel.userInfo
-                    .setPooledTaskInstances(result.size());
+            Main.get().mainPanel.bottomPanel.userInfo.setPooledTaskInstances(result.size());
             pendingPooledTasks.unsetRefreshing();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("findPooledTaskInstances", caught);
             pendingPooledTasks.unsetRefreshing();
         }
@@ -158,15 +146,13 @@ public class WorkflowDashboard extends Composite {
      * Get task instance actor id callback
      */
     final AsyncCallback<Object> callbackSetTaskInstanceActorId = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             pendingPooledTasks.resetPooledTaskInstance();
             pendingPooledTasks.unsetRefreshing();
             refreshAll();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("setTaskInstanceActorId", caught);
             pendingPooledTasks.resetPooledTaskInstance();
             pendingPooledTasks.unsetRefreshing();
@@ -177,9 +163,9 @@ public class WorkflowDashboard extends Composite {
      * refresh all
      */
     public void refreshAll() {
-        showStatus = Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD
-                && Main.get().mainPanel.dashboard.getActualView() == UIDashboardConstants.DASHBOARD_WORKFLOW;
+        showStatus =
+                ((Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD) && (Main.get().mainPanel.dashboard
+                        .getActualView() == UIDashboardConstants.DASHBOARD_WORKFLOW));
         findUserTaskInstances();
         findPooledTaskInstances();
     }
@@ -209,10 +195,8 @@ public class WorkflowDashboard extends Composite {
      */
     public void setTaskInstanceActorId() {
         if (pendingPooledTasks.getPooledTaskInstance() != null) {
-            final GWTTaskInstance taskInstance = pendingPooledTasks
-                    .getPooledTaskInstance();
-            workflowService.setTaskInstanceActorId(taskInstance.getId(),
-                    callbackSetTaskInstanceActorId);
+            GWTTaskInstance taskInstance = pendingPooledTasks.getPooledTaskInstance();
+            workflowService.setTaskInstanceActorId(taskInstance.getId(), callbackSetTaskInstanceActorId);
         }
     }
 
@@ -221,8 +205,7 @@ public class WorkflowDashboard extends Composite {
      * 
      * @param processToExecuteNextTask
      */
-    public void setProcessToExecuteNextTask(
-            final double processToExecuteNextTask) {
+    public void setProcessToExecuteNextTask(double processToExecuteNextTask) {
         pendingTasks.setProcessToExecuteNextTask(processToExecuteNextTask);
     }
 }

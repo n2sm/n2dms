@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -60,10 +60,10 @@ public class AutomationAction implements Serializable {
     @OrderColumn(name = "AAP_ORDER")
     @CollectionTable(name = "OKM_AUTO_ACTION_PARAMS", joinColumns = { @JoinColumn(name = "AAP_VALIDATION") })
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Type(type = "org.hibernate.type.StringClobType")
     private List<String> params = new ArrayList<String>();
 
-    @Column(name = "AAC_ACTIVE")
+    @Column(name = "AAC_ACTIVE", nullable = false)
     @Type(type = "true_false")
     private boolean active;
 
@@ -71,7 +71,7 @@ public class AutomationAction implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -79,7 +79,7 @@ public class AutomationAction implements Serializable {
         return type;
     }
 
-    public void setType(final long type) {
+    public void setType(long type) {
         this.type = type;
     }
 
@@ -87,7 +87,7 @@ public class AutomationAction implements Serializable {
         return order;
     }
 
-    public void setOrder(final int order) {
+    public void setOrder(int order) {
         this.order = order;
     }
 
@@ -95,7 +95,7 @@ public class AutomationAction implements Serializable {
         return params;
     }
 
-    public void setParams(final List<String> params) {
+    public void setParams(List<String> params) {
         this.params = params;
     }
 
@@ -103,13 +103,12 @@ public class AutomationAction implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", type=").append(type);

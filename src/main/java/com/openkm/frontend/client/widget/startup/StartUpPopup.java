@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,8 +31,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -46,21 +45,14 @@ import com.openkm.frontend.client.util.Util;
  */
 public class StartUpPopup extends DialogBox implements ClickHandler {
 
-    private final static int IE_SIZE_RECTIFICATION = Util.getUserAgent()
-            .startsWith("ie") ? 2 : 0;
+    private final static int IE_SIZE_RECTIFICATION = (Util.getUserAgent().startsWith("ie") ? 2 : 0);
 
     private VerticalPanel vPanel;
-
     private VerticalPanel status;
-
     private ScrollPanel scrollPanel;
-
     private FlexTable table;
-
     public Button button;
-
     public int actual = -1;
-
     private List<HTML> msgList = new ArrayList<HTML>();
 
     public StartUpPopup() {
@@ -73,10 +65,10 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
         button = new Button(Main.i18n("button.close"), this);
         scrollPanel = new ScrollPanel(status);
         scrollPanel.setAlwaysShowScrollBars(false);
-        scrollPanel.setSize("490", "160");
+        scrollPanel.setSize("490px", "160px");
         scrollPanel.setStyleName("okm-Input");
 
-        status.setWidth("" + (490 - IE_SIZE_RECTIFICATION));
+        status.setWidth("" + (490 - IE_SIZE_RECTIFICATION) + "px");
 
         vPanel.add(new HTML("&nbsp;"));
         vPanel.add(scrollPanel);
@@ -88,23 +80,18 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
         button.setVisible(false);
         button.setStyleName("okm-YesButton");
 
-        vPanel.setCellHorizontalAlignment(scrollPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(table,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellVerticalAlignment(scrollPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        vPanel.setCellHorizontalAlignment(scrollPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(table, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellVerticalAlignment(scrollPanel, HasAlignment.ALIGN_MIDDLE);
 
-        final int left = (Window.getClientWidth() - 510) / 2;
-        final int top = (Window.getClientHeight() - 220) / 2;
+        int left = (Window.getClientWidth() - 510) / 2;
+        int top = (Window.getClientHeight() - 220) / 2;
         vPanel.setWidth("510px");
         vPanel.setHeight("220px");
 
         for (int i = 0; i < StartUp.STARTUP_LOADING_HISTORY_SEARCH; i++) {
-            table.setWidget(0, i,
-                    new Image(OKMBundleResources.INSTANCE.loadedDisabledIcon()));
+            table.setWidget(0, i, new Image(OKMBundleResources.INSTANCE.loadedDisabledIcon()));
         }
 
         setText(Main.i18n("startup.openkm"));
@@ -118,25 +105,20 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
      * @param text The text
      * @param actual The actual status
      */
-    public void addStatus(final String text, final int actual) {
+    public void addStatus(String text, int actual) {
         HTML tmpHTML;
 
         // We've jumped normally due to errors, must mark as incorrect
         if (this.actual + 1 < actual) {
-            Window.alert("Current error: " + this.actual + ", New error: "
-                    + actual);
+            Window.alert("Current error: " + this.actual + ", New error: " + actual);
 
             for (int i = this.actual + 1; i < actual; i++) {
-                tmpHTML = new HTML("&nbsp;"
-                        + Main.get().startUp.getStatusMsg(i));
+                tmpHTML = new HTML("&nbsp;" + Main.get().startUp.getStatusMsg(i));
                 tmpHTML.setStyleName("okm-Input-Error");
                 tmpHTML.setWordWrap(false);
                 status.add(tmpHTML);
                 scrollPanel.ensureVisible(tmpHTML);
-                table.setWidget(
-                        0,
-                        i,
-                        new Image(OKMBundleResources.INSTANCE.loadedErrorIcon()));
+                table.setWidget(0, i, new Image(OKMBundleResources.INSTANCE.loadedErrorIcon()));
             }
         }
 
@@ -144,12 +126,11 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
         tmpHTML.setWordWrap(false);
         msgList.add(tmpHTML);
         if (msgList.size() > 11) {
-            status.remove(msgList.remove(0)); // Only shows 10 messages on panel, when arrives 10 remove the first
+            status.remove((HTML) msgList.remove(0)); // Only shows 10 messages on panel, when arrives 10 remove the first
         }
         status.add(tmpHTML);
         scrollPanel.ensureVisible(tmpHTML);
-        table.setWidget(0, actual,
-                new Image(OKMBundleResources.INSTANCE.loadedIcon()));
+        table.setWidget(0, actual, new Image(OKMBundleResources.INSTANCE.loadedIcon()));
         this.actual = actual;
     }
 
@@ -163,7 +144,7 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
     /**
      * addError
      */
-    public void addError(final String error) {
+    public void addError(String error) {
         HTML tmpHTML;
         tmpHTML = new HTML("&nbsp;" + error);
         tmpHTML.setStyleName("okm-Input-Error");
@@ -172,20 +153,18 @@ public class StartUpPopup extends DialogBox implements ClickHandler {
 
         if (msgList.size() > 11) {
             // Only shows 10 messages on panel, when arrives 10 remove the first
-            status.remove(msgList.remove(0));
+            status.remove((HTML) msgList.remove(0));
         }
 
         status.add(tmpHTML);
         scrollPanel.ensureVisible(tmpHTML);
-        table.setWidget(0, actual,
-                new Image(OKMBundleResources.INSTANCE.loadedErrorIcon()));
+        table.setWidget(0, actual, new Image(OKMBundleResources.INSTANCE.loadedErrorIcon()));
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
      */
-    @Override
-    public void onClick(final ClickEvent event) {
+    public void onClick(ClickEvent event) {
         Main.get().startUp.disable();
         hide();
     }

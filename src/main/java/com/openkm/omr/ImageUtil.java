@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,30 +38,30 @@ public class ImageUtil {
     /**
      * readImage
      */
-    public static Gray8Image readImage(final String filename) {
+    public static Gray8Image readImage(String filename) {
         Gray8Image grayimage = null;
         RGB24Image redimage = null;
 
         try {
-            final PixelImage image = ImageLoader.load(filename);
+            PixelImage image = ImageLoader.load(filename);
             if (image == null) {
                 return null;
             } else {
                 if (image.getImageType().toString().indexOf("RGB") != -1) {
-                    redimage = (RGB24Image) ImageLoader.load(filename);
-                    final RGBToGrayConversion rgbtogray = new RGBToGrayConversion();
+                    redimage = (RGB24Image) (ImageLoader.load(filename));
+                    RGBToGrayConversion rgbtogray = new RGBToGrayConversion();
                     rgbtogray.setInputImage(redimage);
                     // adjust this if needed
                     // rgbtogray.setColorWeights(0.3f, 0.3f, 0.4f);
                     rgbtogray.process();
-                    grayimage = (Gray8Image) rgbtogray.getOutputImage();
+                    grayimage = (Gray8Image) (rgbtogray.getOutputImage());
                 } else if (image.getImageType().toString().indexOf("Gray") != -1) {
-                    grayimage = (Gray8Image) image;
+                    grayimage = (Gray8Image) (image);
                 } else {
                     grayimage = null;
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace(System.out);
             System.exit(-1);
         }
@@ -72,14 +72,14 @@ public class ImageUtil {
     /**
      * saveImage
      */
-    public static void saveImage(final PixelImage img, final String filename) {
+    public static void saveImage(PixelImage img, String filename) {
         try {
-            final PNGCodec codec = new PNGCodec();
+            PNGCodec codec = new PNGCodec();
             codec.setFile(filename, CodecMode.SAVE);
             codec.setImage(img);
             codec.setCompressionLevel(0);
             codec.process();
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }
     }
@@ -87,8 +87,7 @@ public class ImageUtil {
     /**
      * putMark
      */
-    public static void putMark(final Gray8Image img, final int x, final int y,
-            final boolean color) {
+    public static void putMark(Gray8Image img, int x, int y, boolean color) {
         if (color) {
             img.putBlack(x, y);
             img.putBlack(x + 1, y + 1);

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -23,6 +23,7 @@ package com.openkm.servlet.admin;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -51,30 +52,27 @@ import com.openkm.util.WebUtils;
  */
 public class CssServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(CssServlet.class);
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (method.equals(METHOD_GET)) {
-            doGet(request, response);
-        } else if (method.equals(METHOD_POST)) {
-            doPost(request, response);
+        if (checkMultipleInstancesAccess(request, response)) {
+            if (method.equals(METHOD_GET)) {
+                doGet(request, response);
+            } else if (method.equals(METHOD_POST)) {
+                doPost(request, response);
+            }
         }
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String action = WebUtils.getString(request, "action");
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
@@ -91,7 +89,7 @@ public class CssServlet extends BaseServlet {
             if (action.equals("") || WebUtils.getBoolean(request, "persist")) {
                 list(userId, request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -99,31 +97,30 @@ public class CssServlet extends BaseServlet {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doPost({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         String action = WebUtils.getString(request, "action");
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
             if (ServletFileUpload.isMultipartContent(request)) {
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
-                final List<FileItem> items = upload.parseRequest(request);
-                final Css css = new Css();
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> items = upload.parseRequest(request);
+                Css css = new Css();
                 css.setActive(false);
 
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (item.isFormField()) {
                         if (item.getFieldName().equals("action")) {
                             action = item.getString("UTF-8");
                         } else if (item.getFieldName().equals("css_id")) {
                             if (!item.getString("UTF-8").isEmpty()) {
-                                css.setId(new Long(item.getString("UTF-8"))
-                                        .longValue());
+                                css.setId(new Long(item.getString("UTF-8")).longValue());
                             }
                         } else if (item.getFieldName().equals("css_name")) {
                             css.setName(item.getString("UTF-8"));
@@ -141,29 +138,26 @@ public class CssServlet extends BaseServlet {
                     CssDAO.getInstance().update(css);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CSS_UPDATE",
-                            String.valueOf(css.getId()), null, css.getName());
+                    UserActivity.log(userId, "ADMIN_CSS_UPDATE", String.valueOf(css.getId()), null, css.getName());
                 } else if (action.equals("delete")) {
-                    final String name = WebUtils.getString(request, "css_name");
+                    String name = WebUtils.getString(request, "css_name");
                     CssDAO.getInstance().delete(css.getId());
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CSS_DELETE",
-                            String.valueOf(css.getId()), null, name);
+                    UserActivity.log(userId, "ADMIN_CSS_DELETE", String.valueOf(css.getId()), null, name);
                 } else if (action.equals("create")) {
-                    final long id = CssDAO.getInstance().create(css);
+                    long id = CssDAO.getInstance().create(css);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CSS_CREATE",
-                            String.valueOf(id), null, css.getName());
+                    UserActivity.log(userId, "ADMIN_CSS_CREATE", String.valueOf(id), null, css.getName());
                 }
             }
 
             list(userId, request, response);
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -172,19 +166,15 @@ public class CssServlet extends BaseServlet {
     /**
      * Download CSS
      */
-    private void download(final String userId,
-            final HttpServletRequest request, final HttpServletResponse response)
-            throws DatabaseException, IOException {
-        log.debug("download({}, {}, {})", new Object[] { userId, request,
-                response });
-        final long id = WebUtils.getLong(request, "css_id");
-        final Css css = CssDAO.getInstance().findByPk(id);
+    private void download(String userId, HttpServletRequest request, HttpServletResponse response) throws DatabaseException, IOException {
+        log.debug("download({}, {}, {})", new Object[] { userId, request, response });
+        long id = WebUtils.getLong(request, "css_id");
+        Css css = CssDAO.getInstance().findByPk(id);
         ByteArrayInputStream bais = null;
 
         try {
             bais = new ByteArrayInputStream(css.getContent().getBytes("UTF-8"));
-            WebUtils.sendFile(request, response, css.getName() + ".css",
-                    MimeTypeConfig.MIME_CSS, false, bais);
+            WebUtils.sendFile(request, response, css.getName() + ".css", MimeTypeConfig.MIME_CSS, false, bais);
         } finally {
             IOUtils.closeQuietly(bais);
         }
@@ -195,19 +185,16 @@ public class CssServlet extends BaseServlet {
     /**
      * Delete CSS
      */
-    private void delete(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("delete({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
-        final long id = WebUtils.getLong(request, "css_id");
+    private void delete(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("delete({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        long id = WebUtils.getLong(request, "css_id");
 
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("css", CssDAO.getInstance().findByPk(id));
-        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request, response);
 
         log.debug("edit: void");
     }
@@ -215,19 +202,16 @@ public class CssServlet extends BaseServlet {
     /**
      * Edit CSS
      */
-    private void edit(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("edit({}, {}, {})",
-                new Object[] { userId, request, response });
-        final ServletContext sc = getServletContext();
-        final long id = WebUtils.getLong(request, "css_id");
+    private void edit(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("edit({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
+        long id = WebUtils.getLong(request, "css_id");
 
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("css", CssDAO.getInstance().findByPk(id));
-        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request, response);
 
         log.debug("edit: void");
     }
@@ -235,18 +219,15 @@ public class CssServlet extends BaseServlet {
     /**
      * Create CSS
      */
-    private void create(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("create({}, {}, {})", new Object[] { userId, request,
-                response });
-        final ServletContext sc = getServletContext();
+    private void create(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("create({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
 
         sc.setAttribute("action", WebUtils.getString(request, "action"));
         sc.setAttribute("persist", true);
         sc.setAttribute("css", null);
-        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/css_edit.jsp").forward(request, response);
 
         log.debug("create: void");
     }
@@ -254,15 +235,12 @@ public class CssServlet extends BaseServlet {
     /**
      * List CSS
      */
-    private void list(final String userId, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
-        log.debug("list({}, {}, {})",
-                new Object[] { userId, request, response });
-        final ServletContext sc = getServletContext();
+    private void list(String userId, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException,
+            DatabaseException {
+        log.debug("list({}, {}, {})", new Object[] { userId, request, response });
+        ServletContext sc = getServletContext();
         sc.setAttribute("cssList", CssDAO.getInstance().findAll());
-        sc.getRequestDispatcher("/admin/css_list.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/css_list.jsp").forward(request, response);
         log.debug("list: void");
     }
 }

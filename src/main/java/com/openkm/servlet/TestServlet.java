@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,29 +33,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openkm.core.MimeTypeConfig;
+import com.openkm.spring.PrincipalUtils;
 
 /**
  * Only for testing purposes
  */
 public class TestServlet extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(TestServlet.class);
-
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String token = (String) request.getSession()
-                .getAttribute("token");
-        final PrintWriter out = response.getWriter();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String token = (String) request.getSession().getAttribute("token");
+        PrintWriter out = response.getWriter();
         log.info("Token: " + token);
         out.println("Token: " + token);
         response.setContentType(MimeTypeConfig.MIME_HTML);
 
         try {
-            out.println("Hello, World!");
-        } catch (final Exception e) {
+            out.println("User: " + PrincipalUtils.getUser() + "<br/>");
+            out.println("Roles: " + PrincipalUtils.getRoles() + "<br/>");
+            out.println("Authentication: " + PrincipalUtils.getAuthentication() + "<br/>");
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
 

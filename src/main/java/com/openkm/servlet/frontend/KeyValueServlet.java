@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,29 +42,23 @@ import com.openkm.util.GWTUtil;
  * @author jllort
  * 
  */
-public class KeyValueServlet extends OKMRemoteServiceServlet implements
-        OKMKeyValueService {
+public class KeyValueServlet extends OKMRemoteServiceServlet implements OKMKeyValueService {
     private static Logger log = LoggerFactory.getLogger(KeyValueServlet.class);
-
     private static final long serialVersionUID = -7747765621446287017L;
 
     @Override
-    public List<GWTKeyValue> getKeyValues(final List<String> tables,
-            final String query) throws OKMException {
+    public List<GWTKeyValue> getKeyValues(List<String> tables, String query) throws OKMException {
         log.debug("getKeyValues({},{}})", tables, query);
         updateSessionManager();
-        final List<GWTKeyValue> keyValues = new ArrayList<GWTKeyValue>();
+        List<GWTKeyValue> keyValues = new ArrayList<GWTKeyValue>();
 
         try {
-            for (final KeyValue keyValue : KeyValueDAO.getKeyValues(tables,
-                    query)) {
+            for (KeyValue keyValue : KeyValueDAO.getKeyValues(tables, query)) {
                 keyValues.add(GWTUtil.copy(keyValue));
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMKeyValueService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMKeyValueService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         log.debug("executeValueQuery: {}", keyValues);

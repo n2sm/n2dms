@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,18 +30,20 @@ public interface StatsModule {
     /**
      * Get number of documents per context
      */
-    public StatsInfo getDocumentsByContext(String token)
-            throws RepositoryException, DatabaseException;
+    public StatsInfo getDocumentsByContext(String token) throws RepositoryException, DatabaseException;
 
     /**
      * Get number of folders per context
      */
-    public StatsInfo getFoldersByContext(String token)
-            throws RepositoryException, DatabaseException;
+    public StatsInfo getFoldersByContext(String token) throws RepositoryException, DatabaseException;
 
     /**
-     * Get sizer of documents per context
+     * Get number of mails per context
      */
-    public StatsInfo getDocumentsSizeByContext(String token)
-            throws RepositoryException, DatabaseException;
+    public StatsInfo getMailsByContext(String token) throws RepositoryException, DatabaseException;
+
+    /**
+     * Get size of documents per context
+     */
+    public StatsInfo getDocumentsSizeByContext(String token) throws RepositoryException, DatabaseException;
 }

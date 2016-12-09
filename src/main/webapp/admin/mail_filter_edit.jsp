@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -14,7 +14,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
 		$dm = $('.ds').openDOMWindow({
-			height:200, width:300,
+			height:300, width:400,
 			eventType:'click',
 			overlayOpacity:'57',
 			windowSource:'iframe', windowPadding:0
@@ -98,8 +98,12 @@
           </tr>
           <tr>
             <td colspan="3" align="right">
-              <input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              <input type="submit" value="Send"/>
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <c:choose>
+                <c:when test="${action == 'filterCreate'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                <c:when test="${action == 'filterEdit'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                <c:when test="${action == 'filterDelete'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+              </c:choose>
             </td>
           </tr>
         </table>

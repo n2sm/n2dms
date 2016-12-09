@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -42,93 +42,72 @@ public interface FolderExtension extends Extension {
     /**
      * Executed BEFORE folder creation.
      */
-    public void preCreate(Session session, Ref<Node> parentNode, Ref<Folder> fld)
-            throws AccessDeniedException, RepositoryException,
-            PathNotFoundException, ItemExistsException, DatabaseException,
-            ExtensionException;
+    public void preCreate(Session session, Ref<Node> parentNode, Ref<Folder> fld) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, ItemExistsException, DatabaseException, ExtensionException;
 
     /**
      * Executed AFTER folder creation.
      */
-    public void postCreate(Session session, Ref<Node> parentNode,
-            Ref<Node> fldNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            DatabaseException, ExtensionException;
+    public void postCreate(Session session, Ref<Node> parentNode, Ref<Node> fldNode) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, ItemExistsException, DatabaseException, ExtensionException;
 
     /**
      * Executed BEFORE folder delete.
      */
-    public void preDelete(Session session, String fldPath,
-            Ref<Node> refFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, LockException,
-            DatabaseException;
+    public void preDelete(Session session, String fldPath, Ref<Node> refFolderNode) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, LockException, DatabaseException;
 
     /**
      * Executed AFTER folder delete.
      */
-    public void postDelete(Session session, String fldPath,
-            Ref<Node> refFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, LockException,
-            DatabaseException;
+    public void postDelete(Session session, String fldPath, Ref<Node> refFolderNode) throws AccessDeniedException, RepositoryException,
+            PathNotFoundException, LockException, DatabaseException;
 
     /**
      * Executed BEFORE folder purge.
      */
-    public void prePurge(Session session, String fldPath,
-            Ref<Node> refFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, DatabaseException;
-
-    /**
-     * Executed AFTER folder purge.
-     */
-    public void postPurge(Session session, String fldPath)
-            throws AccessDeniedException, RepositoryException,
+    public void prePurge(Session session, String fldPath, Ref<Node> refFolderNode) throws AccessDeniedException, RepositoryException,
             PathNotFoundException, DatabaseException;
 
     /**
+     * Executed AFTER folder purge.
+     */
+    public void postPurge(Session session, String fldPath) throws AccessDeniedException, RepositoryException, PathNotFoundException,
+            DatabaseException;
+
+    /**
      * Executed BEFORE folder purge.
      */
-    public void preRename(Session session, String fldPath, String newPath,
-            Ref<Node> refFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            DatabaseException;
+    public void preRename(Session session, String fldPath, String newPath, Ref<Node> refFolderNode) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, DatabaseException;
 
     /**
      * Executed AFTER folder purge.
      */
-    public void postRename(Session session, String fldPath, String newPath,
-            Ref<Node> refFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            DatabaseException;
+    public void postRename(Session session, String fldPath, String newPath, Ref<Node> refFolderNode) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, DatabaseException;
 
     /**
      * Executed BEFORE folder move.
      */
-    public void preMove(Session session, String fldPath, String dstNodePath)
-            throws AccessDeniedException, RepositoryException,
+    public void preMove(Session session, String fldPath, String dstNodePath) throws AccessDeniedException, RepositoryException,
             PathNotFoundException, ItemExistsException, DatabaseException;
 
     /**
      * Executed AFTER folder move.
      */
-    public void postMove(Session session, String fldPath, String dstNodePath,
-            Ref<Node> refDstFldNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            DatabaseException;
+    public void postMove(Session session, String fldPath, String dstNodePath, Ref<Node> refDstFldNode) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, DatabaseException;
 
     /**
      * Executed BEFORE folder copy.
      */
-    public void preCopy(XASession session, Ref<Node> refSrcFolderNode,
-            Ref<Node> refDstFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            IOException, DatabaseException, UserQuotaExceededException;
+    public void preCopy(XASession session, Ref<Node> refSrcFolderNode, Ref<Node> refDstFolderNode) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, IOException, DatabaseException, UserQuotaExceededException;
 
     /**
      * Executed AFTER folder copy.
      */
-    public void postCopy(XASession session, Ref<Node> refSrcFolderNode,
-            Ref<Node> refNewFolderNode) throws AccessDeniedException,
-            RepositoryException, PathNotFoundException, ItemExistsException,
-            IOException, DatabaseException, UserQuotaExceededException;
+    public void postCopy(XASession session, Ref<Node> refSrcFolderNode, Ref<Node> refNewFolderNode) throws AccessDeniedException,
+            RepositoryException, PathNotFoundException, ItemExistsException, IOException, DatabaseException, UserQuotaExceededException;
 }

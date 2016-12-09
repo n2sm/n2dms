@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,50 +25,32 @@ import java.io.Serializable;
 
 public class ProfileMenuFile implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean createFolderVisible;
-
     private boolean findFolderVisible;
-
     private boolean findDocumentVisible;
-
     private boolean similarDocumentVisible;
-
     private boolean goFolderVisible;
-
     private boolean downloadVisible;
-
     private boolean downloadPdfVisible;
-
     private boolean addDocumentVisible;
-
     private boolean startWorkflowVisible;
-
     private boolean refreshVisible;
-
     private boolean scannerVisible;
-
     private boolean uploaderVisible;
-
     private boolean exportVisible;
-
     private boolean createFromTemplateVisible;
-
     private boolean purgeVisible;
-
     private boolean restoreVisible;
-
     private boolean purgeTrashVisible;
-
     private boolean sendDocumentLinkVisible;
-
     private boolean sendDocumentAttachmentVisible;
+    private boolean forwardMailVisible;
 
     public boolean isCreateFolderVisible() {
         return createFolderVisible;
     }
 
-    public void setCreateFolderVisible(final boolean createFolderVisible) {
+    public void setCreateFolderVisible(boolean createFolderVisible) {
         this.createFolderVisible = createFolderVisible;
     }
 
@@ -76,7 +58,7 @@ public class ProfileMenuFile implements Serializable {
         return findFolderVisible;
     }
 
-    public void setFindFolderVisible(final boolean findFolderVisible) {
+    public void setFindFolderVisible(boolean findFolderVisible) {
         this.findFolderVisible = findFolderVisible;
     }
 
@@ -84,7 +66,7 @@ public class ProfileMenuFile implements Serializable {
         return findDocumentVisible;
     }
 
-    public void setFindDocumentVisible(final boolean findDocumentVisible) {
+    public void setFindDocumentVisible(boolean findDocumentVisible) {
         this.findDocumentVisible = findDocumentVisible;
     }
 
@@ -92,7 +74,7 @@ public class ProfileMenuFile implements Serializable {
         return similarDocumentVisible;
     }
 
-    public void setSimilarDocumentVisible(final boolean similarDocumentVisible) {
+    public void setSimilarDocumentVisible(boolean similarDocumentVisible) {
         this.similarDocumentVisible = similarDocumentVisible;
     }
 
@@ -100,7 +82,7 @@ public class ProfileMenuFile implements Serializable {
         return goFolderVisible;
     }
 
-    public void setGoFolderVisible(final boolean goFolderVisible) {
+    public void setGoFolderVisible(boolean goFolderVisible) {
         this.goFolderVisible = goFolderVisible;
     }
 
@@ -108,7 +90,7 @@ public class ProfileMenuFile implements Serializable {
         return downloadVisible;
     }
 
-    public void setDownloadVisible(final boolean downloadVisible) {
+    public void setDownloadVisible(boolean downloadVisible) {
         this.downloadVisible = downloadVisible;
     }
 
@@ -116,7 +98,7 @@ public class ProfileMenuFile implements Serializable {
         return downloadPdfVisible;
     }
 
-    public void setDownloadPdfVisible(final boolean downloadPdfVisible) {
+    public void setDownloadPdfVisible(boolean downloadPdfVisible) {
         this.downloadPdfVisible = downloadPdfVisible;
     }
 
@@ -124,7 +106,7 @@ public class ProfileMenuFile implements Serializable {
         return addDocumentVisible;
     }
 
-    public void setAddDocumentVisible(final boolean addDocumentVisible) {
+    public void setAddDocumentVisible(boolean addDocumentVisible) {
         this.addDocumentVisible = addDocumentVisible;
     }
 
@@ -132,7 +114,7 @@ public class ProfileMenuFile implements Serializable {
         return startWorkflowVisible;
     }
 
-    public void setStartWorkflowVisible(final boolean startWorkflowVisible) {
+    public void setStartWorkflowVisible(boolean startWorkflowVisible) {
         this.startWorkflowVisible = startWorkflowVisible;
     }
 
@@ -140,7 +122,7 @@ public class ProfileMenuFile implements Serializable {
         return refreshVisible;
     }
 
-    public void setRefreshVisible(final boolean refreshVisible) {
+    public void setRefreshVisible(boolean refreshVisible) {
         this.refreshVisible = refreshVisible;
     }
 
@@ -148,7 +130,7 @@ public class ProfileMenuFile implements Serializable {
         return scannerVisible;
     }
 
-    public void setScannerVisible(final boolean scannerVisible) {
+    public void setScannerVisible(boolean scannerVisible) {
         this.scannerVisible = scannerVisible;
     }
 
@@ -156,7 +138,7 @@ public class ProfileMenuFile implements Serializable {
         return uploaderVisible;
     }
 
-    public void setUploaderVisible(final boolean uploaderVisible) {
+    public void setUploaderVisible(boolean uploaderVisible) {
         this.uploaderVisible = uploaderVisible;
     }
 
@@ -164,7 +146,7 @@ public class ProfileMenuFile implements Serializable {
         return exportVisible;
     }
 
-    public void setExportVisible(final boolean exportVisible) {
+    public void setExportVisible(boolean exportVisible) {
         this.exportVisible = exportVisible;
     }
 
@@ -172,8 +154,7 @@ public class ProfileMenuFile implements Serializable {
         return createFromTemplateVisible;
     }
 
-    public void setCreateFromTemplateVisible(
-            final boolean createFromTemplateVisible) {
+    public void setCreateFromTemplateVisible(boolean createFromTemplateVisible) {
         this.createFromTemplateVisible = createFromTemplateVisible;
     }
 
@@ -181,7 +162,7 @@ public class ProfileMenuFile implements Serializable {
         return purgeVisible;
     }
 
-    public void setPurgeVisible(final boolean purgeVisible) {
+    public void setPurgeVisible(boolean purgeVisible) {
         this.purgeVisible = purgeVisible;
     }
 
@@ -189,7 +170,7 @@ public class ProfileMenuFile implements Serializable {
         return restoreVisible;
     }
 
-    public void setRestoreVisible(final boolean restoreVisible) {
+    public void setRestoreVisible(boolean restoreVisible) {
         this.restoreVisible = restoreVisible;
     }
 
@@ -197,7 +178,7 @@ public class ProfileMenuFile implements Serializable {
         return purgeTrashVisible;
     }
 
-    public void setPurgeTrashVisible(final boolean purgeTrashVisible) {
+    public void setPurgeTrashVisible(boolean purgeTrashVisible) {
         this.purgeTrashVisible = purgeTrashVisible;
     }
 
@@ -205,7 +186,7 @@ public class ProfileMenuFile implements Serializable {
         return sendDocumentLinkVisible;
     }
 
-    public void setSendDocumentLinkVisible(final boolean sendDocumentLinkVisible) {
+    public void setSendDocumentLinkVisible(boolean sendDocumentLinkVisible) {
         this.sendDocumentLinkVisible = sendDocumentLinkVisible;
     }
 
@@ -213,14 +194,20 @@ public class ProfileMenuFile implements Serializable {
         return sendDocumentAttachmentVisible;
     }
 
-    public void setSendDocumentAttachmentVisible(
-            final boolean sendDocumentAttachmentVisible) {
+    public void setSendDocumentAttachmentVisible(boolean sendDocumentAttachmentVisible) {
         this.sendDocumentAttachmentVisible = sendDocumentAttachmentVisible;
     }
 
-    @Override
+    public boolean isForwardMailVisible() {
+        return forwardMailVisible;
+    }
+
+    public void setForwardMailVisible(boolean forwardMailVisible) {
+        this.forwardMailVisible = forwardMailVisible;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("createFolderVisible=").append(createFolderVisible);
         sb.append(", findFolderVisible=").append(findFolderVisible);

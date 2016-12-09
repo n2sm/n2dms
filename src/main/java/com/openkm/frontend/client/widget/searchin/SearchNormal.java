@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,8 +35,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
@@ -57,77 +56,43 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  *
  */
 public class SearchNormal extends Composite {
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     private static final int CALENDAR_FIRED_NONE = -1;
-
     private static final int CALENDAR_FIRED_START = 0;
-
     private static final int CALENDAR_FIRED_END = 1;
 
     private ScrollPanel scrollPanel;
-
     private FlexTable table;
-
     public ListBox context;
-
     public TextBox content;
-
     public TextBox name;
-
     public TextBox keywords;
-
     public ListBox userListBox;
-
     public TextBox startDate;
-
     public TextBox endDate;
-
     public HorizontalPanel dateRange;
-
     public PopupPanel calendarPopup;
-
     public CalendarWidget calendar;
-
     public Image startCalendarIcon;
-
     public Image endCalendarIcon;
-
     public Image cleanIcon;
-
     public HTML dateBetween;
-
     public int calendarFired = CALENDAR_FIRED_NONE;
-
     public Date modifyDateFrom;
-
     public Date modifyDateTo;
-
     private int posTaxonomy = 0;
-
     private int posTemplates = 0;
-
     private int posPersonal = 0;
-
     private int posMail = 0;
-
     private int posTrash = 0;
-
     private boolean templatesVisible = false;
-
     private boolean personalVisible = false;
-
     private boolean mailVisible = false;
-
     private boolean trashVisible = false;
-
     private String trashContextValue = "";
-
     private String personalContextValue = "";
-
     private String mailContextValue = "";
-
     private String templatesContextValue = "";
 
     /**
@@ -167,15 +132,13 @@ public class SearchNormal extends Composite {
 
         context.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
+            public void onChange(ChangeEvent event) {
                 // each time list is changed must clean folder
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchAdvanced.path
-                        .setText("");
+                Main.get().mainPanel.search.searchBrowser.searchIn.searchAdvanced.path.setText("");
 
                 // Always enable mail search in mail view
                 if (mailVisible && context.getSelectedIndex() == posMail) {
-                    Main.get().mainPanel.search.searchBrowser.searchIn.searchAdvanced
-                            .enableMailSearch();
+                    Main.get().mainPanel.search.searchBrowser.searchIn.searchAdvanced.enableMailSearch();
                 }
             }
         });
@@ -196,9 +159,8 @@ public class SearchNormal extends Composite {
 
         userListBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl
-                        .evaluateSearchButtonVisible();
+            public void onChange(ChangeEvent event) {
+                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.evaluateSearchButtonVisible();
             }
         });
 
@@ -207,10 +169,9 @@ public class SearchNormal extends Composite {
 
         calendar.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
+            public void onChange(ChangeEvent event) {
                 calendarPopup.hide();
-                final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                        .i18n("general.day.pattern"));
+                DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.day.pattern"));
 
                 switch (calendarFired) {
                 case CALENDAR_FIRED_START:
@@ -225,23 +186,20 @@ public class SearchNormal extends Composite {
                 }
 
                 calendarFired = CALENDAR_FIRED_NONE;
-                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl
-                        .evaluateSearchButtonVisible();
+                Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.evaluateSearchButtonVisible();
             }
         });
 
         startCalendarIcon.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 calendarFired = CALENDAR_FIRED_START;
                 if (modifyDateFrom != null) {
                     calendar.setNow((Date) modifyDateFrom.clone());
                 } else {
                     calendar.setNow(null);
                 }
-                calendarPopup.setPopupPosition(
-                        startCalendarIcon.getAbsoluteLeft(),
-                        startCalendarIcon.getAbsoluteTop() - 2);
+                calendarPopup.setPopupPosition(startCalendarIcon.getAbsoluteLeft(), startCalendarIcon.getAbsoluteTop() - 2);
                 calendarPopup.show();
             }
         });
@@ -249,16 +207,14 @@ public class SearchNormal extends Composite {
 
         endCalendarIcon.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 calendarFired = CALENDAR_FIRED_END;
                 if (modifyDateTo != null) {
                     calendar.setNow((Date) modifyDateTo.clone());
                 } else {
                     calendar.setNow(null);
                 }
-                calendarPopup.setPopupPosition(
-                        endCalendarIcon.getAbsoluteLeft(),
-                        endCalendarIcon.getAbsoluteTop() - 2);
+                calendarPopup.setPopupPosition(endCalendarIcon.getAbsoluteLeft(), endCalendarIcon.getAbsoluteTop() - 2);
                 calendarPopup.show();
             }
         });
@@ -266,7 +222,7 @@ public class SearchNormal extends Composite {
 
         cleanIcon.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 startDate.setText("");
                 modifyDateFrom = null;
                 endDate.setText("");
@@ -282,21 +238,17 @@ public class SearchNormal extends Composite {
         dateRange.add(endDate);
         dateRange.add(endCalendarIcon);
         dateRange.add(cleanIcon);
-        startDate.setWidth("70");
-        endDate.setWidth("70");
+        startDate.setWidth("70px");
+        endDate.setWidth("70px");
         startDate.setMaxLength(10);
         endDate.setMaxLength(10);
         startDate.setReadOnly(true);
         endDate.setReadOnly(true);
-        dateRange.setCellVerticalAlignment(startCalendarIcon,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        dateRange.setCellVerticalAlignment(endCalendarIcon,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        dateRange.setCellVerticalAlignment(cleanIcon,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        dateRange.setCellWidth(cleanIcon, "25");
-        dateRange.setCellHorizontalAlignment(cleanIcon,
-                HasHorizontalAlignment.ALIGN_RIGHT);
+        dateRange.setCellVerticalAlignment(startCalendarIcon, HasAlignment.ALIGN_MIDDLE);
+        dateRange.setCellVerticalAlignment(endCalendarIcon, HasAlignment.ALIGN_MIDDLE);
+        dateRange.setCellVerticalAlignment(cleanIcon, HasAlignment.ALIGN_MIDDLE);
+        dateRange.setCellWidth(cleanIcon, "25px");
+        dateRange.setCellHorizontalAlignment(cleanIcon, HasAlignment.ALIGN_RIGHT);
         dateBetween.addStyleName("okm-NoWrap");
 
         table.setHTML(0, 0, Main.i18n("search.context"));
@@ -312,7 +264,7 @@ public class SearchNormal extends Composite {
         table.setHTML(5, 0, Main.i18n("search.date.range"));
         table.setWidget(5, 1, dateRange);
 
-        final CellFormatter cellFormatter = table.getCellFormatter();
+        CellFormatter cellFormatter = table.getCellFormatter();
         cellFormatter.setStyleName(0, 0, "okm-DisableSelect");
         cellFormatter.setStyleName(1, 0, "okm-DisableSelect");
         cellFormatter.setStyleName(2, 0, "okm-DisableSelect");
@@ -345,9 +297,8 @@ public class SearchNormal extends Composite {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final FlexTable table, final int row,
-            final int columns, final boolean wrap) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(FlexTable table, int row, int columns, boolean wrap) {
+        CellFormatter cellFormatter = table.getCellFormatter();
 
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, wrap);
@@ -359,16 +310,14 @@ public class SearchNormal extends Composite {
      */
     public void getAllUsers() {
         authService.getAllUsers(new AsyncCallback<List<GWTUser>>() {
-            @Override
-            public void onSuccess(final List<GWTUser> result) {
+            public void onSuccess(List<GWTUser> result) {
                 userListBox.addItem("", ""); // Add first value empty
-                for (final GWTUser user : result) {
+                for (GWTUser user : result) {
                     userListBox.addItem(user.getUsername(), user.getId());
                 }
             }
 
-            @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("GetAllUsers", caught);
             }
         });
@@ -388,13 +337,11 @@ public class SearchNormal extends Composite {
         context.setItemText(posTaxonomy, Main.i18n("leftpanel.label.taxonomy"));
 
         if (templatesVisible) {
-            context.setItemText(posTemplates,
-                    Main.i18n("leftpanel.label.templates"));
+            context.setItemText(posTemplates, Main.i18n("leftpanel.label.templates"));
         }
 
         if (personalVisible) {
-            context.setItemText(posPersonal,
-                    Main.i18n("leftpanel.label.my.documents"));
+            context.setItemText(posPersonal, Main.i18n("leftpanel.label.my.documents"));
         }
 
         if (mailVisible) {
@@ -414,7 +361,7 @@ public class SearchNormal extends Composite {
      * @param contextValue The context value
      * @param stackView The stack view
      */
-    public void setContextValue(final String contextValue, final int stackView) {
+    public void setContextValue(String contextValue, int stackView) {
         switch (stackView) {
         case UIDesktopConstants.NAVIGATOR_TAXONOMY:
             context.setValue(posTaxonomy, contextValue);
@@ -425,8 +372,7 @@ public class SearchNormal extends Composite {
 
             if (templatesVisible) {
                 posTemplates = context.getItemCount(); // Item count by default is good id, 0 is first item, etc...
-                context.addItem(Main.i18n("leftpanel.label.templates"),
-                        templatesContextValue);
+                context.addItem(Main.i18n("leftpanel.label.templates"), templatesContextValue);
             }
             break;
 
@@ -435,8 +381,7 @@ public class SearchNormal extends Composite {
 
             if (personalVisible) {
                 posPersonal = context.getItemCount();
-                context.addItem(Main.i18n("leftpanel.label.my.documents"),
-                        personalContextValue);
+                context.addItem(Main.i18n("leftpanel.label.my.documents"), personalContextValue);
             }
             break;
 
@@ -445,8 +390,7 @@ public class SearchNormal extends Composite {
 
             if (mailVisible) {
                 posMail = context.getItemCount();
-                context.addItem(Main.i18n("leftpanel.label.mail"),
-                        mailContextValue);
+                context.addItem(Main.i18n("leftpanel.label.mail"), mailContextValue);
             }
             break;
 
@@ -455,8 +399,7 @@ public class SearchNormal extends Composite {
 
             if (trashVisible) {
                 posTrash = context.getItemCount();
-                context.addItem(Main.i18n("leftpanel.label.trash"),
-                        trashContextValue);
+                context.addItem(Main.i18n("leftpanel.label.trash"), trashContextValue);
             }
             break;
         }

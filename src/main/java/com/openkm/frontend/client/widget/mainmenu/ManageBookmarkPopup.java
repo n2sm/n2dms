@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.mainmenu;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,6 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -56,33 +56,20 @@ import com.openkm.frontend.client.util.Util;
  */
 public class ManageBookmarkPopup extends DialogBox {
 
-    private final OKMBookmarkServiceAsync bookmarkService = (OKMBookmarkServiceAsync) GWT
-            .create(OKMBookmarkService.class);
+    private final OKMBookmarkServiceAsync bookmarkService = (OKMBookmarkServiceAsync) GWT.create(OKMBookmarkService.class);
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private Button cancelButton;
-
     private Button deleteButton;
-
     private Button updateButton;
-
     private FlexTable table;
-
     private FlexTable tableBookmark;
-
     private ScrollPanel scrollPanel;
-
     private ScrollPanel scrollPanelBookmark;
-
     private TextBox textBox;
-
     private Map<String, GWTBookmark> bookmarkMap = new HashMap<String, GWTBookmark>();
-
     private int selectedRow = -1;
-
     private int columns = 3;
 
     /**
@@ -99,15 +86,13 @@ public class ManageBookmarkPopup extends DialogBox {
         textBox.setMaxLength(90);
         textBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 if ((char) KeyCodes.KEY_ENTER == event.getNativeKeyCode()) {
                     if (textBox.getText().length() > 0) {
-                        rename(Integer.parseInt(table.getText(selectedRow, 2)),
-                                textBox.getText());
+                        rename(Integer.parseInt(table.getText(selectedRow, 2)), textBox.getText());
                     }
 
-                } else if ((char) KeyCodes.KEY_ESCAPE == event
-                        .getNativeKeyCode()) {
+                } else if ((char) KeyCodes.KEY_ESCAPE == event.getNativeKeyCode()) {
                     tableBookmark.setHTML(0, 1, table.getText(selectedRow, 1));
                     deleteButton.setEnabled(true);
                     updateButton.setEnabled(true);
@@ -115,44 +100,39 @@ public class ManageBookmarkPopup extends DialogBox {
             }
         });
 
-        cancelButton = new Button(Main.i18n("button.close"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        Main.get().mainPanel.topPanel.mainMenu.bookmark
-                                .getAll(); // Refreshing menu after edit bookmarks
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.close"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Main.get().mainPanel.topPanel.mainMenu.bookmark.getAll(); // Refreshing menu after edit bookmarks
+                hide();
+            }
+        });
         cancelButton.setStyleName("okm-NoButton");
 
-        deleteButton = new Button(Main.i18n("button.delete"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (selectedRow >= 0) {
-                            remove(Integer.parseInt(table.getText(selectedRow,
-                                    2)));
-                        }
-                    }
-                });
+        deleteButton = new Button(Main.i18n("button.delete"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (selectedRow >= 0) {
+                    remove(Integer.parseInt(table.getText(selectedRow, 2)));
+                }
+            }
+        });
         deleteButton.setStyleName("okm-DeleteButton");
         deleteButton.setEnabled(false);
 
-        updateButton = new Button(Main.i18n("button.update"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        if (selectedRow >= 0) {
-                            textBox.setText(table.getHTML(selectedRow, 1));
-                            tableBookmark.setWidget(0, 1, textBox);
-                            updateButton.setEnabled(false);
-                            deleteButton.setEnabled(false);
-                            textBox.setFocus(true);
-                        }
-                    }
-                });
-        updateButton.setStyleName("okm-YesButton");
+        updateButton = new Button(Main.i18n("button.update"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (selectedRow >= 0) {
+                    textBox.setText(table.getHTML(selectedRow, 1));
+                    tableBookmark.setWidget(0, 1, textBox);
+                    updateButton.setEnabled(false);
+                    deleteButton.setEnabled(false);
+                    textBox.setFocus(true);
+                }
+            }
+        });
+        updateButton.setStyleName("okm-ChangeButton");
         updateButton.setEnabled(false);
 
         table = new FlexTable();
@@ -164,30 +144,24 @@ public class ManageBookmarkPopup extends DialogBox {
 
         table.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 // Mark selected row or orders rows if header row (0) is clicked 
                 // And row must be other than the selected one
-                final int row = table.getCellForEvent(event).getRowIndex();
+                int row = table.getCellForEvent(event).getRowIndex();
                 if (row != selectedRow) {
                     styleRow(selectedRow, false);
                     styleRow(row, true);
                     selectedRow = row;
                     if (bookmarkMap.containsKey(table.getText(row, 2))) {
-                        final GWTBookmark bookmark = bookmarkMap.get(table
-                                .getText(row, 2));
+                        GWTBookmark bookmark = (GWTBookmark) bookmarkMap.get(table.getText(row, 2));
                         tableBookmark.setHTML(0, 1, bookmark.getName());
                         tableBookmark.setHTML(0, 2, table.getText(row, 2));
-                        tableBookmark.getFlexCellFormatter().setVisible(0, 2,
-                                false);
+                        tableBookmark.getFlexCellFormatter().setVisible(0, 2, false);
                         tableBookmark.setHTML(1, 1, bookmark.getPath());
-                        if (bookmark.getType().equals(
-                                Bookmark.BOOKMARK_DOCUMENT)) {
-                            tableBookmark.setHTML(2, 1,
-                                    Main.i18n("bookmark.type.document"));
-                        } else if (bookmark.getType().equals(
-                                Bookmark.BOOKMARK_FOLDER)) {
-                            tableBookmark.setHTML(2, 1,
-                                    Main.i18n("bookmark.type.folder"));
+                        if (bookmark.getType().equals(Bookmark.BOOKMARK_DOCUMENT)) {
+                            tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.document"));
+                        } else if (bookmark.getType().equals(Bookmark.BOOKMARK_FOLDER)) {
+                            tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.folder"));
                         }
                     }
                     deleteButton.setEnabled(true);
@@ -197,7 +171,7 @@ public class ManageBookmarkPopup extends DialogBox {
         });
 
         scrollPanel = new ScrollPanel(table);
-        scrollPanel.setSize("380", "150");
+        scrollPanel.setSize("380px", "150px");
         scrollPanel.setStyleName("okm-Bookmark-Panel");
 
         // Selected Bookmark data
@@ -207,14 +181,11 @@ public class ManageBookmarkPopup extends DialogBox {
         tableBookmark.setCellSpacing(0);
         tableBookmark.setWidth("100%");
 
-        tableBookmark
-                .setHTML(0, 0, "<b>" + Main.i18n("bookmark.name") + "</b>");
+        tableBookmark.setHTML(0, 0, "<b>" + Main.i18n("bookmark.name") + "</b>");
         tableBookmark.setHTML(0, 1, "");
-        tableBookmark
-                .setHTML(1, 0, "<b>" + Main.i18n("bookmark.path") + "</b>");
+        tableBookmark.setHTML(1, 0, "<b>" + Main.i18n("bookmark.path") + "</b>");
         tableBookmark.setHTML(1, 1, "");
-        tableBookmark
-                .setHTML(2, 0, "<b>" + Main.i18n("bookmark.type") + "</b>");
+        tableBookmark.setHTML(2, 0, "<b>" + Main.i18n("bookmark.type") + "</b>");
         tableBookmark.setHTML(2, 1, "");
 
         tableBookmark.getCellFormatter().setWidth(0, 0, "15%");
@@ -222,7 +193,7 @@ public class ManageBookmarkPopup extends DialogBox {
         tableBookmark.getCellFormatter().setWidth(0, 2, "70%");
 
         // Set no wrap
-        final CellFormatter cellFormatter = tableBookmark.getCellFormatter();
+        CellFormatter cellFormatter = tableBookmark.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(0, i, false);
             cellFormatter.setWordWrap(1, i, false);
@@ -230,7 +201,7 @@ public class ManageBookmarkPopup extends DialogBox {
         }
 
         scrollPanelBookmark = new ScrollPanel(tableBookmark);
-        scrollPanelBookmark.setWidth("380");
+        scrollPanelBookmark.setWidth("380px");
         scrollPanelBookmark.setStyleName("okm-Bookmark-Panel");
         scrollPanelBookmark.setAlwaysShowScrollBars(false);
 
@@ -249,14 +220,10 @@ public class ManageBookmarkPopup extends DialogBox {
         vPanel.add(cancelButton);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(scrollPanelBookmark,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(scrollPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(cancelButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(scrollPanelBookmark, HorizontalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HorizontalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(scrollPanel, HorizontalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(cancelButton, HorizontalPanel.ALIGN_CENTER);
 
         vPanel.setWidth("100%");
 
@@ -269,13 +236,12 @@ public class ManageBookmarkPopup extends DialogBox {
      * Callback get all
      */
     final AsyncCallback<List<GWTBookmark>> callbackGetAll = new AsyncCallback<List<GWTBookmark>>() {
-        @Override
-        public void onSuccess(final List<GWTBookmark> result) {
+        public void onSuccess(List<GWTBookmark> result) {
             int row = table.getRowCount();
             bookmarkMap = new HashMap<String, GWTBookmark>();
 
-            for (final GWTBookmark gwtBookmark : result) {
-                final GWTBookmark bookmark = gwtBookmark;
+            for (Iterator<GWTBookmark> it = result.iterator(); it.hasNext();) {
+                GWTBookmark bookmark = (GWTBookmark) it.next();
                 bookmarkMap.put(String.valueOf(bookmark.getId()), bookmark);
 
                 String icon = "";
@@ -289,23 +255,19 @@ public class ManageBookmarkPopup extends DialogBox {
                 table.setHTML(row, 1, bookmark.getName());
                 table.setHTML(row, 2, String.valueOf(bookmark.getId()));
                 table.getRowFormatter().setStyleName(row, "okm-Table-Row");
-                table.getCellFormatter().setWidth(row, 0, "25");
+                table.getCellFormatter().setWidth(row, 0, "25px");
                 table.getCellFormatter().setVisible(row, 2, false);
                 setRowWordWarp(row, 2, false);
 
                 if (row == 0) {
                     tableBookmark.setHTML(0, 1, bookmark.getName());
-                    tableBookmark.setHTML(0, 2,
-                            String.valueOf(bookmark.getId()));
+                    tableBookmark.setHTML(0, 2, String.valueOf(bookmark.getId()));
                     tableBookmark.setHTML(1, 1, bookmark.getPath());
                     tableBookmark.setHTML(2, 1, bookmark.getType());
                     if (bookmark.getType().equals(Bookmark.BOOKMARK_DOCUMENT)) {
-                        tableBookmark.setHTML(2, 1,
-                                Main.i18n("bookmark.type.document"));
-                    } else if (bookmark.getType().equals(
-                            Bookmark.BOOKMARK_FOLDER)) {
-                        tableBookmark.setHTML(2, 1,
-                                Main.i18n("bookmark.type.folder"));
+                        tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.document"));
+                    } else if (bookmark.getType().equals(Bookmark.BOOKMARK_FOLDER)) {
+                        tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.folder"));
                     }
                     tableBookmark.getCellFormatter().setVisible(0, 2, false);
                     deleteButton.setEnabled(true);
@@ -318,8 +280,7 @@ public class ManageBookmarkPopup extends DialogBox {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getAll", caught);
         }
     };
@@ -328,8 +289,7 @@ public class ManageBookmarkPopup extends DialogBox {
      * Callback remove
      */
     final AsyncCallback<Object> callbackRemove = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             if (selectedRow >= 0) {
                 bookmarkMap.remove(table.getText(selectedRow, 2));
                 table.removeRow(selectedRow);
@@ -340,20 +300,15 @@ public class ManageBookmarkPopup extends DialogBox {
                     } else {
                         styleRow(selectedRow, true);
                     }
-                    final GWTBookmark bookmark = bookmarkMap.get(table.getText(
-                            selectedRow, 2));
+                    GWTBookmark bookmark = (GWTBookmark) bookmarkMap.get(table.getText(selectedRow, 2));
                     tableBookmark.setHTML(0, 1, bookmark.getName());
-                    tableBookmark.setHTML(0, 2,
-                            String.valueOf(bookmark.getId()));
+                    tableBookmark.setHTML(0, 2, String.valueOf(bookmark.getId()));
                     tableBookmark.setHTML(1, 1, bookmark.getPath());
                     tableBookmark.setHTML(2, 1, bookmark.getType());
                     if (bookmark.getType().equals(Bookmark.BOOKMARK_DOCUMENT)) {
-                        tableBookmark.setHTML(2, 1,
-                                Main.i18n("bookmark.type.document"));
-                    } else if (bookmark.getType().equals(
-                            Bookmark.BOOKMARK_FOLDER)) {
-                        tableBookmark.setHTML(2, 1,
-                                Main.i18n("bookmark.type.folder"));
+                        tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.document"));
+                    } else if (bookmark.getType().equals(Bookmark.BOOKMARK_FOLDER)) {
+                        tableBookmark.setHTML(2, 1, Main.i18n("bookmark.type.folder"));
                     }
                 } else {
                     deleteButton.setEnabled(false);
@@ -363,8 +318,7 @@ public class ManageBookmarkPopup extends DialogBox {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("remove", caught);
         }
     };
@@ -373,8 +327,7 @@ public class ManageBookmarkPopup extends DialogBox {
      * Callback rename
      */
     final AsyncCallback<GWTBookmark> callbackRename = new AsyncCallback<GWTBookmark>() {
-        @Override
-        public void onSuccess(final GWTBookmark result) {
+        public void onSuccess(GWTBookmark result) {
             if (selectedRow >= 0) {
                 bookmarkMap.remove(table.getText(selectedRow, 2));
                 bookmarkMap.put(table.getText(selectedRow, 2), result);
@@ -385,8 +338,7 @@ public class ManageBookmarkPopup extends DialogBox {
             updateButton.setEnabled(true);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             deleteButton.setEnabled(true);
             updateButton.setEnabled(true);
             Main.get().showError("rename", caught);
@@ -406,7 +358,7 @@ public class ManageBookmarkPopup extends DialogBox {
      * 
      * @param id
      */
-    private void remove(final int id) {
+    private void remove(int id) {
         bookmarkService.remove(id, callbackRemove);
     }
 
@@ -416,7 +368,7 @@ public class ManageBookmarkPopup extends DialogBox {
      * @param id
      * @param newName
      */
-    private void rename(final int id, final String newName) {
+    private void rename(int id, String newName) {
         bookmarkService.rename(id, newName, callbackRename);
     }
 
@@ -453,14 +405,12 @@ public class ManageBookmarkPopup extends DialogBox {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    private void styleRow(final int row, final boolean selected) {
+    private void styleRow(int row, boolean selected) {
         if (row >= 0) {
             if (selected) {
-                table.getRowFormatter().addStyleName(row,
-                        "okm-Security-SelectedRow");
+                table.getRowFormatter().addStyleName(row, "okm-Security-SelectedRow");
             } else {
-                table.getRowFormatter().removeStyleName(row,
-                        "okm-Security-SelectedRow");
+                table.getRowFormatter().removeStyleName(row, "okm-Security-SelectedRow");
             }
         }
     }
@@ -472,9 +422,8 @@ public class ManageBookmarkPopup extends DialogBox {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, false);
         }
@@ -485,12 +434,9 @@ public class ManageBookmarkPopup extends DialogBox {
      */
     public void langRefresh() {
         setText(Main.i18n("bookmark.edit.label"));
-        tableBookmark
-                .setHTML(0, 0, "<b>" + Main.i18n("bookmark.name") + "</b>");
-        tableBookmark
-                .setHTML(1, 0, "<b>" + Main.i18n("bookmark.path") + "</b>");
-        tableBookmark
-                .setHTML(2, 0, "<b>" + Main.i18n("bookmark.type") + "</b>");
+        tableBookmark.setHTML(0, 0, "<b>" + Main.i18n("bookmark.name") + "</b>");
+        tableBookmark.setHTML(1, 0, "<b>" + Main.i18n("bookmark.path") + "</b>");
+        tableBookmark.setHTML(2, 0, "<b>" + Main.i18n("bookmark.type") + "</b>");
         cancelButton.setHTML(Main.i18n("button.close"));
         deleteButton.setHTML(Main.i18n("button.delete"));
         updateButton.setHTML(Main.i18n("button.update"));

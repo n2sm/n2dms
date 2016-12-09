@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
@@ -43,31 +43,19 @@ import com.openkm.frontend.client.widget.eastereggs.Futurama;
  */
 public class AboutPopup extends DialogBox implements ClickHandler {
     private VerticalPanel vPanel;
-
     private Image logo;
-
     private HTML text;
-
     private HTML htmlAppVersion;
-
     private HTML htmlExtVersion;
-
     private Button button;
-
-    private String msg = "<br>";
-
-    private String copy = "&nbsp;&copy 2002-2013 N2SM, Inc.<br><br>";
-
-    private String team = "<b>N2SM Products Solution</b><br><br>";
-
+    private String msg = "<b>Be Open, my friend!</b><br>";
+    private String copy = "&nbsp;&copy 2006-2016 OpenKM <br><br>";
+    private String team = "<b>OpenKM Team</b><br><br>";
     // "Francisco José Ávila Bermejo (<i>Monkiki</i>)<br>"+
     // "Josep Llort Tella (<i>Darkman97i</i>)<br><br>";
-    private String web = "<a href=\"http://www.n2sm.net\" target=\"_blank\">http://www.n2sm.net</a><br><br>";
-
+    private String web = "<a href=\"http://www.openkm.com\" target=\"_blank\">http://www.openkm.com</a><br><br>";
     private String appVersion = "Version 0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
     private String extVersion = "With Default Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-
     private Futurama futurama;
 
     /**
@@ -78,13 +66,13 @@ public class AboutPopup extends DialogBox implements ClickHandler {
         super(false, true);
 
         futurama = new Futurama();
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 280) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 280) / 2;
 
         vPanel = new VerticalPanel();
         text = new HTML();
         button = new Button(Main.i18n("button.close"), this);
-        logo = new Image("img/logo_n2sm.gif");
+        logo = new Image("img/logo_openkm.gif");
 
         vPanel.setWidth("300px");
         vPanel.setHeight("195px");
@@ -100,31 +88,23 @@ public class AboutPopup extends DialogBox implements ClickHandler {
         vPanel.add(htmlExtVersion);
         vPanel.add(new HTML("<br>"));
         vPanel.add(text);
-        final HTML htmlWeb = new HTML(web);
+        HTML htmlWeb = new HTML(web);
         vPanel.add(htmlWeb);
-        final HTML htmlTeam = new HTML(team);
+        HTML htmlTeam = new HTML(team);
         vPanel.add(htmlTeam);
-        final HTML htmlCopy = new HTML(copy);
+        HTML htmlCopy = new HTML(copy);
         vPanel.add(htmlCopy);
         vPanel.add(button);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(logo,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(htmlAppVersion,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-        vPanel.setCellHorizontalAlignment(htmlExtVersion,
-                HasHorizontalAlignment.ALIGN_RIGHT);
-        vPanel.setCellHorizontalAlignment(text,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(htmlWeb,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(htmlTeam,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(htmlCopy,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(logo, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(htmlAppVersion, HasAlignment.ALIGN_RIGHT);
+        vPanel.setCellHorizontalAlignment(htmlExtVersion, HasAlignment.ALIGN_RIGHT);
+        vPanel.setCellHorizontalAlignment(text, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(htmlWeb, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(htmlTeam, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(htmlCopy, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, HasAlignment.ALIGN_CENTER);
 
         setPopupPosition(left, top);
 
@@ -132,23 +112,20 @@ public class AboutPopup extends DialogBox implements ClickHandler {
         setWidget(vPanel);
     }
 
-    public void setAppVersion(final String appVersion) {
-        this.appVersion = "Version " + appVersion
-                + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    public void setAppVersion(String appVersion) {
+        this.appVersion = "Version " + appVersion + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         htmlAppVersion.setHTML(this.appVersion);
     }
 
-    public void setExtVersion(final String extVersion) {
-        //		this.extVersion = "With " + extVersion + " Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-        this.extVersion = "";
+    public void setExtVersion(String extVersion) {
+        this.extVersion = "With " + extVersion + " Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         htmlExtVersion.setHTML(this.extVersion);
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
      */
-    @Override
-    public void onClick(final ClickEvent event) {
+    public void onClick(ClickEvent event) {
         super.hide();
     }
 
@@ -165,11 +142,10 @@ public class AboutPopup extends DialogBox implements ClickHandler {
      * 
      * @param msg Error message
      */
-    @Override
     public void show() {
         setText(Main.i18n("about.label"));
         text.setHTML(msg);
-        logo.setUrl("img/logo_n2sm.gif");
+        logo.setUrl("img/logo_openkm.gif");
         reset();
         super.show();
     }
@@ -179,7 +155,7 @@ public class AboutPopup extends DialogBox implements ClickHandler {
      * 
      * @param img The image
      */
-    public void changeImg(final String img) {
+    public void changeImg(String img) {
         logo.setUrl(img);
     }
 
@@ -188,16 +164,14 @@ public class AboutPopup extends DialogBox implements ClickHandler {
      * 
      * @param msg The text
      */
-    @Override
-    public void setText(final String msg) {
+    public void setText(String msg) {
         text.setHTML(msg);
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.DialogBox#onPreviewNativeEvent(com.google.gwt.user.client.Event.NativePreviewEvent)
      */
-    @Override
-    public void onPreviewNativeEvent(final NativePreviewEvent event) {
+    public void onPreviewNativeEvent(NativePreviewEvent event) {
         if (event.getTypeInt() == Event.ONKEYPRESS) {
             futurama.evaluateKey((char) event.getNativeEvent().getKeyCode());
         }

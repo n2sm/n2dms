@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,17 +32,20 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.core.DatabaseException;
 import com.openkm.core.PathNotFoundException;
+import com.openkm.dao.ConfigDAO;
 import com.openkm.dao.UserConfigDAO;
 import com.openkm.dao.bean.MailAccount;
 import com.openkm.dao.bean.Profile;
 import com.openkm.dao.bean.UserConfig;
 import com.openkm.frontend.client.OKMException;
+import com.openkm.frontend.client.bean.GWTConfig;
 import com.openkm.frontend.client.bean.GWTConverterStatus;
 import com.openkm.frontend.client.bean.GWTFileUploadingStatus;
-import com.openkm.frontend.client.bean.GWTTestImap;
+import com.openkm.frontend.client.bean.GWTTestMail;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMGeneralService;
 import com.openkm.module.jcr.stuff.JCRUtils;
+import com.openkm.util.GWTUtil;
 import com.openkm.util.MailUtils;
 
 /**
@@ -50,32 +53,26 @@ import com.openkm.util.MailUtils;
  * 
  * @author jllort
  */
-public class GeneralServlet extends OKMRemoteServiceServlet implements
-        OKMGeneralService {
+public class GeneralServlet extends OKMRemoteServiceServlet implements OKMGeneralService {
     private static Logger log = LoggerFactory.getLogger(GeneralServlet.class);
-
     private static final long serialVersionUID = -879908904295685769L;
 
     @Override
     public GWTFileUploadingStatus getFileUploadStatus() {
         log.debug("getFileUploadStatus()");
-        final GWTFileUploadingStatus fus = new GWTFileUploadingStatus();
+        GWTFileUploadingStatus fus = new GWTFileUploadingStatus();
         updateSessionManager();
 
-        if (getThreadLocalRequest().getSession().getAttribute(
-                FileUploadServlet.FILE_UPLOAD_STATUS) != null) {
-            final FileUploadListener listener = (FileUploadListener) getThreadLocalRequest()
-                    .getSession().getAttribute(
-                            FileUploadServlet.FILE_UPLOAD_STATUS);
+        if (getThreadLocalRequest().getSession().getAttribute(FileUploadServlet.FILE_UPLOAD_STATUS) != null) {
+            FileUploadListener listener =
+                    (FileUploadListener) getThreadLocalRequest().getSession().getAttribute(FileUploadServlet.FILE_UPLOAD_STATUS);
             fus.setStarted(true);
             fus.setBytesRead(listener.getBytesRead());
             fus.setContentLength(listener.getContentLength());
             fus.setUploadFinish(listener.isUploadFinish());
 
-            if (listener.getBytesRead() == listener.getContentLength()
-                    || listener.isUploadFinish()) {
-                getThreadLocalRequest().getSession().removeAttribute(
-                        FileUploadServlet.FILE_UPLOAD_STATUS);
+            if (listener.getBytesRead() == listener.getContentLength() || listener.isUploadFinish()) {
+                getThreadLocalRequest().getSession().removeAttribute(FileUploadServlet.FILE_UPLOAD_STATUS);
             }
         }
 
@@ -86,14 +83,12 @@ public class GeneralServlet extends OKMRemoteServiceServlet implements
     @Override
     public GWTConverterStatus getConversionStatus() {
         log.debug("getConversionStatus()");
-        final GWTConverterStatus cos = new GWTConverterStatus();
+        GWTConverterStatus cos = new GWTConverterStatus();
         updateSessionManager();
 
-        if (getThreadLocalRequest().getSession().getAttribute(
-                ConverterServlet.FILE_CONVERTER_STATUS) != null) {
-            final ConverterListener listener = (ConverterListener) getThreadLocalRequest()
-                    .getSession().getAttribute(
-                            ConverterServlet.FILE_CONVERTER_STATUS);
+        if (getThreadLocalRequest().getSession().getAttribute(ConverterServlet.FILE_CONVERTER_STATUS) != null) {
+            ConverterListener listener =
+                    (ConverterListener) getThreadLocalRequest().getSession().getAttribute(ConverterServlet.FILE_CONVERTER_STATUS);
             cos.setStatus(listener.getStatus());
             cos.setConversionFinish(listener.isConversionFinish());
             cos.setError(listener.getError());
@@ -101,8 +96,7 @@ public class GeneralServlet extends OKMRemoteServiceServlet implements
                 cos.setConversionFinish(true);
             }
             if (listener.isConversionFinish()) {
-                getThreadLocalRequest().getSession().removeAttribute(
-                        ConverterServlet.FILE_CONVERTER_STATUS);
+                getThreadLocalRequest().getSession().removeAttribute(ConverterServlet.FILE_CONVERTER_STATUS);
             }
         }
 
@@ -111,30 +105,28 @@ public class GeneralServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public GWTTestImap testImapConnection(final String host, final String user,
-            final String password, final String imapFolder) {
-        log.debug("testImapConnection({}, {}, {}, {})", new Object[] { host,
-                user, password, imapFolder });
-        final GWTTestImap test = new GWTTestImap();
+    public GWTTestMail testMailConnection(String protocol, String host, String user, String password, String mailFolder) {
+        log.debug("testMailConnection({}, {}, {}, {}, {})", new Object[] { protocol, host, user, password, mailFolder });
+        GWTTestMail test = new GWTTestMail();
         updateSessionManager();
 
         try {
             test.setError(false);
-            final MailAccount ma = new MailAccount();
-            ma.setMailProtocol(MailAccount.PROTOCOL_IMAP);
+            MailAccount ma = new MailAccount();
+            ma.setMailProtocol(protocol);
             ma.setMailHost(host);
             ma.setMailUser(user);
             ma.setMailPassword(password);
-            ma.setMailFolder(imapFolder);
+            ma.setMailFolder(mailFolder);
             ma.setMailMarkSeen(true);
             MailUtils.testConnection(ma);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             test.setError(true);
             test.setErrorMsg(e.getMessage());
             e.printStackTrace();
         }
 
-        log.debug("testImapConnection: {}", test);
+        log.debug("testMailConnection: {}", test);
         return test;
     }
 
@@ -143,28 +135,40 @@ public class GeneralServlet extends OKMRemoteServiceServlet implements
         log.debug("getEnabledExtensions()");
         updateSessionManager();
         List<String> extensions = new ArrayList<String>();
-        final Session session = null;
+        Session session = null;
 
         try {
             Profile up = new Profile();
-            final UserConfig uc = UserConfigDAO
-                    .findByPk(getThreadLocalRequest().getRemoteUser());
+            UserConfig uc = UserConfigDAO.findByPk(getThreadLocalRequest().getRemoteUser());
             up = uc.getProfile();
             extensions = new ArrayList<String>(up.getPrfMisc().getExtensions());
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMGeneralService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMGeneralService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (DatabaseException e) {
             log.warn(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMGeneralService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMGeneralService, ErrorCode.CAUSE_Database), e.getMessage());
         } finally {
             JCRUtils.logout(session);
         }
 
         return extensions;
+    }
+
+    @Override
+    public GWTConfig getConfigValue(String key) throws OKMException {
+        com.openkm.dao.bean.Config config;
+        try {
+            config = ConfigDAO.findByPk(key);
+
+            if (config != null) {
+                return GWTUtil.copy(config);
+            }
+
+        } catch (DatabaseException e) {
+            log.warn(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMGeneralService, ErrorCode.CAUSE_Database), e.getMessage());
+        }
+        return null;
     }
 }

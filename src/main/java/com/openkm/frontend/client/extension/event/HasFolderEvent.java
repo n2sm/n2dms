@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,25 +40,15 @@ public interface HasFolderEvent {
     public static class FolderEventConstant {
 
         static final int EVENT_FOLDER_CHANGED = 1;
-
         static final int EVENT_PANEL_RESIZED = 2;
-
         static final int EVENT_TAB_CHANGED = 3;
-
         static final int EVENT_SECURITY_CHANGED = 4;
-
         static final int EVENT_SET_VISIBLE_BUTTON = 5;
-
         static final int EVENT_NOTE_ADDED = 6;
-
         static final int EVENT_FOLDER_DELETED = 7;
-
         static final int EVENT_KEYWORD_REMOVED = 8;
-
         static final int EVENT_KEYWORD_ADDED = 9;
-
         static final int EVENT_CATEGORY_ADDED = 10;
-
         static final int EVENT_CATEGORY_REMOVED = 11;
 
         private int type = 0;
@@ -68,7 +58,7 @@ public interface HasFolderEvent {
          * 
          * @param type
          */
-        private FolderEventConstant(final int type) {
+        private FolderEventConstant(int type) {
             this.type = type;
         }
 
@@ -77,38 +67,17 @@ public interface HasFolderEvent {
         }
     }
 
-    FolderEventConstant FOLDER_CHANGED = new FolderEventConstant(
-            FolderEventConstant.EVENT_FOLDER_CHANGED);
-
-    FolderEventConstant PANEL_RESIZED = new FolderEventConstant(
-            FolderEventConstant.EVENT_PANEL_RESIZED);
-
-    FolderEventConstant TAB_CHANGED = new FolderEventConstant(
-            FolderEventConstant.EVENT_TAB_CHANGED);
-
-    FolderEventConstant SECURITY_CHANGED = new FolderEventConstant(
-            FolderEventConstant.EVENT_SECURITY_CHANGED);
-
-    FolderEventConstant SET_VISIBLE_BUTTON = new FolderEventConstant(
-            FolderEventConstant.EVENT_SET_VISIBLE_BUTTON);
-
-    FolderEventConstant NOTE_ADDED = new FolderEventConstant(
-            FolderEventConstant.EVENT_NOTE_ADDED);
-
-    FolderEventConstant FOLDER_DELETED = new FolderEventConstant(
-            FolderEventConstant.EVENT_FOLDER_DELETED);
-
-    FolderEventConstant KEYWORD_REMOVED = new FolderEventConstant(
-            FolderEventConstant.EVENT_KEYWORD_REMOVED);
-
-    FolderEventConstant KEYWORD_ADDED = new FolderEventConstant(
-            FolderEventConstant.EVENT_KEYWORD_ADDED);
-
-    FolderEventConstant CATEGORY_ADDED = new FolderEventConstant(
-            FolderEventConstant.EVENT_CATEGORY_ADDED);
-
-    FolderEventConstant CATEGORY_REMOVED = new FolderEventConstant(
-            FolderEventConstant.EVENT_CATEGORY_REMOVED);
+    FolderEventConstant FOLDER_CHANGED = new FolderEventConstant(FolderEventConstant.EVENT_FOLDER_CHANGED);
+    FolderEventConstant PANEL_RESIZED = new FolderEventConstant(FolderEventConstant.EVENT_PANEL_RESIZED);
+    FolderEventConstant TAB_CHANGED = new FolderEventConstant(FolderEventConstant.EVENT_TAB_CHANGED);
+    FolderEventConstant SECURITY_CHANGED = new FolderEventConstant(FolderEventConstant.EVENT_SECURITY_CHANGED);
+    FolderEventConstant SET_VISIBLE_BUTTON = new FolderEventConstant(FolderEventConstant.EVENT_SET_VISIBLE_BUTTON);
+    FolderEventConstant NOTE_ADDED = new FolderEventConstant(FolderEventConstant.EVENT_NOTE_ADDED);
+    FolderEventConstant FOLDER_DELETED = new FolderEventConstant(FolderEventConstant.EVENT_FOLDER_DELETED);
+    FolderEventConstant KEYWORD_REMOVED = new FolderEventConstant(FolderEventConstant.EVENT_KEYWORD_REMOVED);
+    FolderEventConstant KEYWORD_ADDED = new FolderEventConstant(FolderEventConstant.EVENT_KEYWORD_ADDED);
+    FolderEventConstant CATEGORY_ADDED = new FolderEventConstant(FolderEventConstant.EVENT_CATEGORY_ADDED);
+    FolderEventConstant CATEGORY_REMOVED = new FolderEventConstant(FolderEventConstant.EVENT_CATEGORY_REMOVED);
 
     /**
      * @param event

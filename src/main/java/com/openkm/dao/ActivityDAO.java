@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,7 +44,7 @@ public class ActivityDAO {
     /**
      * Create activity
      */
-    public static void create(final Activity activity) throws DatabaseException {
+    public static void create(Activity activity) throws DatabaseException {
         Session session = null;
         Transaction tx = null;
 
@@ -53,7 +53,7 @@ public class ActivityDAO {
             tx = session.beginTransaction();
             session.save(activity);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -65,17 +65,14 @@ public class ActivityDAO {
      * Find by filter
      */
     @SuppressWarnings("unchecked")
-    public static List<Activity> findByFilter(final ActivityFilter filter)
-            throws DatabaseException {
+    public static List<Activity> findByFilter(ActivityFilter filter) throws DatabaseException {
         log.debug("findByFilter({})", filter);
         String qs = "from Activity a where a.date between :begin and :end ";
 
-        if (filter.getUser() != null && !filter.getUser().equals("")) {
+        if (filter.getUser() != null && !filter.getUser().equals(""))
             qs += "and a.user=:user ";
-        }
-        if (filter.getAction() != null && !filter.getAction().equals("")) {
+        if (filter.getAction() != null && !filter.getAction().equals(""))
             qs += "and a.action=:action ";
-        }
         if (filter.getItem() != null && !filter.getItem().equals("")) {
             qs += "and a.item=:item ";
         }
@@ -85,24 +82,21 @@ public class ActivityDAO {
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setCalendar("begin", filter.getBegin());
             q.setCalendar("end", filter.getEnd());
 
-            if (filter.getUser() != null && !filter.getUser().equals("")) {
+            if (filter.getUser() != null && !filter.getUser().equals(""))
                 q.setString("user", filter.getUser());
-            }
-            if (filter.getAction() != null && !filter.getAction().equals("")) {
+            if (filter.getAction() != null && !filter.getAction().equals(""))
                 q.setString("action", filter.getAction());
-            }
-            if (filter.getItem() != null && !filter.getItem().equals("")) {
+            if (filter.getItem() != null && !filter.getItem().equals(""))
                 q.setString("item", filter.getItem());
-            }
 
-            final List<Activity> ret = q.list();
+            List<Activity> ret = q.list();
             log.debug("findByFilter: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -113,27 +107,24 @@ public class ActivityDAO {
      * Find by filter
      */
     @SuppressWarnings("unchecked")
-    public static List<Activity> findByFilterByItem(final ActivityFilter filter)
-            throws DatabaseException {
+    public static List<Activity> findByFilterByItem(ActivityFilter filter) throws DatabaseException {
         log.debug("findByFilter({})", filter);
         String qs = "from Activity a where a.item=:item ";
-        if (filter.getAction() != null && !filter.getAction().equals("")) {
+        if (filter.getAction() != null && !filter.getAction().equals(""))
             qs += "and a.action=:action ";
-        }
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("item", filter.getItem());
-            if (filter.getAction() != null && !filter.getAction().equals("")) {
+            if (filter.getAction() != null && !filter.getAction().equals(""))
                 q.setString("action", filter.getAction());
-            }
 
-            final List<Activity> ret = q.list();
+            List<Activity> ret = q.list();
             log.debug("findByFilterByItem: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -143,14 +134,12 @@ public class ActivityDAO {
     /**
      * Get activity date
      */
-    public static Calendar getActivityDate(final String user,
-            final String action, final String item) throws DatabaseException {
-        log.debug("getActivityDate({}, {}, {})", new Object[] { user, action,
-                item });
-        final String qsAct = "select max(a.date) from Activity a "
-                + "where a.user=:user and a.action=:action and a.item=:item";
-        final String qsNoAct = "select max(a.date) from Activity a "
-                + "where (a.action='CREATE_DOCUMENT' or a.action='CHECKIN_DOCUMENT') and a.item=:item";
+    public static Calendar getActivityDate(String user, String action, String item) throws DatabaseException {
+        log.debug("getActivityDate({}, {}, {})", new Object[] { user, action, item });
+        String qsAct = "select max(a.date) from Activity a " + "where a.user=:user and a.action=:action and a.item=:item";
+        String qsNoAct =
+                "select max(a.date) from Activity a "
+                        + "where (a.action='CREATE_DOCUMENT' or a.action='CHECKIN_DOCUMENT') and a.item=:item";
         Session session = null;
 
         try {
@@ -176,7 +165,7 @@ public class ActivityDAO {
 
             log.debug("getActivityDate: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

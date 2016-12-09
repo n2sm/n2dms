@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,8 +29,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -42,11 +43,8 @@ import com.openkm.frontend.client.Main;
 public class ExternalURLPopup extends DialogBox {
 
     private VerticalPanel vPanel;
-
     private Button button;
-
     private Frame iframe;
-
     private String property = "";
 
     /**
@@ -68,7 +66,7 @@ public class ExternalURLPopup extends DialogBox {
 
         button = new Button(Main.i18n("button.close"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 Log.debug("onClick(" + event + ")");
                 hide();
 
@@ -82,10 +80,8 @@ public class ExternalURLPopup extends DialogBox {
         vPanel.add(button);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(iframe,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(iframe, HorizontalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, HorizontalPanel.ALIGN_CENTER);
 
         button.setStyleName("okm-YesButton");
 
@@ -105,8 +101,7 @@ public class ExternalURLPopup extends DialogBox {
      * 
      * @param msg Error message
      */
-    public void show(final String property, final String url, final int width,
-            final int height) {
+    public void show(String property, String url, int width, int height) {
         this.property = property;
         setText(Main.i18n(property));
         setSize("" + width, "" + height);

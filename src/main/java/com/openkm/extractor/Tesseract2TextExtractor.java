@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -50,8 +50,7 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(Tesseract2TextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(Tesseract2TextExtractor.class);
 
     /**
      * Creates a new <code>TextExtractor</code> instance.
@@ -65,9 +64,7 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         File tmpFileIn = null;
         File tmpFilePre = null;
         File tmpFileOut = null;
@@ -79,7 +76,7 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
                 tmpFileIn = File.createTempFile("okm", ".tif");
                 tmpFilePre = File.createTempFile("okm", ".tif");
                 tmpFileOut = File.createTempFile("okm", "");
-                final FileOutputStream fos = new FileOutputStream(tmpFileIn);
+                FileOutputStream fos = new FileOutputStream(tmpFileIn);
                 IOUtils.copy(stream, fos);
                 fos.close();
 
@@ -87,8 +84,7 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
                 HashMap<String, Object> hm = new HashMap<String, Object>();
                 hm.put("fileIn", tmpFileIn.getPath());
                 hm.put("fileOut", tmpFilePre.getPath());
-                final String tpl = Config.SYSTEM_IMAGEMAGICK_CONVERT
-                        + " -depth 8 -monochrome ${fileIn} ${fileOut}";
+                String tpl = Config.SYSTEM_IMAGEMAGICK_CONVERT + " -depth 8 -monochrome ${fileIn} ${fileOut}";
                 cmd = TemplateUtils.replace("SYSTEM_IMG2PDF", tpl, hm);
                 ExecutionUtils.runCmd(cmd);
 
@@ -96,13 +92,11 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
                 hm = new HashMap<String, Object>();
                 hm.put("fileIn", tmpFilePre.getPath());
                 hm.put("fileOut", tmpFileOut.getPath());
-                cmd = TemplateUtils
-                        .replace("SYSTEM_OCR", Config.SYSTEM_OCR, hm);
+                cmd = TemplateUtils.replace("SYSTEM_OCR", Config.SYSTEM_OCR, hm);
                 ExecutionUtils.runCmd(cmd);
 
                 // Read result
-                String text = IOUtils.toString(new FileInputStream(tmpFileOut
-                        .getPath() + ".txt"));
+                String text = IOUtils.toString(new FileInputStream(tmpFileOut.getPath() + ".txt"));
 
                 // Spellchecker
                 if (Config.SYSTEM_OPENOFFICE_DICTIONARY.equals("")) {
@@ -113,16 +107,16 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
                     log.debug("TEXT: {}", text);
                     return new StringReader(text);
                 }
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 log.warn("Security exception executing command: " + cmd, e);
                 return new StringReader("");
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 log.warn("IO exception executing command: " + cmd, e);
                 return new StringReader("");
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 log.warn("Interrupted exception executing command: " + cmd, e);
                 return new StringReader("");
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 log.warn("Failed to extract OCR text", e);
                 return new StringReader("");
             } finally {
@@ -132,8 +126,7 @@ public class Tesseract2TextExtractor extends AbstractTextExtractor {
                 FileUtils.deleteQuietly(tmpFileOut);
 
                 if (tmpFileOut != null) {
-                    FileUtils.deleteQuietly(new File(tmpFileOut.getPath()
-                            + ".txt"));
+                    FileUtils.deleteQuietly(new File(tmpFileOut.getPath() + ".txt"));
                 }
             }
         } else {

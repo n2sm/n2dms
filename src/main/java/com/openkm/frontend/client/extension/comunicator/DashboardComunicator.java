@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,8 +37,7 @@ public class DashboardComunicator {
      * getUserSubscribedDocuments
      */
     public static void getUserSubscribedDocuments() {
-        Main.get().mainPanel.dashboard.userDashboard
-                .getUserSubscribedDocuments();
+        Main.get().mainPanel.dashboard.userDashboard.getUserSubscribedDocuments();
     }
 
     /**
@@ -60,9 +59,8 @@ public class DashboardComunicator {
      * 
      * @param extension
      */
-    public static void showToolBoxExtension(final ToolBarBoxExtension extension) {
-        Main.get().mainPanel.dashboard.horizontalToolBar
-                .showToolBoxExtension(extension);
+    public static void showToolBoxExtension(ToolBarBoxExtension extension) {
+        Main.get().mainPanel.dashboard.horizontalToolBar.showToolBoxExtension(extension);
     }
 
     /**
@@ -70,7 +68,7 @@ public class DashboardComunicator {
      * 
      * @param refresh
      */
-    public static void getUserSearchs(final boolean refresh) {
+    public static void getUserSearchs(boolean refresh) {
         Main.get().mainPanel.dashboard.newsDashboard.getUserSearchs(refresh);
     }
 
@@ -80,7 +78,7 @@ public class DashboardComunicator {
      * @param widget
      * @return
      */
-    public static boolean isWidgetExtensionVisible(final Widget widget) {
+    public static boolean isWidgetExtensionVisible(Widget widget) {
         return Main.get().mainPanel.dashboard.isWidgetExtensionVisible(widget);
     }
 }

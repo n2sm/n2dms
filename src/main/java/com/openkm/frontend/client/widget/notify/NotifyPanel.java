@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,14 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.openkm.frontend.client.Main;
+import com.openkm.frontend.client.util.Util;
 
 /**
  * NotifyPanel
@@ -49,32 +49,23 @@ import com.openkm.frontend.client.Main;
 public class NotifyPanel extends Composite {
 
     private static final int TAB_HEIGHT = 20;
-
     private static final int TAB_USERS = 0;
-
     private static final int TAB_GROUPS = 1;
 
     public TabLayoutPanel tabPanel;
-
     private VerticalPanel vPanel;
-
     private NotifyUser notifyUser;
-
     private NotifyRole notifyRole;
-
     private boolean filterView = false;
-
     private CheckBox checkBoxFilter;
-
     private TextBox filter;
-
     private HorizontalPanel filterPanel;
-
     private HTML filterText;
-
     private String usersFilter = "";
-
     private String groupsFilter = "";
+    private VerticalPanel vNotifyExternalUserPanel;
+    private TextBox externalMailAddress;
+    private HTML externalUserHTML;
 
     /**
      * NotifyPanel
@@ -88,12 +79,12 @@ public class NotifyPanel extends Composite {
         tabPanel.add(notifyUser, Main.i18n("fileupload.label.users"));
         tabPanel.add(notifyRole, Main.i18n("fileupload.label.roles"));
         tabPanel.selectTab(TAB_USERS);
-        tabPanel.setWidth("374");
-        tabPanel.setHeight("140");
+        tabPanel.setWidth("374px");
+        tabPanel.setHeight("140px");
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
+            public void onSelection(SelectionEvent<Integer> event) {
                 switch (event.getSelectedItem().intValue()) {
                 case TAB_USERS:
                     groupsFilter = filter.getText();
@@ -115,10 +106,10 @@ public class NotifyPanel extends Composite {
         checkBoxFilter.setValue(false);
         checkBoxFilter.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 notifyUser.resetAvailableUsersTable();
                 notifyRole.resetAvailableRolesTable();
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
                 if (((CheckBox) sender).getValue()) {
                     filter.setText("");
                     filter.setEnabled(true);
@@ -139,18 +130,15 @@ public class NotifyPanel extends Composite {
         filterPanel.add(new HTML("&nbsp;"));
         filterPanel.add(filter);
 
-        filterPanel.setCellVerticalAlignment(checkBoxFilter,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        filterPanel.setCellVerticalAlignment(filterText,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        filterPanel.setCellVerticalAlignment(filter,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(checkBoxFilter, HasAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(filterText, HasAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(filter, HasAlignment.ALIGN_MIDDLE);
 
         filter.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 if (filter.getText().length() >= 3) {
-                    final int selected = tabPanel.getSelectedIndex();
+                    int selected = tabPanel.getSelectedIndex();
                     switch (selected) {
                     case TAB_USERS:
                         notifyUser.resetAvailableUsersTable();
@@ -169,11 +157,21 @@ public class NotifyPanel extends Composite {
             }
         });
 
+        vNotifyExternalUserPanel = new VerticalPanel();
+        externalUserHTML = new HTML(Main.i18n("security.notify.external.mail"));
+        externalMailAddress = new TextBox();
+        externalMailAddress.setWidth("374px");
+        externalMailAddress.setStyleName("okm-Input");
+        vNotifyExternalUserPanel.add(Util.vSpace("5px"));
+        vNotifyExternalUserPanel.add(externalUserHTML);
+        vNotifyExternalUserPanel.add(externalMailAddress);
+        vNotifyExternalUserPanel.setVisible(false);
+
         vPanel.add(filterPanel);
         vPanel.add(tabPanel);
+        vPanel.add(vNotifyExternalUserPanel);
 
-        vPanel.setCellHorizontalAlignment(filterPanel,
-                HasHorizontalAlignment.ALIGN_RIGHT);
+        vPanel.setCellHorizontalAlignment(filterPanel, VerticalPanel.ALIGN_RIGHT);
 
         vPanel.addStyleName("okm-DisableSelect");
         tabPanel.addStyleName("okm-Border-Bottom");
@@ -196,13 +194,19 @@ public class NotifyPanel extends Composite {
     public void reset() {
         notifyUser.reset();
         notifyRole.reset();
+        filter.setText("");
+        filter.setEnabled(true);
+        checkBoxFilter.setValue(true);
+        usersFilter = "";
+        groupsFilter = "";
+        externalMailAddress.setText("");
     }
 
     /**
      * langRefresh
      */
     public void langRefresh() {
-        final int selected = tabPanel.getSelectedIndex();
+        int selected = tabPanel.getSelectedIndex();
 
         while (tabPanel.getWidgetCount() > 0) {
             tabPanel.remove(0);
@@ -247,6 +251,13 @@ public class NotifyPanel extends Composite {
     }
 
     /**
+     * enableNotifyExternalUsers
+     */
+    public void enableNotifyExternalUsers() {
+        vNotifyExternalUserPanel.setVisible(true);
+    }
+
+    /**
      * getRolesToNotify
      * 
      * @return
@@ -262,5 +273,12 @@ public class NotifyPanel extends Composite {
      */
     public String getUsersToNotify() {
         return notifyUser.getUsersToNotify();
+    }
+
+    /**
+     * getExternalMailAddress
+     */
+    public String getExternalMailAddress() {
+        return externalMailAddress.getText();
     }
 }

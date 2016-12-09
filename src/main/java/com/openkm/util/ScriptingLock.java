@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,9 +30,7 @@ public class ScriptingLock {
     private static ScriptingLock instance = new ScriptingLock();
 
     boolean isLocked = false;
-
     Thread lockedBy = null;
-
     int lockedCount = 0;
 
     /**
@@ -46,7 +44,7 @@ public class ScriptingLock {
      * lock
      */
     public synchronized void lock() throws InterruptedException {
-        final Thread callingThread = Thread.currentThread();
+        Thread callingThread = Thread.currentThread();
 
         while (isLocked) {
             wait();
@@ -61,7 +59,7 @@ public class ScriptingLock {
      * unlock
      */
     public synchronized void unlock() {
-        if (Thread.currentThread() == lockedBy) {
+        if (Thread.currentThread() == this.lockedBy) {
             lockedCount--;
 
             if (lockedCount == 0) {

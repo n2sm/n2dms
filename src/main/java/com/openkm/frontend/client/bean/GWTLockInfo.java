@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,18 +25,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GWTLockInfo implements IsSerializable {
     private String owner;
-
     private String nodePath;
-
     private String token;
-
     private GWTUser user;
 
     public String getNodePath() {
         return nodePath;
     }
 
-    public void setNodePath(final String nodePath) {
+    public void setNodePath(String nodePath) {
         this.nodePath = nodePath;
     }
 
@@ -44,7 +41,7 @@ public class GWTLockInfo implements IsSerializable {
         return owner;
     }
 
-    public void setOwner(final String owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
@@ -52,7 +49,7 @@ public class GWTLockInfo implements IsSerializable {
         return token;
     }
 
-    public void setToken(final String token) {
+    public void setToken(String token) {
         this.token = token;
     }
 
@@ -60,7 +57,7 @@ public class GWTLockInfo implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 }

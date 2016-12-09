@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,8 +42,8 @@ public class GroupBoxPanel extends ComplexPanel implements InsertPanel {
      * GroupBoxPanel
      */
     public GroupBoxPanel() {
-        final Element fieldset = DOM.createFieldSet();
-        legend = DOM.createLegend();
+        Element fieldset = DOM.createFieldSet();
+        this.legend = DOM.createLegend();
         DOM.appendChild(fieldset, legend);
         setElement(fieldset);
     }
@@ -54,7 +54,7 @@ public class GroupBoxPanel extends ComplexPanel implements InsertPanel {
      * @return
      */
     public String getCaption() {
-        return DOM.getInnerText(legend);
+        return DOM.getInnerText(this.legend);
     }
 
     /**
@@ -62,8 +62,8 @@ public class GroupBoxPanel extends ComplexPanel implements InsertPanel {
      * 
      * @param caption
      */
-    public void setCaption(final String caption) {
-        DOM.setInnerText(legend, caption);
+    public void setCaption(String caption) {
+        DOM.setInnerText(this.legend, caption);
     }
 
     /**
@@ -72,7 +72,7 @@ public class GroupBoxPanel extends ComplexPanel implements InsertPanel {
        * @param w the widget to be added
        */
     @Override
-    public void add(final Widget w) {
+    public void add(Widget w) {
         add(w, getElement());
     }
 
@@ -94,8 +94,7 @@ public class GroupBoxPanel extends ComplexPanel implements InsertPanel {
      * @throws IndexOutOfBoundsException if <code>beforeIndex</code> is out of
      *           range
      */
-    @Override
-    public void insert(final Widget w, final int beforeIndex) {
+    public void insert(Widget w, int beforeIndex) {
         insert(w, getElement(), beforeIndex, true);
     }
 }

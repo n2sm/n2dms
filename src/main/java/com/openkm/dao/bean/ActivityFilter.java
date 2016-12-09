@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,22 +26,17 @@ import java.util.Calendar;
 
 public class ActivityFilter implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Calendar begin;
-
     private Calendar end;
-
     private String user;
-
     private String action;
-
     private String item;
 
     public Calendar getBegin() {
         return begin;
     }
 
-    public void setBegin(final Calendar begin) {
+    public void setBegin(Calendar begin) {
         this.begin = begin;
     }
 
@@ -49,7 +44,7 @@ public class ActivityFilter implements Serializable {
         return end;
     }
 
-    public void setEnd(final Calendar end) {
+    public void setEnd(Calendar end) {
         this.end = end;
     }
 
@@ -57,7 +52,7 @@ public class ActivityFilter implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -65,7 +60,7 @@ public class ActivityFilter implements Serializable {
         return action;
     }
 
-    public void setAction(final String action) {
+    public void setAction(String action) {
         this.action = action;
     }
 
@@ -73,13 +68,12 @@ public class ActivityFilter implements Serializable {
         return item;
     }
 
-    public void setItem(final String item) {
+    public void setItem(String item) {
         this.item = item;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("begin=");
         sb.append(begin == null ? null : begin.getTime());

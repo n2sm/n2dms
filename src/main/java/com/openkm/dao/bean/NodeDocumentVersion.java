@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -50,8 +50,7 @@ import org.hibernate.search.annotations.Store;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Table(appliesTo = "OKM_NODE_DOCUMENT_VERSION", indexes = {
 // CREATE INDEX IDX_NOD_DOC_VER_PARCUR ON OKM_NODE_DOCUMENT_VERSION(NDV_PARENT, NDV_CURRENT);
-@org.hibernate.annotations.Index(name = "IDX_NOD_DOC_VER_PARCUR", columnNames = {
-        "NDV_PARENT", "NDV_CURRENT" }) })
+@org.hibernate.annotations.Index(name = "IDX_NOD_DOC_VER_PARCUR", columnNames = { "NDV_PARENT", "NDV_CURRENT" }) })
 public class NodeDocumentVersion implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -88,7 +87,7 @@ public class NodeDocumentVersion implements Serializable {
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     private String name;
 
-    @Column(name = "NDV_CURRENT")
+    @Column(name = "NDV_CURRENT", nullable = false)
     @Type(type = "true_false")
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     private boolean current;
@@ -118,7 +117,7 @@ public class NodeDocumentVersion implements Serializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -126,7 +125,7 @@ public class NodeDocumentVersion implements Serializable {
         return parent;
     }
 
-    public void setParent(final String parent) {
+    public void setParent(String parent) {
         this.parent = parent;
     }
 
@@ -134,7 +133,7 @@ public class NodeDocumentVersion implements Serializable {
         return previous;
     }
 
-    public void setPrevious(final String previous) {
+    public void setPrevious(String previous) {
         this.previous = previous;
     }
 
@@ -142,7 +141,7 @@ public class NodeDocumentVersion implements Serializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -150,7 +149,7 @@ public class NodeDocumentVersion implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -158,7 +157,7 @@ public class NodeDocumentVersion implements Serializable {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -166,7 +165,7 @@ public class NodeDocumentVersion implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -174,7 +173,7 @@ public class NodeDocumentVersion implements Serializable {
         return current;
     }
 
-    public void setCurrent(final boolean current) {
+    public void setCurrent(boolean current) {
         this.current = current;
     }
 
@@ -182,7 +181,7 @@ public class NodeDocumentVersion implements Serializable {
         return comment;
     }
 
-    public void setComment(final String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
@@ -190,7 +189,7 @@ public class NodeDocumentVersion implements Serializable {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -198,7 +197,7 @@ public class NodeDocumentVersion implements Serializable {
         return checksum;
     }
 
-    public void setChecksum(final String checksum) {
+    public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
 
@@ -206,7 +205,7 @@ public class NodeDocumentVersion implements Serializable {
         return content;
     }
 
-    public void setContent(final byte[] content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 
@@ -214,21 +213,19 @@ public class NodeDocumentVersion implements Serializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", parent=").append(parent);
         sb.append(", previous=").append(previous);
         sb.append(", size=").append(size);
         sb.append(", author=").append(author);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
         sb.append(", name=").append(name);
         sb.append(", current=").append(current);
         sb.append(", comment=").append(comment);

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -42,58 +42,45 @@ import com.openkm.principal.PrincipalAdapterException;
 
 @WebService(name = "OKMNotification", serviceName = "OKMNotification", targetNamespace = "http://ws.openkm.com")
 public class NotificationService {
-    private static Logger log = LoggerFactory
-            .getLogger(NotificationService.class);
+    private static Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     @WebMethod
-    public void subscribe(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void subscribe(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("subscribe({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
+        NotificationModule nm = ModuleManager.getNotificationModule();
         nm.subscribe(token, nodePath);
         log.debug("subscribe: void");
     }
 
     @WebMethod
-    public void unsubscribe(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public void unsubscribe(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("unsubscribe({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
+        NotificationModule nm = ModuleManager.getNotificationModule();
         nm.unsubscribe(token, nodePath);
         log.debug("unsubscribe: void");
     }
 
     @WebMethod
-    public String[] getSubscriptors(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public String[] getSubscriptors(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getSubscriptors({}, {})", token, nodePath);
-        final NotificationModule nm = ModuleManager.getNotificationModule();
-        final Set<String> col = nm.getSubscriptors(token, nodePath);
-        final String[] result = col.toArray(new String[col.size()]);
+        NotificationModule nm = ModuleManager.getNotificationModule();
+        Set<String> col = nm.getSubscriptors(token, nodePath);
+        String[] result = (String[]) col.toArray(new String[col.size()]);
         log.debug("getSubscriptors: {}", result);
         return result;
     }
 
     @WebMethod
-    public void notify(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "users") final String[] users,
-            @WebParam(name = "message") final String message,
-            @WebParam(name = "attachment") final boolean attachment)
-            throws PathNotFoundException, AccessDeniedException,
-            PrincipalAdapterException, RepositoryException, DatabaseException,
-            IOException {
-        log.debug("notify({}, {}, {}, {}, {})", new Object[] { token, nodePath,
-                users, message, attachment });
-        final NotificationModule nm = ModuleManager.getNotificationModule();
-        nm.notify(token, nodePath, Arrays.asList(users), message, attachment);
+    public void notify(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "users") String[] users, @WebParam(name = "mails") String[] mails, @WebParam(name = "message") String message,
+            @WebParam(name = "attachment") boolean attachment) throws PathNotFoundException, AccessDeniedException,
+            PrincipalAdapterException, RepositoryException, DatabaseException, IOException {
+        log.debug("notify({}, {}, {}, {}, {})", new Object[] { token, nodePath, users, message, attachment });
+        NotificationModule nm = ModuleManager.getNotificationModule();
+        nm.notify(token, nodePath, Arrays.asList(users), Arrays.asList(mails), message, attachment);
         log.debug("notify: void");
     }
 }

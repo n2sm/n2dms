@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,20 +27,16 @@ import java.util.List;
 public class PropertyMetadata {
     // mix:property_group
     private String name;
-
     private String type;
-
     private boolean multiValue;
-
     private String value;
-
     private List<String> values = new ArrayList<String>();
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -48,7 +44,7 @@ public class PropertyMetadata {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -56,7 +52,7 @@ public class PropertyMetadata {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -64,7 +60,7 @@ public class PropertyMetadata {
         return multiValue;
     }
 
-    public void setMultiValue(final boolean multiValue) {
+    public void setMultiValue(boolean multiValue) {
         this.multiValue = multiValue;
     }
 
@@ -72,13 +68,12 @@ public class PropertyMetadata {
         return values;
     }
 
-    public void setValues(final List<String> values) {
+    public void setValues(List<String> values) {
         this.values = values;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("name=");
         sb.append(name);

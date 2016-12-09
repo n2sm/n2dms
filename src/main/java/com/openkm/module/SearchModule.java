@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,9 +47,8 @@ public interface SearchModule {
      * @return A collection of document which content matched the searched expression.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public List<QueryResult> findByContent(String token, String expression)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException;
+    public List<QueryResult> findByContent(String token, String expression) throws IOException, ParseException, AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Search for documents by document name.
@@ -58,9 +57,8 @@ public interface SearchModule {
      * @return A collection of document which name matched the searched expression.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public List<QueryResult> findByName(String token, String expression)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException;
+    public List<QueryResult> findByName(String token, String expression) throws IOException, ParseException, AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Search for documents using it associated keywords.
@@ -69,9 +67,8 @@ public interface SearchModule {
      * @return A collection of document which keywords matched the searched expression.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public List<QueryResult> findByKeywords(String token, Set<String> expression)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException;
+    public List<QueryResult> findByKeywords(String token, Set<String> expression) throws IOException, ParseException,
+            AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Performs a complex search by content, name and keywords (between others).
@@ -81,9 +78,8 @@ public interface SearchModule {
      * @throws RepositoryException If there is any general repository problem.
      * @throws IOException If something fails when parsing metadata.
      */
-    public List<QueryResult> find(String token, QueryParams params)
-            throws IOException, ParseException, RepositoryException,
-            DatabaseException;
+    public List<QueryResult> find(String token, QueryParams params) throws IOException, ParseException, AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Performs a complex search by content, name and keywords. Paginated version.
@@ -95,9 +91,8 @@ public interface SearchModule {
      *         statement.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public ResultSet findPaginated(String token, QueryParams params,
-            int offset, int limit) throws IOException, ParseException,
-            RepositoryException, DatabaseException;
+    public ResultSet findPaginated(String token, QueryParams params, int offset, int limit) throws IOException, ParseException,
+            AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Save a search for future use.
@@ -106,9 +101,7 @@ public interface SearchModule {
      * @param name The name of the query to be saved.
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public long saveSearch(String token, QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException;
+    public long saveSearch(String token, QueryParams params) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Updated a saved search.
@@ -117,9 +110,7 @@ public interface SearchModule {
      * @param name The name of the query to be saved.
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public void updateSearch(String token, QueryParams params)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException;
+    public void updateSearch(String token, QueryParams params) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Get a saved search.
@@ -128,8 +119,7 @@ public interface SearchModule {
      * @return The saved search query params.
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public QueryParams getSearch(String token, int qpId)
-            throws PathNotFoundException, RepositoryException,
+    public QueryParams getSearch(String token, int qpId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -138,8 +128,7 @@ public interface SearchModule {
      * @return A collection with the names of the saved search.
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<QueryParams> getAllSearchs(String token)
-            throws RepositoryException, DatabaseException;
+    public List<QueryParams> getAllSearchs(String token) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Delete a saved search.
@@ -148,9 +137,7 @@ public interface SearchModule {
      * @throws PathNotFoundException If there is no saved search with this name.
      * @throws RepositoryException If there is any general repository problem or the query fails
      */
-    public void deleteSearch(String token, long qpId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException;
+    public void deleteSearch(String token, long qpId) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Return a Keyword map. This is a hash with the keywords and the occurrence.
@@ -159,8 +146,8 @@ public interface SearchModule {
      * @return The keyword map.
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public Map<String, Integer> getKeywordMap(String token, List<String> filter)
-            throws RepositoryException, DatabaseException;
+    public Map<String, Integer> getKeywordMap(String token, List<String> filter) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the documents within a category
@@ -169,8 +156,8 @@ public interface SearchModule {
      * @return A Collection of documents in the category
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Document> getCategorizedDocuments(String token,
-            String categoryId) throws RepositoryException, DatabaseException;
+    public List<Document> getCategorizedDocuments(String token, String categoryId) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the folders within a category
@@ -179,8 +166,8 @@ public interface SearchModule {
      * @return A Collection of folders in the category
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Folder> getCategorizedFolders(String token, String categoryId)
-            throws RepositoryException, DatabaseException;
+    public List<Folder> getCategorizedFolders(String token, String categoryId) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the mails within a category
@@ -189,8 +176,8 @@ public interface SearchModule {
      * @return A Collection of mails in the category
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Mail> getCategorizedMails(String token, String categoryId)
-            throws RepositoryException, DatabaseException;
+    public List<Mail> getCategorizedMails(String token, String categoryId) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the documents with a keyword
@@ -199,8 +186,8 @@ public interface SearchModule {
      * @return A Collection of documents with the keyword
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Document> getDocumentsByKeyword(String token, String keyword)
-            throws RepositoryException, DatabaseException;
+    public List<Document> getDocumentsByKeyword(String token, String keyword) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the folders with a keyword
@@ -209,8 +196,8 @@ public interface SearchModule {
      * @return A Collection of folders with the keyword
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Folder> getFoldersByKeyword(String token, String keyword)
-            throws RepositoryException, DatabaseException;
+    public List<Folder> getFoldersByKeyword(String token, String keyword) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Get the mails with a keyword
@@ -219,8 +206,7 @@ public interface SearchModule {
      * @return A Collection of mails with the keyword
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Mail> getMailsByKeyword(String token, String keyword)
-            throws RepositoryException, DatabaseException;
+    public List<Mail> getMailsByKeyword(String token, String keyword) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Get the documents with a property value
@@ -229,9 +215,8 @@ public interface SearchModule {
      * @return A Collection of documents with the property value
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Document> getDocumentsByPropertyValue(String token,
-            String group, String property, String value)
-            throws RepositoryException, DatabaseException;
+    public List<Document> getDocumentsByPropertyValue(String token, String group, String property, String value)
+            throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Get the folders with a property value
@@ -240,9 +225,8 @@ public interface SearchModule {
      * @return A Collection of folders with the property value
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Folder> getFoldersByPropertyValue(String token, String group,
-            String property, String value) throws RepositoryException,
-            DatabaseException;
+    public List<Folder> getFoldersByPropertyValue(String token, String group, String property, String value) throws AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Get the mails with a property value
@@ -251,9 +235,8 @@ public interface SearchModule {
      * @return A Collection of mails with the property value
      * @throws RepositoryException If there is any general repository problem or the query fails.
      */
-    public List<Mail> getMailsByPropertyValue(String token, String group,
-            String property, String value) throws RepositoryException,
-            DatabaseException;
+    public List<Mail> getMailsByPropertyValue(String token, String group, String property, String value) throws AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Performs a simple search using on GQL language.
@@ -263,8 +246,8 @@ public interface SearchModule {
      * @return A collection of documents.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public List<QueryResult> findSimpleQuery(String token, String statement)
-            throws RepositoryException, DatabaseException;
+    public List<QueryResult> findSimpleQuery(String token, String statement) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 
     /**
      * Performs a simple search using GQL languahe. Paginated version.
@@ -277,9 +260,8 @@ public interface SearchModule {
      *         statement.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public ResultSet findSimpleQueryPaginated(String token, String statement,
-            int offset, int limit) throws RepositoryException,
-            DatabaseException;
+    public ResultSet findSimpleQueryPaginated(String token, String statement, int offset, int limit) throws AccessDeniedException,
+            RepositoryException, DatabaseException;
 
     /**
      * Find documents like a given one.
@@ -289,6 +271,6 @@ public interface SearchModule {
      *         statement.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public ResultSet findMoreLikeThis(String token, String uuid, int maxResults)
-            throws RepositoryException, DatabaseException;
+    public ResultSet findMoreLikeThis(String token, String uuid, int maxResults) throws AccessDeniedException, RepositoryException,
+            DatabaseException;
 }

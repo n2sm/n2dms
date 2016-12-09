@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,27 +45,24 @@ public class ColoredFlexTable extends FlexTable {
     /**
      * setStyleRow
      */
-    public void setStyleRow(final int row, final boolean selected) {
+    public void setStyleRow(int row, boolean selected) {
         // Ensures that header is never changed
-        if (row >= 0 && row <= getRowCount() - 1) {
+        if (row >= 0 && row <= (getRowCount() - 1)) {
             if (selected) {
-                getRowFormatter().addStyleName(row,
-                        "okm-FileBrowser-SelectedRow");
+                getRowFormatter().addStyleName(row, "okm-FileBrowser-SelectedRow");
             } else {
-                getRowFormatter().removeStyleName(row,
-                        "okm-FileBrowser-SelectedRow");
+                getRowFormatter().removeStyleName(row, "okm-FileBrowser-SelectedRow");
             }
         }
     }
 
     @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
         super.onBrowserEvent(event);
-        final Element td = getEventTargetCell(event);
-        if (td == null) {
+        Element td = getEventTargetCell(event);
+        if (td == null)
             return;
-        }
-        final Element tr = DOM.getParent(td);
+        Element tr = DOM.getParent(td);
 
         switch (DOM.eventGetType(event)) {
         case Event.ONMOUSEOVER:

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -40,19 +40,12 @@ import com.openkm.frontend.client.service.OKMUINotificationService;
  * 
  * Servlet Class
  */
-public class UINotificationServlet extends OKMRemoteServiceServlet implements
-        OKMUINotificationService {
+public class UINotificationServlet extends OKMRemoteServiceServlet implements OKMUINotificationService {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(UINotificationServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(UINotificationServlet.class);
     private static int count = 0;
-
     private static List<GWTUINotification> notifications = new ArrayList<GWTUINotification>();
-
     private static int indexToDelete = 0;
-
     private static String msg = "";
 
     @Override
@@ -61,18 +54,14 @@ public class UINotificationServlet extends OKMRemoteServiceServlet implements
 
         try {
             // Add new updated message
-            final String uMsg = OKMRepository.getInstance().getUpdateMessage(
-                    null);
+            String uMsg = OKMRepository.getInstance().getUpdateMessage(null);
             if (uMsg != null && !uMsg.equals("") && !msg.equals(uMsg)) {
                 msg = uMsg;
-                add(GWTUINotification.ACTION_NONE, uMsg,
-                        GWTUINotification.TYPE_PERMANENT, false);
+                add(GWTUINotification.ACTION_NONE, uMsg, GWTUINotification.TYPE_PERMANENT, false);
             }
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMRepositoryService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMRepositoryService, ErrorCode.CAUSE_Repository), e.getMessage());
         }
 
         log.debug("get: {}", notifications);
@@ -82,11 +71,9 @@ public class UINotificationServlet extends OKMRemoteServiceServlet implements
     /**
      * Add notification message.
      */
-    public static void add(final int action, final String message,
-            final int type, final boolean show) {
-        log.debug("add({}, {}, {}, {})", new Object[] { action, message, type,
-                show });
-        final GWTUINotification uin = new GWTUINotification();
+    public static void add(int action, String message, int type, boolean show) {
+        log.debug("add({}, {}, {}, {})", new Object[] { action, message, type, show });
+        GWTUINotification uin = new GWTUINotification();
         uin.setId(getId());
         uin.setDate(new Date());
         uin.setAction(action);
@@ -99,10 +86,10 @@ public class UINotificationServlet extends OKMRemoteServiceServlet implements
     /**
      * DElete notification message.
      */
-    public static void delete(final int id) {
+    public static void delete(int id) {
         log.debug("delete({})", id);
 
-        for (final GWTUINotification uin : notifications) {
+        for (GWTUINotification uin : notifications) {
             if (uin.getId() == id) {
                 notifications.remove(uin);
                 break;
@@ -117,9 +104,9 @@ public class UINotificationServlet extends OKMRemoteServiceServlet implements
         log.debug("clean()");
 
         if (indexToDelete > 0) {
-            final List<GWTUINotification> toDelete = new ArrayList<GWTUINotification>();
+            List<GWTUINotification> toDelete = new ArrayList<GWTUINotification>();
 
-            for (int i = 0; i < notifications.size() && i < indexToDelete; i++) {
+            for (int i = 0; (i < notifications.size() && i < indexToDelete); i++) {
                 // Deleting temporal notifications
                 if (notifications.get(i).getType() == GWTUINotification.TYPE_TEMPORAL) {
                     toDelete.add(notifications.get(i));
@@ -143,10 +130,10 @@ public class UINotificationServlet extends OKMRemoteServiceServlet implements
     /**
      * Find notification message.
      */
-    public static GWTUINotification findById(final int id) {
+    public static GWTUINotification findById(int id) {
         log.debug("findById({})", id);
 
-        for (final GWTUINotification uin : notifications) {
+        for (GWTUINotification uin : notifications) {
             if (uin.getId() == id) {
                 return uin;
             }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,8 +22,7 @@
 package com.openkm.frontend.client.widget.categories;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -39,15 +38,10 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class Status extends PopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private boolean flag_getChilds = false;
-
     private boolean flag_root = false;
 
     /**
@@ -64,11 +58,9 @@ public class Status extends PopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -85,16 +77,12 @@ public class Status extends PopupPanel {
      */
     public void refresh() {
         if (flag_getChilds || flag_root) {
-            final int left = (Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup
-                    .getOffsetWidth() - 125)
-                    / 2
-                    + Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup
-                            .getAbsoluteLeft();
-            final int top = (Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup
-                    .getOffsetHeight() - 40)
-                    / 2
-                    + Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup
-                            .getAbsoluteTop();
+            int left =
+                    ((Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.getOffsetWidth() - 125) / 2)
+                            + Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.getAbsoluteLeft();
+            int top =
+                    ((Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.getOffsetHeight() - 40) / 2)
+                            + Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.getAbsoluteTop();
             setPopupPosition(left, top);
             Main.get().mainPanel.desktop.navigator.categoriesTree.categoriesSelectPopup.scrollDirectoryPanel
                     .addStyleName("okm-PanelRefreshing");

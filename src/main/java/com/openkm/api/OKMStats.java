@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,7 +36,6 @@ import com.openkm.module.StatsModule;
  */
 public class OKMStats implements StatsModule {
     private static Logger log = LoggerFactory.getLogger(OKMStats.class);
-
     private static OKMStats instance = new OKMStats();
 
     private OKMStats() {
@@ -47,32 +46,38 @@ public class OKMStats implements StatsModule {
     }
 
     @Override
-    public StatsInfo getDocumentsByContext(final String token)
-            throws RepositoryException, DatabaseException {
+    public StatsInfo getDocumentsByContext(String token) throws RepositoryException, DatabaseException {
         log.debug("getDocumentsByContext({})", token);
-        final StatsModule sm = ModuleManager.getStatsModule();
-        final StatsInfo stats = sm.getDocumentsByContext(token);
+        StatsModule sm = ModuleManager.getStatsModule();
+        StatsInfo stats = sm.getDocumentsByContext(token);
         log.debug("getDocumentsByContext: {}", stats);
         return stats;
     }
 
     @Override
-    public StatsInfo getDocumentsSizeByContext(final String token)
-            throws RepositoryException, DatabaseException {
+    public StatsInfo getDocumentsSizeByContext(String token) throws RepositoryException, DatabaseException {
         log.debug("getDocumentsSizeByContext({})", token);
-        final StatsModule sm = ModuleManager.getStatsModule();
-        final StatsInfo stats = sm.getDocumentsSizeByContext(token);
+        StatsModule sm = ModuleManager.getStatsModule();
+        StatsInfo stats = sm.getDocumentsSizeByContext(token);
         log.debug("getDocumentsSizeByContext: {}", stats);
         return stats;
     }
 
     @Override
-    public StatsInfo getFoldersByContext(final String token)
-            throws RepositoryException, DatabaseException {
+    public StatsInfo getFoldersByContext(String token) throws RepositoryException, DatabaseException {
         log.debug("getFoldersByContext({})", token);
-        final StatsModule sm = ModuleManager.getStatsModule();
-        final StatsInfo stats = sm.getFoldersByContext(token);
+        StatsModule sm = ModuleManager.getStatsModule();
+        StatsInfo stats = sm.getFoldersByContext(token);
         log.debug("getFoldersByContext: {}", stats);
+        return stats;
+    }
+
+    @Override
+    public StatsInfo getMailsByContext(String token) throws RepositoryException, DatabaseException {
+        log.debug("getMailsByContext({})", token);
+        StatsModule sm = ModuleManager.getStatsModule();
+        StatsInfo stats = sm.getMailsByContext(token);
+        log.debug("getMailsByContext: {}", stats);
         return stats;
     }
 }

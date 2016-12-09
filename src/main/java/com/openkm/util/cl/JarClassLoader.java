@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -30,18 +30,16 @@ import java.util.jar.Attributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JarClassLoader extends URLClassLoader implements
-        MultipleClassLoader {
+public class JarClassLoader extends URLClassLoader implements MultipleClassLoader {
     private static Logger log = LoggerFactory.getLogger(JarClassLoader.class);
-
     private URL url;
 
-    public JarClassLoader(final URL url) {
+    public JarClassLoader(URL url) {
         super(new URL[] { url });
         this.url = url;
     }
 
-    public JarClassLoader(final URL url, final ClassLoader parent) {
+    public JarClassLoader(URL url, ClassLoader parent) {
         super(new URL[] { url }, parent);
         this.url = url;
     }
@@ -49,9 +47,9 @@ public class JarClassLoader extends URLClassLoader implements
     @Override
     public String getMainClassName() throws IOException {
         log.debug("getMainClassName()");
-        final URL u = new URL("jar", "", url + "!/");
-        final JarURLConnection uc = (JarURLConnection) u.openConnection();
-        final Attributes attr = uc.getMainAttributes();
+        URL u = new URL("jar", "", url + "!/");
+        JarURLConnection uc = (JarURLConnection) u.openConnection();
+        Attributes attr = uc.getMainAttributes();
         return attr != null ? attr.getValue(Attributes.Name.MAIN_CLASS) : null;
     }
 }

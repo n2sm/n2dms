@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -48,10 +48,8 @@ import com.google.gwt.user.client.ui.Image;
  * @author jllort
  *
  */
-public class ImageHover extends Image implements HasClickHandlers,
-        HasAllMouseHandlers {
+public class ImageHover extends Image implements HasClickHandlers, HasAllMouseHandlers {
     private String url = "";
-
     private String urlHover = "";
 
     public ImageHover(final String url, final String urlHover) {
@@ -62,14 +60,14 @@ public class ImageHover extends Image implements HasClickHandlers,
 
         addMouseOverHandler(new MouseOverHandler() {
             @Override
-            public void onMouseOver(final MouseOverEvent event) {
+            public void onMouseOver(MouseOverEvent event) {
                 setUrl(urlHover);
             }
         });
 
         addMouseOutHandler(new MouseOutHandler() {
             @Override
-            public void onMouseOut(final MouseOutEvent event) {
+            public void onMouseOut(MouseOutEvent event) {
                 setUrl(url);
             }
         });
@@ -79,67 +77,56 @@ public class ImageHover extends Image implements HasClickHandlers,
      * @see com.google.gwt.event.dom.client.HasClickHandlers#addClickHandler(com.google.gwt.event.dom.client.ClickHandler)
      */
     @Override
-    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+    public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addHandler(handler, ClickEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseDownHandlers#addMouseDownHandler(com.google.gwt.event.dom.client.MouseDownHandler)
      */
-    @Override
-    public HandlerRegistration addMouseDownHandler(
-            final MouseDownHandler handler) {
+    public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
         return addDomHandler(handler, MouseDownEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseMoveHandlers#addMouseMoveHandler(com.google.gwt.event.dom.client.MouseMoveHandler)
      */
-    @Override
-    public HandlerRegistration addMouseMoveHandler(
-            final MouseMoveHandler handler) {
+    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
         return addDomHandler(handler, MouseMoveEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseOutHandlers#addMouseOutHandler(com.google.gwt.event.dom.client.MouseOutHandler)
      */
-    @Override
-    public HandlerRegistration addMouseOutHandler(final MouseOutHandler handler) {
+    public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
         return addDomHandler(handler, MouseOutEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseOverHandlers#addMouseOverHandler(com.google.gwt.event.dom.client.MouseOverHandler)
      */
-    @Override
-    public HandlerRegistration addMouseOverHandler(
-            final MouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
         return addDomHandler(handler, MouseOverEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseUpHandlers#addMouseUpHandler(com.google.gwt.event.dom.client.MouseUpHandler)
      */
-    @Override
-    public HandlerRegistration addMouseUpHandler(final MouseUpHandler handler) {
+    public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
         return addDomHandler(handler, MouseUpEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseWheelHandlers#addMouseWheelHandler(com.google.gwt.event.dom.client.MouseWheelHandler)
      */
-    @Override
-    public HandlerRegistration addMouseWheelHandler(
-            final MouseWheelHandler handler) {
+    public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
         return addDomHandler(handler, MouseWheelEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.Widget#onBrowserEvent(com.google.gwt.user.client.Event)
      */
-    @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
         switch (DOM.eventGetType(event)) {
         case Event.ONMOUSEDOWN:
         case Event.ONMOUSEUP:

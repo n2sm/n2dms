@@ -7,68 +7,47 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "queryParams")
 public class QueryParams implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int DOCUMENT = 1;
-
     public static final int FOLDER = 2;
-
     public static final int MAIL = 4;
 
     public static final String AND = "and";
-
     public static final String OR = "or";
 
     private long id;
-
     private String queryName;
-
     private String user;
-
     private String name;
-
     private Set<String> keywords = new HashSet<String>();
-
     private Set<String> categories = new HashSet<String>();
-
     private String content;
-
     private String mimeType;
-
     private String author;
-
     private String path;
-
     private Calendar lastModifiedFrom;
-
     private Calendar lastModifiedTo;
-
     private String mailSubject;
-
     private String mailFrom;
-
     private String mailTo;
-
     private String statementQuery;
-
     private String statementType;
-
     private boolean dashboard;
-
     private long domain = DOCUMENT;
-
     private String operator = AND;
-
     private Map<String, String> properties = new HashMap<String, String>();
-
     private Set<String> shared = new HashSet<String>();
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -76,7 +55,7 @@ public class QueryParams implements Serializable {
         return queryName;
     }
 
-    public void setQueryName(final String queryName) {
+    public void setQueryName(String queryName) {
         this.queryName = queryName;
     }
 
@@ -84,7 +63,7 @@ public class QueryParams implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -92,7 +71,7 @@ public class QueryParams implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -100,7 +79,7 @@ public class QueryParams implements Serializable {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -108,7 +87,7 @@ public class QueryParams implements Serializable {
         return categories;
     }
 
-    public void setCategories(final Set<String> categories) {
+    public void setCategories(Set<String> categories) {
         this.categories = categories;
     }
 
@@ -116,7 +95,7 @@ public class QueryParams implements Serializable {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -124,7 +103,7 @@ public class QueryParams implements Serializable {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -132,7 +111,7 @@ public class QueryParams implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -140,7 +119,7 @@ public class QueryParams implements Serializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -148,7 +127,7 @@ public class QueryParams implements Serializable {
         return lastModifiedFrom;
     }
 
-    public void setLastModifiedFrom(final Calendar lastModifiedFrom) {
+    public void setLastModifiedFrom(Calendar lastModifiedFrom) {
         this.lastModifiedFrom = lastModifiedFrom;
     }
 
@@ -156,7 +135,7 @@ public class QueryParams implements Serializable {
         return lastModifiedTo;
     }
 
-    public void setLastModifiedTo(final Calendar lastModifiedTo) {
+    public void setLastModifiedTo(Calendar lastModifiedTo) {
         this.lastModifiedTo = lastModifiedTo;
     }
 
@@ -164,7 +143,7 @@ public class QueryParams implements Serializable {
         return mailSubject;
     }
 
-    public void setMailSubject(final String mailSubject) {
+    public void setMailSubject(String mailSubject) {
         this.mailSubject = mailSubject;
     }
 
@@ -172,7 +151,7 @@ public class QueryParams implements Serializable {
         return mailFrom;
     }
 
-    public void setMailFrom(final String mailFrom) {
+    public void setMailFrom(String mailFrom) {
         this.mailFrom = mailFrom;
     }
 
@@ -180,7 +159,7 @@ public class QueryParams implements Serializable {
         return mailTo;
     }
 
-    public void setMailTo(final String mailTo) {
+    public void setMailTo(String mailTo) {
         this.mailTo = mailTo;
     }
 
@@ -188,7 +167,7 @@ public class QueryParams implements Serializable {
         return statementQuery;
     }
 
-    public void setStatementQuery(final String statementQuery) {
+    public void setStatementQuery(String statementQuery) {
         this.statementQuery = statementQuery;
     }
 
@@ -196,7 +175,7 @@ public class QueryParams implements Serializable {
         return statementType;
     }
 
-    public void setStatementType(final String statementType) {
+    public void setStatementType(String statementType) {
         this.statementType = statementType;
     }
 
@@ -204,7 +183,7 @@ public class QueryParams implements Serializable {
         return dashboard;
     }
 
-    public void setDashboard(final boolean dashboard) {
+    public void setDashboard(boolean dashboard) {
         this.dashboard = dashboard;
     }
 
@@ -212,7 +191,7 @@ public class QueryParams implements Serializable {
         return domain;
     }
 
-    public void setDomain(final long domain) {
+    public void setDomain(long domain) {
         this.domain = domain;
     }
 
@@ -220,7 +199,7 @@ public class QueryParams implements Serializable {
         return operator;
     }
 
-    public void setOperator(final String operator) {
+    public void setOperator(String operator) {
         this.operator = operator;
     }
 
@@ -228,7 +207,7 @@ public class QueryParams implements Serializable {
         return properties;
     }
 
-    public void setProperties(final Map<String, String> properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
@@ -236,50 +215,32 @@ public class QueryParams implements Serializable {
         return shared;
     }
 
-    public void setShared(final Set<String> shared) {
+    public void setShared(Set<String> shared) {
         this.shared = shared;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("id=");
-        sb.append(id);
-        sb.append(", queryName=");
-        sb.append(queryName);
-        sb.append(", user=");
-        sb.append(user);
-        sb.append(", name=");
-        sb.append(name);
-        sb.append(", keywords=");
-        sb.append(keywords);
-        sb.append(", categories=");
-        sb.append(categories);
-        sb.append(", content=");
-        sb.append(content);
-        sb.append(", mimeType=");
-        sb.append(mimeType);
-        sb.append(", author=");
-        sb.append(author);
-        sb.append(", path=");
-        sb.append(path);
-        sb.append(", dashboard=");
-        sb.append(dashboard);
-        sb.append(", domain=");
-        sb.append(domain);
-        sb.append(", operator=");
-        sb.append(operator);
-        sb.append(", shared=");
-        sb.append(shared);
-        sb.append(", statementQuery=");
-        sb.append(statementQuery);
-        sb.append(", statementType=");
-        sb.append(statementType);
-        sb.append(", lastModifiedFrom=");
-        sb.append(lastModifiedFrom == null ? null : lastModifiedFrom.getTime());
-        sb.append(", lastModifiedTo=");
-        sb.append(lastModifiedTo == null ? null : lastModifiedTo.getTime());
+        sb.append("id=").append(id);
+        sb.append(", queryName=").append(queryName);
+        sb.append(", user=").append(user);
+        sb.append(", name=").append(name);
+        sb.append(", keywords=").append(keywords);
+        sb.append(", categories=").append(categories);
+        sb.append(", content=").append(content);
+        sb.append(", mimeType=").append(mimeType);
+        sb.append(", author=").append(author);
+        sb.append(", path=").append(path);
+        sb.append(", dashboard=").append(dashboard);
+        sb.append(", domain=").append(domain);
+        sb.append(", operator=").append(operator);
+        sb.append(", properties=").append(properties);
+        sb.append(", shared=").append(shared);
+        sb.append(", statementQuery=").append(statementQuery);
+        sb.append(", statementType=").append(statementType);
+        sb.append(", lastModifiedFrom=").append(lastModifiedFrom == null ? null : lastModifiedFrom.getTime());
+        sb.append(", lastModifiedTo=").append(lastModifiedTo == null ? null : lastModifiedTo.getTime());
         sb.append("}");
         return sb.toString();
     }

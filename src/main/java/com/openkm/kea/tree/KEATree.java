@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -63,52 +63,40 @@ public class KEATree {
     /**
      * Generate tree
      */
-    public static void generateTree(final String token, final int levelToDraw,
-            final String parentPath, final Vector<String> parentUIDs,
-            final Writer out) throws IOException, PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException, AutomationException,
-            LockException {
+    public static void generateTree(String token, int levelToDraw, String parentPath, Vector<String> parentUIDs, Writer out)
+            throws IOException, PathNotFoundException, ItemExistsException, AccessDeniedException, RepositoryException, DatabaseException,
+            ExtensionException, AutomationException, LockException {
         // Remove previous thesaurus
-        for (final Folder fld : OKMFolder.getInstance().getChildren(token,
-                "/" + Repository.THESAURUS)) {
+        for (Folder fld : OKMFolder.getInstance().getChildren(token, "/" + Repository.THESAURUS)) {
             out.write("Removing " + fld.getPath() + "<br>");
             OKMFolder.getInstance().purge(token, fld.getPath());
         }
 
-        gnerateTreeHelper(token, null, 0, levelToDraw, parentPath, parentUIDs,
-                out);
+        gnerateTreeHelper(token, null, 0, levelToDraw, parentPath, parentUIDs, out);
     }
 
     @SuppressWarnings("unchecked")
-    private static void gnerateTreeHelper(final String token,
-            final String termID, final int level, final int levelToDraw,
-            final String parentPath, final Vector<String> parentUIDs,
-            final Writer out) throws IOException, PathNotFoundException,
-            ItemExistsException, AccessDeniedException,
-            com.openkm.core.RepositoryException, DatabaseException,
-            ExtensionException, AutomationException {
-        final List<Term> lisTerms = getParentTerms(termID);
+    private static void gnerateTreeHelper(String token, String termID, int level, int levelToDraw, String parentPath,
+            Vector<String> parentUIDs, Writer out) throws IOException, PathNotFoundException, ItemExistsException, AccessDeniedException,
+            com.openkm.core.RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        List<Term> lisTerms = getParentTerms(termID);
 
         if (level <= levelToDraw) {
-            out.write("<br/>Found " + lisTerms.size() + " terms in level "
-                    + level + "<br/>");
+            out.write("<br/>Found " + lisTerms.size() + " terms in level " + level + "<br/>");
             out.flush();
         }
 
-        for (final ListIterator<Term> it = lisTerms.listIterator(); it
-                .hasNext();) {
-            final Vector<String> newParentUIDs = (Vector<String>) parentUIDs
-                    .clone();
+        for (ListIterator<Term> it = lisTerms.listIterator(); it.hasNext();) {
+            Vector<String> newParentUIDs = (Vector<String>) parentUIDs.clone();
             String path = parentPath;
-            final Term term = it.next();
+            Term term = it.next();
 
             if (level <= levelToDraw) {
                 drawTerm(term, level, out);
             }
 
             path += "/" + term.getText();
-            final Folder folder = new Folder();
+            Folder folder = new Folder();
             folder.setPath(path);
             OKMFolder.getInstance().create(token, folder);
 
@@ -117,8 +105,7 @@ public class KEATree {
                 newParentUIDs.add(term.getUid());
 
                 // Recursive generation
-                gnerateTreeHelper(token, term.getUid(), level + 1, levelToDraw,
-                        path, newParentUIDs, out);
+                gnerateTreeHelper(token, term.getUid(), level + 1, levelToDraw, path, newParentUIDs, out);
             }
         }
     }
@@ -129,19 +116,17 @@ public class KEATree {
      * @param term The term
      * @param level The level
      */
-    private static void drawTerm(final Term term, final int level,
-            final Writer out) throws IOException {
+    private static void drawTerm(Term term, int level, Writer out) throws IOException {
         String levelSeparator = "";
 
         for (int i = 0; i < level; i++) {
             levelSeparator += "-";
         }
 
-        final Calendar cal = Calendar.getInstance();
-        final SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
-        out.write(dtf.format(cal.getTime()) + " Creating term "
-                + levelSeparator + "> [" + term.getText() + "] - with uid:"
-                + term.getUid() + "<br>");
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat dtf = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+        out.write(dtf.format(cal.getTime()) + " Creating term " + levelSeparator + "> [" + term.getText() + "] - with uid:" + term.getUid()
+                + "<br>");
         out.flush();
     }
 
@@ -151,8 +136,8 @@ public class KEATree {
      * @param termID The term id
      * @return List of child terms
      */
-    private static List<Term> getParentTerms(final String termID) {
-        final List<Term> childTerms = new ArrayList<Term>();
+    private static List<Term> getParentTerms(String termID) {
+        List<Term> childTerms = new ArrayList<Term>();
         org.openrdf.repository.RepositoryConnection con = null;
         TupleQuery query;
 
@@ -162,27 +147,24 @@ public class KEATree {
             if (termID == null) {
                 query = QueryBank.getInstance().getTreeTopQuery(con);
             } else {
-                query = QueryBank.getInstance().getTreeNextLayerQuery(termID,
-                        con);
+                query = QueryBank.getInstance().getTreeNextLayerQuery(termID, con);
             }
 
-            final TupleQueryResult result = query.evaluate();
+            TupleQueryResult result = query.evaluate();
 
             while (result.hasNext()) {
 
-                final BindingSet bindingSet = result.next();
-                final Term term = new Term(bindingSet.getValue("UID")
-                        .stringValue(), bindingSet.getValue("TEXT")
-                        .stringValue());
+                BindingSet bindingSet = result.next();
+                Term term = new Term(bindingSet.getValue("UID").stringValue(), bindingSet.getValue("TEXT").stringValue());
 
                 // need to ignore duplicates casued by grandchild problem
                 if (!childTerms.contains(term)) {
                     childTerms.add(term);
                 }
             }
-        } catch (final QueryEvaluationException e) {
+        } catch (QueryEvaluationException e) {
             log.error("Query evaluation exception", e);
-        } catch (final org.openrdf.repository.RepositoryException e) {
+        } catch (org.openrdf.repository.RepositoryException e) {
             log.error("RDFVocabulary repository exception", e);
         }
 

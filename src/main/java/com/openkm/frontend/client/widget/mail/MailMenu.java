@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,17 +39,11 @@ import com.openkm.frontend.client.widget.MenuBase;
 public class MailMenu extends MenuBase {
 
     private ToolBarOption toolBarOption;
-
     private MenuBar dirMenu;
-
     private MenuItem create;
-
     private MenuItem remove;
-
     private MenuItem rename;
-
     private MenuItem move;
-
     private MenuItem copy;
 
     public MailMenu() {
@@ -58,24 +52,19 @@ public class MailMenu extends MenuBase {
 
         // First initialize language values
         dirMenu = new MenuBar(true);
-        create = new MenuItem(Util.menuHTML("img/icon/actions/add_folder.gif",
-                Main.i18n("tree.menu.directory.create")), true, addFolder);
+        create = new MenuItem(Util.menuHTML("img/icon/actions/add_folder.gif", Main.i18n("tree.menu.directory.create")), true, addFolder);
         create.addStyleName("okm-MenuItem");
         dirMenu.addItem(create);
-        remove = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("tree.menu.directory.remove")), true, delFolder);
+        remove = new MenuItem(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("tree.menu.directory.remove")), true, delFolder);
         remove.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(remove);
-        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("tree.menu.directory.rename")), true, renFolder);
+        rename = new MenuItem(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("tree.menu.directory.rename")), true, renFolder);
         rename.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(rename);
-        move = new MenuItem(Util.menuHTML("img/icon/actions/move_folder.gif",
-                Main.i18n("tree.menu.directory.move")), true, moveFolder);
+        move = new MenuItem(Util.menuHTML("img/icon/actions/move_folder.gif", Main.i18n("tree.menu.directory.move")), true, moveFolder);
         move.addStyleName("okm-MenuItem");
         dirMenu.addItem(move);
-        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("tree.menu.directory.copy")), true, copyFolder);
+        copy = new MenuItem(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("tree.menu.directory.copy")), true, copyFolder);
         copy.addStyleName("okm-MenuItem");
         dirMenu.addItem(copy);
         dirMenu.setStyleName("okm-MenuBar");
@@ -84,7 +73,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to add a new Directory
     Command addFolder = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.createFolderOption) {
                 Main.get().activeFolderTree.addTmpFolderCreate();
@@ -95,7 +83,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to delete a new Directory
     Command delFolder = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.deleteOption) {
                 Main.get().activeFolderTree.confirmDelete();
@@ -106,7 +93,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to delete a new Directory
     Command renFolder = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.renameOption) {
                 Main.get().mainPanel.topPanel.toolBar.executeRename();
@@ -117,7 +103,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to refresh actual Directory
     Command moveFolder = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.moveOption) {
                 Main.get().activeFolderTree.move();
@@ -128,7 +113,6 @@ public class MailMenu extends MenuBase {
 
     // Command menu to refresh actual Directory
     Command copyFolder = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.copyOption) {
                 Main.get().activeFolderTree.copy();
@@ -140,7 +124,6 @@ public class MailMenu extends MenuBase {
     /**
      * Evaluates menu options
      */
-    @Override
     public void evaluateMenuOptions() {
         if (toolBarOption.createFolderOption) {
             enable(create);
@@ -171,20 +154,15 @@ public class MailMenu extends MenuBase {
 
     @Override
     public void langRefresh() {
-        create.setHTML(Util.menuHTML("img/icon/actions/add_folder.gif",
-                Main.i18n("tree.menu.directory.create")));
-        remove.setHTML(Util.menuHTML("img/icon/actions/delete.gif",
-                Main.i18n("tree.menu.directory.remove")));
-        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif",
-                Main.i18n("tree.menu.directory.rename")));
-        move.setHTML(Util.menuHTML("img/icon/actions/move_folder.gif",
-                Main.i18n("tree.menu.directory.move")));
-        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif",
-                Main.i18n("tree.menu.directory.copy")));
+        create.setHTML(Util.menuHTML("img/icon/actions/add_folder.gif", Main.i18n("tree.menu.directory.create")));
+        remove.setHTML(Util.menuHTML("img/icon/actions/delete.gif", Main.i18n("tree.menu.directory.remove")));
+        rename.setHTML(Util.menuHTML("img/icon/actions/rename.gif", Main.i18n("tree.menu.directory.rename")));
+        move.setHTML(Util.menuHTML("img/icon/actions/move_folder.gif", Main.i18n("tree.menu.directory.move")));
+        copy.setHTML(Util.menuHTML("img/icon/actions/copy.gif", Main.i18n("tree.menu.directory.copy")));
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
         if (!option.isCreateFolderOption()) {
             dirMenu.removeItem(create);
         }
@@ -203,7 +181,7 @@ public class MailMenu extends MenuBase {
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         this.toolBarOption = toolBarOption;
         evaluateMenuOptions();
     }
@@ -220,5 +198,13 @@ public class MailMenu extends MenuBase {
 
     @Override
     public void disableAddPropertyGroup() {
+    }
+
+    @Override
+    public void disablePdfMerge() {
+    }
+
+    @Override
+    public void enablePdfMerge() {
     }
 }

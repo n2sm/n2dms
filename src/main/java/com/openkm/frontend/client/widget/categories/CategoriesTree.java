@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,14 +40,13 @@ public class CategoriesTree extends FolderTree {
     /**
      * Inits on first load
      */
-    @Override
     public void init() {
         menuPopup = new MenuPopup(new CategoriesMenu());
         menuPopup.setStyleName("okm-Tree-MenuPopup");
 
         categoriesSelectPopup = new CategoriesSelectPopup();
-        categoriesSelectPopup.setWidth("500");
-        categoriesSelectPopup.setHeight("300");
+        categoriesSelectPopup.setWidth("500px");
+        categoriesSelectPopup.setHeight("300px");
         categoriesSelectPopup.setStyleName("okm-Popup");
 
         folderRoot = Main.get().categoriesRootFolder;
@@ -61,12 +60,9 @@ public class CategoriesTree extends FolderTree {
     /**
      * Move folder on file browser ( only trash mode )
      */
-    @Override
     public void move() {
-        final GWTFolder folderToRestore = (GWTFolder) actualItem
-                .getUserObject();
-        folderSelectPopup
-                .setEntryPoint(FolderSelectPopup.ENTRYPOINT_CATEGORIES);
+        GWTFolder folderToRestore = (GWTFolder) actualItem.getUserObject();
+        folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_CATEGORIES);
         folderSelectPopup.setToMove(folderToRestore);
         showDirectorySelectPopup();
         hideMenuPopup();
@@ -75,7 +71,6 @@ public class CategoriesTree extends FolderTree {
     /**
      * Copy folder on file browser ( only trash mode )
      */
-    @Override
     public void copy() {
     }
 }

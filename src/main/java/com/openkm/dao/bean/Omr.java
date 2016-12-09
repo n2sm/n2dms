@@ -16,18 +16,11 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.Index;
-import org.hibernate.search.annotations.Store;
-
-import com.openkm.module.db.stuff.SetFieldBridge;
 
 @Entity
 @Table(name = "OKM_OMR")
 public class Omr implements Serializable {
     private static final long serialVersionUID = 1L;
-
     @Id
     @Column(name = "OMR_ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -79,8 +72,6 @@ public class Omr implements Serializable {
     @ElementCollection
     @Column(name = "OMP_PROPERTY")
     @CollectionTable(name = "OKM_OMR_PROPERTY", joinColumns = { @JoinColumn(name = "OMP_OMR") })
-    @Field(index = Index.UN_TOKENIZED, store = Store.YES)
-    @FieldBridge(impl = SetFieldBridge.class)
     protected Set<String> properties = new HashSet<String>();
 
     @Column(name = "OMR_ACTIVE", nullable = false)
@@ -91,7 +82,7 @@ public class Omr implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -99,7 +90,7 @@ public class Omr implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -107,7 +98,7 @@ public class Omr implements Serializable {
         return templateFileContent;
     }
 
-    public void setTemplateFilContent(final byte[] templateFileContent) {
+    public void setTemplateFilContent(byte[] templateFileContent) {
         this.templateFileContent = templateFileContent;
     }
 
@@ -115,15 +106,15 @@ public class Omr implements Serializable {
         return templateFileMime;
     }
 
-    public void setTemplateFileMime(final String fileTemplateMime) {
-        templateFileMime = fileTemplateMime;
+    public void setTemplateFileMime(String fileTemplateMime) {
+        this.templateFileMime = fileTemplateMime;
     }
 
     public String getTemplateFileName() {
         return templateFileName;
     }
 
-    public void setTemplateFileName(final String templateFileName) {
+    public void setTemplateFileName(String templateFileName) {
         this.templateFileName = templateFileName;
     }
 
@@ -131,7 +122,7 @@ public class Omr implements Serializable {
         return ascFileContent;
     }
 
-    public void setAscFileContent(final byte[] ascFileContent) {
+    public void setAscFileContent(byte[] ascFileContent) {
         this.ascFileContent = ascFileContent;
     }
 
@@ -139,7 +130,7 @@ public class Omr implements Serializable {
         return configFileContent;
     }
 
-    public void setConfigFileContent(final byte[] configFileContent) {
+    public void setConfigFileContent(byte[] configFileContent) {
         this.configFileContent = configFileContent;
     }
 
@@ -147,7 +138,7 @@ public class Omr implements Serializable {
         return fieldsFileContent;
     }
 
-    public void setFieldsFileContent(final byte[] fieldsFileContent) {
+    public void setFieldsFileContent(byte[] fieldsFileContent) {
         this.fieldsFileContent = fieldsFileContent;
     }
 
@@ -155,7 +146,7 @@ public class Omr implements Serializable {
         return ascFileMime;
     }
 
-    public void setAscFileMime(final String ascFileMime) {
+    public void setAscFileMime(String ascFileMime) {
         this.ascFileMime = ascFileMime;
     }
 
@@ -163,7 +154,7 @@ public class Omr implements Serializable {
         return configFileMime;
     }
 
-    public void setConfigFileMime(final String configFileMime) {
+    public void setConfigFileMime(String configFileMime) {
         this.configFileMime = configFileMime;
     }
 
@@ -171,7 +162,7 @@ public class Omr implements Serializable {
         return fieldsFileMime;
     }
 
-    public void setFieldsFileMime(final String fieldsFileMime) {
+    public void setFieldsFileMime(String fieldsFileMime) {
         this.fieldsFileMime = fieldsFileMime;
     }
 
@@ -179,7 +170,7 @@ public class Omr implements Serializable {
         return ascFileName;
     }
 
-    public void setAscFileName(final String ascFileName) {
+    public void setAscFileName(String ascFileName) {
         this.ascFileName = ascFileName;
     }
 
@@ -187,7 +178,7 @@ public class Omr implements Serializable {
         return configFileName;
     }
 
-    public void setConfigFileName(final String configFileName) {
+    public void setConfigFileName(String configFileName) {
         this.configFileName = configFileName;
     }
 
@@ -195,11 +186,11 @@ public class Omr implements Serializable {
         return fieldsFileName;
     }
 
-    public void setFieldsFileName(final String fieldsFileName) {
+    public void setFieldsFileName(String fieldsFileName) {
         this.fieldsFileName = fieldsFileName;
     }
 
-    public void setTemplateFileContent(final byte[] templateFileContent) {
+    public void setTemplateFileContent(byte[] templateFileContent) {
         this.templateFileContent = templateFileContent;
     }
 
@@ -207,7 +198,7 @@ public class Omr implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -215,13 +206,12 @@ public class Omr implements Serializable {
         return properties;
     }
 
-    public void setProperties(final Set<String> properties) {
+    public void setProperties(Set<String> properties) {
         this.properties = properties;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", name=").append(name);

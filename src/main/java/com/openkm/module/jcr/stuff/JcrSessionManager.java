@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,13 +40,9 @@ import com.openkm.bean.JcrSessionInfo;
  */
 public class JcrSessionManager {
     @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory
-            .getLogger(JcrSessionManager.class);
-
+    private static Logger log = LoggerFactory.getLogger(JcrSessionManager.class);
     private static JcrSessionManager instance = new JcrSessionManager();
-
     private Map<String, JcrSessionInfo> sessions = new HashMap<String, JcrSessionInfo>();
-
     private static String systemToken;
 
     /**
@@ -72,7 +68,7 @@ public class JcrSessionManager {
     /**
      * Set system session
      */
-    public void putSystemSession(final Session session) {
+    public void putSystemSession(Session session) {
         systemToken = UUID.randomUUID().toString();
         add(systemToken, session);
     }
@@ -87,8 +83,8 @@ public class JcrSessionManager {
     /**
      * Add a new session
      */
-    public synchronized void add(final String token, final Session session) {
-        final JcrSessionInfo si = new JcrSessionInfo();
+    public synchronized void add(String token, Session session) {
+        JcrSessionInfo si = new JcrSessionInfo();
         si.setSession(session);
         si.setCreation(Calendar.getInstance());
         si.setLastAccess(Calendar.getInstance());
@@ -98,8 +94,8 @@ public class JcrSessionManager {
     /**
      * Return a session
      */
-    public Session get(final String token) {
-        final JcrSessionInfo si = sessions.get(token);
+    public Session get(String token) {
+        JcrSessionInfo si = (JcrSessionInfo) sessions.get(token);
 
         if (si != null) {
             si.setLastAccess(Calendar.getInstance());
@@ -112,14 +108,14 @@ public class JcrSessionManager {
     /**
      * Return a session info
      */
-    public JcrSessionInfo getInfo(final String token) {
+    public JcrSessionInfo getInfo(String token) {
         return sessions.get(token);
     }
 
     /**
      * Remove a session
      */
-    public synchronized void remove(final String token) {
+    public synchronized void remove(String token) {
         sessions.remove(token);
     }
 
@@ -127,9 +123,9 @@ public class JcrSessionManager {
      * Return all active tokens
      */
     public List<String> getTokens() {
-        final List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<String>();
 
-        for (final String token : sessions.keySet()) {
+        for (String token : sessions.keySet()) {
             if (!systemToken.equals(token)) {
                 list.add(token);
             }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,11 +22,11 @@
 package com.openkm.frontend.client.widget.dashboard;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
+
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.util.OKMBundleResources;
 
@@ -39,13 +39,9 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class Status extends PopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private boolean flag_getDashboard = false;
 
     /**
@@ -62,11 +58,9 @@ public class Status extends PopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -81,13 +75,12 @@ public class Status extends PopupPanel {
     /**
      * Refresh
      */
-    public void refresh(final int left, final int top) {
+    public void refresh(int left, int top) {
         // left> & top>0 because when widget is removed from dashboard it sets left=0 and top=0
         // and must not see it refreshing
         if (flag_getDashboard && left > 0 && top > 0) {
             show();
-            setPopupPosition(left - getOffsetWidth() / 2, top
-                    - getOffsetHeight() / 2);
+            setPopupPosition(left - (getOffsetWidth() / 2), top - (getOffsetHeight() / 2));
         } else {
             hide();
         }

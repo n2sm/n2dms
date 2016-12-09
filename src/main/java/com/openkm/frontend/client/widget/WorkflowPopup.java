@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -34,7 +35,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -53,23 +53,15 @@ import com.openkm.frontend.client.widget.wizard.WorkflowWidgetToFire;
  *
  */
 public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
-    private final OKMWorkflowServiceAsync workflowService = (OKMWorkflowServiceAsync) GWT
-            .create(OKMWorkflowService.class);
+    private final OKMWorkflowServiceAsync workflowService = (OKMWorkflowServiceAsync) GWT.create(OKMWorkflowService.class);
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
-    private Button button;
-
+    private Button closeButton;
     private Button addButton;
-
     private ListBox listBox;
-
     private SimplePanel sp;
-
     private WorkflowWidget workflowWidget = null;
-
     private String uuid = "";
 
     /**
@@ -83,16 +75,16 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
         hPanel = new HorizontalPanel();
         sp = new SimplePanel();
 
-        button = new Button(Main.i18n("button.close"), new ClickHandler() {
+        closeButton = new Button(Main.i18n("button.close"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
 
         addButton = new Button(Main.i18n("button.start"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 addButton.setEnabled(false);
                 runProcessDefinition();
             }
@@ -101,7 +93,7 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
         listBox = new ListBox();
         listBox.addChangeHandler(new ChangeHandler() {
             @Override
-            public void onChange(final ChangeEvent event) {
+            public void onChange(ChangeEvent event) {
                 if (listBox.getSelectedIndex() > 0) {
                     addButton.setEnabled(true);
                 } else {
@@ -116,18 +108,16 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
 
         vPanel.setWidth("300px");
         vPanel.setHeight("50px");
-        button.setStyleName("okm-YesButton");
-        addButton.setStyleName("okm-AddButton");
+        closeButton.setStyleName("okm-NoButton");
+        addButton.setStyleName("okm-YesButton");
         addButton.setEnabled(false);
 
-        hPanel.add(button);
+        hPanel.add(closeButton);
         hPanel.add(new HTML("&nbsp;&nbsp;"));
         hPanel.add(addButton);
 
-        hPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        hPanel.setCellHorizontalAlignment(addButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellHorizontalAlignment(closeButton, VerticalPanel.ALIGN_CENTER);
+        hPanel.setCellHorizontalAlignment(addButton, VerticalPanel.ALIGN_CENTER);
 
         vPanel.add(new HTML("<br>"));
         vPanel.add(listBox);
@@ -136,10 +126,8 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(listBox,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(listBox, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, VerticalPanel.ALIGN_CENTER);
 
         super.hide();
         setWidget(vPanel);
@@ -149,25 +137,21 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      * Gets asynchronous to get all process definitions
      */
     final AsyncCallback<List<GWTProcessDefinition>> callbackFindLatestProcessDefinitions = new AsyncCallback<List<GWTProcessDefinition>>() {
-        @Override
-        public void onSuccess(final List<GWTProcessDefinition> result) {
+        public void onSuccess(List<GWTProcessDefinition> result) {
             listBox.clear();
             listBox.addItem("", ""); // Adds empty value
 
-            for (final GWTProcessDefinition processDefinition : result) {
-                if (Main.get().workspaceUserProperties.getWorkspace()
-                        .getMiscWorkflowList()
-                        .contains(processDefinition.getName())) {
-                    listBox.addItem(processDefinition.getName(),
-                            processDefinition.getName());
+            for (Iterator<GWTProcessDefinition> it = result.iterator(); it.hasNext();) {
+                GWTProcessDefinition processDefinition = it.next();
+
+                if (Main.get().workspaceUserProperties.getWorkspace().getMiscWorkflowList().contains(processDefinition.getName())) {
+                    listBox.addItem(processDefinition.getName(), processDefinition.getName());
                 }
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get()
-                    .showError("callbackFindLatestProcessDefinitions", caught);
+        public void onFailure(Throwable caught) {
+            Main.get().showError("callbackFindLatestProcessDefinitions", caught);
         }
     };
 
@@ -175,14 +159,11 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      * Gets asynchronous to run process definition
      */
     final AsyncCallback<Object> callbackRunProcessDefinition = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
-            Main.get().mainPanel.dashboard.workflowDashboard
-                    .findUserTaskInstances();
+        public void onSuccess(Object result) {
+            Main.get().mainPanel.dashboard.workflowDashboard.findUserTaskInstances();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("callbackRunProcessDefinition", caught);
         }
     };
@@ -191,7 +172,7 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      * Enables close button
      */
     public void enableClose() {
-        button.setEnabled(true);
+        closeButton.setEnabled(true);
         Main.get().mainPanel.setVisible(true); // Shows main panel when all widgets are loaded
     }
 
@@ -200,7 +181,7 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      */
     public void langRefresh() {
         setText(Main.i18n("workflow.label"));
-        button.setText(Main.i18n("button.close"));
+        closeButton.setText(Main.i18n("button.close"));
         addButton.setText(Main.i18n("button.start"));
     }
 
@@ -209,7 +190,6 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      * 
      * @param msg Error message
      */
-    @Override
     public void show() {
         setText(Main.i18n("workflow.label"));
         findLatestProcessDefinitions(); // Gets all groups
@@ -219,8 +199,8 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
         listBox.setVisible(true);
         sp.setVisible(false);
         sp.clear();
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 100) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 100) / 2;
         setPopupPosition(left, top);
         super.show();
     }
@@ -229,8 +209,7 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
      * Gets all process definitions
      */
     private void findLatestProcessDefinitions() {
-        workflowService
-                .findLatestProcessDefinitions(callbackFindLatestProcessDefinitions);
+        workflowService.findLatestProcessDefinitions(callbackFindLatestProcessDefinitions);
     }
 
     /**
@@ -243,24 +222,16 @@ public class WorkflowPopup extends DialogBox implements WorkflowWidgetToFire {
             if (Main.get().activeFolderTree.isPanelSelected()) {
                 uuid = Main.get().activeFolderTree.getFolder().getUuid();
             } else {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isDocumentSelected()) {
-                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser
-                            .getDocument().getUuid();
-                } else if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isFolderSelected()) {
-                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser
-                            .getFolder().getUuid();
-                } else if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMailSelected()) {
-                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser
-                            .getMail().getUuid();
+                if (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()) {
+                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser.getDocument().getUuid();
+                } else if (Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected()) {
+                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser.getFolder().getUuid();
+                } else if (Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected()) {
+                    uuid = Main.get().mainPanel.desktop.browser.fileBrowser.getMail().getUuid();
                 }
             }
 
-            workflowWidget = new WorkflowWidget(listBox.getValue(listBox
-                    .getSelectedIndex()), uuid, this,
-                    new HashMap<String, Object>());
+            workflowWidget = new WorkflowWidget(listBox.getValue(listBox.getSelectedIndex()), uuid, this, new HashMap<String, Object>());
             listBox.setVisible(false);
             sp.add(workflowWidget);
             workflowWidget.runProcessDefinition();

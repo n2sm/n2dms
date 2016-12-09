@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,8 @@ package com.openkm.frontend.client.widget.searchin;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -30,7 +32,9 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTQueryParams;
+import com.openkm.frontend.client.util.JSONUtil;
 import com.openkm.frontend.client.util.OKMBundleResources;
+import com.openkm.frontend.client.util.Util;
 
 /**
  * ControlSearchIn
@@ -40,27 +44,17 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  */
 public class ControlSearchIn extends Composite {
     private VerticalPanel controlPanel;
-
     private HTML textResults;
-
     private Image previous;
-
     private Image next;
-
+    private Image export;
     private FlexTable table;
-
     private int offset = 0;
-
     private int limit = 10;
-
     private boolean previousEnabled = false; // Indicates if button is enabled
-
     private boolean nextEnabled = false; // Indicates if button is enabled
-
     private GWTQueryParams gwtParams; // Actual search values
-
     private String statement; // Simple search valeu
-
     private long total = 0;
 
     public ControlSearchIn() {
@@ -69,19 +63,42 @@ public class ControlSearchIn extends Composite {
         textResults = new HTML(Main.i18n("search.results"));
         previous = new Image(OKMBundleResources.INSTANCE.previous());
         next = new Image(OKMBundleResources.INSTANCE.next());
+        export = new Image(OKMBundleResources.INSTANCE.exportCSV());
+        export.setTitle(Main.i18n("search.export.to.csv"));
+        export.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean compact = false;
+                String params = "action=" + ((gwtParams != null) ? "find" : "findSimpleQuery");
+                params += "&lang=" + Main.get().getLang();
+                if (Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.advancedView.getValue()
+                        && Main.get().mainPanel.search.searchBrowser.searchIn.searchControl.compactResultsView.getValue()) {
+                    compact = true;
+                }
+                if (gwtParams != null) {
+                    params += "&json=" + JSONUtil.toJson(gwtParams).toString();
+                    params += "&compact=" + String.valueOf(compact);
+                } else {
+                    JSONObject json = new JSONObject();
+                    json.put("statement", new JSONString(statement));
+                    params += "&json=" + json.toString();
+                    params += "&compact=" + String.valueOf(compact);
+                }
+
+                Util.downloadCSVFile(params);
+            }
+        });
+        export.setStyleName("okm-Hyperlink");
 
         previous.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (previousEnabled) {
                     offset -= limit;
                     if (gwtParams != null) {
-                        Main.get().mainPanel.search.searchBrowser.searchResult
-                                .findPaginated(gwtParams, offset, limit);
+                        Main.get().mainPanel.search.searchBrowser.searchResult.findPaginated(gwtParams, offset, limit);
                     } else {
-                        Main.get().mainPanel.search.searchBrowser.searchResult
-                                .findSimpleQueryPaginated(statement, offset,
-                                        limit);
+                        Main.get().mainPanel.search.searchBrowser.searchResult.findSimpleQueryPaginated(statement, offset, limit);
                     }
                 }
             }
@@ -90,16 +107,13 @@ public class ControlSearchIn extends Composite {
 
         next.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (nextEnabled) {
                     offset += limit;
                     if (gwtParams != null) {
-                        Main.get().mainPanel.search.searchBrowser.searchResult
-                                .findPaginated(gwtParams, offset, limit);
+                        Main.get().mainPanel.search.searchBrowser.searchResult.findPaginated(gwtParams, offset, limit);
                     } else {
-                        Main.get().mainPanel.search.searchBrowser.searchResult
-                                .findSimpleQueryPaginated(statement, offset,
-                                        limit);
+                        Main.get().mainPanel.search.searchBrowser.searchResult.findSimpleQueryPaginated(statement, offset, limit);
                     }
                 }
             }
@@ -111,6 +125,7 @@ public class ControlSearchIn extends Composite {
         table.setWidget(0, 2, previous);
         table.setHTML(0, 3, "");
         table.setWidget(0, 4, next);
+        table.setWidget(0, 5, export);
 
         controlPanel.add(table);
 
@@ -123,25 +138,23 @@ public class ControlSearchIn extends Composite {
     /**
      * Executes the search
      */
-    public void executeSearch(final GWTQueryParams gwtParams, final int limit) {
+    public void executeSearch(GWTQueryParams gwtParams, int limit) {
         this.gwtParams = gwtParams;
-        statement = null;
+        this.statement = null;
         this.limit = limit;
         offset = 0;
-        Main.get().mainPanel.search.searchBrowser.searchResult.findPaginated(
-                gwtParams, offset, limit);
+        Main.get().mainPanel.search.searchBrowser.searchResult.findPaginated(gwtParams, offset, limit);
     }
 
     /**
      * Executes the search
      */
-    public void executeSearch(final String statement, final int limit) {
-        gwtParams = null;
+    public void executeSearch(String statement, int limit) {
+        this.gwtParams = null;
         this.statement = statement;
         this.limit = limit;
         offset = 0;
-        Main.get().mainPanel.search.searchBrowser.searchResult
-                .findSimpleQueryPaginated(statement, offset, limit);
+        Main.get().mainPanel.search.searchBrowser.searchResult.findSimpleQueryPaginated(statement, offset, limit);
     }
 
     /**
@@ -149,7 +162,7 @@ public class ControlSearchIn extends Composite {
      * 
      * @param total 
      */
-    public void refreshControl(final long total) {
+    public void refreshControl(long total) {
         this.total = total;
         textResults.setHTML(Main.i18n("search.results") + " : " + total);
 
@@ -166,16 +179,12 @@ public class ControlSearchIn extends Composite {
                 previousEnabled = true;
             }
 
-            if (offset + limit >= total) {
+            if ((offset + limit) >= total) {
                 nextEnabled = false;
-                table.setHTML(0, 3,
-                        offset + 1 + "&nbsp;" + Main.i18n("search.to")
-                                + "&nbsp;" + total);
+                table.setHTML(0, 3, (offset + 1) + "&nbsp;" + Main.i18n("search.to") + "&nbsp;" + total);
             } else {
                 nextEnabled = true;
-                table.setHTML(0, 3,
-                        offset + 1 + "&nbsp;" + Main.i18n("search.to")
-                                + "&nbsp;" + (offset + limit));
+                table.setHTML(0, 3, (offset + 1) + "&nbsp;" + Main.i18n("search.to") + "&nbsp;" + (offset + limit));
             }
             setVisible(true);
         }
@@ -188,6 +197,7 @@ public class ControlSearchIn extends Composite {
      */
     public void langRefresh() {
         refreshControl(total);
+        export.setTitle(Main.i18n("search.export.to.csv"));
     }
 
     /**

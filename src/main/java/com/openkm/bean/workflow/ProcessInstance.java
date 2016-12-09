@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,31 +38,20 @@ import com.openkm.bean.form.TextArea;
 /**
  * @author pavila
  */
-@XmlSeeAlso({ Button.class, Input.class, TextArea.class, Select.class,
-        CheckBox.class, SuggestBox.class })
+@XmlSeeAlso({ Button.class, Input.class, TextArea.class, Select.class, CheckBox.class, SuggestBox.class })
 public class ProcessInstance implements Serializable {
     private static final long serialVersionUID = -2917421131012124036L;
 
     private long id;
-
     private int version;
-
     private String key;
-
     private Calendar start;
-
     private Calendar end;
-
     private boolean ended;
-
     private boolean suspended;
-
     private Token rootToken;
-
     private Map<String, Object> variables;
-
     private List<Token> allTokens;
-
     private ProcessDefinition processDefinition;
 
     public ProcessInstance() {
@@ -72,7 +61,7 @@ public class ProcessInstance implements Serializable {
         return version;
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
@@ -80,7 +69,7 @@ public class ProcessInstance implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -88,7 +77,7 @@ public class ProcessInstance implements Serializable {
         return ended;
     }
 
-    public void setEnded(final boolean ended) {
+    public void setEnded(boolean ended) {
         this.ended = ended;
     }
 
@@ -96,7 +85,7 @@ public class ProcessInstance implements Serializable {
         return suspended;
     }
 
-    public void setSuspended(final boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 
@@ -104,11 +93,11 @@ public class ProcessInstance implements Serializable {
         return variables;
     }
 
-    public void setVariables(final Map<String, Object> variables) {
+    public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
     }
 
-    public void setAllTokens(final List<Token> allTokens) {
+    public void setAllTokens(List<Token> allTokens) {
         this.allTokens = allTokens;
     }
 
@@ -120,7 +109,7 @@ public class ProcessInstance implements Serializable {
         return processDefinition;
     }
 
-    public void setProcessDefinition(final ProcessDefinition processDefinition) {
+    public void setProcessDefinition(ProcessDefinition processDefinition) {
         this.processDefinition = processDefinition;
     }
 
@@ -128,7 +117,7 @@ public class ProcessInstance implements Serializable {
         return start;
     }
 
-    public void setStart(final Calendar start) {
+    public void setStart(Calendar start) {
         this.start = start;
     }
 
@@ -136,7 +125,7 @@ public class ProcessInstance implements Serializable {
         return end;
     }
 
-    public void setEnd(final Calendar end) {
+    public void setEnd(Calendar end) {
         this.end = end;
     }
 
@@ -144,7 +133,7 @@ public class ProcessInstance implements Serializable {
         return key;
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -152,13 +141,12 @@ public class ProcessInstance implements Serializable {
         return rootToken;
     }
 
-    public void setRootToken(final Token rootToken) {
+    public void setRootToken(Token rootToken) {
         this.rootToken = rootToken;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("id=");
         sb.append(id);

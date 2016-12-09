@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,7 +49,7 @@ public class VerticalBorderPanel extends Composite {
      * @param width the width size
      * @param height the height size
      */
-    public void setSize(final int width, final int height) {
-        leftBar.setSize("" + width, "" + height);
+    public void setSize(int width, int height) {
+        leftBar.setSize("" + width + "px", "" + height + "px");
     }
 }

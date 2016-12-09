@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,37 +43,25 @@ import com.openkm.frontend.client.service.OKMDashboardServiceAsync;
  *
  */
 public class UserDashboard extends Composite {
-    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT
-            .create(OKMDashboardService.class);
+    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT.create(OKMDashboardService.class);
 
     private final int NUMBER_OF_COLUMNS = 2;
 
     private HorizontalPanel hPanel;
-
     private VerticalPanel vPanelLeft;
-
     private VerticalPanel vPanelRight;
 
     private DashboardWidget lockedDocuments;
-
     private DashboardWidget chechoutDocuments;
-
     private DashboardWidget lastModifiedDocuments;
-
     private DashboardWidget subscribedDocuments;
-
     private DashboardWidget subscribedFolder;
-
     private DashboardWidget lastDownloadedDocuments;
-
     private DashboardWidget lastUploadedDocuments;
 
     private boolean showStatus = false;
-
     private int tmpSubscriptions = 0;
-
     private boolean checkoutDocumentFlag = false;
-
     private int checkouts = 0;
 
     /**
@@ -87,34 +75,27 @@ public class UserDashboard extends Composite {
         hPanel.add(vPanelLeft);
         hPanel.add(vPanelRight);
 
-        lockedDocuments = new DashboardWidget("UserLockedDocuments",
-                "dashboard.user.locked.documents", "img/icon/lock.gif", true,
-                "userLockedDocuments");
-        chechoutDocuments = new DashboardWidget("UserCheckedOutDocuments",
-                "dashboard.user.checkout.documents",
-                "img/icon/actions/checkout.gif", true,
-                "userCheckedOutDocuments");
-        lastModifiedDocuments = new DashboardWidget(
-                "UserLastModifiedDocuments",
-                "dashboard.user.last.modified.documents",
-                "img/icon/actions/checkin.gif", true,
-                "userLastModifiedDocuments");
-        lastDownloadedDocuments = new DashboardWidget(
-                "UserLastDownloadedDocuments",
-                "dashboard.user.last.downloaded.documents",
-                "img/icon/actions/download.gif", false,
-                "userLastDownloadedDocuments");
-        subscribedDocuments = new DashboardWidget("UserSubscribedDocuments",
-                "dashboard.user.subscribed.documents",
-                "img/icon/subscribed.gif", false, "userSubscribedDocuments");
-        subscribedFolder = new DashboardWidget("UserSubscribedFolders",
-                "dashboard.user.subscribed.folders", "img/icon/subscribed.gif",
-                false, "userSubscribedFolders");
-        lastUploadedDocuments = new DashboardWidget(
-                "UserLastUploadedDocuments",
-                "dashboard.user.last.uploaded.documents",
-                "img/icon/actions/add_document.gif", true,
-                "userLastUploadedDocuments");
+        lockedDocuments =
+                new DashboardWidget("UserLockedDocuments", "dashboard.user.locked.documents", "img/icon/lock.gif", true,
+                        "userLockedDocuments");
+        chechoutDocuments =
+                new DashboardWidget("UserCheckedOutDocuments", "dashboard.user.checkout.documents", "img/icon/actions/checkout.gif", true,
+                        "userCheckedOutDocuments");
+        lastModifiedDocuments =
+                new DashboardWidget("UserLastModifiedDocuments", "dashboard.user.last.modified.documents", "img/icon/actions/checkin.gif",
+                        true, "userLastModifiedDocuments");
+        lastDownloadedDocuments =
+                new DashboardWidget("UserLastDownloadedDocuments", "dashboard.user.last.downloaded.documents",
+                        "img/icon/actions/download.gif", false, "userLastDownloadedDocuments");
+        subscribedDocuments =
+                new DashboardWidget("UserSubscribedDocuments", "dashboard.user.subscribed.documents", "img/icon/subscribed.gif", false,
+                        "userSubscribedDocuments");
+        subscribedFolder =
+                new DashboardWidget("UserSubscribedFolders", "dashboard.user.subscribed.folders", "img/icon/subscribed.gif", false,
+                        "userSubscribedFolders");
+        lastUploadedDocuments =
+                new DashboardWidget("UserLastUploadedDocuments", "dashboard.user.last.uploaded.documents",
+                        "img/icon/actions/add_document.gif", true, "userLastUploadedDocuments");
 
         vPanelLeft.add(lockedDocuments);
         vPanelLeft.add(chechoutDocuments);
@@ -139,7 +120,7 @@ public class UserDashboard extends Composite {
     /**
      * @param checkouts
      */
-    public void setCheckouts(final int checkouts) {
+    public void setCheckouts(int checkouts) {
         this.checkouts = checkouts;
     }
 
@@ -161,8 +142,8 @@ public class UserDashboard extends Composite {
      * 
      * @param width
      */
-    public void setWidth(final int width) {
-        final int columnWidth = width / NUMBER_OF_COLUMNS;
+    public void setWidth(int width) {
+        int columnWidth = width / NUMBER_OF_COLUMNS;
 
         // Trying to distribute widgets on columns with max size
         lockedDocuments.setWidth(columnWidth);
@@ -177,140 +158,129 @@ public class UserDashboard extends Composite {
     /**
      * Gets the locked documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLockedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lockedDocuments.setDocuments(result);
-            lockedDocuments.setHeaderResults(result.size());
-            Main.get().mainPanel.bottomPanel.userInfo.setLockedDocuments(result
-                    .size());
-            lockedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLockedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lockedDocuments.setDocuments(result);
+                    lockedDocuments.setHeaderResults(result.size());
+                    Main.get().mainPanel.bottomPanel.userInfo.setLockedDocuments(result.size());
+                    lockedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserLockedDocuments", caught);
-            lockedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserLockedDocuments", caught);
+                    lockedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets the checkout documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserCheckOutDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            checkouts = result.size();
-            chechoutDocuments.setDocuments(result);
-            chechoutDocuments.setHeaderResults(checkouts);
-            Main.get().mainPanel.bottomPanel.userInfo
-                    .setCheckoutDocuments(checkouts);
-            chechoutDocuments.unsetRefreshing();
-            checkoutDocumentFlag = false; // Marks rpc calls are finished and can checkout document
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserCheckOutDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    checkouts = result.size();
+                    chechoutDocuments.setDocuments(result);
+                    chechoutDocuments.setHeaderResults(checkouts);
+                    Main.get().mainPanel.bottomPanel.userInfo.setCheckoutDocuments(checkouts);
+                    chechoutDocuments.unsetRefreshing();
+                    checkoutDocumentFlag = false; // Marks rpc calls are finished and can checkout document
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserCheckedOutDocuments", caught);
-            chechoutDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserCheckedOutDocuments", caught);
+                    chechoutDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets last modified documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastModifiedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastModifiedDocuments.setDocuments(result);
-            lastModifiedDocuments.setHeaderResults(result.size());
-            lastModifiedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastModifiedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastModifiedDocuments.setDocuments(result);
+                    lastModifiedDocuments.setHeaderResults(result.size());
+                    lastModifiedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserLastModifiedDocuments", caught);
-            lastModifiedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserLastModifiedDocuments", caught);
+                    lastModifiedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Get subscribed documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserSubscribedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            subscribedDocuments.setDocuments(result);
-            subscribedDocuments.setHeaderResults(result.size());
-            tmpSubscriptions = result.size();
-            getUserSubscribedFolders();
-            subscribedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserSubscribedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    subscribedDocuments.setDocuments(result);
+                    subscribedDocuments.setHeaderResults(result.size());
+                    tmpSubscriptions = result.size();
+                    getUserSubscribedFolders();
+                    subscribedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserSubscribedDocuments", caught);
-            subscribedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserSubscribedDocuments", caught);
+                    subscribedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets the subscribed folders
      */
-    final AsyncCallback<List<GWTDashboardFolderResult>> callbackGetUserSubscribedFolders = new AsyncCallback<List<GWTDashboardFolderResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardFolderResult> result) {
-            subscribedFolder.setFolders(result);
-            subscribedFolder.setHeaderResults(result.size());
-            tmpSubscriptions += result.size();
-            Main.get().mainPanel.bottomPanel.userInfo
-                    .setSubscriptions(tmpSubscriptions);
-            subscribedFolder.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardFolderResult>> callbackGetUserSubscribedFolders =
+            new AsyncCallback<List<GWTDashboardFolderResult>>() {
+                public void onSuccess(List<GWTDashboardFolderResult> result) {
+                    subscribedFolder.setFolders(result);
+                    subscribedFolder.setHeaderResults(result.size());
+                    tmpSubscriptions += result.size();
+                    Main.get().mainPanel.bottomPanel.userInfo.setSubscriptions(tmpSubscriptions);
+                    subscribedFolder.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserSubscribedFolders", caught);
-            subscribedFolder.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserSubscribedFolders", caught);
+                    subscribedFolder.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets the downloaded documents
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastDownloadedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastDownloadedDocuments.setDocuments(result);
-            lastDownloadedDocuments.setHeaderResults(result.size());
-            lastDownloadedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastDownloadedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastDownloadedDocuments.setDocuments(result);
+                    lastDownloadedDocuments.setHeaderResults(result.size());
+                    lastDownloadedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getUserLastDownloadedDocuments", caught);
-            lastDownloadedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getUserLastDownloadedDocuments", caught);
+                    lastDownloadedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets the last uploaded documents
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastUploadedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastUploadedDocuments.setDocuments(result);
-            lastUploadedDocuments.setHeaderResults(result.size());
-            lastUploadedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetUserLastUploadedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastUploadedDocuments.setDocuments(result);
+                    lastUploadedDocuments.setHeaderResults(result.size());
+                    lastUploadedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get()
-                    .showError("callbackGetUserLastUploadedDocuments", caught);
-            lastUploadedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("callbackGetUserLastUploadedDocuments", caught);
+                    lastUploadedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * getUserLockedDocuments
@@ -344,8 +314,7 @@ public class UserDashboard extends Composite {
             chechoutDocuments.setRefreshing();
         }
 
-        dashboardService
-                .getUserCheckedOutDocuments(callbackGetUserCheckOutDocuments);
+        dashboardService.getUserCheckedOutDocuments(callbackGetUserCheckOutDocuments);
     }
 
     /**
@@ -356,8 +325,7 @@ public class UserDashboard extends Composite {
             lastModifiedDocuments.setRefreshing();
         }
 
-        dashboardService
-                .getUserLastModifiedDocuments(callbackGetUserLastModifiedDocuments);
+        dashboardService.getUserLastModifiedDocuments(callbackGetUserLastModifiedDocuments);
     }
 
     /**
@@ -368,8 +336,7 @@ public class UserDashboard extends Composite {
             subscribedDocuments.setRefreshing();
         }
 
-        dashboardService
-                .getUserSubscribedDocuments(callbackGetUserSubscribedDocuments);
+        dashboardService.getUserSubscribedDocuments(callbackGetUserSubscribedDocuments);
     }
 
     /**
@@ -380,8 +347,7 @@ public class UserDashboard extends Composite {
             subscribedFolder.setRefreshing();
         }
 
-        dashboardService
-                .getUserSubscribedFolders(callbackGetUserSubscribedFolders);
+        dashboardService.getUserSubscribedFolders(callbackGetUserSubscribedFolders);
     }
 
     /**
@@ -392,8 +358,7 @@ public class UserDashboard extends Composite {
             lastDownloadedDocuments.setRefreshing();
         }
 
-        dashboardService
-                .getUserLastDownloadedDocuments(callbackGetUserLastDownloadedDocuments);
+        dashboardService.getUserLastDownloadedDocuments(callbackGetUserLastDownloadedDocuments);
     }
 
     /**
@@ -404,17 +369,16 @@ public class UserDashboard extends Composite {
             lastUploadedDocuments.setRefreshing();
         }
 
-        dashboardService
-                .getUserLastUploadedDocuments(callbackGetUserLastUploadedDocuments);
+        dashboardService.getUserLastUploadedDocuments(callbackGetUserLastUploadedDocuments);
     }
 
     /**
      * Refresh all panels
      */
     public void refreshAll() {
-        showStatus = Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD
-                && Main.get().mainPanel.dashboard.getActualView() == UIDashboardConstants.DASHBOARD_USER;
+        showStatus =
+                ((Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD) && (Main.get().mainPanel.dashboard
+                        .getActualView() == UIDashboardConstants.DASHBOARD_USER));
         getUserLockedDocuments();
         getUserCheckedOutDocuments();
         getUserLastModifiedDocuments();

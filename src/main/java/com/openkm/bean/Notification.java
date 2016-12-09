@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,9 +25,7 @@ import java.io.Serializable;
 
 public class Notification implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String TYPE = "mix:notification";
-
     public static final String SUBSCRIPTORS = "okm:subscriptors";
 
     private String item;
@@ -36,13 +34,12 @@ public class Notification implements Serializable {
         return item;
     }
 
-    public void setItem(final String item) {
+    public void setItem(String item) {
         this.item = item;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("item=");
         sb.append(item);

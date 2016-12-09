@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,10 +25,10 @@ import java.util.Comparator;
 
 public class OrderComparator<T extends Extension> implements Comparator<T> {
     @Override
-    public int compare(final T o1, final T o2) {
-        final int o1i = ((Extension) o1).getOrder();
-        final int o2i = ((Extension) o2).getOrder();
+    public int compare(T o1, T o2) {
+        int o1i = ((Extension) o1).getOrder();
+        int o2i = ((Extension) o2).getOrder();
 
-        return o1i > o2i ? -1 : o1i < o2i ? 1 : 0;
+        return (o1i > o2i ? -1 : (o1i < o2i ? 1 : 0));
     }
 }

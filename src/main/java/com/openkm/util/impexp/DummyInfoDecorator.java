@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,7 @@ public class DummyInfoDecorator implements InfoDecorator {
     }
 
     @Override
-    public String print(final String path, final long size, final String error) {
+    public String print(String path, long size, String error) {
         return "";
     }
 }

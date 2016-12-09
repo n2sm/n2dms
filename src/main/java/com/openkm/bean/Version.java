@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,28 +24,25 @@ package com.openkm.bean;
 import java.io.Serializable;
 import java.util.Calendar;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "version")
 public class Version implements Serializable {
     private static final long serialVersionUID = 3219672583638952409L;
 
     private String name;
-
     private Calendar created;
-
     private long size;
-
     private String author;
-
     private boolean actual;
-
     private String comment;
-
     private String checksum;
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -53,7 +50,7 @@ public class Version implements Serializable {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -61,7 +58,7 @@ public class Version implements Serializable {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -69,7 +66,7 @@ public class Version implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -77,7 +74,7 @@ public class Version implements Serializable {
         return actual;
     }
 
-    public void setActual(final boolean actual) {
+    public void setActual(boolean actual) {
         this.actual = actual;
     }
 
@@ -85,7 +82,7 @@ public class Version implements Serializable {
         return comment;
     }
 
-    public void setComment(final String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
@@ -93,13 +90,12 @@ public class Version implements Serializable {
         return checksum;
     }
 
-    public void setChecksum(final String checksum) {
+    public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("name=");
         sb.append(name);

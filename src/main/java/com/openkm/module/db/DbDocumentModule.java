@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -44,11 +44,11 @@ import com.openkm.automation.AutomationException;
 import com.openkm.automation.AutomationManager;
 import com.openkm.automation.AutomationUtils;
 import com.openkm.bean.Document;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.FileUploadResponse;
 import com.openkm.bean.LockInfo;
 import com.openkm.bean.Repository;
 import com.openkm.bean.Version;
-import com.openkm.cache.UserItemsManager;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
@@ -56,6 +56,8 @@ import com.openkm.core.FileSizeExceededException;
 import com.openkm.core.ItemExistsException;
 import com.openkm.core.LockException;
 import com.openkm.core.MimeTypeConfig;
+import com.openkm.core.NoSuchGroupException;
+import com.openkm.core.ParseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.core.Ref;
 import com.openkm.core.RepositoryException;
@@ -76,6 +78,8 @@ import com.openkm.dao.bean.NodeDocument;
 import com.openkm.dao.bean.NodeDocumentVersion;
 import com.openkm.dao.bean.NodeFolder;
 import com.openkm.dao.bean.NodeLock;
+import com.openkm.dao.bean.NodeNote;
+import com.openkm.dao.bean.NodeProperty;
 import com.openkm.extension.core.ExtensionException;
 import com.openkm.module.DocumentModule;
 import com.openkm.module.common.CommonGeneralModule;
@@ -86,20 +90,19 @@ import com.openkm.module.db.base.BaseNotificationModule;
 import com.openkm.principal.PrincipalAdapterException;
 import com.openkm.spring.PrincipalUtils;
 import com.openkm.util.ConfigUtils;
+import com.openkm.util.FileUtils;
 import com.openkm.util.FormatUtil;
 import com.openkm.util.PathUtils;
 import com.openkm.util.UserActivity;
+import com.openkm.util.impexp.RepositoryExporter;
 
 public class DbDocumentModule implements DocumentModule {
     private static Logger log = LoggerFactory.getLogger(DbDocumentModule.class);
 
     @Override
-    public Document create(final String token, final Document doc,
-            final InputStream is) throws UnsupportedMimeTypeException,
-            FileSizeExceededException, UserQuotaExceededException,
-            VirusDetectedException, ItemExistsException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, IOException,
-            DatabaseException, ExtensionException, AutomationException {
+    public Document create(String token, Document doc, InputStream is) throws UnsupportedMimeTypeException, FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, ItemExistsException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, IOException, DatabaseException, ExtensionException, AutomationException {
         log.debug("create({}, {}, {})", new Object[] { token, doc, is });
         return create(token, doc, is, is.available(), null);
     }
@@ -107,32 +110,22 @@ public class DbDocumentModule implements DocumentModule {
     /**
      * Used when big files and WebDAV and GoogleDocs
      */
-    public Document create(final String token, final Document doc,
-            final InputStream is, final long size, final String userId)
-            throws UnsupportedMimeTypeException, FileSizeExceededException,
-            UserQuotaExceededException, VirusDetectedException,
-            ItemExistsException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, IOException, DatabaseException,
-            ExtensionException, AutomationException {
-        log.debug("create({}, {}, {}, {}, {})", new Object[] { token, doc, is,
-                size, userId });
-        return create(token, doc, is, size, userId,
-                new Ref<FileUploadResponse>(null));
+    public Document create(String token, Document doc, InputStream is, long size, String userId) throws UnsupportedMimeTypeException,
+            FileSizeExceededException, UserQuotaExceededException, VirusDetectedException, ItemExistsException, PathNotFoundException,
+            AccessDeniedException, RepositoryException, IOException, DatabaseException, ExtensionException, AutomationException {
+        log.debug("create({}, {}, {}, {}, {})", new Object[] { token, doc, is, size, userId });
+        return create(token, doc, is, size, userId, new Ref<FileUploadResponse>(null));
     }
 
     /**
      * Used when big files and FileUpload
      */
-    public Document create(final String token, final Document doc,
-            InputStream is, final long size, final String userId,
-            final Ref<FileUploadResponse> fuResponse)
-            throws UnsupportedMimeTypeException, FileSizeExceededException,
-            UserQuotaExceededException, VirusDetectedException,
-            ItemExistsException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, IOException, DatabaseException,
+    public Document create(String token, Document doc, InputStream is, long size, String userId, Ref<FileUploadResponse> fuResponse)
+            throws UnsupportedMimeTypeException, FileSizeExceededException, UserQuotaExceededException, VirusDetectedException,
+            ItemExistsException, PathNotFoundException, AccessDeniedException, RepositoryException, IOException, DatabaseException,
             ExtensionException, AutomationException {
-        log.debug("create({}, {}, {}, {}, {}, {})", new Object[] { token, doc,
-                is, size, userId, fuResponse });
+        log.debug("create({}, {}, {}, {}, {}, {})", new Object[] { token, doc, is, size, userId, fuResponse });
+        long begin = System.currentTimeMillis();
         Document newDocument = null;
         Authentication auth = null, oldAuth = null;
 
@@ -140,13 +133,17 @@ public class DbDocumentModule implements DocumentModule {
             throw new AccessDeniedException("System is in read-only mode");
         }
 
-        final String parentPath = PathUtils.getParent(doc.getPath());
+        if (!PathUtils.checkPath(doc.getPath())) {
+            throw new RepositoryException("Invalid path: " + doc.getPath());
+        }
+
+        String parentPath = PathUtils.getParent(doc.getPath());
         String name = PathUtils.getName(doc.getPath());
 
         // Add to KEA - must have the same extension
-        final int idx = name.lastIndexOf('.');
-        final String fileExtension = idx > 0 ? name.substring(idx) : ".tmp";
-        final File tmp = File.createTempFile("okm", fileExtension);
+        int idx = name.lastIndexOf('.');
+        String fileExtension = idx > 0 ? name.substring(idx) : ".tmp";
+        File tmp = File.createTempFile("okm", fileExtension);
 
         try {
             if (token == null) {
@@ -157,15 +154,11 @@ public class DbDocumentModule implements DocumentModule {
             }
 
             if (Config.MAX_FILE_SIZE > 0 && size > Config.MAX_FILE_SIZE) {
-                log.error(
-                        "Uploaded file size: {} ({}), Max file size: {} ({})",
-                        new Object[] { FormatUtil.formatSize(size), size,
-                                FormatUtil.formatSize(Config.MAX_FILE_SIZE),
-                                Config.MAX_FILE_SIZE });
-                final String usr = userId == null ? auth.getName() : userId;
-                UserActivity.log(usr, "ERROR_FILE_SIZE_EXCEEDED", null,
-                        doc.getPath(), Long.toString(size));
-                throw new FileSizeExceededException(Long.toString(size));
+                log.error("Uploaded file size: {} ({}), Max file size: {} ({})", new Object[] { FormatUtil.formatSize(size), size,
+                        FormatUtil.formatSize(Config.MAX_FILE_SIZE), Config.MAX_FILE_SIZE });
+                String usr = userId == null ? auth.getName() : userId;
+                UserActivity.log(usr, "ERROR_FILE_SIZE_EXCEEDED", null, doc.getPath(), FormatUtil.formatSize(size));
+                throw new FileSizeExceededException(FormatUtil.formatSize(size));
             }
 
             // Escape dangerous chars in name
@@ -175,41 +168,34 @@ public class DbDocumentModule implements DocumentModule {
                 doc.setPath(parentPath + "/" + name);
 
                 // Check file restrictions
-                final String mimeType = MimeTypeConfig.mimeTypes
-                        .getContentType(name.toLowerCase());
+                String mimeType = MimeTypeConfig.mimeTypes.getContentType(name.toLowerCase());
                 doc.setMimeType(mimeType);
 
-                if (Config.RESTRICT_FILE_MIME
-                        && MimeTypeDAO.findByName(mimeType) == null) {
-                    final String usr = userId == null ? auth.getName() : userId;
-                    UserActivity.log(usr, "ERROR_UNSUPPORTED_MIME_TYPE", null,
-                            doc.getPath(), mimeType);
+                if (Config.RESTRICT_FILE_MIME && MimeTypeDAO.findByName(mimeType) == null) {
+                    String usr = userId == null ? auth.getName() : userId;
+                    UserActivity.log(usr, "ERROR_UNSUPPORTED_MIME_TYPE", null, doc.getPath(), mimeType);
                     throw new UnsupportedMimeTypeException(mimeType);
                 }
 
                 // Restrict for extension
                 if (!Config.RESTRICT_FILE_NAME.isEmpty()) {
-                    final StringTokenizer st = new StringTokenizer(
-                            Config.RESTRICT_FILE_NAME, Config.LIST_SEPARATOR);
+                    StringTokenizer st = new StringTokenizer(Config.RESTRICT_FILE_NAME, Config.LIST_SEPARATOR);
 
                     while (st.hasMoreTokens()) {
-                        final String wc = st.nextToken().trim();
-                        final String re = ConfigUtils.wildcard2regexp(wc);
+                        String wc = st.nextToken().trim();
+                        String re = ConfigUtils.wildcard2regexp(wc);
 
                         if (Pattern.matches(re, name)) {
-                            final String usr = userId == null ? auth.getName()
-                                    : userId;
-                            UserActivity.log(usr,
-                                    "ERROR_UNSUPPORTED_MIME_TYPE", null,
-                                    doc.getPath(), mimeType);
+                            String usr = userId == null ? auth.getName() : userId;
+                            UserActivity.log(usr, "ERROR_UNSUPPORTED_MIME_TYPE", null, doc.getPath(), mimeType);
                             throw new UnsupportedMimeTypeException(mimeType);
                         }
                     }
                 }
 
                 // Manage temporary files
-                final byte[] buff = new byte[4 * 1024];
-                final FileOutputStream fos = new FileOutputStream(tmp);
+                byte[] buff = new byte[4 * 1024];
+                FileOutputStream fos = new FileOutputStream(tmp);
                 int read;
 
                 while ((read = is.read(buff)) != -1) {
@@ -222,39 +208,33 @@ public class DbDocumentModule implements DocumentModule {
                 is = new FileInputStream(tmp);
 
                 if (!Config.SYSTEM_ANTIVIR.equals("")) {
-                    final String info = VirusDetection.detect(tmp);
+                    String info = VirusDetection.detect(tmp);
 
                     if (info != null) {
-                        final String usr = userId == null ? auth.getName()
-                                : userId;
-                        UserActivity.log(usr, "ERROR_VIRUS_DETECTED", null,
-                                doc.getPath(), info);
+                        String usr = userId == null ? auth.getName() : userId;
+                        UserActivity.log(usr, "ERROR_VIRUS_DETECTED", null, doc.getPath(), info);
                         throw new VirusDetectedException(info);
                     }
                 }
 
-                final String parentUuid = NodeBaseDAO.getInstance()
-                        .getUuidFromPath(parentPath);
-                final NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(
-                        parentUuid);
+                String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(parentPath);
+                NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(parentUuid);
 
                 // AUTOMATION - PRE
                 // INSIDE BaseDocumentModule.create
 
                 // Create node
-                final Set<String> keywords = doc.getKeywords() != null ? doc
-                        .getKeywords() : new HashSet<String>();
-                final NodeDocument docNode = BaseDocumentModule.create(
-                        auth.getName(), parentPath, parentNode, name,
-                        doc.getTitle(), doc.getCreated(), mimeType, is, size,
-                        keywords, new HashSet<String>(), fuResponse);
+                Set<String> keywords = doc.getKeywords() != null ? doc.getKeywords() : new HashSet<String>();
+                NodeDocument docNode =
+                        BaseDocumentModule.create(auth.getName(), parentPath, parentNode, name, doc.getTitle(), doc.getCreated(), mimeType,
+                                is, size, keywords, new HashSet<String>(), new HashSet<NodeProperty>(), new ArrayList<NodeNote>(),
+                                fuResponse);
 
                 // AUTOMATION - POST
                 // INSIDE BaseDocumentModule.create
 
                 // Set returned folder properties
-                newDocument = BaseDocumentModule.getProperties(auth.getName(),
-                        docNode);
+                newDocument = BaseDocumentModule.getProperties(auth.getName(), docNode);
 
                 // Setting wizard properties
                 // INSIDE BaseDocumentModule.create
@@ -263,33 +243,20 @@ public class DbDocumentModule implements DocumentModule {
                     fuResponse.set(new FileUploadResponse());
                 }
 
-                fuResponse.get().setHasAutomation(
-                        AutomationManager.getInstance().hasAutomation());
+                fuResponse.get().setHasAutomation(AutomationManager.getInstance().hasAutomation());
 
                 if (userId == null) {
                     // Check subscriptions
-                    BaseNotificationModule.checkSubscriptions(docNode,
-                            auth.getName(), "CREATE_DOCUMENT", null);
-
-                    // Check scripting
-                    // BaseScriptingModule.checkScripts(session, parentNode, documentNode, "CREATE_DOCUMENT");
+                    BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), "CREATE_DOCUMENT", null);
 
                     // Activity log
-                    UserActivity.log(auth.getName(), "CREATE_DOCUMENT",
-                            docNode.getUuid(), doc.getPath(), mimeType + ", "
-                                    + size);
+                    UserActivity.log(auth.getName(), "CREATE_DOCUMENT", docNode.getUuid(), doc.getPath(), mimeType + ", " + size);
                 } else {
                     // Check subscriptions
-                    BaseNotificationModule.checkSubscriptions(docNode, userId,
-                            "CREATE_MAIL_ATTACHMENT", null);
-
-                    // Check scripting
-                    // BaseScriptingModule.checkScripts(session, parentNode, documentNode, "CREATE_MAIL_ATTACHMENT");
+                    BaseNotificationModule.checkSubscriptions(docNode, userId, "CREATE_MAIL_ATTACHMENT", null);
 
                     // Activity log
-                    UserActivity.log(userId, "CREATE_MAIL_ATTACHMENT",
-                            docNode.getUuid(), doc.getPath(), mimeType + ", "
-                                    + size);
+                    UserActivity.log(userId, "CREATE_MAIL_ATTACHMENT", docNode.getUuid(), doc.getPath(), mimeType + ", " + size);
                 }
             } else {
                 throw new RepositoryException("Invalid document name");
@@ -303,16 +270,19 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("create.Time: {}", System.currentTimeMillis() - begin);
         log.debug("create: {}", newDocument);
         return newDocument;
     }
 
     @Override
-    public void delete(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("delete({}, {})", new Object[] { token, docPath });
+    public void delete(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("delete({}, {})", new Object[] { token, docId });
+        long begin = System.currentTimeMillis();
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -326,34 +296,34 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-
-            if (BaseDocumentModule.hasWorkflowNodes(docUuid)) {
-                throw new LockException(
-                        "Can't delete a document used in a workflow");
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
             }
 
-            final String userTrashPath = "/" + Repository.TRASH + "/"
-                    + auth.getName();
-            final String userTrashUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(userTrashPath);
-            final String name = PathUtils.getName(docPath);
+            if (BaseDocumentModule.hasWorkflowNodes(docUuid)) {
+                throw new LockException("Can't delete a document used in a workflow");
+            }
 
-            NodeDocumentDAO.getInstance().delete(name, docUuid, userTrashUuid);
+            String userTrashPath = "/" + Repository.TRASH + "/" + auth.getName();
+            String userTrashUuid = NodeBaseDAO.getInstance().getUuidFromPath(userTrashPath);
+            String name = PathUtils.getName(docPath);
 
             // Check subscriptions
-            final NodeDocument documentNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            BaseNotificationModule.checkSubscriptions(documentNode,
-                    PrincipalUtils.getUser(), "DELETE_DOCUMENT", null);
+            NodeDocument documentNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            BaseNotificationModule.checkSubscriptions(documentNode, PrincipalUtils.getUser(), "DELETE_DOCUMENT", null);
+
+            // After notification move to trash folder
+            NodeDocumentDAO.getInstance().delete(name, docUuid, userTrashUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_DOCUMENT", docUuid,
-                    docPath, null);
-        } catch (final WorkflowException e) {
+            UserActivity.log(auth.getName(), "DELETE_DOCUMENT", docUuid, docPath, null);
+        } catch (WorkflowException e) {
             throw new RepositoryException(e.getMessage());
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -361,18 +331,18 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("delete.Time: {}", System.currentTimeMillis() - begin);
         log.debug("delete: void");
     }
 
     @Override
-    public Document rename(final String token, final String docPath,
-            String newName) throws PathNotFoundException, ItemExistsException,
-            AccessDeniedException, LockException, RepositoryException,
-            DatabaseException {
-        log.debug("rename({}, {}, {})",
-                new Object[] { token, docPath, newName });
+    public Document rename(String token, String docId, String newName) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, LockException, RepositoryException, DatabaseException {
+        log.debug("rename({}, {}, {})", new Object[] { token, docId, newName });
         Document renamedDocument = null;
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -386,34 +356,34 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String name = PathUtils.getName(docPath);
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            String name = PathUtils.getName(docPath);
 
             // Escape dangerous chars in name
             newName = PathUtils.escape(newName);
 
             if (newName != null && !newName.isEmpty() && !newName.equals(name)) {
-                final NodeDocument documentNode = NodeDocumentDAO.getInstance()
-                        .rename(docUuid, newName);
-                renamedDocument = BaseDocumentModule.getProperties(
-                        auth.getName(), documentNode);
+                NodeDocument documentNode = NodeDocumentDAO.getInstance().rename(docUuid, newName);
+                renamedDocument = BaseDocumentModule.getProperties(auth.getName(), documentNode);
 
                 // Check subscriptions
-                BaseNotificationModule.checkSubscriptions(documentNode,
-                        PrincipalUtils.getUser(), "RENAME_DOCUMENT", null);
+                BaseNotificationModule.checkSubscriptions(documentNode, PrincipalUtils.getUser(), "RENAME_DOCUMENT", null);
             } else {
                 // Don't change anything
-                final NodeDocument documentNode = NodeDocumentDAO.getInstance()
-                        .findByPk(docUuid);
-                renamedDocument = BaseDocumentModule.getProperties(
-                        auth.getName(), documentNode);
+                NodeDocument documentNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+                renamedDocument = BaseDocumentModule.getProperties(auth.getName(), documentNode);
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "RENAME_DOCUMENT", docUuid,
-                    docPath, newName);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "RENAME_DOCUMENT", docUuid, docPath, newName);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -426,12 +396,13 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public Document getProperties(final String token, final String docPath)
-            throws PathNotFoundException, RepositoryException,
+    public Document getProperties(String token, String docId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getProperties({}, {})", token, docPath);
+        log.debug("getProperties({}, {})", token, docId);
         Document doc = null;
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -441,16 +412,20 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
             doc = BaseDocumentModule.getProperties(auth.getName(), docNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_DOCUMENT_PROPERTIES",
-                    docUuid, docPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_DOCUMENT_PROPERTIES", docUuid, docPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -463,11 +438,13 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void setProperties(final String token, final Document doc)
-            throws VersionException, LockException, PathNotFoundException,
+    public void setProperties(String token, Document doc) throws VersionException, LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("setProperties({}, {})", token, doc);
         Authentication auth = null, oldAuth = null;
+        @SuppressWarnings("unused")
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -477,22 +454,22 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    doc.getPath());
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
+            if (doc.getPath() != null && !doc.getPath().isEmpty()) {
+                docPath = doc.getPath();
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(doc.getPath());
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(doc.getUuid());
+                docUuid = doc.getUuid();
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(),
-                    "SET_DOCUMENT_PROPERTIES", null);
-
-            // Check scripting
-            // BaseScriptingModule.checkScripts(session, documentNode, documentNode, "SET_DOCUMENT_PROPERTIES");
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), "SET_DOCUMENT_PROPERTIES", null);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SET_DOCUMENT_PROPERTIES",
-                    docUuid, doc.getPath(), null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "SET_DOCUMENT_PROPERTIES", docUuid, doc.getPath(), null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -504,32 +481,29 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public InputStream getContent(final String token, final String docPath,
-            final boolean checkout) throws PathNotFoundException,
-            AccessDeniedException, RepositoryException, IOException,
-            DatabaseException {
-        log.debug("getContent({}, {}, {})", new Object[] { token, docPath,
-                checkout });
-        return getContent(token, docPath, checkout, true);
+    public InputStream getContent(String token, String docId, boolean checkout) throws PathNotFoundException, AccessDeniedException,
+            RepositoryException, IOException, DatabaseException {
+        log.debug("getContent({}, {}, {})", new Object[] { token, docId, checkout });
+        return getContent(token, docId, checkout, true);
     }
 
     /**
      * Retrieve the content input stream from a document
      * 
      * @param token Authorization token.
-     * @param docPath Path of the document to get the content.
+     * @param docId Path of the document to get the content or its UUID.
      * @param checkout If the content is retrieved due to a checkout or not.
      * @param extendedSecurity If the extended security DOWNLOAD permission should be evaluated.
-     * This is used to enable the document preview.
+     *        This is used to enable the document preview.
      */
-    public InputStream getContent(final String token, final String docPath,
-            final boolean checkout, final boolean extendedSecurity)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, IOException, DatabaseException {
-        log.debug("getContent({}, {}, {}, {})", new Object[] { token, docPath,
-                checkout, extendedSecurity });
+    public InputStream getContent(String token, String docId, boolean checkout, boolean extendedSecurity) throws PathNotFoundException,
+            AccessDeniedException, RepositoryException, IOException, DatabaseException {
+        log.debug("getContent({}, {}, {}, {})", new Object[] { token, docId, checkout, extendedSecurity });
+        long begin = System.currentTimeMillis();
         InputStream is = null;
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -539,9 +513,16 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            is = BaseDocumentModule.getContent(auth.getName(), docPath,
-                    checkout, extendedSecurity);
-        } catch (final DatabaseException e) {
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            is = BaseDocumentModule.getContent(auth.getName(), docUuid, docPath, checkout, extendedSecurity);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -549,19 +530,19 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("getContent.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getContent: {}", is);
         return is;
     }
 
     @Override
-    public InputStream getContentByVersion(final String token,
-            final String docPath, final String verName)
-            throws RepositoryException, PathNotFoundException, IOException,
-            DatabaseException {
-        log.debug("getContentByVersion({}, {}, {})", new Object[] { token,
-                docPath, verName });
+    public InputStream getContentByVersion(String token, String docId, String verName) throws RepositoryException, AccessDeniedException,
+            PathNotFoundException, IOException, DatabaseException {
+        log.debug("getContentByVersion({}, {}, {})", new Object[] { token, docId, verName });
         InputStream is = null;
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -571,15 +552,19 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            is = NodeDocumentVersionDAO.getInstance()
-                    .getVersionContentByParent(docUuid, verName);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            is = NodeDocumentVersionDAO.getInstance().getVersionContentByParent(docUuid, verName);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_DOCUMENT_CONTENT_BY_VERSION",
-                    docUuid, docPath, verName + ", " + is.available());
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_DOCUMENT_CONTENT_BY_VERSION", docUuid, docPath, verName + ", " + is.available());
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -593,19 +578,20 @@ public class DbDocumentModule implements DocumentModule {
 
     @Override
     @Deprecated
-    public List<Document> getChilds(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Document> getChilds(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        return getChildren(token, fldPath);
+        return getChildren(token, fldId);
     }
 
     @Override
-    public List<Document> getChildren(final String token, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Document> getChildren(String token, String fldId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("getChildren({}, {})", token, fldPath);
-        final List<Document> children = new ArrayList<Document>();
+        log.debug("getChildren({}, {})", token, fldId);
+        long begin = System.currentTimeMillis();
+        List<Document> children = new ArrayList<Document>();
         Authentication auth = null, oldAuth = null;
+        String fldPath = null;
+        String fldUuid = null;
 
         try {
             if (token == null) {
@@ -615,19 +601,21 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String fldUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    fldPath);
+            if (PathUtils.isPath(fldId)) {
+                fldPath = fldId;
+                fldUuid = NodeBaseDAO.getInstance().getUuidFromPath(fldId);
+            } else {
+                fldPath = NodeBaseDAO.getInstance().getPathFromUuid(fldId);
+                fldUuid = fldId;
+            }
 
-            for (final NodeDocument nDocument : NodeDocumentDAO.getInstance()
-                    .findByParent(fldUuid)) {
-                children.add(BaseDocumentModule.getProperties(auth.getName(),
-                        nDocument));
+            for (NodeDocument nDocument : NodeDocumentDAO.getInstance().findByParent(fldUuid)) {
+                children.add(BaseDocumentModule.getProperties(auth.getName(), nDocument));
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_CHILDREN_DOCUMENTS", fldUuid,
-                    fldPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_CHILDREN_DOCUMENTS", fldUuid, fldPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -635,26 +623,27 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("getChildren.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getChildren: {}", children);
         return children;
     }
 
     @Override
-    public void checkout(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void checkout(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        checkout(token, docPath, null);
+        checkout(token, docId, null);
     }
 
     /**
      * Used in Zoho extension
      */
-    public void checkout(final String token, final String docPath, String userId)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void checkout(String token, String docId, String userId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("checkout({}, {}, {})",
-                new Object[] { token, docPath, userId });
+        log.debug("checkout({}, {}, {})", new Object[] { token, docId, userId });
+        long begin = System.currentTimeMillis();
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -672,14 +661,19 @@ public class DbDocumentModule implements DocumentModule {
                 userId = auth.getName();
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
             NodeDocumentDAO.getInstance().checkout(userId, docUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "CHECKOUT_DOCUMENT", docUuid,
-                    docPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "CHECKOUT_DOCUMENT", docUuid, docPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -687,26 +681,25 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("checkout.Time: {}", System.currentTimeMillis() - begin);
         log.debug("checkout: void");
     }
 
     @Override
-    public void cancelCheckout(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void cancelCheckout(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("cancelCheckout({}, {})", token, docPath);
-        cancelCheckoutHelper(token, docPath, false);
+        log.debug("cancelCheckout({}, {})", token, docId);
+        cancelCheckoutHelper(token, docId, false);
         log.debug("cancelCheckout: void");
     }
 
     @Override
-    public void forceCancelCheckout(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void forceCancelCheckout(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException, PrincipalAdapterException {
-        log.debug("forceCancelCheckout({}, {})", token, docPath);
+        log.debug("forceCancelCheckout({}, {})", token, docId);
 
         if (PrincipalUtils.getRoles().contains(Config.DEFAULT_ADMIN_ROLE)) {
-            cancelCheckoutHelper(token, docPath, true);
+            cancelCheckoutHelper(token, docId, true);
         } else {
             throw new AccessDeniedException("Only administrator use allowed");
         }
@@ -717,14 +710,14 @@ public class DbDocumentModule implements DocumentModule {
     /**
      * Implement cancelCheckout and forceCancelCheckout features
      */
-    private void cancelCheckoutHelper(final String token, final String docPath,
-            final boolean force) throws LockException, PathNotFoundException,
+    private void cancelCheckoutHelper(String token, String docId, boolean force) throws LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("cancelCheckoutHelper({}, {}, {})", new Object[] { token,
-                docPath, force });
+        log.debug("cancelCheckoutHelper({}, {}, {})", new Object[] { token, docId, force });
+        long begin = System.currentTimeMillis();
         Authentication auth = null, oldAuth = null;
-        final String action = force ? "FORCE_CANCEL_DOCUMENT_CHECKOUT"
-                : "CANCEL_DOCUMENT_CHECKOUT";
+        String action = force ? "FORCE_CANCEL_DOCUMENT_CHECKOUT" : "CANCEL_DOCUMENT_CHECKOUT";
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -734,23 +727,23 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            NodeDocumentDAO.getInstance().cancelCheckout(auth.getName(),
-                    docUuid, force);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            NodeDocumentDAO.getInstance().cancelCheckout(auth.getName(), docUuid, force);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(),
-                    action, null);
-
-            // Check scripting
-            // BaseScriptingModule.checkScripts(session, documentNode, documentNode, action);
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), action, null);
 
             // Activity log
             UserActivity.log(auth.getName(), action, docUuid, docPath, null);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -758,30 +751,39 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("cancelCheckoutHelper.Time: {}", System.currentTimeMillis() - begin);
         log.debug("cancelCheckoutHelper: void");
     }
 
     @Override
-    public boolean isCheckedOut(final String token, final String docPath)
-            throws PathNotFoundException, RepositoryException,
+    public boolean isCheckedOut(String token, String docId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("isCheckedOut({}, {})", token, docPath);
+        log.debug("isCheckedOut({}, {})", token, docId);
         boolean checkedOut = false;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        @SuppressWarnings("unused")
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
             checkedOut = NodeDocumentDAO.getInstance().isCheckedOut(docUuid);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -794,49 +796,68 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public Version checkin(final String token, final String docPath,
-            final InputStream is, final String comment)
-            throws FileSizeExceededException, UserQuotaExceededException,
-            VirusDetectedException, AccessDeniedException, RepositoryException,
-            PathNotFoundException, LockException, VersionException,
-            IOException, DatabaseException {
-        return checkin(token, docPath, is, comment, null);
+    public Version checkin(String token, String docId, InputStream is, String comment) throws FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, VersionException, IOException, DatabaseException, AutomationException {
+        return checkin(token, docId, is, is.available(), comment, null, 0);
+    }
+
+    @Override
+    public Version checkin(String token, String docId, InputStream is, String comment, int increment) throws FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, VersionException, IOException, DatabaseException, AutomationException {
+        return checkin(token, docId, is, is.available(), comment, null, increment);
     }
 
     /**
      * Used in Zoho extension
      */
-    public Version checkin(final String token, final String docPath,
-            final InputStream is, final String comment, final String userId)
-            throws FileSizeExceededException, UserQuotaExceededException,
-            VirusDetectedException, AccessDeniedException, RepositoryException,
-            PathNotFoundException, LockException, VersionException,
-            IOException, DatabaseException {
-        return checkin(token, docPath, is, is.available(), comment, userId);
+    public Version checkin(String token, String docId, InputStream is, String comment, String userId) throws FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, VersionException, IOException, DatabaseException, AutomationException {
+        return checkin(token, docId, is, is.available(), comment, userId, 0);
     }
 
     /**
      * Used when big files and WebDAV
      */
-    public Version checkin(final String token, final String docPath,
-            InputStream is, final long size, final String comment, String userId)
-            throws FileSizeExceededException, UserQuotaExceededException,
-            VirusDetectedException, AccessDeniedException, RepositoryException,
-            PathNotFoundException, LockException, VersionException,
-            IOException, DatabaseException {
-        log.debug("checkin({}, {}, {}, {}, {}, {})", new Object[] { token,
-                docPath, is, size, comment, userId });
+    public Version checkin(String token, String docId, InputStream is, long size, String comment, String userId)
+            throws FileSizeExceededException, UserQuotaExceededException, VirusDetectedException, AccessDeniedException,
+            RepositoryException, PathNotFoundException, LockException, VersionException, IOException, DatabaseException,
+            AutomationException {
+        return checkin(token, docId, is, size, comment, userId, 0);
+    }
+
+    /**
+     * Used when increase document major version
+     */
+    public Version checkin(String token, String docId, InputStream is, long size, String comment, String userId, int increment)
+            throws FileSizeExceededException, UserQuotaExceededException, VirusDetectedException, AccessDeniedException,
+            RepositoryException, PathNotFoundException, LockException, VersionException, IOException, DatabaseException,
+            AutomationException {
+        log.debug("checkin({}, {}, {}, {}, {}, {})", new Object[] { token, docId, is, size, comment, userId });
+        long begin = System.currentTimeMillis();
         Version version = new Version();
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
         }
 
-        final String name = PathUtils.getName(docPath);
-        final int idx = name.lastIndexOf('.');
-        final String fileExtension = idx > 0 ? name.substring(idx) : ".tmp";
-        final File tmp = File.createTempFile("okm", fileExtension);
+        if (PathUtils.isPath(docId)) {
+            docPath = docId;
+            docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+        } else {
+            docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+            docUuid = docId;
+        }
+
+        String name = PathUtils.getName(docPath);
+        int idx = name.lastIndexOf('.');
+        String fileExtension = idx > 0 ? name.substring(idx) : ".tmp";
+        File tmp = File.createTempFile("okm", fileExtension);
 
         try {
             if (token == null) {
@@ -851,19 +872,15 @@ public class DbDocumentModule implements DocumentModule {
             }
 
             if (Config.MAX_FILE_SIZE > 0 && size > Config.MAX_FILE_SIZE) {
-                log.error(
-                        "Uploaded file size: {} ({}), Max file size: {} ({})",
-                        new Object[] { FormatUtil.formatSize(size), size,
-                                FormatUtil.formatSize(Config.MAX_FILE_SIZE),
-                                Config.MAX_FILE_SIZE });
-                UserActivity.log(userId, "ERROR_FILE_SIZE_EXCEEDED", null,
-                        docPath, Long.toString(size));
-                throw new FileSizeExceededException(Long.toString(size));
+                log.error("Uploaded file size: {} ({}), Max file size: {} ({})", new Object[] { FormatUtil.formatSize(size), size,
+                        FormatUtil.formatSize(Config.MAX_FILE_SIZE), Config.MAX_FILE_SIZE });
+                UserActivity.log(userId, "ERROR_FILE_SIZE_EXCEEDED", null, docPath, FormatUtil.formatSize(size));
+                throw new FileSizeExceededException(FormatUtil.formatSize(size));
             }
 
             // Manage temporary files
-            final byte[] buff = new byte[4 * 1024];
-            final FileOutputStream fos = new FileOutputStream(tmp);
+            byte[] buff = new byte[4 * 1024];
+            FileOutputStream fos = new FileOutputStream(tmp);
             int read;
 
             while ((read = is.read(buff)) != -1) {
@@ -876,47 +893,40 @@ public class DbDocumentModule implements DocumentModule {
             is = new FileInputStream(tmp);
 
             if (!Config.SYSTEM_ANTIVIR.equals("")) {
-                final String info = VirusDetection.detect(tmp);
+                String info = VirusDetection.detect(tmp);
 
                 if (info != null) {
-                    UserActivity.log(userId, "ERROR_VIRUS_DETECTED", null,
-                            docPath, info);
+                    UserActivity.log(userId, "ERROR_VIRUS_DETECTED", null, docPath, info);
                     throw new VirusDetectedException(info);
                 }
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            final NodeDocumentVersion newDocVersion = NodeDocumentVersionDAO
-                    .getInstance().checkin(userId, comment, docUuid, is, size);
+            // AUTOMATION - PRE
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            Map<String, Object> env = new HashMap<String, Object>();
+            env.put(AutomationUtils.DOCUMENT_NODE, docNode);
+            AutomationManager.getInstance().fireEvent(AutomationRule.EVENT_DOCUMENT_UPDATE, AutomationRule.AT_PRE, env);
+            docNode = (NodeDocument) env.get(AutomationUtils.DOCUMENT_NODE);
+
+            NodeDocumentVersion newDocVersion = NodeDocumentVersionDAO.getInstance().checkin(userId, comment, docUuid, is, size, increment);
             version = BaseModule.getProperties(newDocVersion);
 
-            // Add comment (as system user)
-            final String text = "New version " + version.getName() + " by "
-                    + userId + ": " + comment;
-            BaseNoteModule.create(docUuid, Config.SYSTEM_USER, text);
+            // AUTOMATION - POST
+            AutomationManager.getInstance().fireEvent(AutomationRule.EVENT_DOCUMENT_UPDATE, AutomationRule.AT_POST, env);
 
-            // Update user items size
-            if (Config.USER_ITEM_CACHE) {
-                UserItemsManager.incSize(auth.getName(), size);
-            }
+            // Add comment (as system user)
+            String text = "New version " + version.getName() + " by " + userId + ": " + comment;
+            BaseNoteModule.create(docUuid, Config.SYSTEM_USER, text);
 
             // Remove pdf & preview from cache
             CommonGeneralModule.cleanPreviewCache(docUuid);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(docNode, userId,
-                    "CHECKIN_DOCUMENT", comment);
-
-            // Check scripting
-            // BaseScriptingModule.checkScripts(session, documentNode, documentNode, "CHECKIN_DOCUMENT");
+            BaseNotificationModule.checkSubscriptions(docNode, userId, "CHECKIN_DOCUMENT", comment);
 
             // Activity log
-            UserActivity.log(auth.getName(), "CHECKIN_DOCUMENT", docUuid,
-                    docPath, size + ", " + comment);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "CHECKIN_DOCUMENT", docUuid, docPath, size + ", " + comment);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             IOUtils.closeQuietly(is);
@@ -927,17 +937,19 @@ public class DbDocumentModule implements DocumentModule {
             }
         }
 
+        log.trace("checkin.Time: {}", System.currentTimeMillis() - begin);
         log.debug("checkin: {}", version);
         return version;
     }
 
     @Override
-    public LockInfo lock(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public LockInfo lock(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("lock({}, {})", token, docPath);
+        log.debug("lock({}, {})", token, docId);
         LockInfo lck = null;
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -947,25 +959,24 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            final NodeLock nLock = NodeDocumentDAO.getInstance().lock(
-                    auth.getName(), docUuid);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            NodeLock nLock = NodeDocumentDAO.getInstance().lock(auth.getName(), docUuid);
             lck = BaseModule.getProperties(nLock, docPath);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(),
-                    "LOCK_DOCUMENT", null);
-
-            // Check scripting
-            // BaseScriptingModule.checkScripts(session, documentNode, documentNode, "LOCK_DOCUMENT");
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), "LOCK_DOCUMENT", null);
 
             // Activity log
-            UserActivity.log(auth.getName(), "LOCK_DOCUMENT", docUuid, docPath,
-                    lck.getToken());
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "LOCK_DOCUMENT", docUuid, docPath, lck.getToken());
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -978,22 +989,20 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void unlock(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("unlock({}, {})", token, docPath);
-        unlockHelper(token, docPath, false);
+    public void unlock(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("unlock({}, {})", token, docId);
+        unlockHelper(token, docId, false);
         log.debug("unlock: void");
     }
 
     @Override
-    public void forceUnlock(final String token, final String docPath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void forceUnlock(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException, PrincipalAdapterException {
-        log.debug("forceUnlock({}, {})", token, docPath);
+        log.debug("forceUnlock({}, {})", token, docId);
 
         if (PrincipalUtils.getRoles().contains(Config.DEFAULT_ADMIN_ROLE)) {
-            unlockHelper(token, docPath, true);
+            unlockHelper(token, docId, true);
         } else {
             throw new AccessDeniedException("Only administrator use allowed");
         }
@@ -1004,13 +1013,13 @@ public class DbDocumentModule implements DocumentModule {
     /**
      * Implement unlock and forceUnlock features
      */
-    private void unlockHelper(final String token, final String docPath,
-            final boolean force) throws LockException, PathNotFoundException,
+    private void unlockHelper(String token, String docId, boolean force) throws LockException, PathNotFoundException,
             AccessDeniedException, RepositoryException, DatabaseException {
-        log.debug("unlock({}, {}, {})", new Object[] { token, docPath, force });
+        log.debug("unlock({}, {}, {})", new Object[] { token, docId, force });
         Authentication auth = null, oldAuth = null;
-        final String action = force ? "FORCE_UNLOCK_DOCUMENT"
-                : "UNLOCK_DOCUMENT";
+        String action = force ? "FORCE_UNLOCK_DOCUMENT" : "UNLOCK_DOCUMENT";
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -1020,23 +1029,23 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeDocument docNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            NodeDocumentDAO.getInstance()
-                    .unlock(auth.getName(), docUuid, force);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            NodeDocumentDAO.getInstance().unlock(auth.getName(), docUuid, force);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(),
-                    action, null);
-
-            // Check scripting
-            // BaseScriptingModule.checkScripts(session, documentNode, documentNode, action);
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), action, null);
 
             // Activity log
             UserActivity.log(auth.getName(), action, docUuid, docPath, null);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1048,26 +1057,34 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public boolean isLocked(final String token, final String docPath)
-            throws RepositoryException, PathNotFoundException,
+    public boolean isLocked(String token, String docId) throws RepositoryException, AccessDeniedException, PathNotFoundException,
             DatabaseException {
-        log.debug("isLocked({}, {})", token, docPath);
+        log.debug("isLocked({}, {})", token, docId);
         boolean locked = false;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        @SuppressWarnings("unused")
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
             locked = NodeDocumentDAO.getInstance().isLocked(docUuid);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1080,28 +1097,34 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public LockInfo getLockInfo(final String token, final String docPath)
-            throws RepositoryException, PathNotFoundException, LockException,
-            DatabaseException {
-        log.debug("getLock({}, {})", token, docPath);
+    public LockInfo getLockInfo(String token, String docId) throws RepositoryException, AccessDeniedException, PathNotFoundException,
+            LockException, DatabaseException {
+        log.debug("getLock({}, {})", token, docId);
         LockInfo lock = null;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final NodeLock nLock = NodeDocumentDAO.getInstance().getLock(
-                    docUuid);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeLock nLock = NodeDocumentDAO.getInstance().getLock(docUuid);
             lock = BaseModule.getProperties(nLock, docPath);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1114,12 +1137,13 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void purge(final String token, final String docPath)
-            throws LockException, AccessDeniedException, RepositoryException,
-            PathNotFoundException, DatabaseException {
-        log.debug("purge({}, {})", token, docPath);
+    public void purge(String token, String docId) throws LockException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            DatabaseException {
+        log.debug("purge({}, {})", token, docId);
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -1127,21 +1151,37 @@ public class DbDocumentModule implements DocumentModule {
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            if (Config.REPOSITORY_PURGATORY_HOME != null && !Config.REPOSITORY_PURGATORY_HOME.isEmpty()) {
+                File dateDir = FileUtils.createDateDir(Config.REPOSITORY_PURGATORY_HOME);
+                File dstPath = new File(dateDir, PathUtils.getName(docPath));
+                RepositoryExporter.exportDocument(null, docPath, dstPath.getPath(), true, false, null, null);
+            }
+
             NodeDocumentDAO.getInstance().purge(docUuid);
 
             // Activity log - Already inside DAO
             // UserActivity.log(auth.getName(), "PURGE_DOCUMENT", docUuid, docPath, null);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (ParseException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (NoSuchGroupException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1153,13 +1193,14 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void move(final String token, final String docPath,
-            final String dstPath) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, LockException,
-            RepositoryException, DatabaseException, ExtensionException,
-            AutomationException {
-        log.debug("move({}, {}, {})", new Object[] { token, docPath, dstPath });
+    public void move(String token, String docId, String dstId) throws PathNotFoundException, ItemExistsException, AccessDeniedException,
+            LockException, RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        log.debug("move({}, {}, {})", new Object[] { token, docId, dstId });
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
+        String dstPath = null;
+        String dstUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -1173,30 +1214,44 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final String dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    dstPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            if (PathUtils.isPath(dstId)) {
+                if (!PathUtils.checkPath(dstId)) {
+                    throw new RepositoryException("Invalid destination path: " + dstId);
+                }
+
+                dstPath = dstId;
+                dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(dstId);
+            } else {
+                dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstId);
+                dstUuid = dstId;
+
+                if (!PathUtils.checkPath(dstPath)) {
+                    throw new RepositoryException("Invalid destination path: " + dstPath);
+                }
+            }
 
             // AUTOMATION - PRE
-            final Map<String, Object> env = new HashMap<String, Object>();
+            Map<String, Object> env = new HashMap<String, Object>();
             env.put(AutomationUtils.DOCUMENT_UUID, docUuid);
             env.put(AutomationUtils.FOLDER_UUID, dstUuid);
-            AutomationManager.getInstance().fireEvent(
-                    AutomationRule.EVENT_DOCUMENT_MOVE, AutomationRule.AT_PRE,
-                    env);
+            AutomationManager.getInstance().fireEvent(AutomationRule.EVENT_DOCUMENT_MOVE, AutomationRule.AT_PRE, env);
 
             NodeDocumentDAO.getInstance().move(docUuid, dstUuid);
 
             // AUTOMATION - POST
-            AutomationManager.getInstance().fireEvent(
-                    AutomationRule.EVENT_DOCUMENT_MOVE, AutomationRule.AT_POST,
-                    env);
+            AutomationManager.getInstance().fireEvent(AutomationRule.EVENT_DOCUMENT_MOVE, AutomationRule.AT_POST, env);
 
             // Activity log
-            UserActivity.log(auth.getName(), "MOVE_DOCUMENT", docUuid, docPath,
-                    dstPath);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "MOVE_DOCUMENT", docUuid, docPath, dstPath);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1208,13 +1263,22 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void copy(final String token, final String docPath,
-            final String dstPath) throws ItemExistsException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            IOException, AutomationException, DatabaseException,
-            UserQuotaExceededException {
+    public void copy(String token, String docPath, String dstPath) throws ItemExistsException, PathNotFoundException,
+            AccessDeniedException, RepositoryException, IOException, AutomationException, DatabaseException, UserQuotaExceededException {
         log.debug("copy({}, {}, {})", new Object[] { token, docPath, dstPath });
+        extendedCopy(token, docPath, dstPath, PathUtils.getName(docPath), new ExtendedAttributes());
+    }
+
+    @Override
+    public void extendedCopy(String token, String docId, String dstId, String docName, ExtendedAttributes extAttr)
+            throws ItemExistsException, PathNotFoundException, AccessDeniedException, RepositoryException, IOException,
+            AutomationException, DatabaseException, UserQuotaExceededException {
+        log.debug("extendedCopy({}, {}, {}, {}, {})", new Object[] { token, docId, dstId, docName, extAttr });
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
+        String dstPath = null;
+        String dstUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -1228,28 +1292,39 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            // Escape dangerous chars in name
-            final String docName = PathUtils.escape(PathUtils.getName(docPath));
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final String dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    dstPath);
-            final NodeDocument srcDocNode = NodeDocumentDAO.getInstance()
-                    .findByPk(docUuid);
-            final NodeFolder dstFldNode = NodeFolderDAO.getInstance().findByPk(
-                    dstUuid);
-            final NodeDocument newDocNode = BaseDocumentModule.copy(
-                    auth.getName(), srcDocNode, dstPath, dstFldNode, docName);
+            if (PathUtils.isPath(dstId)) {
+                dstPath = dstId;
+                dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(dstId);
+            } else {
+                dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstId);
+                dstUuid = dstId;
+            }
+
+            if (docName == null) {
+                docName = PathUtils.getName(docPath);
+            } else {
+                // Escape dangerous chars in name
+                docName = PathUtils.escape(docName);
+            }
+
+            NodeDocument srcDocNode = NodeDocumentDAO.getInstance().findByPk(docUuid, extAttr.isPropertyGroups());
+            NodeFolder dstFldNode = NodeFolderDAO.getInstance().findByPk(dstUuid);
+            NodeDocument newDocNode = BaseDocumentModule.copy(auth.getName(), srcDocNode, dstPath, dstFldNode, docName, extAttr);
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(dstFldNode,
-                    auth.getName(), "COPY_DOCUMENT", null);
+            BaseNotificationModule.checkSubscriptions(dstFldNode, auth.getName(), "COPY_DOCUMENT", null);
 
             // Activity log
-            UserActivity.log(auth.getName(), "COPY_DOCUMENT",
-                    newDocNode.getUuid(), docPath, dstPath);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "COPY_DOCUMENT", newDocNode.getUuid(), docPath, dstPath);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1259,13 +1334,12 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void restoreVersion(final String token, final String docPath,
-            final String versionId) throws PathNotFoundException,
-            AccessDeniedException, LockException, RepositoryException,
-            DatabaseException {
-        log.debug("restoreVersion({}, {}, {})", new Object[] { token, docPath,
-                versionId });
+    public void restoreVersion(String token, String docId, String versionId) throws PathNotFoundException, AccessDeniedException,
+            LockException, RepositoryException, DatabaseException {
+        log.debug("restoreVersion({}, {}, {})", new Object[] { token, docId, versionId });
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -1279,18 +1353,22 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            NodeDocumentVersionDAO.getInstance().restoreVersion(docUuid,
-                    versionId);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocumentVersionDAO.getInstance().restoreVersion(docUuid, versionId);
 
             // Remove pdf & preview from cache
             CommonGeneralModule.cleanPreviewCache(docUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "RESTORE_DOCUMENT_VERSION",
-                    docUuid, docPath, versionId);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "RESTORE_DOCUMENT_VERSION", docUuid, docPath, versionId);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1302,11 +1380,12 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public void purgeVersionHistory(final String token, final String docPath)
-            throws AccessDeniedException, PathNotFoundException, LockException,
+    public void purgeVersionHistory(String token, String docId) throws AccessDeniedException, PathNotFoundException, LockException,
             RepositoryException, DatabaseException {
-        log.debug("purgeVersionHistory({}, {})", token, docPath);
+        log.debug("purgeVersionHistory({}, {})", token, docId);
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -1320,16 +1399,21 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
             NodeDocumentVersionDAO.getInstance().purgeVersionHistory(docUuid);
 
             // Activity log
-            UserActivity.log(auth.getName(), "PURGE_DOCUMENT_VERSION_HISTORY",
-                    docUuid, docPath, null);
-        } catch (final IOException e) {
+            UserActivity.log(auth.getName(), "PURGE_DOCUMENT_VERSION_HISTORY", docUuid, docPath, null);
+        } catch (IOException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1341,12 +1425,13 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public List<Version> getVersionHistory(final String token,
-            final String docPath) throws PathNotFoundException,
+    public List<Version> getVersionHistory(String token, String docId) throws AccessDeniedException, PathNotFoundException,
             RepositoryException, DatabaseException {
-        log.debug("getVersionHistory({}, {})", token, docPath);
-        final List<Version> history = new ArrayList<Version>();
+        log.debug("getVersionHistory({}, {})", token, docId);
+        List<Version> history = new ArrayList<Version>();
         Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
@@ -1356,19 +1441,23 @@ public class DbDocumentModule implements DocumentModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final List<NodeDocumentVersion> docVersions = NodeDocumentVersionDAO
-                    .getInstance().findByParent(docUuid);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
 
-            for (final NodeDocumentVersion nDocVersion : docVersions) {
+            List<NodeDocumentVersion> docVersions = NodeDocumentVersionDAO.getInstance().findByParent(docUuid);
+
+            for (NodeDocumentVersion nDocVersion : docVersions) {
                 history.add(BaseModule.getProperties(nDocVersion));
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_DOCUMENT_VERSION_HISTORY",
-                    docUuid, docPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_DOCUMENT_VERSION_HISTORY", docUuid, docPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1381,31 +1470,37 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public long getVersionHistorySize(final String token, final String docPath)
-            throws RepositoryException, PathNotFoundException,
+    @SuppressWarnings("unused")
+    public long getVersionHistorySize(String token, String docId) throws RepositoryException, AccessDeniedException, PathNotFoundException,
             DatabaseException {
-        log.debug("getVersionHistorySize({}, {})", token, docPath);
+        log.debug("getVersionHistorySize({}, {})", token, docId);
         long versionHistorySize = 0;
-        @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
-            final List<NodeDocumentVersion> docVersions = NodeDocumentVersionDAO
-                    .getInstance().findByParent(docUuid);
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
 
-            for (final NodeDocumentVersion nDocVersion : docVersions) {
+            List<NodeDocumentVersion> docVersions = NodeDocumentVersionDAO.getInstance().findByParent(docUuid);
+
+            for (NodeDocumentVersion nDocVersion : docVersions) {
                 versionHistorySize += nDocVersion.getSize();
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1418,31 +1513,34 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public boolean isValid(final String token, final String docPath)
-            throws PathNotFoundException, RepositoryException,
+    public boolean isValid(String token, String docId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("isValid({}, {})", token, docPath);
+        log.debug("isValid({}, {})", token, docId);
         boolean valid = true;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
+        String docUuid = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String docUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    docPath);
+            if (PathUtils.isPath(docId)) {
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docUuid = docId;
+            }
 
             try {
                 NodeDocumentDAO.getInstance().findByPk(docUuid);
-            } catch (final PathNotFoundException e) {
+            } catch (PathNotFoundException e) {
                 valid = false;
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -1455,13 +1553,231 @@ public class DbDocumentModule implements DocumentModule {
     }
 
     @Override
-    public String getPath(final String token, final String uuid)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String getPath(String token, String uuid) throws AccessDeniedException, RepositoryException, DatabaseException {
         try {
             return NodeBaseDAO.getInstance().getPathFromUuid(uuid);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw new RepositoryException(e.getMessage(), e);
         }
+    }
+
+    /*
+     * ========================
+     * LiveEdit methods
+     * =========================
+     */
+
+    /**
+     * Create temporal file and set content.
+     */
+    public void liveEditSetContent(String token, String docId, InputStream is) throws FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, VersionException, IOException, DatabaseException {
+        log.debug("liveEditSetContent({}, {})", new Object[] { docId, is });
+        Authentication auth = null, oldAuth = null;
+        int size = is.available();
+        String docPath = null;
+        String docUuid = null;
+
+        if (Config.SYSTEM_READONLY) {
+            throw new AccessDeniedException("System is in read-only mode");
+        }
+
+        if (PathUtils.isPath(docId)) {
+            docPath = docId;
+            docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+        } else {
+            docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+            docUuid = docId;
+        }
+
+        String name = PathUtils.getName(docPath);
+        int idx = name.lastIndexOf('.');
+        String fileExtension = idx > 0 ? name.substring(idx) : ".tmp";
+        File tmp = File.createTempFile("okm", fileExtension);
+
+        try {
+            if (token == null) {
+                auth = PrincipalUtils.getAuthentication();
+            } else {
+                oldAuth = PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthenticationByToken(token);
+            }
+
+            if (Config.MAX_FILE_SIZE > 0 && size > Config.MAX_FILE_SIZE) {
+                log.error("Uploaded file size: {} ({}), Max file size: {} ({})", new Object[] { FormatUtil.formatSize(size), size,
+                        FormatUtil.formatSize(Config.MAX_FILE_SIZE), Config.MAX_FILE_SIZE });
+                UserActivity.log(auth.getName(), "ERROR_FILE_SIZE_EXCEEDED", null, docPath, FormatUtil.formatSize(size));
+                throw new FileSizeExceededException(FormatUtil.formatSize(size));
+            }
+
+            // Manage temporary files
+            byte[] buff = new byte[4 * 1024];
+            FileOutputStream fos = new FileOutputStream(tmp);
+            int read;
+
+            while ((read = is.read(buff)) != -1) {
+                fos.write(buff, 0, read);
+            }
+
+            fos.flush();
+            fos.close();
+            is.close();
+            is = new FileInputStream(tmp);
+
+            if (!Config.SYSTEM_ANTIVIR.equals("")) {
+                String info = VirusDetection.detect(tmp);
+
+                if (info != null) {
+                    UserActivity.log(auth.getName(), "ERROR_VIRUS_DETECTED", null, docPath, info);
+                    throw new VirusDetectedException(info);
+                }
+            }
+
+            NodeDocumentVersionDAO.getInstance().liveEditSetContent(docUuid, is, size);
+        } catch (DatabaseException e) {
+            throw e;
+        } finally {
+            IOUtils.closeQuietly(is);
+            org.apache.commons.io.FileUtils.deleteQuietly(tmp);
+
+            if (token != null) {
+                PrincipalUtils.setAuthentication(oldAuth);
+            }
+        }
+
+        log.debug("liveEditSetContent: void");
+    }
+
+    /**
+     * New version and delete temporal file.
+     */
+    public Version liveEditCheckin(String token, String docId, String comment, int increment) throws FileSizeExceededException,
+            UserQuotaExceededException, VirusDetectedException, AccessDeniedException, RepositoryException, PathNotFoundException,
+            LockException, VersionException, IOException, DatabaseException {
+        log.debug("liveEditCheckin({}, {}, {})", new Object[] { token, docId, comment });
+        Version version = new Version();
+        Authentication auth = null, oldAuth = null;
+        String docPath = null;
+        String docUuid = null;
+
+        if (Config.SYSTEM_READONLY) {
+            throw new AccessDeniedException("System is in read-only mode");
+        }
+
+        try {
+            if (token == null) {
+                auth = PrincipalUtils.getAuthentication();
+            } else {
+                oldAuth = PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthenticationByToken(token);
+            }
+
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            NodeDocumentVersion newDocVersion =
+                    NodeDocumentVersionDAO.getInstance().liveEditCheckin(auth.getName(), comment, increment, docUuid);
+            version = BaseModule.getProperties(newDocVersion);
+
+            // Add comment (as system user)
+            String text = "New version " + version.getName() + " by " + auth.getName() + ": " + comment;
+            BaseNoteModule.create(docUuid, Config.SYSTEM_USER, text);
+
+            // Remove pdf & preview from cache
+            CommonGeneralModule.cleanPreviewCache(docUuid);
+
+            // Check subscriptions
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), "CHECKIN_DOCUMENT", comment);
+
+            // Activity log
+            UserActivity.log(auth.getName(), "CHECKIN_DOCUMENT", docUuid, docPath, newDocVersion.getSize() + ", " + comment);
+        } catch (DatabaseException e) {
+            throw e;
+        } finally {
+            if (token != null) {
+                PrincipalUtils.setAuthentication(oldAuth);
+            }
+        }
+
+        log.debug("tempCheckin: {}", version);
+        return version;
+    }
+
+    /**
+     * Cancel checkout and delete temporal file.
+     */
+    public void liveEditCancelCheckout(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
+        log.debug("liveEditCancelCheckout({}, {})", token, docId);
+        liveEditCancelCheckoutHelper(token, docId, false);
+        log.debug("liveEditCancelCheckout: void");
+    }
+
+    /**
+     * Cancel checkout and delete temporal file.
+     */
+    public void liveEditForceCancelCheckout(String token, String docId) throws LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException {
+        log.debug("liveEditForceCancelCheckout({}, {})", token, docId);
+
+        if (PrincipalUtils.getRoles().contains(Config.DEFAULT_ADMIN_ROLE)) {
+            liveEditCancelCheckoutHelper(token, docId, true);
+        } else {
+            throw new AccessDeniedException("Only administrator use allowed");
+        }
+
+        log.debug("liveEditForceCancelCheckout: void");
+    }
+
+    private void liveEditCancelCheckoutHelper(String token, String docId, boolean force) throws LockException, PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("liveEditCancelCheckoutHelper({}, {}, {})", new Object[] { token, docId, force });
+        long begin = System.currentTimeMillis();
+        Authentication auth = null, oldAuth = null;
+        String action = force ? "FORCE_CANCEL_DOCUMENT_CHECKOUT" : "CANCEL_DOCUMENT_CHECKOUT";
+        String docPath = null;
+        String docUuid = null;
+
+        try {
+            if (token == null) {
+                auth = PrincipalUtils.getAuthentication();
+            } else {
+                oldAuth = PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthenticationByToken(token);
+            }
+
+            if (PathUtils.isPath(docId)) {
+                docPath = docId;
+                docUuid = NodeBaseDAO.getInstance().getUuidFromPath(docId);
+            } else {
+                docPath = NodeBaseDAO.getInstance().getPathFromUuid(docId);
+                docUuid = docId;
+            }
+
+            NodeDocument docNode = NodeDocumentDAO.getInstance().findByPk(docUuid);
+            NodeDocumentDAO.getInstance().liveEditCancelCheckout(auth.getName(), docUuid, force);
+
+            // Check subscriptions
+            BaseNotificationModule.checkSubscriptions(docNode, auth.getName(), action, null);
+
+            // Activity log
+            UserActivity.log(auth.getName(), action, docUuid, docPath, null);
+        } catch (DatabaseException e) {
+            throw e;
+        } finally {
+            if (token != null) {
+                PrincipalUtils.setAuthentication(oldAuth);
+            }
+        }
+
+        log.trace("liveEditCancelCheckoutHelper.Time: {}", System.currentTimeMillis() - begin);
+        log.debug("liveEditCancelCheckoutHelper: void");
     }
 }

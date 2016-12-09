@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,7 +43,6 @@ import freemarker.template.TemplateException;
 
 public class TemplateUtils {
     private static Logger log = LoggerFactory.getLogger(Config.class);
-
     private static Configuration cfg = null;
 
     /**
@@ -55,7 +54,7 @@ public class TemplateUtils {
                 cfg = new Configuration();
                 cfg.setDirectoryForTemplateLoading(new File(Config.HOME_DIR));
                 cfg.setObjectWrapper(new DefaultObjectWrapper());
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -66,11 +65,11 @@ public class TemplateUtils {
     /**
      * Check for template existence
      */
-    public static boolean templateExists(final String name) {
+    public static boolean templateExists(String name) {
         try {
             getConfig().getTemplate(name);
             return true;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             return false;
         }
     }
@@ -78,12 +77,10 @@ public class TemplateUtils {
     /**
      * Quick replace utility function
      */
-    public static String replace(final String name, final String template,
-            final Map<String, Object> model) throws IOException,
-            TemplateException {
-        final StringReader sr = new StringReader(template);
-        final Template tpl = new Template(name, sr, cfg);
-        final StringWriter sw = new StringWriter();
+    public static String replace(String name, String template, Map<String, Object> model) throws IOException, TemplateException {
+        StringReader sr = new StringReader(template);
+        Template tpl = new Template(name, sr, cfg);
+        StringWriter sw = new StringWriter();
         tpl.process(model, sw);
         sw.close();
         sr.close();
@@ -93,12 +90,11 @@ public class TemplateUtils {
     /**
      * Quick replace utility function
      */
-    public static void replace(final String name, final InputStream input,
-            final Map<String, Object> model, final OutputStream out)
-            throws IOException, TemplateException {
-        final InputStreamReader isr = new InputStreamReader(input);
-        final Template tpl = new Template(name, isr, cfg);
-        final OutputStreamWriter osw = new OutputStreamWriter(out);
+    public static void replace(String name, InputStream input, Map<String, Object> model, OutputStream out) throws IOException,
+            TemplateException {
+        InputStreamReader isr = new InputStreamReader(input);
+        Template tpl = new Template(name, isr, cfg);
+        OutputStreamWriter osw = new OutputStreamWriter(out);
         tpl.process(model, osw);
         osw.close();
         isr.close();

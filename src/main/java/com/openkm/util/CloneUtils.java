@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,10 +35,10 @@ public class CloneUtils {
     /**
      * Clone collection
      */
-    public static <E> List<E> clone(final List<E> input) {
-        final List<E> ret = new ArrayList<E>();
+    public static <E> List<E> clone(List<E> input) {
+        List<E> ret = new ArrayList<E>();
 
-        for (final E tmp : input) {
+        for (E tmp : input) {
             ret.add(tmp);
         }
 
@@ -48,10 +48,10 @@ public class CloneUtils {
     /**
      * Clone set
      */
-    public static <E> Set<E> clone(final Set<E> input) {
-        final Set<E> ret = new HashSet<E>();
+    public static <E> Set<E> clone(Set<E> input) {
+        Set<E> ret = new HashSet<E>();
 
-        for (final E tmp : input) {
+        for (E tmp : input) {
             ret.add(tmp);
         }
 
@@ -61,10 +61,10 @@ public class CloneUtils {
     /**
      * Clone map
      */
-    public static <K, V> Map<K, V> clone(final Map<K, V> input) {
-        final Map<K, V> ret = new HashMap<K, V>();
+    public static <K, V> Map<K, V> clone(Map<K, V> input) {
+        Map<K, V> ret = new HashMap<K, V>();
 
-        for (final Entry<K, V> tmp : input.entrySet()) {
+        for (Entry<K, V> tmp : input.entrySet()) {
             ret.put(tmp.getKey(), tmp.getValue());
         }
 
@@ -75,18 +75,17 @@ public class CloneUtils {
      * DeepClone
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static HashMap deepClone(final HashMap map) {
-        final HashMap newone = (HashMap) map.clone();
+    public static HashMap deepClone(HashMap map) {
+        HashMap newone = (HashMap) map.clone();
 
-        for (final Iterator it = newone.keySet().iterator(); it.hasNext();) {
-            final Object newkey = it.next();
-            Object deepobj = null;
-            final Object newobj = newone.get(newkey);
+        for (Iterator it = newone.keySet().iterator(); it.hasNext();) {
+            Object newkey = it.next();
+            Object deepobj = null, newobj = newone.get(newkey);
 
             if (newobj instanceof HashMap) {
                 deepobj = deepClone((HashMap) newobj);
             } else if (newobj instanceof String) {
-                deepobj = new String((String) newobj);
+                deepobj = (Object) new String((String) newobj);
             } else if (newobj instanceof Vector) {
                 deepobj = ((Vector) newobj).clone();
             }

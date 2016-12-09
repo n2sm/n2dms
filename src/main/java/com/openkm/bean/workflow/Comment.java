@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,16 +31,14 @@ public class Comment implements Serializable {
     private static final long serialVersionUID = 913315631264167804L;
 
     private Calendar time;
-
     private String actorId;
-
     private String message;
 
     public Calendar getTime() {
         return time;
     }
 
-    public void setTime(final Calendar time) {
+    public void setTime(Calendar time) {
         this.time = time;
     }
 
@@ -48,7 +46,7 @@ public class Comment implements Serializable {
         return actorId;
     }
 
-    public void setActorId(final String actorId) {
+    public void setActorId(String actorId) {
         this.actorId = actorId;
     }
 
@@ -56,13 +54,12 @@ public class Comment implements Serializable {
         return message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("time=");
         sb.append(time == null ? null : time.getTime());

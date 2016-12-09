@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,14 +38,10 @@ import com.openkm.frontend.client.widget.MenuBase;
  */
 public class MassiveOperationsMenu extends MenuBase {
     private MenuBar dirMenu;
-
     private MenuItem selectAll;
-
     private MenuItem selectFolders;
-
     private MenuItem selectDocuments;
-
-    // private MenuItem selectMails;
+    private MenuItem selectMails;
     private MenuItem removeSelection;
 
     /**
@@ -56,29 +52,28 @@ public class MassiveOperationsMenu extends MenuBase {
 
         // First initialize language values
         dirMenu = new MenuBar(true);
-        selectAll = new MenuItem(Util.menuHTML(
-                "img/icon/actions/select_all.png",
-                Main.i18n("filebrowser.menu.select.all")), true,
-                massiveSelectAll);
+        selectAll =
+                new MenuItem(Util.menuHTML("img/icon/actions/select_all.png", Main.i18n("filebrowser.menu.select.all")), true,
+                        massiveSelectAll);
         selectAll.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(selectAll);
-        selectFolders = new MenuItem(Util.menuHTML("img/menuitem_empty.gif",
-                Main.i18n("filebrowser.menu.select.all.folders")), true,
-                massiveSelectFolders);
+        selectFolders =
+                new MenuItem(Util.menuHTML("img/menuitem_empty.gif", Main.i18n("filebrowser.menu.select.all.folders")), true,
+                        massiveSelectFolders);
         selectFolders.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(selectFolders);
-        selectDocuments = new MenuItem(Util.menuHTML("img/document.png",
-                Main.i18n("filebrowser.menu.select.all.documents")), true,
-                massiveSelectDocuments);
+        selectDocuments =
+                new MenuItem(Util.menuHTML("img/document.png", Main.i18n("filebrowser.menu.select.all.documents")), true,
+                        massiveSelectDocuments);
         selectDocuments.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(selectDocuments);
-        /*selectMails = new MenuItem(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")), true, massiveSelectMails);
+        selectMails =
+                new MenuItem(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")), true, massiveSelectMails);
         selectMails.addStyleName("okm-MenuItem-strike");
-        dirMenu.addItem(selectMails);*/
-        removeSelection = new MenuItem(Util.menuHTML(
-                "img/icon/actions/remove_all.png",
-                Main.i18n("filebrowser.menu.remove.selection")), true,
-                massiveRemoveSelection);
+        dirMenu.addItem(selectMails);
+        removeSelection =
+                new MenuItem(Util.menuHTML("img/icon/actions/remove_all.png", Main.i18n("filebrowser.menu.remove.selection")), true,
+                        massiveRemoveSelection);
         removeSelection.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(removeSelection);
         dirMenu.setStyleName("okm-MenuBar");
@@ -87,12 +82,11 @@ public class MassiveOperationsMenu extends MenuBase {
         enable(selectAll);
         enable(selectFolders);
         enable(selectDocuments);
-        // enable(selectMails);
+        enable(selectMails);
     }
 
     // Command menu to select all file
     Command massiveSelectAll = new Command() {
-        @Override
         public void execute() {
             Main.get().mainPanel.desktop.browser.fileBrowser.selectAllMassive();
             hide();
@@ -101,37 +95,30 @@ public class MassiveOperationsMenu extends MenuBase {
 
     // Command menu to select all folders
     Command massiveSelectFolders = new Command() {
-        @Override
         public void execute() {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .selectAllFoldersMassive();
+            Main.get().mainPanel.desktop.browser.fileBrowser.selectAllFoldersMassive();
             hide();
         }
     };
 
     // Command menu to select all documents
     Command massiveSelectDocuments = new Command() {
-        @Override
         public void execute() {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .selectAllDocumentsMassive();
+            Main.get().mainPanel.desktop.browser.fileBrowser.selectAllDocumentsMassive();
             hide();
         }
     };
 
     // Command menu to select all mails
     Command massiveSelectMails = new Command() {
-        @Override
         public void execute() {
-            Main.get().mainPanel.desktop.browser.fileBrowser
-                    .selectAllMailsMassive();
+            Main.get().mainPanel.desktop.browser.fileBrowser.selectAllMailsMassive();
             hide();
         }
     };
 
     // Command menu to remove selection file
     Command massiveRemoveSelection = new Command() {
-        @Override
         public void execute() {
             Main.get().mainPanel.desktop.browser.fileBrowser.removeAllMassive();
             hide();
@@ -140,20 +127,15 @@ public class MassiveOperationsMenu extends MenuBase {
 
     @Override
     public void langRefresh() {
-        selectAll.setHTML(Util.menuHTML("img/icon/actions/select_all.png",
-                Main.i18n("filebrowser.menu.select.all")));
-        selectFolders.setHTML(Util.menuHTML("img/menuitem_empty.gif",
-                Main.i18n("filebrowser.menu.select.all.folders")));
-        selectDocuments.setHTML(Util.menuHTML("img/document.png",
-                Main.i18n("filebrowser.menu.select.all.documents")));
-        // selectMails.setHTML(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")));
-        removeSelection.setHTML(Util.menuHTML(
-                "img/icon/actions/remove_all.png",
-                Main.i18n("filebrowser.menu.remove.selection")));
+        selectAll.setHTML(Util.menuHTML("img/icon/actions/select_all.png", Main.i18n("filebrowser.menu.select.all")));
+        selectFolders.setHTML(Util.menuHTML("img/menuitem_empty.gif", Main.i18n("filebrowser.menu.select.all.folders")));
+        selectDocuments.setHTML(Util.menuHTML("img/document.png", Main.i18n("filebrowser.menu.select.all.documents")));
+        selectMails.setHTML(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")));
+        removeSelection.setHTML(Util.menuHTML("img/icon/actions/remove_all.png", Main.i18n("filebrowser.menu.remove.selection")));
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
     }
 
     @Override
@@ -163,7 +145,6 @@ public class MassiveOperationsMenu extends MenuBase {
     /**
      * Evaluates menu options
      */
-    @Override
     public void evaluateMenuOptions() {
         enable(selectAll);
         if (Main.get().mainPanel.desktop.browser.fileBrowser.isMassive()) {
@@ -174,7 +155,7 @@ public class MassiveOperationsMenu extends MenuBase {
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
     }
 
     @Override
@@ -185,11 +166,18 @@ public class MassiveOperationsMenu extends MenuBase {
     public void disableAddPropertyGroup() {
     }
 
+    @Override
+    public void disablePdfMerge() {
+    }
+
+    @Override
+    public void enablePdfMerge() {
+    }
+
     /**
      * Hide popup menu
      */
     public void hide() {
-        Main.get().mainPanel.desktop.browser.fileBrowser.massiveOperationsMenuPopup
-                .hide();
+        Main.get().mainPanel.desktop.browser.fileBrowser.massiveOperationsMenuPopup.hide();
     }
 }

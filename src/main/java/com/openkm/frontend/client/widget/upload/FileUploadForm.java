@@ -1,5 +1,5 @@
 /**
-*  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+*  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,33 +38,24 @@ import com.openkm.frontend.client.constants.service.RPCService;
 public class FileUploadForm extends Composite {
 
     private FormPanel uploadForm;
-
     private VerticalPanel vPanel;
-
     private TextBox inputPath;
-
     private TextBox inputAction;
-
     private TextBox inputRenameDocument;
-
     private CheckBox notifyToUser;
-
     private CheckBox importZip;
-
     private TextArea versionComment;
-
+    private TextBox mails;
     private TextBox users;
-
     private TextBox roles;
-
     private FileUpload fileUpload;
-
     private TextArea message;
+    private TextBox increaseVersion;
 
     /**
      * FileUploadForm
      */
-    public FileUploadForm(final FileUpload fileUpload, final String size) {
+    public FileUploadForm(FileUpload fileUpload, String size) {
         this.fileUpload = fileUpload;
         fileUpload.setStyleName("okm-Input");
         fileUpload.getElement().setAttribute("size", size);
@@ -79,9 +70,11 @@ public class FileUploadForm extends Composite {
         notifyToUser = new CheckBox();
         importZip = new CheckBox();
         versionComment = new TextArea();
+        mails = new TextBox();
         users = new TextBox();
         roles = new TextBox();
         message = new TextArea();
+        increaseVersion = new TextBox();
 
         // Set Form details
         // Set the action to call on submit
@@ -115,6 +108,10 @@ public class FileUploadForm extends Composite {
         versionComment.setVisible(false);
         vPanel.add(versionComment);
 
+        mails.setName("mails");
+        mails.setVisible(false);
+        vPanel.add(mails);
+
         users.setName("users");
         users.setVisible(false);
         vPanel.add(users);
@@ -126,6 +123,11 @@ public class FileUploadForm extends Composite {
         message.setName("message");
         message.setVisible(false);
         vPanel.add(message);
+
+        increaseVersion.setName("increaseVersion");
+        increaseVersion.setText("0");
+        increaseVersion.setVisible(false);
+        vPanel.add(increaseVersion);
 
         vPanel.add(fileUpload);
 
@@ -139,8 +141,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param submitCompleHandler
      */
-    public void addSubmitCompleteHandler(
-            final SubmitCompleteHandler submitCompleHandler) {
+    public void addSubmitCompleteHandler(SubmitCompleteHandler submitCompleHandler) {
         uploadForm.addSubmitCompleteHandler(submitCompleHandler);
     }
 
@@ -149,7 +150,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param encoding
      */
-    public void setEncoding(final String encodingType) {
+    public void setEncoding(String encodingType) {
         uploadForm.setEncoding(encodingType);
     }
 
@@ -157,7 +158,7 @@ public class FileUploadForm extends Composite {
      * Set the path
      * @param path String path
      */
-    public void setPath(final String path) {
+    public void setPath(String path) {
         inputPath.setText(path);
     }
 
@@ -166,7 +167,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param action
      */
-    public void setAction(final String action) {
+    public void setAction(String action) {
         inputAction.setText(action);
     }
 
@@ -175,7 +176,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param rename
      */
-    public void setRename(final String rename) {
+    public void setRename(String rename) {
         if (rename != null && !rename.equals("")) {
             inputRenameDocument.setText(rename);
         }
@@ -186,7 +187,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param value
      */
-    public void setNotifyToUser(final boolean value) {
+    public void setNotifyToUser(boolean value) {
         notifyToUser.setValue(value);
     }
 
@@ -204,7 +205,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param value
      */
-    public void setImportZip(final boolean value) {
+    public void setImportZip(boolean value) {
         importZip.setValue(value);
     }
 
@@ -222,8 +223,17 @@ public class FileUploadForm extends Composite {
      * 
      * @param comment
      */
-    public void setVersionCommnent(final String comment) {
+    public void setVersionCommnent(String comment) {
         versionComment.setText(comment);
+    }
+
+    /**
+     * setMails
+     * 
+     * @param mails
+     */
+    public void setMails(String mails) {
+        this.mails.setText(mails);
     }
 
     /**
@@ -231,7 +241,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param users
      */
-    public void setUsers(final String users) {
+    public void setUsers(String users) {
         this.users.setText(users);
     }
 
@@ -240,7 +250,7 @@ public class FileUploadForm extends Composite {
      * 
      * @param roles
      */
-    public void setRoles(final String roles) {
+    public void setRoles(String roles) {
         this.roles.setText(roles);
     }
 
@@ -249,8 +259,15 @@ public class FileUploadForm extends Composite {
      * 
      * @param message
      */
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message.setText(message);
+    }
+
+    /**
+     * setIncreaseMajorVersion
+     */
+    public void setIncreaseVersion(int increaseVersion) {
+        this.increaseVersion.setText(String.valueOf(increaseVersion));
     }
 
     /**

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,24 +47,18 @@ import com.openkm.util.MailUtils;
 public class MyEventListener implements EventListener {
     private static Logger log = LoggerFactory.getLogger(EventListener.class);
 
-    @Override
-    public void onEvent(final EventIterator arg0) {
-        final Session system = JcrRepositoryModule.getSystemSession();
+    public void onEvent(EventIterator arg0) {
+        Session system = JcrRepositoryModule.getSystemSession();
 
         while (arg0.hasNext()) {
-            final Event evn = arg0.nextEvent();
+            Event evn = arg0.nextEvent();
             String eventType = "";
 
             try {
-                if (!evn.getPath().endsWith("okm:content")
-                        && !evn.getPath().endsWith("okm:size")
-                        && !evn.getPath().endsWith("okm:author")
-                        && !evn.getPath().endsWith("jcr:lastModified")
-                        && !evn.getPath().endsWith("jcr:lockOwner")
-                        && !evn.getPath().endsWith("jcr:lockIsDeep")
-                        && !evn.getPath().endsWith("jcr:isCheckedOut")
-                        && !evn.getPath().endsWith("jcr:baseVersion")
-                        && !evn.getPath().endsWith("jcr:predecessors")) {
+                if (!evn.getPath().endsWith("okm:content") && !evn.getPath().endsWith("okm:size") && !evn.getPath().endsWith("okm:author")
+                        && !evn.getPath().endsWith("jcr:lastModified") && !evn.getPath().endsWith("jcr:lockOwner")
+                        && !evn.getPath().endsWith("jcr:lockIsDeep") && !evn.getPath().endsWith("jcr:isCheckedOut")
+                        && !evn.getPath().endsWith("jcr:baseVersion") && !evn.getPath().endsWith("jcr:predecessors")) {
                     switch (evn.getType()) {
                     case Event.NODE_ADDED:
                         eventType = "NODE_ADDED";
@@ -93,41 +87,35 @@ public class MyEventListener implements EventListener {
 
                     log.info("***** Type: " + eventType + " - " + evn.getPath());
 
-                    if (evn.getType() != Event.NODE_REMOVED
-                            && evn.getType() != Event.PROPERTY_REMOVED) {
+                    if (evn.getType() != Event.NODE_REMOVED && evn.getType() != Event.PROPERTY_REMOVED) {
                         Item item = system.getItem(evn.getPath());
                         for (; !item.isNode(); item = item.getParent()) {
                             log.info("[1][1] " + item.getPath());
                         }
 
                         Node node = (Node) item;
-                        for (; !node.isNodeType(Notification.TYPE); node = node
-                                .getParent()) {
+                        for (; !node.isNodeType(Notification.TYPE); node = node.getParent()) {
                             log.info("[2][2] " + node.getPath());
                         }
 
-                        final Value[] subscriptors = node.getProperty(
-                                Notification.SUBSCRIPTORS).getValues();
-                        for (final Value subscriptor : subscriptors) {
-                            log.info("[3][3] " + subscriptor.getString());
+                        Value[] subscriptors = node.getProperty(Notification.SUBSCRIPTORS).getValues();
+                        for (int i = 0; i < subscriptors.length; i++) {
+                            log.info("[3][3] " + subscriptors[i].getString());
                         }
                     }
 
-                    final List<String> emails = new ArrayList<String>();
-                    final String body = "URL: " + Config.APPLICATION_URL
-                            + "?nodePath="
-                            + URLEncoder.encode(evn.getPath(), "UTF-8") + "\n"
-                            + "File: " + evn.getPath() + "\n" + "User: "
-                            + evn.getUserID() + "\n" + "Action: " + eventType;
+                    List<String> emails = new ArrayList<String>();
+                    String body =
+                            "URL: " + Config.APPLICATION_URL + "?nodePath=" + URLEncoder.encode(evn.getPath(), "UTF-8") + "\n" + "File: "
+                                    + evn.getPath() + "\n" + "User: " + evn.getUserID() + "\n" + "Action: " + eventType;
 
-                    MailUtils.sendMessage("monkiki@gmail.com", emails,
-                            "OpenKM notification", body);
+                    MailUtils.sendMessage("monkiki@gmail.com", emails, "OpenKM notification", body);
                 }
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 e.printStackTrace();
-            } catch (final RepositoryException e) {
+            } catch (RepositoryException e) {
                 e.printStackTrace();
             }
         }

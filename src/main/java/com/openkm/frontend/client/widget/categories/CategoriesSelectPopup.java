@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -38,19 +38,12 @@ import com.openkm.frontend.client.constants.ui.UIDesktopConstants;
 public class CategoriesSelectPopup extends DialogBox {
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     public ScrollPanel scrollDirectoryPanel;
-
     private VerticalPanel verticalDirectoryPanel;
-
     private FolderSelectTree folderSelectTree;
-
     private Button cancelButton;
-
     private Button actionButton;
-
     public Status status;
 
     public CategoriesSelectPopup() {
@@ -61,12 +54,12 @@ public class CategoriesSelectPopup extends DialogBox {
         status.setStyleName("okm-StatusPopup");
 
         vPanel = new VerticalPanel();
-        vPanel.setWidth("500");
-        vPanel.setHeight("300");
+        vPanel.setWidth("500px");
+        vPanel.setHeight("300px");
         hPanel = new HorizontalPanel();
 
         scrollDirectoryPanel = new ScrollPanel();
-        scrollDirectoryPanel.setSize("490", "250");
+        scrollDirectoryPanel.setSize("490px", "250px");
         scrollDirectoryPanel.setStyleName("okm-Popup-text");
         verticalDirectoryPanel = new VerticalPanel();
         verticalDirectoryPanel.setSize("100%", "100%");
@@ -76,17 +69,16 @@ public class CategoriesSelectPopup extends DialogBox {
         verticalDirectoryPanel.add(folderSelectTree);
         scrollDirectoryPanel.add(verticalDirectoryPanel);
 
-        cancelButton = new Button(Main.i18n("button.close"),
-                new ClickHandler() {
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        hide();
-                    }
-                });
+        cancelButton = new Button(Main.i18n("button.close"), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                hide();
+            }
+        });
 
         actionButton = new Button(Main.i18n("button.add"), new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 executeAction(folderSelectTree.getCategory());
             }
         });
@@ -95,18 +87,16 @@ public class CategoriesSelectPopup extends DialogBox {
         vPanel.add(scrollDirectoryPanel);
         vPanel.add(new HTML("<br>"));
         hPanel.add(cancelButton);
-        final HTML space = new HTML();
-        space.setWidth("50");
+        HTML space = new HTML();
+        space.setWidth("50px");
         hPanel.add(space);
         hPanel.add(actionButton);
         vPanel.add(hPanel);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHeight(scrollDirectoryPanel, "250");
+        vPanel.setCellHorizontalAlignment(scrollDirectoryPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(scrollDirectoryPanel, "250px");
 
         cancelButton.setStyleName("okm-NoButton");
         actionButton.setStyleName("okm-AddButton");
@@ -118,36 +108,26 @@ public class CategoriesSelectPopup extends DialogBox {
     /**
      * Executes the action
      */
-    public void executeAction(final GWTFolder category) {
-        final int actualView = Main.get().mainPanel.desktop.navigator
-                .getStackIndex();
+    public void executeAction(GWTFolder category) {
+        int actualView = Main.get().mainPanel.desktop.navigator.getStackIndex();
         switch (actualView) {
         case UIDesktopConstants.NAVIGATOR_MAIL:
-            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                    .addCategory(category);
+            Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.addCategory(category);
             break;
 
         default:
             // Filebrowser panel selected
-            if (Main.get().mainPanel.desktop.browser.fileBrowser
-                    .isPanelSelected()) {
-                if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isDocumentSelected()) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document
-                            .addCategory(category);
-                } else if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isFolderSelected()) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                            .addCategory(category);
-                } else if (Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isMailSelected()) {
-                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail
-                            .addCategory(category);
+            if (Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
+                if (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()) {
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabDocument.document.addCategory(category);
+                } else if (Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected()) {
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addCategory(category);
+                } else if (Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected()) {
+                    Main.get().mainPanel.desktop.browser.tabMultiple.tabMail.mail.addCategory(category);
                 }
             } else {
                 // Otherside tree panel is selected
-                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                        .addCategory(category);
+                Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addCategory(category);
             }
             break;
 
@@ -167,11 +147,10 @@ public class CategoriesSelectPopup extends DialogBox {
     /**
      * Shows the popup 
      */
-    @Override
     public void show() {
         initButtons();
-        final int left = (Window.getClientWidth() - 500) / 2;
-        final int top = (Window.getClientHeight() - 300) / 2;
+        int left = (Window.getClientWidth() - 500) / 2;
+        int top = (Window.getClientHeight() - 300) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("categories.folder.select.label"));
 
@@ -185,7 +164,7 @@ public class CategoriesSelectPopup extends DialogBox {
      * 
      * @param enable
      */
-    public void enable(final boolean enable) {
+    public void enable(boolean enable) {
         actionButton.setEnabled(enable);
     }
 

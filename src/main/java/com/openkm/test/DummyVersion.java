@@ -45,15 +45,11 @@ import org.slf4j.LoggerFactory;
 
 public class DummyVersion {
     private static Logger log = LoggerFactory.getLogger(Dummy.class);
-
     private static String repHomeDir = "repotest2";
-
     private static Session systemSession = null;
-
     private static Repository repository = null;
 
-    public static void main(final String[] args) throws NamingException,
-            RepositoryException, FileNotFoundException {
+    public static void main(String[] args) throws NamingException, RepositoryException, FileNotFoundException {
         log.debug("*** DESTROY REPOSITORY ***");
         removeRepository();
 
@@ -61,18 +57,17 @@ public class DummyVersion {
         createRepository();
 
         log.debug("*** USER LOGIN ***");
-        final Session userSession = login("paco", "pepe");
+        Session userSession = login("paco", "pepe");
 
         log.debug("*** GET MY ROOT NODE ***");
-        final Node rootNode = userSession.getRootNode();
-        final Node myRoot = rootNode.getNode("my:root");
+        Node rootNode = userSession.getRootNode();
+        Node myRoot = rootNode.getNode("my:root");
 
         log.debug("*** ADD A DOCUMENT NODE ***");
-        final Node fileNode = myRoot.addNode("perico", "nt:file");
-        final Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
+        Node fileNode = myRoot.addNode("perico", "nt:file");
+        Node contentNode = fileNode.addNode("jcr:content", "nt:resource");
         contentNode.addMixin("mix:versionable");
-        contentNode.setProperty("jcr:data", new ByteArrayInputStream(
-                "Texto de pruebas".getBytes()));
+        contentNode.setProperty("jcr:data", new ByteArrayInputStream("Texto de pruebas".getBytes()));
         contentNode.setProperty("jcr:mimeType", "text/plain");
         contentNode.setProperty("jcr:lastModified", Calendar.getInstance());
         myRoot.save();
@@ -80,8 +75,7 @@ public class DummyVersion {
         log.debug("*** ADD A DOCUMENT VERSION ***");
         for (int i = 0; i < 5; i++) {
             contentNode.checkout();
-            contentNode.setProperty("jcr:data", new ByteArrayInputStream(
-                    ("Texto de pruebas " + i).getBytes()));
+            contentNode.setProperty("jcr:data", new ByteArrayInputStream(("Texto de pruebas " + i).getBytes()));
             contentNode.save();
             contentNode.checkin();
         }
@@ -92,8 +86,8 @@ public class DummyVersion {
 
         log.debug("*** VIEW DOCUMENT VERSION HISTORY ***");
         VersionHistory vh = contentNode.getVersionHistory();
-        for (final VersionIterator vit = vh.getAllVersions(); vit.hasNext();) {
-            final Version v = vit.nextVersion();
+        for (VersionIterator vit = vh.getAllVersions(); vit.hasNext();) {
+            Version v = vit.nextVersion();
             log.debug(v.getName());
         }
 
@@ -107,16 +101,15 @@ public class DummyVersion {
         log.debug("*** ADD A DOCUMENT VERSION ***");
         for (int i = 0; i < 5; i++) {
             contentNode.checkout();
-            contentNode.setProperty("jcr:data", new ByteArrayInputStream(
-                    ("Texto de pruebas " + i).getBytes()));
+            contentNode.setProperty("jcr:data", new ByteArrayInputStream(("Texto de pruebas " + i).getBytes()));
             contentNode.save();
             contentNode.checkin();
         }
 
         log.debug("*** VIEW DOCUMENT VERSION HISTORY ***");
         vh = contentNode.getVersionHistory();
-        for (final VersionIterator vit = vh.getAllVersions(); vit.hasNext();) {
-            final Version v = vit.nextVersion();
+        for (VersionIterator vit = vh.getAllVersions(); vit.hasNext();) {
+            Version v = vit.nextVersion();
             log.debug(v.getName());
         }
 
@@ -131,7 +124,7 @@ public class DummyVersion {
     private static void removeRepository() {
         try {
             FileUtils.deleteDirectory(new File(repHomeDir));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("No previous repo");
         }
     }
@@ -139,12 +132,10 @@ public class DummyVersion {
     /**
      * 
      */
-    public static Session login(final String user, final String pass)
-            throws NamingException, RepositoryException, LoginException,
+    public static Session login(String user, String pass) throws NamingException, RepositoryException, LoginException,
             NoSuchWorkspaceException {
-        final Repository repository = getRepository();
-        final Session session = repository.login(new SimpleCredentials(user,
-                pass.toCharArray()), null);
+        Repository repository = getRepository();
+        Session session = repository.login(new SimpleCredentials(user, pass.toCharArray()), null);
         log.debug("Session: " + session);
         return session;
     }
@@ -152,15 +143,13 @@ public class DummyVersion {
     /**
      * 
      */
-    public static synchronized Repository getRepository()
-            throws RepositoryException {
+    public static synchronized Repository getRepository() throws RepositoryException {
         if (repository == null) {
             // Repository config
-            final String repositoryConfig = "repository2.xml";
-            final String repositoryHome = "repotest2";
+            String repositoryConfig = "repository2.xml";
+            String repositoryHome = "repotest2";
 
-            final RepositoryConfig config = RepositoryConfig.create(
-                    repositoryConfig, repositoryHome);
+            RepositoryConfig config = RepositoryConfig.create(repositoryConfig, repositoryHome);
             repository = RepositoryImpl.create(config);
             log.debug("*** System repository created " + repository);
         }
@@ -171,13 +160,10 @@ public class DummyVersion {
     /**
      *
      */
-    public static synchronized Session getSystemSession()
-            throws LoginException, NoSuchWorkspaceException,
-            RepositoryException {
+    public static synchronized Session getSystemSession() throws LoginException, NoSuchWorkspaceException, RepositoryException {
         if (systemSession == null) {
             // System User Session
-            systemSession = repository.login(
-                    new SimpleCredentials("system", "".toCharArray()), null);
+            systemSession = repository.login(new SimpleCredentials("system", "".toCharArray()), null);
             log.debug("*** System user created " + systemSession.getUserID());
         }
 
@@ -187,23 +173,20 @@ public class DummyVersion {
     /**
      * 
      */
-    public static Node createRepository() throws NamespaceException,
-            UnsupportedRepositoryOperationException, AccessDeniedException,
-            RepositoryException, ItemExistsException, PathNotFoundException,
-            NoSuchNodeTypeException, LockException, VersionException,
+    public static Node createRepository() throws NamespaceException, UnsupportedRepositoryOperationException, AccessDeniedException,
+            RepositoryException, ItemExistsException, PathNotFoundException, NoSuchNodeTypeException, LockException, VersionException,
             ConstraintViolationException, InvalidItemStateException {
         // Initialize repository
         // Repository repository = getRepository();
-        final Session systemSession = getSystemSession();
+        Session systemSession = getSystemSession();
 
         // Namespace registration
-        final Workspace ws = systemSession.getWorkspace();
-        ws.getNamespaceRegistry().registerNamespace("my",
-                "http://www.guia-ubuntu.org/1.0");
+        Workspace ws = systemSession.getWorkspace();
+        ws.getNamespaceRegistry().registerNamespace("my", "http://www.guia-ubuntu.org/1.0");
 
         // Node creation
-        final Node root = systemSession.getRootNode();
-        final Node okmRoot = root.addNode("my:root", "nt:folder");
+        Node root = systemSession.getRootNode();
+        Node okmRoot = root.addNode("my:root", "nt:folder");
         okmRoot.addMixin("mix:referenceable");
         systemSession.save();
         log.info("****** Repository created *******");
@@ -213,19 +196,15 @@ public class DummyVersion {
     /**
      * 
      */
-    public static void addDocument(final Session session, final Node okmRoot,
-            final String fileName) throws ItemExistsException,
-            PathNotFoundException, NoSuchNodeTypeException, LockException,
-            VersionException, ConstraintViolationException,
-            RepositoryException, ValueFormatException, FileNotFoundException,
-            AccessDeniedException, InvalidItemStateException {
+    public static void addDocument(Session session, Node okmRoot, String fileName) throws ItemExistsException, PathNotFoundException,
+            NoSuchNodeTypeException, LockException, VersionException, ConstraintViolationException, RepositoryException,
+            ValueFormatException, FileNotFoundException, AccessDeniedException, InvalidItemStateException {
         // Add document
-        final Node fileNode = okmRoot.addNode(new File(fileName).getName(),
-                "nt:file");
+        Node fileNode = okmRoot.addNode(new File(fileName).getName(), "nt:file");
         fileNode.addMixin("mix:referenceable");
         fileNode.addMixin("mix:lockable");
         fileNode.addMixin("mix:versionable");
-        final Node resNode = fileNode.addNode("jcr:content", "nt:resource");
+        Node resNode = fileNode.addNode("jcr:content", "nt:resource");
         resNode.setProperty("jcr:mimeType", getMime(fileName));
         resNode.setProperty("jcr:data", new FileInputStream(fileName));
         resNode.setProperty("jcr:lastModified", Calendar.getInstance());
@@ -236,7 +215,7 @@ public class DummyVersion {
     /**
      * 
      */
-    public static String getMime(final String fileName) {
+    public static String getMime(String fileName) {
         if (fileName.endsWith(".doc")) {
             return "application/msword";
         } else if (fileName.endsWith(".odt")) {
@@ -253,22 +232,18 @@ public class DummyVersion {
     /**
      * 
      */
-    public static void search(final Session session, final String words)
-            throws RepositoryException, InvalidQueryException,
-            UnsupportedRepositoryOperationException, ItemNotFoundException,
-            AccessDeniedException {
+    public static void search(Session session, String words) throws RepositoryException, InvalidQueryException,
+            UnsupportedRepositoryOperationException, ItemNotFoundException, AccessDeniedException {
         // Search
-        final String statement = "/jcr:root/my:root//element(*,nt:resource)[jcr:contains(.,'"
-                + words + "')]";
-        final Workspace workspace = session.getWorkspace();
-        final QueryManager queryManager = workspace.getQueryManager();
-        final Query query = queryManager.createQuery(statement,
-                javax.jcr.query.Query.XPATH);
-        final QueryResult result = query.execute();
+        String statement = "/jcr:root/my:root//element(*,nt:resource)[jcr:contains(.,'" + words + "')]";
+        Workspace workspace = session.getWorkspace();
+        QueryManager queryManager = workspace.getQueryManager();
+        Query query = queryManager.createQuery(statement, javax.jcr.query.Query.XPATH);
+        QueryResult result = query.execute();
 
         log.info("Search results:");
-        for (final NodeIterator it = result.getNodes(); it.hasNext();) {
-            final Node sNode = (Node) it.next();
+        for (NodeIterator it = result.getNodes(); it.hasNext();) {
+            Node sNode = (Node) it.next();
             log.info(" * " + sNode.getParent().getName());
         }
     }

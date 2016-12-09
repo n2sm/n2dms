@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.openkm.bean.form.Input;
 import com.openkm.bean.form.Select;
+import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.ItemExistsException;
 import com.openkm.core.MimeTypeConfig;
@@ -62,20 +63,19 @@ import com.openkm.vernum.VersionNumerationAdapter;
 import com.openkm.vernum.VersionNumerationFactory;
 
 public class DbMetadataAdapter extends MetadataAdapter {
-    private static Logger log = LoggerFactory
-            .getLogger(DbMetadataAdapter.class);
+    private static Logger log = LoggerFactory.getLogger(DbMetadataAdapter.class);
 
-    public DbMetadataAdapter(final String token) {
+    public DbMetadataAdapter(String token) {
         super.token = token;
     }
 
     @Override
-    public void importWithMetadata(final DocumentMetadata dmd,
-            final InputStream is) throws ItemExistsException,
-            RepositoryException, DatabaseException, IOException {
+    public void importWithMetadata(DocumentMetadata dmd, InputStream is) throws ItemExistsException, RepositoryException,
+            DatabaseException, IOException {
         log.debug("importWithMetadata({}, {})", new Object[] { dmd, is });
-        final NodeDocumentVersion nDocVer = new NodeDocumentVersion();
-        final NodeDocument nDoc = new NodeDocument();
+        long begin = System.currentTimeMillis();
+        NodeDocumentVersion nDocVer = new NodeDocumentVersion();
+        NodeDocument nDoc = new NodeDocument();
         Session session = null;
         Transaction tx = null;
 
@@ -87,31 +87,29 @@ public class DbMetadataAdapter extends MetadataAdapter {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final String name = PathUtils.getName(dmd.getPath());
-            final String user = PrincipalUtils.getUser();
-            final String parentPath = PathUtils.getParent(dmd.getPath());
-            final String parentUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(parentPath);
-            final NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(
-                    parentUuid);
+            String name = PathUtils.getName(dmd.getPath());
+            String user = PrincipalUtils.getUser();
+            String parentPath = PathUtils.getParent(dmd.getPath());
+            String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(parentPath);
+            NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(parentUuid);
 
             nDoc.setParent(parentUuid);
             nDoc.setContext(parentNode.getContext());
 
-            if (uuid && dmd.getUuid() != null && !dmd.getUuid().equals("")) {
+            if (uuid && dmd.getUuid() != null && !dmd.getUuid().isEmpty()) {
                 nDoc.setUuid(dmd.getUuid());
             } else {
                 nDoc.setUuid(UUID.randomUUID().toString());
             }
 
             // Basic
-            if (dmd.getAuthor() != null && !dmd.getAuthor().equals("")) {
+            if (dmd.getAuthor() != null && !dmd.getAuthor().isEmpty()) {
                 nDoc.setAuthor(dmd.getAuthor());
             } else {
                 nDoc.setAuthor(user);
             }
 
-            if (dmd.getName() != null && !dmd.getName().equals("")) {
+            if (dmd.getName() != null && !dmd.getName().isEmpty()) {
                 nDoc.setName(dmd.getName());
             } else {
                 nDoc.setName(name);
@@ -141,6 +139,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
                 nDoc.setDescription(dmd.getDescription());
             }
 
+            // Document path
+            if (Config.STORE_NODE_PATH) {
+                nDoc.setPath(parentPath + "/" + nDoc.getName());
+            }
+
             // Keywords & categories
             nDoc.setKeywords(dmd.getKeywords());
             nDoc.setCategories(getValues(dmd.getCategories()));
@@ -154,13 +157,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
             importPropertyGroups(nDoc, dmd.getPropertyGroups());
 
             // Security
-            if (dmd.getGrantedUsers() != null
-                    && !dmd.getGrantedUsers().isEmpty()) {
+            if (dmd.getGrantedUsers() != null && !dmd.getGrantedUsers().isEmpty()) {
                 nDoc.setUserPermissions(dmd.getGrantedUsers());
             }
 
-            if (dmd.getGrantedRoles() != null
-                    && !dmd.getGrantedRoles().isEmpty()) {
+            if (dmd.getGrantedRoles() != null && !dmd.getGrantedRoles().isEmpty()) {
                 nDoc.setRolePermissions(dmd.getGrantedRoles());
             }
 
@@ -171,8 +172,7 @@ public class DbMetadataAdapter extends MetadataAdapter {
                 vmd = new VersionMetadata();
             }
 
-            final VersionNumerationAdapter verNumAdapter = VersionNumerationFactory
-                    .getVersionNumerationAdapter();
+            VersionNumerationAdapter verNumAdapter = VersionNumerationFactory.getVersionNumerationAdapter();
             nDocVer.setParent(nDoc.getUuid());
             nDocVer.setUuid(UUID.randomUUID().toString());
             nDocVer.setName(verNumAdapter.getInitialVersionNumber());
@@ -206,8 +206,7 @@ public class DbMetadataAdapter extends MetadataAdapter {
                 nDocVer.setMimeType(vmd.getMimeType());
                 nDoc.setMimeType(vmd.getMimeType());
             } else {
-                final String mimeType = MimeTypeConfig.mimeTypes
-                        .getContentType(name.toLowerCase());
+                String mimeType = MimeTypeConfig.mimeTypes.getContentType(name.toLowerCase());
                 nDocVer.setMimeType(mimeType);
                 nDoc.setMimeType(mimeType);
             }
@@ -221,8 +220,8 @@ public class DbMetadataAdapter extends MetadataAdapter {
 
             // Notes
             if (!dmd.getNotes().isEmpty()) {
-                for (final NoteMetadata nmd : dmd.getNotes()) {
-                    final NodeNote nNote = new NodeNote();
+                for (NoteMetadata nmd : dmd.getNotes()) {
+                    NodeNote nNote = new NodeNote();
                     nNote.setUuid(UUID.randomUUID().toString());
                     nNote.setParent(nDoc.getUuid());
                     nNote.setAuthor(nmd.getUser());
@@ -233,14 +232,14 @@ public class DbMetadataAdapter extends MetadataAdapter {
             }
 
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
 
             // What happen when create fails? This datastore file should be deleted!
             FsDataStore.delete(nDocVer.getUuid());
 
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException("PathNotFound: " + e.getMessage(), e);
         } finally {
@@ -248,19 +247,18 @@ public class DbMetadataAdapter extends MetadataAdapter {
         }
 
         // Activity log
-        UserActivity.log(PrincipalUtils.getUser(), "CREATE_DOCUMENT",
-                nDoc.getUuid(), dmd.getPath(), "Imported with metadata");
+        UserActivity.log(PrincipalUtils.getUser(), "CREATE_DOCUMENT", nDoc.getUuid(), dmd.getPath(), "Imported with metadata");
+
+        log.trace("importWithMetadata.Time: {}", System.currentTimeMillis() - begin);
     }
 
     @Override
-    public void importWithMetadata(final String parentPath,
-            final VersionMetadata vmd, final InputStream is)
-            throws ItemExistsException, RepositoryException, DatabaseException,
-            IOException {
+    public void importWithMetadata(String parentPath, VersionMetadata vmd, InputStream is) throws ItemExistsException, RepositoryException,
+            DatabaseException, IOException {
         log.debug("importWithMetadata({}, {})", vmd, is);
-        final VersionNumerationAdapter verNumAdapter = VersionNumerationFactory
-                .getVersionNumerationAdapter();
-        final NodeDocumentVersion nDocVer = new NodeDocumentVersion();
+        long begin = System.currentTimeMillis();
+        VersionNumerationAdapter verNumAdapter = VersionNumerationFactory.getVersionNumerationAdapter();
+        NodeDocumentVersion nDocVer = new NodeDocumentVersion();
         Session session = null;
         Transaction tx = null;
 
@@ -268,18 +266,15 @@ public class DbMetadataAdapter extends MetadataAdapter {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final String user = PrincipalUtils.getUser();
-            final String parentUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(session, parentPath);
-            final NodeDocument parentNode = (NodeDocument) session.load(
-                    NodeDocument.class, parentUuid);
+            String user = PrincipalUtils.getUser();
+            String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(session, parentPath);
+            NodeDocument parentNode = (NodeDocument) session.load(NodeDocument.class, parentUuid);
 
             nDocVer.setParent(parentUuid);
             nDocVer.setUuid(UUID.randomUUID().toString());
             nDocVer.setCurrent(true);
 
-            final NodeDocumentVersion prevDocVer = NodeDocumentVersionDAO
-                    .getInstance().findCurrentVersion(session, parentUuid);
+            NodeDocumentVersion prevDocVer = NodeDocumentVersionDAO.getInstance().findCurrentVersion(session, parentUuid);
             prevDocVer.setCurrent(false);
 
             // Basic
@@ -316,8 +311,7 @@ public class DbMetadataAdapter extends MetadataAdapter {
             if (vmd.getName() != null && !vmd.getName().equals("")) {
                 nDocVer.setName(vmd.getName());
             } else {
-                nDocVer.setName(verNumAdapter.getNextVersionNumber(session,
-                        parentNode, nDocVer));
+                nDocVer.setName(verNumAdapter.getNextVersionNumber(session, parentNode, nDocVer, 0));
             }
 
             // Persist file in datastore
@@ -328,26 +322,28 @@ public class DbMetadataAdapter extends MetadataAdapter {
             session.save(prevDocVer);
 
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
 
             // What happen when create fails? This datastore file should be deleted!
             FsDataStore.delete(nDocVer.getUuid());
 
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException("PathNotFound: " + e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
         }
+
+        log.trace("importWithMetadata.Time: {}", System.currentTimeMillis() - begin);
     }
 
     @Override
-    public void importWithMetadata(final FolderMetadata fmd)
-            throws ItemExistsException, RepositoryException, DatabaseException {
+    public void importWithMetadata(FolderMetadata fmd) throws ItemExistsException, RepositoryException, DatabaseException {
         log.debug("importWithMetadata({})", fmd);
-        final NodeFolder nFld = new NodeFolder();
+        long begin = System.currentTimeMillis();
+        NodeFolder nFld = new NodeFolder();
         Session session = null;
         Transaction tx = null;
 
@@ -359,13 +355,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final String name = PathUtils.getName(fmd.getPath());
-            final String user = PrincipalUtils.getUser();
-            final String parentPath = PathUtils.getParent(fmd.getPath());
-            final String parentUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(parentPath);
-            final NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(
-                    parentUuid);
+            String name = PathUtils.getName(fmd.getPath());
+            String user = PrincipalUtils.getUser();
+            String parentPath = PathUtils.getParent(fmd.getPath());
+            String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(parentPath);
+            NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(parentUuid);
 
             nFld.setParent(parentUuid);
             nFld.setContext(parentNode.getContext());
@@ -399,6 +393,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
                 nFld.setDescription(fmd.getDescription());
             }
 
+            // Folder path
+            if (Config.STORE_NODE_PATH) {
+                nFld.setPath(parentPath + "/" + nFld.getName());
+            }
+
             // Keywords & categories
             nFld.setKeywords(fmd.getKeywords());
             nFld.setCategories(getValues(fmd.getCategories()));
@@ -412,13 +411,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
             importPropertyGroups(nFld, fmd.getPropertyGroups());
 
             // Security
-            if (fmd.getGrantedUsers() != null
-                    && !fmd.getGrantedUsers().isEmpty()) {
+            if (fmd.getGrantedUsers() != null && !fmd.getGrantedUsers().isEmpty()) {
                 nFld.setUserPermissions(fmd.getGrantedUsers());
             }
 
-            if (fmd.getGrantedRoles() != null
-                    && !fmd.getGrantedRoles().isEmpty()) {
+            if (fmd.getGrantedRoles() != null && !fmd.getGrantedRoles().isEmpty()) {
                 nFld.setRolePermissions(fmd.getGrantedRoles());
             }
 
@@ -427,8 +424,8 @@ public class DbMetadataAdapter extends MetadataAdapter {
 
             // Notes
             if (!fmd.getNotes().isEmpty()) {
-                for (final NoteMetadata nmd : fmd.getNotes()) {
-                    final NodeNote nNote = new NodeNote();
+                for (NoteMetadata nmd : fmd.getNotes()) {
+                    NodeNote nNote = new NodeNote();
                     nNote.setUuid(UUID.randomUUID().toString());
                     nNote.setParent(nFld.getUuid());
                     nNote.setAuthor(nmd.getUser());
@@ -439,10 +436,10 @@ public class DbMetadataAdapter extends MetadataAdapter {
             }
 
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException("PathNotFound: " + e.getMessage(), e);
         } finally {
@@ -450,15 +447,16 @@ public class DbMetadataAdapter extends MetadataAdapter {
         }
 
         // Activity log
-        UserActivity.log(PrincipalUtils.getUser(), "CREATE_FOLDER",
-                nFld.getUuid(), fmd.getPath(), "Imported with metadata");
+        UserActivity.log(PrincipalUtils.getUser(), "CREATE_FOLDER", nFld.getUuid(), fmd.getPath(), "Imported with metadata");
+
+        log.trace("importWithMetadata.Time: {}", System.currentTimeMillis() - begin);
     }
 
     @Override
-    public void importWithMetadata(final MailMetadata mmd)
-            throws ItemExistsException, RepositoryException, DatabaseException {
+    public void importWithMetadata(MailMetadata mmd) throws ItemExistsException, RepositoryException, DatabaseException {
         log.debug("importWithMetadata({})", new Object[] { mmd });
-        final NodeMail nMail = new NodeMail();
+        long begin = System.currentTimeMillis();
+        NodeMail nMail = new NodeMail();
         Session session = null;
         Transaction tx = null;
 
@@ -470,13 +468,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final String name = PathUtils.getName(mmd.getPath());
-            final String user = PrincipalUtils.getUser();
-            final String parentPath = PathUtils.getParent(mmd.getPath());
-            final String parentUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(parentPath);
-            final NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(
-                    parentUuid);
+            String name = PathUtils.getName(mmd.getPath());
+            String user = PrincipalUtils.getUser();
+            String parentPath = PathUtils.getParent(mmd.getPath());
+            String parentUuid = NodeBaseDAO.getInstance().getUuidFromPath(parentPath);
+            NodeBase parentNode = NodeBaseDAO.getInstance().findByPk(parentUuid);
 
             nMail.setParent(parentUuid);
             nMail.setContext(parentNode.getContext());
@@ -526,6 +522,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
                 nMail.setContent(mmd.getContent());
             }
 
+            // Document path
+            if (Config.STORE_NODE_PATH) {
+                nMail.setPath(parentPath + "/" + nMail.getName());
+            }
+
             // Keywords & categories
             nMail.setKeywords(mmd.getKeywords());
             nMail.setCategories(getValues(mmd.getCategories()));
@@ -534,13 +535,11 @@ public class DbMetadataAdapter extends MetadataAdapter {
             importPropertyGroups(nMail, mmd.getPropertyGroups());
 
             // Security
-            if (mmd.getGrantedUsers() != null
-                    && !mmd.getGrantedUsers().isEmpty()) {
+            if (mmd.getGrantedUsers() != null && !mmd.getGrantedUsers().isEmpty()) {
                 nMail.setUserPermissions(mmd.getGrantedUsers());
             }
 
-            if (mmd.getGrantedRoles() != null
-                    && !mmd.getGrantedRoles().isEmpty()) {
+            if (mmd.getGrantedRoles() != null && !mmd.getGrantedRoles().isEmpty()) {
                 nMail.setRolePermissions(mmd.getGrantedRoles());
             }
 
@@ -549,8 +548,8 @@ public class DbMetadataAdapter extends MetadataAdapter {
 
             // Notes
             if (!mmd.getNotes().isEmpty()) {
-                for (final NoteMetadata nmd : mmd.getNotes()) {
-                    final NodeNote nNote = new NodeNote();
+                for (NoteMetadata nmd : mmd.getNotes()) {
+                    NodeNote nNote = new NodeNote();
                     nNote.setUuid(UUID.randomUUID().toString());
                     nNote.setParent(nMail.getUuid());
                     nNote.setAuthor(nmd.getUser());
@@ -561,10 +560,10 @@ public class DbMetadataAdapter extends MetadataAdapter {
             }
 
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException("PathNotFound: " + e.getMessage(), e);
         } finally {
@@ -572,35 +571,33 @@ public class DbMetadataAdapter extends MetadataAdapter {
         }
 
         // Activity log
-        UserActivity.log(PrincipalUtils.getUser(), "CREATE_MAIL",
-                nMail.getUuid(), mmd.getPath(), "Imported with metadata");
+        UserActivity.log(PrincipalUtils.getUser(), "CREATE_MAIL", nMail.getUuid(), mmd.getPath(), "Imported with metadata");
+
+        log.trace("importWithMetadata.Time: {}", System.currentTimeMillis() - begin);
     }
 
     /**
      * 
      */
-    private void importPropertyGroups(final NodeBase nBase,
-            final List<PropertyGroupMetadata> pGroups) {
-        final Gson gson = new Gson();
+    private void importPropertyGroups(NodeBase nBase, List<PropertyGroupMetadata> pGroups) {
+        Gson gson = new Gson();
 
-        for (final PropertyGroupMetadata pgmd : pGroups) {
-            for (final PropertyMetadata pmd : pgmd.getProperties()) {
-                final NodeProperty nProp = new NodeProperty();
+        for (PropertyGroupMetadata pgmd : pGroups) {
+            for (PropertyMetadata pmd : pgmd.getProperties()) {
+                NodeProperty nProp = new NodeProperty();
                 nProp.setGroup(pgmd.getName());
                 nProp.setName(pmd.getName());
                 nProp.setNode(nBase);
 
-                if (pmd.isMultiValue()
-                        || Select.class.getSimpleName().equals(pmd.getType())) {
+                if (pmd.isMultiValue() || Select.class.getSimpleName().equals(pmd.getType())) {
                     nProp.setValue(gson.toJson(pmd.getValues()));
                 } else {
                     // Check if input of type date is in extended ISO8601 format, and convert if needed
                     if (Input.class.getSimpleName().equals(pmd.getType())) {
-                        final String value = pmd.getValue();
+                        String value = pmd.getValue();
 
                         if (ISO8601.isExtended(value)) {
-                            final Calendar calValue = ISO8601
-                                    .parseExtended(value);
+                            Calendar calValue = ISO8601.parseExtended(value);
                             nProp.setValue(ISO8601.formatBasic(calValue));
                         } else {
                             nProp.setValue(value);
@@ -619,10 +616,10 @@ public class DbMetadataAdapter extends MetadataAdapter {
     /**
      * Convert between formats.
      */
-    private Set<String> getValues(final Set<CategoryMetadata> categories) {
-        final Set<String> ret = new HashSet<String>();
+    private Set<String> getValues(Set<CategoryMetadata> categories) {
+        Set<String> ret = new HashSet<String>();
 
-        for (final CategoryMetadata cmd : categories) {
+        for (CategoryMetadata cmd : categories) {
             try {
                 if (cmd.getUuid() != null && !cmd.getUuid().equals("")) {
                     if (NodeBaseDAO.getInstance().itemUuidExists(cmd.getUuid())) {
@@ -631,13 +628,12 @@ public class DbMetadataAdapter extends MetadataAdapter {
                         log.warn("Category UUID not found: {}", cmd.getUuid());
                     }
                 } else if (cmd.getPath() != null && !cmd.getPath().equals("")) {
-                    final String uuid = NodeBaseDAO.getInstance()
-                            .getUuidFromPath(cmd.getPath());
+                    String uuid = NodeBaseDAO.getInstance().getUuidFromPath(cmd.getPath());
                     ret.add(uuid);
                 }
-            } catch (final PathNotFoundException e) {
+            } catch (PathNotFoundException e) {
                 log.warn("Category node not found: {}", cmd.getPath());
-            } catch (final DatabaseException e) {
+            } catch (DatabaseException e) {
                 log.warn("Error resolving category: {}", cmd);
             }
         }

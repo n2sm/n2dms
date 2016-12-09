@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,28 +34,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTUpload extends GWTFormElement implements IsSerializable {
     public static final String TYPE_CREATE = "create";
-
     public static final String TYPE_UPDATE = "update";
-
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private String type = TYPE_CREATE;
-
     private String folderPath = "";
-
     private String folderUuid = "";
-
     private String documentName = "";
-
     private String documentUuid = "";
-
     private String data = "";
 
     public List<GWTValidator> getValidators() {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -63,7 +55,7 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -71,7 +63,7 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return folderUuid;
     }
 
-    public void setFolderUuid(final String folderUuid) {
+    public void setFolderUuid(String folderUuid) {
         this.folderUuid = folderUuid;
     }
 
@@ -79,7 +71,7 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return documentUuid;
     }
 
-    public void setDocumentUuid(final String documentUuid) {
+    public void setDocumentUuid(String documentUuid) {
         this.documentUuid = documentUuid;
     }
 
@@ -87,7 +79,7 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return folderPath;
     }
 
-    public void setFolderPath(final String folderPath) {
+    public void setFolderPath(String folderPath) {
         this.folderPath = folderPath;
     }
 
@@ -95,7 +87,7 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return documentName;
     }
 
-    public void setDocumentName(final String documentName) {
+    public void setDocumentName(String documentName) {
         this.documentName = documentName;
     }
 
@@ -103,13 +95,12 @@ public class GWTUpload extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);

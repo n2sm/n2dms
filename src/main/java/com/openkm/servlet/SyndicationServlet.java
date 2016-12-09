@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -56,100 +56,78 @@ import com.sun.syndication.io.SyndFeedOutput;
  * Syndication Servlet
  */
 public class SyndicationServlet extends BasicSecuredServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(SyndicationServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(SyndicationServlet.class);
     private static final long serialVersionUID = 1L;
-
     private static final String FEED_TYPE = "rss_2.0"; // atom_0.3
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String action = request.getPathInfo();
-        final String userId = request.getRemoteUser();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String action = request.getPathInfo();
+        String userId = request.getRemoteUser();
         log.debug("action: {}", action);
 
         try {
             SyndFeed feed = null;
 
             if ("/userLockedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserLockedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserLockedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user locked documents");
             } else if ("/userCheckedOutDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserCheckedOutDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserCheckedOutDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user checked-out documents");
             } else if ("/userSubscribedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserSubscribedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserSubscribedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user subscribed documents");
             } else if ("/userSubscribedFolders".equals(action)) {
-                feed = getFeedFolders(new DbDashboardModule()
-                        .getUserSubscribedFoldersSrv(userId));
+                feed = getFeedFolders(new DbDashboardModule().getUserSubscribedFoldersSrv(userId));
                 feed.setTitle("OpenKM: user subscribed folders");
             } else if ("/userLastUploadedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserLastUploadedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserLastUploadedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user last uploaded documents");
             } else if ("/userLastModifiedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserLastModifiedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserLastModifiedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user last modified documents");
             } else if ("/userLastDownloadedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserLastDownloadedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserLastDownloadedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: user last downloaded documents");
             } else if ("/userLastImportedMails".equals(action)) {
-                feed = getFeedMails(new DbDashboardModule()
-                        .getUserLastImportedMailsSrv(userId));
+                feed = getFeedMails(new DbDashboardModule().getUserLastImportedMailsSrv(userId));
                 feed.setTitle("OpenKM: user last imported mails");
             } else if ("/userLastImportedMailAttachments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getUserLastImportedMailAttachmentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getUserLastImportedMailAttachmentsSrv(userId));
                 feed.setTitle("OpenKM: user last imported mail attachments");
             } else if ("/lastWeekTopDownloadedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastWeekTopDownloadedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastWeekTopDownloadedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last week top downloaded documents");
             } else if ("/lastMonthTopDownloadedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastMonthTopDownloadedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastMonthTopDownloadedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last month top downloaded documents");
             } else if ("/lastWeekTopModifiedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastWeekTopModifiedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastWeekTopModifiedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last week top modified documents");
             } else if ("/lastMonthTopModifiedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastMonthTopModifiedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastMonthTopModifiedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last month top modified documents");
             } else if ("/lastModifiedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastModifiedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastModifiedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last modified documents");
             } else if ("/lastUploadedDocuments".equals(action)) {
-                feed = getFeedDocuments(new DbDashboardModule()
-                        .getLastUploadedDocumentsSrv(userId));
+                feed = getFeedDocuments(new DbDashboardModule().getLastUploadedDocumentsSrv(userId));
                 feed.setTitle("OpenKM: last uploaded documents");
             } else if (action != null && action.startsWith("/news_")) {
-                final String qpStr = action.substring(6);
-                final int qpId = Integer.parseInt(qpStr);
-                final QueryParams qp = QueryParamsDAO.findByPk(qpId);
-                feed = getFeedDocuments(new DbDashboardModule().findSrv(userId,
-                        qpId));
+                String qpStr = action.substring(6);
+                int qpId = Integer.parseInt(qpStr);
+                QueryParams qp = QueryParamsDAO.findByPk(qpId);
+                feed = getFeedDocuments(new DbDashboardModule().findSrv(userId, qpId));
                 feed.setTitle("OpenKM: " + qp.getQueryName());
             }
 
             if (feed != null) {
                 response.setContentType("application/xml; charset=UTF-8");
-                final SyndFeedOutput output = new SyndFeedOutput();
-                final SyndImage img = new SyndImageImpl();
+                SyndFeedOutput output = new SyndFeedOutput();
+                SyndImage img = new SyndImageImpl();
                 img.setTitle(feed.getTitle());
                 img.setUrl(Config.APPLICATION_BASE + "/img/logo_short.gif");
                 img.setLink(Config.APPLICATION_BASE);
@@ -161,37 +139,32 @@ public class SyndicationServlet extends BasicSecuredServlet {
                 output.output(feed, response.getWriter());
             } else {
                 response.setContentType("text/plain; charset=UTF-8");
-                final PrintWriter out = response.getWriter();
+                PrintWriter out = response.getWriter();
                 out.println("Unknown syndicantion feed");
                 out.close();
             }
-        } catch (final DatabaseException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final FeedException e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-        } catch (final Exception e) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+        } catch (DatabaseException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (FeedException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     /**
      * Get feed documents
      */
-    private SyndFeed getFeedDocuments(final List<DashboardDocumentResult> result)
-            throws FeedException, SQLException, IOException {
-        final List<SyndEntry> entries = new ArrayList<SyndEntry>();
-        final SyndFeed feed = new SyndFeedImpl();
+    private SyndFeed getFeedDocuments(List<DashboardDocumentResult> result) throws FeedException, SQLException, IOException {
+        List<SyndEntry> entries = new ArrayList<SyndEntry>();
+        SyndFeed feed = new SyndFeedImpl();
 
-        for (final DashboardDocumentResult item : result) {
-            final SyndEntry entry = new SyndEntryImpl();
+        for (DashboardDocumentResult item : result) {
+            SyndEntry entry = new SyndEntryImpl();
             entry.setTitle(item.getDocument().getPath());
             entry.setAuthor(item.getDocument().getActualVersion().getAuthor());
             entry.setPublishedDate(item.getDate().getTime());
-            entry.setLink(Config.APPLICATION_URL + "?docPath="
-                    + URLEncoder.encode(item.getDocument().getPath(), "UTF-8"));
+            entry.setLink(Config.APPLICATION_URL + "?docPath=" + URLEncoder.encode(item.getDocument().getPath(), "UTF-8"));
             entries.add(entry);
         }
 
@@ -202,18 +175,16 @@ public class SyndicationServlet extends BasicSecuredServlet {
     /**
      * Get feed folders
      */
-    private SyndFeed getFeedFolders(final List<DashboardFolderResult> result)
-            throws FeedException, SQLException, IOException {
-        final List<SyndEntry> entries = new ArrayList<SyndEntry>();
-        final SyndFeed feed = new SyndFeedImpl();
+    private SyndFeed getFeedFolders(List<DashboardFolderResult> result) throws FeedException, SQLException, IOException {
+        List<SyndEntry> entries = new ArrayList<SyndEntry>();
+        SyndFeed feed = new SyndFeedImpl();
 
-        for (final DashboardFolderResult item : result) {
-            final SyndEntry entry = new SyndEntryImpl();
+        for (DashboardFolderResult item : result) {
+            SyndEntry entry = new SyndEntryImpl();
             entry.setTitle(item.getFolder().getPath());
             entry.setAuthor(item.getFolder().getAuthor());
             entry.setPublishedDate(item.getDate().getTime());
-            entry.setLink(Config.APPLICATION_URL + "?fldPath="
-                    + URLEncoder.encode(item.getFolder().getPath(), "UTF-8"));
+            entry.setLink(Config.APPLICATION_URL + "?fldPath=" + URLEncoder.encode(item.getFolder().getPath(), "UTF-8"));
             entries.add(entry);
         }
 
@@ -224,18 +195,16 @@ public class SyndicationServlet extends BasicSecuredServlet {
     /**
      * Get feed mails
      */
-    private SyndFeed getFeedMails(final List<DashboardMailResult> result)
-            throws FeedException, SQLException, IOException {
-        final List<SyndEntry> entries = new ArrayList<SyndEntry>();
-        final SyndFeed feed = new SyndFeedImpl();
+    private SyndFeed getFeedMails(List<DashboardMailResult> result) throws FeedException, SQLException, IOException {
+        List<SyndEntry> entries = new ArrayList<SyndEntry>();
+        SyndFeed feed = new SyndFeedImpl();
 
-        for (final DashboardMailResult item : result) {
-            final SyndEntry entry = new SyndEntryImpl();
+        for (DashboardMailResult item : result) {
+            SyndEntry entry = new SyndEntryImpl();
             entry.setTitle(item.getMail().getPath());
             entry.setAuthor(item.getMail().getFrom());
             entry.setPublishedDate(item.getDate().getTime());
-            entry.setLink(Config.APPLICATION_URL + "?docPath="
-                    + URLEncoder.encode(item.getMail().getPath(), "UTF-8"));
+            entry.setLink(Config.APPLICATION_URL + "?docPath=" + URLEncoder.encode(item.getMail().getPath(), "UTF-8"));
             entries.add(entry);
         }
 

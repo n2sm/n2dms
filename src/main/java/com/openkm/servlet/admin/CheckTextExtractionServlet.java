@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -23,6 +23,7 @@ package com.openkm.servlet.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -57,34 +58,25 @@ import com.openkm.util.PathUtils;
  */
 public class CheckTextExtractionServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(CheckTextExtractionServlet.class);
 
-    private static Logger log = LoggerFactory
-            .getLogger(CheckTextExtractionServlet.class);
-
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         updateSessionManager(request);
 
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
         sc.setAttribute("repoPath", "/" + Repository.ROOT);
         sc.setAttribute("docUuid", null);
         sc.setAttribute("text", null);
         sc.setAttribute("time", null);
         sc.setAttribute("mimeType", null);
         sc.setAttribute("extractor", null);
-        sc.getRequestDispatcher("/admin/check_text_extraction.jsp").forward(
-                request, response);
+        sc.getRequestDispatcher("/admin/check_text_extraction.jsp").forward(request, response);
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doPost({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         updateSessionManager(request);
@@ -92,16 +84,19 @@ public class CheckTextExtractionServlet extends BaseServlet {
 
         try {
             if (ServletFileUpload.isMultipartContent(request)) {
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
-                final List<FileItem> items = upload.parseRequest(request);
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> items = upload.parseRequest(request);
                 String docUuid = null;
                 String repoPath = null;
                 String text = null;
+                String error = null;
                 String mimeType = null;
                 String extractor = null;
 
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (item.isFormField()) {
                         if (item.getFieldName().equals("docUuid")) {
                             docUuid = item.getString("UTF-8");
@@ -110,10 +105,8 @@ public class CheckTextExtractionServlet extends BaseServlet {
                         }
                     } else {
                         is = item.getInputStream();
-                        final String name = FilenameUtils.getName(item
-                                .getName());
-                        mimeType = MimeTypeConfig.mimeTypes.getContentType(name
-                                .toLowerCase());
+                        String name = FilenameUtils.getName(item.getName());
+                        mimeType = MimeTypeConfig.mimeTypes.getContentType(name.toLowerCase());
 
                         if (!name.isEmpty() && item.getSize() > 0) {
                             docUuid = null;
@@ -125,54 +118,53 @@ public class CheckTextExtractionServlet extends BaseServlet {
                 }
 
                 if (docUuid != null && !docUuid.isEmpty()) {
-                    repoPath = OKMRepository.getInstance().getNodePath(null,
-                            docUuid);
+                    repoPath = OKMRepository.getInstance().getNodePath(null, docUuid);
                 }
 
                 if (repoPath != null && !repoPath.isEmpty()) {
-                    final String name = PathUtils.getName(repoPath);
-                    mimeType = MimeTypeConfig.mimeTypes.getContentType(name
-                            .toLowerCase());
-                    is = OKMDocument.getInstance().getContent(null, repoPath,
-                            false);
+                    String name = PathUtils.getName(repoPath);
+                    mimeType = MimeTypeConfig.mimeTypes.getContentType(name.toLowerCase());
+                    is = OKMDocument.getInstance().getContent(null, repoPath, false);
                 }
 
-                final long begin = System.currentTimeMillis();
+                long begin = System.currentTimeMillis();
 
                 if (is != null) {
                     if (!MimeTypeConfig.MIME_UNDEFINED.equals(mimeType)) {
-                        final TextExtractor extClass = RegisteredExtractors
-                                .getTextExtractor(mimeType);
+                        TextExtractor extClass = RegisteredExtractors.getTextExtractor(mimeType);
 
                         if (extClass != null) {
-                            extractor = extClass.getClass().getCanonicalName();
-                            text = RegisteredExtractors.getText(mimeType, null,
-                                    is);
+                            try {
+                                extractor = extClass.getClass().getCanonicalName();
+                                text = RegisteredExtractors.getText(mimeType, null, is);
+                            } catch (Exception e) {
+                                error = e.getMessage();
+                            }
                         } else {
                             extractor = "Undefined text extractor";
                         }
                     }
                 }
 
-                final ServletContext sc = getServletContext();
+                ServletContext sc = getServletContext();
                 sc.setAttribute("docUuid", docUuid);
                 sc.setAttribute("repoPath", repoPath);
                 sc.setAttribute("text", text);
                 sc.setAttribute("time", System.currentTimeMillis() - begin);
                 sc.setAttribute("mimeType", mimeType);
+                sc.setAttribute("error", error);
                 sc.setAttribute("extractor", extractor);
-                sc.getRequestDispatcher("/admin/check_text_extraction.jsp")
-                        .forward(request, response);
+                sc.getRequestDispatcher("/admin/check_text_extraction.jsp").forward(request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             sendErrorRedirect(request, response, e);
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             sendErrorRedirect(request, response, e);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             sendErrorRedirect(request, response, e);
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             sendErrorRedirect(request, response, e);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             sendErrorRedirect(request, response, e);
         } finally {
             IOUtils.closeQuietly(is);

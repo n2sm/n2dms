@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,8 +42,7 @@ public class TabFolderComunicator {
      * @return
      */
     public static int getSelectedTab() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .getSelectedTab();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.getSelectedTab();
     }
 
     /**
@@ -52,8 +51,7 @@ public class TabFolderComunicator {
      * @return
      */
     public static GWTFolder getFolder() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .getFolder();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.getFolder();
     }
 
     /**
@@ -62,8 +60,7 @@ public class TabFolderComunicator {
      * @return
      */
     public static boolean isVisibleButton() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .isVisibleButton();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.isVisibleButton();
     }
 
     /**
@@ -71,9 +68,8 @@ public class TabFolderComunicator {
      * 
      * @param keyword
      */
-    public static void addKeyword(final String keyword) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                .addKeyword(keyword);
+    public static void addKeyword(String keyword) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addKeyword(keyword);
     }
 
     /**
@@ -81,9 +77,8 @@ public class TabFolderComunicator {
      * 
      * @param keyword
      */
-    public static void removeKeyword(final String keyword) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                .removeKey(keyword);
+    public static void removeKeyword(String keyword) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.removeKey(keyword);
     }
 
     /**
@@ -91,9 +86,8 @@ public class TabFolderComunicator {
      * 
      * @param keyword
      */
-    public static void addCategory(final GWTFolder category) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                .addCategory(category);
+    public static void addCategory(GWTFolder category) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.addCategory(category);
     }
 
     /**
@@ -101,9 +95,8 @@ public class TabFolderComunicator {
      * 
      * @param keyword
      */
-    public static void removeCategory(final String UUID) {
-        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                .removeCategory(UUID);
+    public static void removeCategory(String UUID) {
+        Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.removeCategory(UUID);
     }
 
     /**
@@ -112,8 +105,7 @@ public class TabFolderComunicator {
      * @return
      */
     public static Collection<String> getKeywords() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder
-                .getKeywords();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.folder.getKeywords();
     }
 
     /**
@@ -122,8 +114,7 @@ public class TabFolderComunicator {
      * @return
      */
     public static Collection<GWTNote> getNotes() {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.notes
-                .getNotes();
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.notes.getNotes();
     }
 
     /**
@@ -132,8 +123,7 @@ public class TabFolderComunicator {
      * @param widget
      * @return
      */
-    public static boolean isWidgetExtensionVisible(final Widget widget) {
-        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder
-                .isWidgetExtensionVisible(widget);
+    public static boolean isWidgetExtensionVisible(Widget widget) {
+        return Main.get().mainPanel.desktop.browser.tabMultiple.tabFolder.isWidgetExtensionVisible(widget);
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,15 +44,12 @@ import com.openkm.core.DatabaseException;
  */
 public abstract class GenericDAO<T, ID extends Serializable> {
     private static Logger log = LoggerFactory.getLogger(GenericDAO.class);
-
     private Class<T> persistentClass;
-
     private Session session;
 
     @SuppressWarnings("unchecked")
     public GenericDAO() {
-        final ParameterizedType thisType = (ParameterizedType) getClass()
-                .getGenericSuperclass();
+        ParameterizedType thisType = (ParameterizedType) getClass().getGenericSuperclass();
         this.persistentClass = (Class<T>) thisType.getActualTypeArguments()[0];
     }
 
@@ -60,7 +57,7 @@ public abstract class GenericDAO<T, ID extends Serializable> {
         return persistentClass;
     }
 
-    public void setSession(final Session session) {
+    public void setSession(Session session) {
         this.session = session;
     }
 
@@ -72,7 +69,7 @@ public abstract class GenericDAO<T, ID extends Serializable> {
      * Create
      */
     @SuppressWarnings("unchecked")
-    public ID create(final T t) throws DatabaseException {
+    public ID create(T t) throws DatabaseException {
         log.debug("create({})", t);
         Session session = null;
         Transaction tx = null;
@@ -80,11 +77,11 @@ public abstract class GenericDAO<T, ID extends Serializable> {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final ID id = (ID) session.save(t);
+            ID id = (ID) session.save(t);
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -95,7 +92,7 @@ public abstract class GenericDAO<T, ID extends Serializable> {
     /**
      * Update
      */
-    public void update(final T t) throws DatabaseException {
+    public void update(T t) throws DatabaseException {
         log.debug("update({})", t);
         Session session = null;
         Transaction tx = null;
@@ -105,7 +102,7 @@ public abstract class GenericDAO<T, ID extends Serializable> {
             tx = session.beginTransaction();
             session.update(t);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -119,7 +116,7 @@ public abstract class GenericDAO<T, ID extends Serializable> {
      * Delete
      */
     @SuppressWarnings("unchecked")
-    public void delete(final ID id) throws DatabaseException {
+    public void delete(ID id) throws DatabaseException {
         log.debug("delete({})", id);
         Session session = null;
         Transaction tx = null;
@@ -127,10 +124,10 @@ public abstract class GenericDAO<T, ID extends Serializable> {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final T t = (T) session.load(persistentClass, id);
+            T t = (T) session.load(persistentClass, id);
             session.delete(t);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -144,17 +141,17 @@ public abstract class GenericDAO<T, ID extends Serializable> {
      * Find by primary key
      */
     @SuppressWarnings("unchecked")
-    public T findByPk(final ID id) throws DatabaseException {
+    public T findByPk(ID id) throws DatabaseException {
         log.debug("findByPk({})", id);
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final T ret = (T) session.load(persistentClass, id);
+            T ret = (T) session.load(persistentClass, id);
             Hibernate.initialize(ret);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -171,12 +168,11 @@ public abstract class GenericDAO<T, ID extends Serializable> {
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery("from "
-                    + persistentClass.getName() + " x");
-            final List<T> ret = q.list();
+            Query q = session.createQuery("from " + persistentClass.getName() + " x");
+            List<T> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,14 +39,11 @@ import org.hibernate.annotations.Type;
 @Table(name = "OKM_ACTIVITY")
 @org.hibernate.annotations.Table(appliesTo = "OKM_ACTIVITY", indexes = {
 // CREATE INDEX IDX_ACTIVITY_DATACT ON OKM_ACTIVITY(ACT_DATE, ACT_ACTION);
-        @Index(name = "IDX_ACTIVITY_DATACT", columnNames = { "ACT_DATE",
-                "ACT_ACTION" }),
+        @Index(name = "IDX_ACTIVITY_DATACT", columnNames = { "ACT_DATE", "ACT_ACTION" }),
         // CREATE INDEX IDX_ACTIVITY_USRACT ON OKM_ACTIVITY(ACT_USER, ACT_ACTION);
-        @Index(name = "IDX_ACTIVITY_USRACT", columnNames = { "ACT_USER",
-                "ACT_ACTION" }) })
+        @Index(name = "IDX_ACTIVITY_USRACT", columnNames = { "ACT_USER", "ACT_ACTION" }) })
 public class Activity implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private static final int MAX_LENGTH = 4000;
 
     @Id
@@ -70,19 +67,19 @@ public class Activity implements Serializable {
 
     @Column(name = "ACT_PATH")
     @Lob
-    @Type(type = "org.hibernate.type.TextType")
+    @Type(type = "org.hibernate.type.StringClobType")
     private String path;
 
     @Column(name = "ACT_PARAMS", length = MAX_LENGTH)
     // Changed to VARCHAR(4000) for Oracle compatibility
-    // @Lob @Type(type = "org.hibernate.type.TextType")
+    // @Lob @Type(type = "org.hibernate.type.StringClobType")
     private String params;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -90,7 +87,7 @@ public class Activity implements Serializable {
         return action;
     }
 
-    public void setAction(final String action) {
+    public void setAction(String action) {
         this.action = action;
     }
 
@@ -98,7 +95,7 @@ public class Activity implements Serializable {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
@@ -106,7 +103,7 @@ public class Activity implements Serializable {
         return item;
     }
 
-    public void setItem(final String item) {
+    public void setItem(String item) {
         this.item = item;
     }
 
@@ -114,7 +111,7 @@ public class Activity implements Serializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -122,7 +119,7 @@ public class Activity implements Serializable {
         return params;
     }
 
-    public void setParams(final String params) {
+    public void setParams(String params) {
         if (params != null && params.length() > MAX_LENGTH) {
             this.params = params.substring(0, MAX_LENGTH);
         } else {
@@ -134,13 +131,12 @@ public class Activity implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

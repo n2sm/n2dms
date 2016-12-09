@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,11 +21,11 @@
 
 package com.openkm.frontend.client.bean.form;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * GWTSelect
@@ -35,26 +35,21 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTSelect extends GWTFormElement implements IsSerializable {
     public static final String TYPE_SIMPLE = "simple";
-
     public static final String TYPE_MULTIPLE = "multiple";
-
     private Collection<GWTOption> options = new ArrayList<GWTOption>();
-
     private List<GWTValidator> validators = new ArrayList<GWTValidator>();
-
     private String type = TYPE_SIMPLE;
-
     private String data = "";
-
     private String optionsData = "";
-
+    private String suggestion = "";
+    private String className = "";
     private boolean readonly = false;
 
     public Collection<GWTOption> getOptions() {
         return options;
     }
 
-    public void setOptions(final Collection<GWTOption> options) {
+    public void setOptions(Collection<GWTOption> options) {
         this.options = options;
     }
 
@@ -62,7 +57,7 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -70,7 +65,7 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         return validators;
     }
 
-    public void setValidators(final List<GWTValidator> validators) {
+    public void setValidators(List<GWTValidator> validators) {
         this.validators = validators;
     }
 
@@ -78,7 +73,7 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         return readonly;
     }
 
-    public void setReadonly(final boolean readonly) {
+    public void setReadonly(boolean readonly) {
         this.readonly = readonly;
     }
 
@@ -86,7 +81,7 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         return data;
     }
 
-    public void setData(final String data) {
+    public void setData(String data) {
         this.data = data;
     }
 
@@ -94,13 +89,28 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         return optionsData;
     }
 
-    public void setOptionsData(final String optionsData) {
+    public void setOptionsData(String optionsData) {
         this.optionsData = optionsData;
     }
 
-    @Override
+    public String getSuggestion() {
+        return suggestion;
+    }
+
+    public void setSuggestion(String suggestion) {
+        this.suggestion = suggestion;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("label=");
         sb.append(label);
@@ -120,6 +130,8 @@ public class GWTSelect extends GWTFormElement implements IsSerializable {
         sb.append(validators);
         sb.append(", data=");
         sb.append(data);
+        sb.append(", suggestion=");
+        sb.append(suggestion);
         sb.append("}");
         return sb.toString();
     }

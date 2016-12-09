@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -45,23 +45,21 @@ import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
 
 public class ResourceUtils {
-    private static final Logger log = LoggerFactory
-            .getLogger(ResourceUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceUtils.class);
 
     /**
      * Resolve node resource (may be folder or document)
      */
-    public static Resource getNode(final Path srcPath, final String path)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public static Resource getNode(Path srcPath, String path) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
         log.debug("getNode({}, {})", srcPath, path);
-        final String fixedPath = ResourceUtils.fixRepositoryPath(path);
+        long begin = System.currentTimeMillis();
+        String fixedPath = ResourceUtils.fixRepositoryPath(path);
         Resource res = null;
 
         try {
             if (OKMFolder.getInstance().isValid(null, fixedPath)) {
-                if (path.startsWith(fixRepositoryPath("/"
-                        + Repository.CATEGORIES))) {
+                if (path.startsWith(fixRepositoryPath("/" + Repository.CATEGORIES))) {
                     // Is from categories
                     log.info("Path: {}", path);
                     res = getCategory(srcPath, path);
@@ -73,10 +71,11 @@ public class ResourceUtils {
             } else if (OKMMail.getInstance().isValid(null, fixedPath)) {
                 res = getMail(path);
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn("PathNotFoundException: {}", e.getMessage());
         }
 
+        log.trace("getNode.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getNode: {}", res);
         return res;
     }
@@ -84,63 +83,57 @@ public class ResourceUtils {
     /**
      * Resolve folder resource.
      */
-    private static Resource getFolder(final Path path, final String fldPath)
-            throws PathNotFoundException, RepositoryException,
+    private static Resource getFolder(Path path, String fldPath) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        final String fixedFldPath = fixRepositoryPath(fldPath);
-        final Folder fld = OKMFolder.getInstance().getProperties(null,
-                fixedFldPath);
-        final List<Folder> fldChilds = OKMFolder.getInstance().getChildren(
-                null, fixedFldPath);
-        final List<Document> docChilds = OKMDocument.getInstance().getChildren(
-                null, fixedFldPath);
-        final List<Mail> mailChilds = OKMMail.getInstance().getChildren(null,
-                fixedFldPath);
-        final Resource fldResource = new FolderResource(path, fld, fldChilds,
-                docChilds, mailChilds);
+        long begin = System.currentTimeMillis();
+        String fixedFldPath = fixRepositoryPath(fldPath);
+        Folder fld = OKMFolder.getInstance().getProperties(null, fixedFldPath);
+        List<Folder> fldChilds = OKMFolder.getInstance().getChildren(null, fixedFldPath);
+        List<Document> docChilds = OKMDocument.getInstance().getChildren(null, fixedFldPath);
+        List<Mail> mailChilds = OKMMail.getInstance().getChildren(null, fixedFldPath);
+        Resource fldResource = new FolderResource(path, fld, fldChilds, docChilds, mailChilds);
 
+        log.trace("getFolder.Time: {}", System.currentTimeMillis() - begin);
         return fldResource;
     }
 
     /**
      * Resolve document resource.
      */
-    private static Resource getDocument(final String docPath)
-            throws PathNotFoundException, RepositoryException,
+    private static Resource getDocument(String docPath) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        final String fixedDocPath = fixRepositoryPath(docPath);
-        final Document doc = OKMDocument.getInstance().getProperties(null,
-                fixedDocPath);
-        final Resource docResource = new DocumentResource(doc);
+        long begin = System.currentTimeMillis();
+        String fixedDocPath = fixRepositoryPath(docPath);
+        Document doc = OKMDocument.getInstance().getProperties(null, fixedDocPath);
+        Resource docResource = new DocumentResource(doc);
 
+        log.trace("getDocument.Time: {}", System.currentTimeMillis() - begin);
         return docResource;
     }
 
     /**
      * Resolve mail resource.
      */
-    private static Resource getMail(final String mailPath)
-            throws PathNotFoundException, RepositoryException,
+    private static Resource getMail(String mailPath) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        final String fixedMailPath = fixRepositoryPath(mailPath);
-        final Mail mail = OKMMail.getInstance().getProperties(null,
-                fixedMailPath);
-        final Resource docResource = new MailResource(mail);
+        long begin = System.currentTimeMillis();
+        String fixedMailPath = fixRepositoryPath(mailPath);
+        Mail mail = OKMMail.getInstance().getProperties(null, fixedMailPath);
+        Resource docResource = new MailResource(mail);
 
+        log.trace("getMail.Time: {}", System.currentTimeMillis() - begin);
         return docResource;
     }
 
     /**
      * Resolve category resource.
      */
-    private static Resource getCategory(final Path path, final String catPath)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final String fixedFldPath = fixRepositoryPath(catPath);
-        final Folder cat = OKMFolder.getInstance().getProperties(null,
-                fixedFldPath);
-        final List<Folder> catChilds = OKMFolder.getInstance().getChildren(
-                null, fixedFldPath);
+    private static Resource getCategory(Path path, String catPath) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
+        long begin = System.currentTimeMillis();
+        String fixedFldPath = fixRepositoryPath(catPath);
+        Folder cat = OKMFolder.getInstance().getProperties(null, fixedFldPath);
+        List<Folder> catChilds = OKMFolder.getInstance().getChildren(null, fixedFldPath);
         //String uuid = OKMFolder.getInstance().getProperties(null, fixedFldPath).getUuid();
         //List<Folder> fldChilds = OKMSearch.getInstance().getCategorizedFolders(null, uuid);
         //List<Document> docChilds = OKMSearch.getInstance().getCategorizedDocuments(null, uuid);
@@ -152,30 +145,26 @@ public class ResourceUtils {
         //}
 
         //catChilds.addAll(fldChilds);
-        final List<Document> docChilds = new ArrayList<Document>();
-        final List<Mail> mailChilds = new ArrayList<Mail>();
-        final Resource catResource = new CategoryResource(path, cat, catChilds,
-                docChilds, mailChilds);
+        List<Document> docChilds = new ArrayList<Document>();
+        List<Mail> mailChilds = new ArrayList<Mail>();
+        Resource catResource = new CategoryResource(path, cat, catChilds, docChilds, mailChilds);
 
+        log.trace("getCategory.Time: {}", System.currentTimeMillis() - begin);
         return catResource;
     }
 
     /**
      * Create HTML content.
      */
-    public static void createContent(final OutputStream out, final Path path,
-            final List<Folder> fldChilds, final List<Document> docChilds,
-            final List<Mail> mailChilds) {
-        log.debug("createContent({}, {}, {}, {}, {})", new Object[] { out,
-                path, fldChilds, docChilds, mailChilds });
-        final PrintWriter pw = new PrintWriter(out);
+    public static void createContent(OutputStream out, Path path, List<Folder> fldChilds, List<Document> docChilds, List<Mail> mailChilds) {
+        log.debug("createContent({}, {}, {}, {}, {})", new Object[] { out, path, fldChilds, docChilds, mailChilds });
+        long begin = System.currentTimeMillis();
+        PrintWriter pw = new PrintWriter(out);
         pw.println("<html>");
         pw.println("<header>");
         pw.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
-        pw.println("<link rel=\"Shortcut icon\" href=\"/" + path.getFirst()
-                + "/favicon.ico\" />");
-        pw.println("<link rel=\"stylesheet\" href=\"/" + path.getFirst()
-                + "/css/style.css\" type=\"text/css\" />");
+        pw.println("<link rel=\"Shortcut icon\" href=\"/" + path.getFirst() + "/favicon.ico\" />");
+        pw.println("<link rel=\"stylesheet\" href=\"/" + path.getFirst() + "/css/style.css\" type=\"text/css\" />");
         pw.println("<title>OpenKM WebDAV</title>");
         pw.println("</header>");
         pw.println("<body>");
@@ -183,59 +172,48 @@ public class ResourceUtils {
         pw.println("<table>");
 
         if (!path.getStripFirst().getStripFirst().isRoot()) {
-            final String url = path.getParent().toPath();
+            String url = path.getParent().toPath();
             pw.print("<tr>");
-            pw.print("<td><img src='/" + path.getFirst()
-                    + "/img/webdav/folder.png'/></td>");
+            pw.print("<td><img src='/" + path.getFirst() + "/img/webdav/folder.png'/></td>");
             pw.print("<td><a href='" + url + "'>..</a></td>");
             pw.println("<tr>");
         }
 
         if (fldChilds != null) {
-            for (final Folder fld : fldChilds) {
-                final Path fldPath = Path.path(fld.getPath());
-                final String url = path.toPath().concat("/")
-                        .concat(fldPath.getName());
+            for (Folder fld : fldChilds) {
+                Path fldPath = Path.path(fld.getPath());
+                String url = path.toPath().concat("/").concat(fldPath.getName());
                 pw.print("<tr>");
-                pw.print("<td><img src='/" + path.getFirst()
-                        + "/img/webdav/folder.png'/></td>");
-                pw.print("<td><a href='" + url + "'>" + fldPath.getName()
-                        + "</a></td>");
+                pw.print("<td><img src='/" + path.getFirst() + "/img/webdav/folder.png'/></td>");
+                pw.print("<td><a href='" + url + "'>" + fldPath.getName() + "</a></td>");
                 pw.println("<tr>");
             }
         }
 
         if (docChilds != null) {
-            for (final Document doc : docChilds) {
-                final Path docPath = Path.path(doc.getPath());
-                final String url = path.toPath().concat("/")
-                        .concat(docPath.getName());
+            for (Document doc : docChilds) {
+                Path docPath = Path.path(doc.getPath());
+                String url = path.toPath().concat("/").concat(docPath.getName());
                 pw.print("<tr>");
-                pw.print("<td><img src='/" + path.getFirst() + "/mime/"
-                        + doc.getMimeType() + "'/></td>");
-                pw.print("<td><a href='" + url + "'>" + docPath.getName()
-                        + "</a></td>");
+                pw.print("<td><img src='/" + path.getFirst() + "/mime/" + doc.getMimeType() + "'/></td>");
+                pw.print("<td><a href='" + url + "'>" + docPath.getName() + "</a></td>");
                 pw.println("<tr>");
             }
         }
 
         if (mailChilds != null) {
-            for (final Mail mail : mailChilds) {
-                final Path mailPath = Path.path(mail.getPath());
-                final String url = path.toPath().concat("/")
-                        .concat(mailPath.getName());
+            for (Mail mail : mailChilds) {
+                Path mailPath = Path.path(mail.getPath());
+                String url = path.toPath().concat("/").concat(mailPath.getName());
                 pw.print("<tr>");
 
                 if (mail.getAttachments().isEmpty()) {
-                    pw.print("<td><img src='/" + path.getFirst()
-                            + "/img/webdav/email.png'/></td>");
+                    pw.print("<td><img src='/" + path.getFirst() + "/img/webdav/email.png'/></td>");
                 } else {
-                    pw.print("<td><img src='/" + path.getFirst()
-                            + "/img/webdav/email_attach.png'/></td>");
+                    pw.print("<td><img src='/" + path.getFirst() + "/img/webdav/email_attach.png'/></td>");
                 }
 
-                pw.print("<td><a href='" + url + "'>" + mailPath.getName()
-                        + "</a></td>");
+                pw.print("<td><a href='" + url + "'>" + mailPath.getName() + "</a></td>");
                 pw.println("<tr>");
             }
         }
@@ -245,12 +223,14 @@ public class ResourceUtils {
         pw.println("</html>");
         pw.flush();
         pw.close();
+
+        log.trace("createContent.Time: {}", System.currentTimeMillis() - begin);
     }
 
     /**
      * Correct webdav folder path
      */
-    public static Folder fixResourcePath(final Folder fld) {
+    public static Folder fixResourcePath(Folder fld) {
         if (Config.SYSTEM_WEBDAV_FIX) {
             fld.setPath(fixResourcePath(fld.getPath()));
         }
@@ -261,7 +241,7 @@ public class ResourceUtils {
     /**
      * Correct webdav document path
      */
-    public static Document fixResourcePath(final Document doc) {
+    public static Document fixResourcePath(Document doc) {
         if (Config.SYSTEM_WEBDAV_FIX) {
             doc.setPath(fixResourcePath(doc.getPath()));
         }
@@ -272,7 +252,7 @@ public class ResourceUtils {
     /**
      * Correct webdav mail path
      */
-    public static Mail fixResourcePath(final Mail mail) {
+    public static Mail fixResourcePath(Mail mail) {
         if (Config.SYSTEM_WEBDAV_FIX) {
             mail.setPath(fixResourcePath(mail.getPath()));
         }
@@ -283,14 +263,14 @@ public class ResourceUtils {
     /**
      * 
      */
-    private static String fixResourcePath(final String path) {
+    private static String fixResourcePath(String path) {
         return path.replace("okm:", "okm_");
     }
 
     /**
      * 
      */
-    public static String fixRepositoryPath(final String path) {
+    public static String fixRepositoryPath(String path) {
         if (Config.SYSTEM_WEBDAV_FIX) {
             return path.replace("okm_", "okm:");
         } else {

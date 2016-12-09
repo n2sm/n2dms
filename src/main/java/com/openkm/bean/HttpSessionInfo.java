@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,24 +26,18 @@ import java.util.Calendar;
 
 public class HttpSessionInfo implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String user;
-
     private String ip;
-
     private String host;
-
     private String id;
-
     private Calendar creation;
-
     private Calendar lastAccess;
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -51,7 +45,7 @@ public class HttpSessionInfo implements Serializable {
         return ip;
     }
 
-    public void setIp(final String ip) {
+    public void setIp(String ip) {
         this.ip = ip;
     }
 
@@ -59,7 +53,7 @@ public class HttpSessionInfo implements Serializable {
         return host;
     }
 
-    public void setHost(final String host) {
+    public void setHost(String host) {
         this.host = host;
     }
 
@@ -67,7 +61,7 @@ public class HttpSessionInfo implements Serializable {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -75,7 +69,7 @@ public class HttpSessionInfo implements Serializable {
         return creation;
     }
 
-    public void setCreation(final Calendar creation) {
+    public void setCreation(Calendar creation) {
         this.creation = creation;
     }
 
@@ -83,13 +77,12 @@ public class HttpSessionInfo implements Serializable {
         return lastAccess;
     }
 
-    public void setLastAccess(final Calendar lastAccess) {
+    public void setLastAccess(Calendar lastAccess) {
         this.lastAccess = lastAccess;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("user=");
         sb.append(user);

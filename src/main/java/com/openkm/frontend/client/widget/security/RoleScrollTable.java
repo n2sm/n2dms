@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,41 +34,32 @@ import com.google.gwt.gen2.table.client.SelectionGrid;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTPermission;
+import com.openkm.frontend.client.util.ScrollTableHelper;
 
 /**
  * RoleScrollTable
  * 
  * @author jllort
+ *
  */
 public class RoleScrollTable extends Composite {
     public static final int PROPERTY_READ = 0;
-
     public static final int PROPERTY_WRITE = 1;
-
     public static final int PROPERTY_DELETE = 2;
-
     public static final int PROPERTY_SECURITY = 3;
 
     private ScrollTable table;
-
     private FixedWidthFlexTable headerTable;
-
     private FixedWidthGrid dataTable;
-
-    private boolean isAssigned = false; // Determines if is assigned users table
-                                        // or not
-
-    private String path;
-
+    private boolean isAssigned = false; // Determines if is assigned users table or not
+    private String uuid;
     private int flag_property;
-
     private int numberOfColumns = 0;
-
     private int width = 405;
 
     /**
@@ -76,64 +67,52 @@ public class RoleScrollTable extends Composite {
      * 
      * @param isAssigned
      */
-    public RoleScrollTable(final boolean isAssigned) {
+    public RoleScrollTable(boolean isAssigned) {
         this.isAssigned = isAssigned;
 
-        final ScrollTableImages scrollTableImages = new ScrollTableImages() {
-            @Override
+        ScrollTableImages scrollTableImages = new ScrollTableImages() {
             public AbstractImagePrototype scrollTableAscending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_asc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_asc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_asc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableDescending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_desc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_desc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_desc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableFillWidth() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/fill_width.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/fill_width.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/fill_width.gif\"/>";
                     }
@@ -153,45 +132,48 @@ public class RoleScrollTable extends Composite {
         table.setResizePolicy(ResizePolicy.UNCONSTRAINED);
         table.setScrollPolicy(ScrollPolicy.BOTH);
 
-        initSecurity();
-
         initWidget(table);
     }
 
     /**
      * initSecurity
      * 
-     * @param extendedSecurity
      */
     public void initSecurity() {
         // Level 1 headers
         int col = 0;
         if (isAssigned) {
             headerTable.setHTML(0, col, Main.i18n("security.role.name"));
-            table.setColumnWidth(col++, 175);
-            headerTable.setHTML(0, col,
-                    Main.i18n("security.role.permission.read"));
-            table.setColumnWidth(col++, 55);
-            headerTable.setHTML(0, col,
-                    Main.i18n("security.role.permission.write"));
-            table.setColumnWidth(col++, 55);
-            headerTable.setHTML(0, col,
-                    Main.i18n("security.role.permission.delete"));
-            table.setColumnWidth(col++, 55);
-            headerTable.setHTML(0, col,
-                    Main.i18n("security.role.permission.security"));
-            table.setColumnWidth(col++, 55);
+            ScrollTableHelper.setColumnWidth(table, col, 175, ScrollTableHelper.GREAT, true, false);
+            col++;
+            headerTable.setHTML(0, col, Main.i18n("security.role.permission.read"));
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
+            headerTable.setHTML(0, col, Main.i18n("security.role.permission.write"));
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
+            headerTable.setHTML(0, col, Main.i18n("security.role.permission.delete"));
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
+            headerTable.setHTML(0, col, Main.i18n("security.role.permission.security"));
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
 
             headerTable.setHTML(0, col, ""); // Hidden user id
-            table.setColumnWidth(col++, 0);
+            ScrollTableHelper.setColumnWidth(table, col, 0, ScrollTableHelper.FIXED, true, true);
+            table.setColumnSortable(col, false);
+            col++;
             numberOfColumns = col; // Number of columns
-            table.setSize(String.valueOf(width), "365"); // Setting table size
+            table.setSize(String.valueOf(width) + "px", "365px"); // Setting table size
         } else {
-            table.setSize("185", "365");
+            table.setSize("185px", "365px");
             headerTable.setHTML(0, col, Main.i18n("security.role.name"));
-            table.setColumnWidth(col++, 167);
+            ScrollTableHelper.setColumnWidth(table, col, 165, ScrollTableHelper.GREAT, true, false); // the real size is 167
+            col++;
             headerTable.setHTML(0, col, ""); // Hidden user id
-            table.setColumnWidth(col++, 0);
+            ScrollTableHelper.setColumnWidth(table, col, 0, ScrollTableHelper.FIXED, true, true);
+            table.setColumnSortable(col, false);
+            col++;
             numberOfColumns = col;
         }
     }
@@ -203,14 +185,11 @@ public class RoleScrollTable extends Composite {
         int col = 0;
         if (isAssigned) {
             headerTable.setHTML(0, col++, Main.i18n("security.role.name"));
-            headerTable.setHTML(0, col++,
-                    Main.i18n("security.role.permission.read"));
-            headerTable.setHTML(0, col++,
-                    Main.i18n("security.role.permission.write"));
-            headerTable.setHTML(0, col++,
-                    Main.i18n("security.role.permission.delete"));
-            headerTable.setHTML(0, col++,
-                    Main.i18n("security.role.permission.security"));
+            headerTable.setHTML(0, col++, Main.i18n("security.role.permission.read"));
+            headerTable.setHTML(0, col++, Main.i18n("security.role.permission.write"));
+            headerTable.setHTML(0, col++, Main.i18n("security.role.permission.delete"));
+            headerTable.setHTML(0, col++, Main.i18n("security.role.permission.security"));
+
         } else {
             headerTable.setHTML(0, col++, Main.i18n("security.role.name"));
         }
@@ -223,8 +202,7 @@ public class RoleScrollTable extends Composite {
      * @param permission The permission value
      * @param modified if need to mark as modified
      */
-    public void addRow(final String roleName, final Integer permission,
-            final boolean modified) {
+    public void addRow(final String roleName, Integer permission, boolean modified) {
         final int rows = dataTable.getRowCount();
         dataTable.insertRow(rows);
         dataTable.setHTML(rows, 0, roleName);
@@ -233,83 +211,71 @@ public class RoleScrollTable extends Composite {
             dataTable.getCellFormatter().addStyleName(rows, 0, "bold");
         }
 
-        final CheckBox checkReadPermission = new CheckBox();
-        final CheckBox checkWritePermission = new CheckBox();
-        final CheckBox checkDeletePermission = new CheckBox();
-        final CheckBox checkSecurityPermission = new CheckBox();
+        CheckBox checkReadPermission = new CheckBox();
+        CheckBox checkWritePermission = new CheckBox();
+        CheckBox checkDeletePermission = new CheckBox();
+        CheckBox checkSecurityPermission = new CheckBox();
 
-        final ClickHandler checkBoxReadListener = new ClickHandler() {
+        ClickHandler checkBoxReadListener = new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 flag_property = PROPERTY_READ;
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
 
-                // Actions are inverse to check value because before user
-                // perform check on checkbox
+                // Actions are inverse to check value because before user perform check on checkbox
                 // it has inverse value
                 if (((CheckBox) sender).getValue()) {
-                    grant(dataTable.getText(rows, 0), GWTPermission.READ,
-                            Main.get().securityPopup.recursive.getValue());
+                    grant(roleName, GWTPermission.READ, Main.get().securityPopup.recursive.getValue());
                 } else {
-                    revoke(dataTable.getText(rows, 0), GWTPermission.READ,
-                            Main.get().securityPopup.recursive.getValue());
+                    revoke(roleName, GWTPermission.READ, Main.get().securityPopup.recursive.getValue());
                 }
             }
         };
 
-        final ClickHandler checkBoxWriteListener = new ClickHandler() {
+        ClickHandler checkBoxWriteListener = new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 flag_property = PROPERTY_WRITE;
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
 
-                // Actions are inverse to check value because before user
-                // perform check on checkbox
+                // Actions are inverse to check value because before user perform check on checkbox
                 // it has inverse value
                 if (((CheckBox) sender).getValue()) {
-                    grant(dataTable.getText(rows, 0), GWTPermission.WRITE,
-                            Main.get().securityPopup.recursive.getValue());
+                    grant(roleName, GWTPermission.WRITE, Main.get().securityPopup.recursive.getValue());
                 } else {
-                    revoke(dataTable.getText(rows, 0), GWTPermission.WRITE,
-                            Main.get().securityPopup.recursive.getValue());
+                    revoke(roleName, GWTPermission.WRITE, Main.get().securityPopup.recursive.getValue());
                 }
             }
         };
 
-        final ClickHandler checkBoxDeleteListener = new ClickHandler() {
+        ClickHandler checkBoxDeleteListener = new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 flag_property = PROPERTY_DELETE;
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
 
-                // Actions are inverse to check value because before user
-                // perform check on checkbox
+                // Actions are inverse to check value because before user perform check on checkbox
                 // it has inverse value
                 if (((CheckBox) sender).getValue()) {
-                    grant(dataTable.getText(rows, 0), GWTPermission.DELETE,
-                            Main.get().securityPopup.recursive.getValue());
+                    grant(roleName, GWTPermission.DELETE, Main.get().securityPopup.recursive.getValue());
                 } else {
-                    revoke(dataTable.getText(rows, 0), GWTPermission.DELETE,
-                            Main.get().securityPopup.recursive.getValue());
+                    revoke(roleName, GWTPermission.DELETE, Main.get().securityPopup.recursive.getValue());
                 }
             }
         };
 
-        final ClickHandler checkBoxSecurityListener = new ClickHandler() {
+        ClickHandler checkBoxSecurityListener = new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 flag_property = PROPERTY_SECURITY;
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
 
-                // Actions are inverse to check value because before user
-                // perform check on checkbox
+                // Actions are inverse to check value because before user perform check on checkbox
                 // it has inverse value
                 if (((CheckBox) sender).getValue()) {
-                    grant(dataTable.getText(rows, 0), GWTPermission.SECURITY,
-                            Main.get().securityPopup.recursive.getValue());
+                    grant(roleName, GWTPermission.SECURITY, Main.get().securityPopup.recursive.getValue());
                 } else {
-                    revoke(dataTable.getText(rows, 0), GWTPermission.SECURITY,
-                            Main.get().securityPopup.recursive.getValue());
+                    revoke(roleName, GWTPermission.SECURITY, Main.get().securityPopup.recursive.getValue());
                 }
             }
         };
@@ -322,13 +288,11 @@ public class RoleScrollTable extends Composite {
         if ((permission & GWTPermission.READ) == GWTPermission.READ) {
             checkReadPermission.setValue(true);
             dataTable.setWidget(rows, col, checkReadPermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         } else {
             checkReadPermission.setValue(false);
             dataTable.setWidget(rows, col, checkReadPermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         }
 
         checkWritePermission.addClickHandler(checkBoxWriteListener);
@@ -336,13 +300,11 @@ public class RoleScrollTable extends Composite {
         if ((permission & GWTPermission.WRITE) == GWTPermission.WRITE) {
             checkWritePermission.setValue(true);
             dataTable.setWidget(rows, col, checkWritePermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         } else {
             checkWritePermission.setValue(false);
             dataTable.setWidget(rows, col, checkWritePermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         }
 
         checkDeletePermission.addClickHandler(checkBoxDeleteListener);
@@ -350,13 +312,11 @@ public class RoleScrollTable extends Composite {
         if ((permission & GWTPermission.DELETE) == GWTPermission.DELETE) {
             checkDeletePermission.setValue(true);
             dataTable.setWidget(rows, col, checkDeletePermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         } else {
             checkDeletePermission.setValue(false);
             dataTable.setWidget(rows, col, checkDeletePermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         }
 
         checkSecurityPermission.addClickHandler(checkBoxSecurityListener);
@@ -364,13 +324,11 @@ public class RoleScrollTable extends Composite {
         if ((permission & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
             checkSecurityPermission.setValue(true);
             dataTable.setWidget(rows, col, checkSecurityPermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         } else {
             checkSecurityPermission.setValue(false);
             dataTable.setWidget(rows, col, checkSecurityPermission);
-            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
         }
     }
 
@@ -380,8 +338,8 @@ public class RoleScrollTable extends Composite {
      * @param roleName The user name value
      * @param modified if need to mark as modified
      */
-    public void addRow(final String roleName, final boolean modified) {
-        final int rows = dataTable.getRowCount();
+    public void addRow(String roleName, boolean modified) {
+        int rows = dataTable.getRowCount();
         dataTable.insertRow(rows);
         dataTable.setHTML(rows, 0, roleName);
 
@@ -403,10 +361,10 @@ public class RoleScrollTable extends Composite {
      * Removes all rows except the first
      */
     public void removeAllRows() {
-        // Purge all rows
         while (dataTable.getRowCount() > 0) {
             dataTable.removeRow(0);
         }
+
         dataTable.resize(0, numberOfColumns);
     }
 
@@ -424,11 +382,10 @@ public class RoleScrollTable extends Composite {
      */
     public String getRole() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
+
             if (dataTable.isRowSelected(selectedRow)) {
-                return dataTable.getHTML(dataTable.getSelectedRows().iterator()
-                        .next().intValue(), 0);
+                return dataTable.getHTML(((Integer) dataTable.getSelectedRows().iterator().next()).intValue(), 0);
             }
         }
 
@@ -437,8 +394,7 @@ public class RoleScrollTable extends Composite {
 
     public int getSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             if (dataTable.isRowSelected(selectedRow)) {
                 return selectedRow;
             } else {
@@ -454,8 +410,7 @@ public class RoleScrollTable extends Composite {
      */
     public void removeSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             dataTable.removeRow(selectedRow);
 
             if (dataTable.getRowCount() > 0) {
@@ -473,8 +428,7 @@ public class RoleScrollTable extends Composite {
      */
     public void markModifiedSelectedRow() {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
             dataTable.getCellFormatter().addStyleName(selectedRow, 0, "bold");
         }
     }
@@ -482,16 +436,14 @@ public class RoleScrollTable extends Composite {
     /**
      * markModifiedSelectedRow
      */
-    public void markModifiedSelectedRow(final boolean modified) {
+    public void markModifiedSelectedRow(boolean modified) {
         if (!dataTable.getSelectedRows().isEmpty()) {
-            final int selectedRow = dataTable.getSelectedRows().iterator()
-                    .next().intValue();
+            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
+
             if (modified) {
-                dataTable.getCellFormatter().addStyleName(selectedRow, 0,
-                        "bold");
+                dataTable.getCellFormatter().addStyleName(selectedRow, 0, "bold");
             } else {
-                dataTable.getCellFormatter().removeStyleName(selectedRow, 0,
-                        "bold");
+                dataTable.getCellFormatter().removeStyleName(selectedRow, 0, "bold");
             }
         }
     }
@@ -502,13 +454,10 @@ public class RoleScrollTable extends Composite {
      * @param user The granted role
      * @param permissions The permissions value
      */
-    public void grant(final String role, final int permissions,
-            final boolean recursive) {
-        if (path != null) {
-            Log.debug("RoleScrollTable.grant(" + role + ", " + permissions
-                    + ", " + recursive + ")");
-            Main.get().securityPopup.securityPanel.securityRole.grant(role,
-                    permissions, recursive, flag_property);
+    public void grant(String role, int permissions, boolean recursive) {
+        if (uuid != null) {
+            Log.debug("RoleScrollTable.grant(" + role + ", " + permissions + ", " + recursive + ")");
+            Main.get().securityPopup.securityPanel.securityRole.grant(role, permissions, recursive, flag_property);
         }
     }
 
@@ -518,23 +467,20 @@ public class RoleScrollTable extends Composite {
      * @param user The role
      * @param permissions The permissions value
      */
-    public void revoke(final String role, final int permissions,
-            final boolean recursive) {
-        if (path != null) {
-            Log.debug("RoleScrollTable.revoke(" + role + ", " + permissions
-                    + ", " + recursive + ")");
-            Main.get().securityPopup.securityPanel.securityRole.revoke(role,
-                    permissions, recursive, flag_property);
+    public void revoke(String role, int permissions, boolean recursive) {
+        if (uuid != null) {
+            Log.debug("RoleScrollTable.revoke(" + role + ", " + permissions + ", " + recursive + ")");
+            Main.get().securityPopup.securityPanel.securityRole.revoke(role, permissions, recursive, flag_property);
         }
     }
 
     /**
-     * Sets the path
+     * Sets the uuid
      * 
-     * @param path The path
+     * @param uuid The uuid
      */
-    public void setPath(final String path) {
-        this.path = path;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     /**

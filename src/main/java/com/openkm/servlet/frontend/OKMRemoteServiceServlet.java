@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,30 +42,24 @@ import com.openkm.frontend.client.bean.GWTWorkspace;
  *
  */
 public class OKMRemoteServiceServlet extends RemoteServiceServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(OKMRemoteServiceServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(OKMRemoteServiceServlet.class);
     private static final long serialVersionUID = 1L;
-
     public static final String WORKSPACE = "workspace";
 
     @Override
-    public void init(final ServletConfig config) throws ServletException {
+    public void init(ServletConfig config) throws ServletException {
         super.init(config);
     }
 
     @Override
-    protected SerializationPolicy doGetSerializationPolicy(
-            final HttpServletRequest request, String moduleBaseURL,
-            final String strongName) {
+    protected SerializationPolicy doGetSerializationPolicy(HttpServletRequest request, String moduleBaseURL, String strongName) {
         if (Config.SYSTEM_APACHE_REQUEST_HEADER_FIX) {
             // Get base url from the header instead of the body. This way 
             // Apache reverse proxy with rewrite on header can work.
             // Suggested at http://stackoverflow.com/questions/1517290/problem-with-gwt-behind-a-reverse-proxy-either-nginx-or-apache
             // ProxyPass /app/ ajp://localhost:8009/OpenKM/
             // RequestHeader edit X-GWT-Module-Base ^(.*)/app/(.*)$ $1/OpenKM/$2
-            final String moduleBaseURLHdr = request
-                    .getHeader("X-GWT-Module-Base");
+            String moduleBaseURLHdr = request.getHeader("X-GWT-Module-Base");
             log.debug("X-GWT-Module-Base: {}", moduleBaseURLHdr);
 
             if (moduleBaseURLHdr != null) {
@@ -73,26 +67,23 @@ public class OKMRemoteServiceServlet extends RemoteServiceServlet {
             }
         }
 
-        return super.doGetSerializationPolicy(request, moduleBaseURL,
-                strongName);
+        return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
     }
 
     public void updateSessionManager() {
         // Case when servlet is not called from GWT ( mobile access )
         if (getThreadLocalRequest() != null) {
-            HttpSessionManager.getInstance().update(
-                    getThreadLocalRequest().getSession().getId());
+            HttpSessionManager.getInstance().update(getThreadLocalRequest().getSession().getId());
         }
     }
 
     /**
      * getUserWorkspaceSession
      */
-    public void saveUserWorkspaceSession(final GWTWorkspace workspace) {
+    public void saveUserWorkspaceSession(GWTWorkspace workspace) {
         // Case when servlet is not called from GWT ( mobile access )
         if (getThreadLocalRequest() != null) {
-            getThreadLocalRequest().getSession().setAttribute(WORKSPACE,
-                    workspace);
+            getThreadLocalRequest().getSession().setAttribute(WORKSPACE, workspace);
         }
     }
 
@@ -102,10 +93,8 @@ public class OKMRemoteServiceServlet extends RemoteServiceServlet {
     public GWTWorkspace getUserWorkspaceSession() {
         // Case when servlet is not called from GWT ( mobile access )
         if (getThreadLocalRequest() != null) {
-            if (getThreadLocalRequest().getSession().getAttribute(
-                    OKMRemoteServiceServlet.WORKSPACE) != null) {
-                return (GWTWorkspace) getThreadLocalRequest().getSession()
-                        .getAttribute(OKMRemoteServiceServlet.WORKSPACE);
+            if (getThreadLocalRequest().getSession().getAttribute(WorkspaceServlet.WORKSPACE) != null) {
+                return (GWTWorkspace) getThreadLocalRequest().getSession().getAttribute(WorkspaceServlet.WORKSPACE);
             } else {
                 return null;
             }
@@ -118,10 +107,10 @@ public class OKMRemoteServiceServlet extends RemoteServiceServlet {
      * Gets language from HTTP session.
      */
     protected String getLanguage() {
-        final HttpServletRequest request = getThreadLocalRequest();
+        HttpServletRequest request = this.getThreadLocalRequest();
 
         if (request != null) {
-            final Object obj = request.getSession().getAttribute("lang");
+            Object obj = request.getSession().getAttribute("lang");
 
             if (obj instanceof String) {
                 return (String) obj;
@@ -134,9 +123,9 @@ public class OKMRemoteServiceServlet extends RemoteServiceServlet {
     /**
      * Stores language into HTTP session.
      */
-    protected void setLanguage(final String language) {
+    protected void setLanguage(String language) {
         // Store current language into session
-        final HttpServletRequest request = getThreadLocalRequest();
+        HttpServletRequest request = this.getThreadLocalRequest();
         request.getSession().setAttribute("lang", language);
     }
 }

@@ -23,18 +23,20 @@ import com.openkm.module.db.base.BaseNoteModule;
 import com.openkm.module.db.base.BaseNotificationModule;
 import com.openkm.spring.PrincipalUtils;
 import com.openkm.util.FormatUtil;
+import com.openkm.util.PathUtils;
 import com.openkm.util.UserActivity;
 
 public class DbNoteModule implements NoteModule {
     private static Logger log = LoggerFactory.getLogger(DbNoteModule.class);
 
     @Override
-    public Note add(final String token, final String nodePath, String text)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public Note add(String token, String nodeId, String text) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("add({}, {}, {})", new Object[] { token, nodePath, text });
+        log.debug("add({}, {}, {})", new Object[] { token, nodeId, text });
         Note newNote = null;
         Authentication auth = null, oldAuth = null;
+        String nodePath = null;
+        String nodeUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -48,23 +50,26 @@ public class DbNoteModule implements NoteModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    nodePath);
-            final NodeBase node = NodeBaseDAO.getInstance().findByPk(nodeUuid);
+            if (PathUtils.isPath(nodeId)) {
+                nodePath = nodeId;
+                nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(nodeId);
+            } else {
+                nodePath = NodeBaseDAO.getInstance().getPathFromUuid(nodeId);
+                nodeUuid = nodeId;
+            }
+
+            NodeBase node = NodeBaseDAO.getInstance().findByPk(nodeUuid);
 
             text = FormatUtil.sanitizeInput(text);
-            final NodeNote nNote = BaseNoteModule.create(nodeUuid,
-                    auth.getName(), text);
+            NodeNote nNote = BaseNoteModule.create(nodeUuid, auth.getName(), text);
             newNote = BaseNoteModule.getProperties(nNote, nNote.getUuid());
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(node, auth.getName(),
-                    "ADD_NOTE", text);
+            BaseNotificationModule.checkSubscriptions(node, auth.getName(), "ADD_NOTE", text);
 
             // Activity log
-            UserActivity.log(auth.getName(), "ADD_NOTE", nodeUuid, nodePath,
-                    text);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "ADD_NOTE", nodeUuid, nodePath, text);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -77,11 +82,12 @@ public class DbNoteModule implements NoteModule {
     }
 
     @Override
-    public void delete(final String token, final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public void delete(String token, String noteId) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("delete({}, {})", token, notePath);
+        log.debug("delete({}, {})", token, noteId);
         Authentication auth = null, oldAuth = null;
+        String notePath = null;
+        String noteUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -95,22 +101,21 @@ public class DbNoteModule implements NoteModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String noteUuid = notePath;
-            final NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
+            NodeBase nBase = NodeNoteDAO.getInstance().getParentNode(noteId);
+            notePath = NodeBaseDAO.getInstance().getPathFromUuid(nBase.getUuid()) + "/" + noteId;
+            noteUuid = noteId;
 
-            if (auth.getName().equals(nNote.getAuthor())
-                    || PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
+            NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
+
+            if (auth.getName().equals(nNote.getAuthor()) || PrincipalUtils.hasRole(Config.DEFAULT_ADMIN_ROLE)) {
                 NodeNoteDAO.getInstance().delete(noteUuid);
             } else {
-                throw new AccessDeniedException(
-                        "Note can only be removed by its creator or "
-                                + Config.ADMIN_USER);
+                throw new AccessDeniedException("Note can only be removed by its creator or " + Config.ADMIN_USER);
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "DELETE_NOTE", noteUuid, notePath,
-                    null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "DELETE_NOTE", noteUuid, notePath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -122,12 +127,13 @@ public class DbNoteModule implements NoteModule {
     }
 
     @Override
-    public Note get(final String token, final String notePath)
-            throws LockException, PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("get({}, {})", token, notePath);
+    public Note get(String token, String noteId) throws LockException, PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("get({}, {})", token, noteId);
         Note note = null;
         Authentication auth = null, oldAuth = null;
+        String notePath = null;
+        String noteUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -141,14 +147,16 @@ public class DbNoteModule implements NoteModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String noteUuid = notePath;
-            final NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
+            NodeBase nBase = NodeNoteDAO.getInstance().getParentNode(noteId);
+            notePath = NodeBaseDAO.getInstance().getPathFromUuid(nBase.getUuid()) + "/" + noteId;
+            noteUuid = noteId;
+
+            NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
             note = BaseNoteModule.getProperties(nNote, nNote.getUuid());
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_NOTE", noteUuid, notePath,
-                    null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_NOTE", noteUuid, notePath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -161,11 +169,12 @@ public class DbNoteModule implements NoteModule {
     }
 
     @Override
-    public String set(final String token, final String notePath, String text)
-            throws LockException, PathNotFoundException, AccessDeniedException,
+    public String set(String token, String noteId, String text) throws LockException, PathNotFoundException, AccessDeniedException,
             RepositoryException, DatabaseException {
-        log.debug("set({}, {})", token, notePath);
+        log.debug("set({}, {})", token, noteId);
         Authentication auth = null, oldAuth = null;
+        String notePath = null;
+        String noteUuid = null;
 
         if (Config.SYSTEM_READONLY) {
             throw new AccessDeniedException("System is in read-only mode");
@@ -179,28 +188,27 @@ public class DbNoteModule implements NoteModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String noteUuid = notePath;
-            final NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
-            final NodeBase node = NodeNoteDAO.getInstance().getParentNode(
-                    noteUuid);
+            NodeBase nBase = NodeNoteDAO.getInstance().getParentNode(noteId);
+            notePath = NodeBaseDAO.getInstance().getPathFromUuid(nBase.getUuid()) + "/" + noteId;
+            noteUuid = noteId;
+
+            NodeNote nNote = NodeNoteDAO.getInstance().findByPk(noteUuid);
+            NodeBase node = NodeNoteDAO.getInstance().getParentNode(noteUuid);
 
             if (auth.getName().equals(nNote.getAuthor())) {
                 text = FormatUtil.sanitizeInput(text);
                 nNote.setText(text);
                 NodeNoteDAO.getInstance().update(nNote);
             } else {
-                throw new AccessDeniedException(
-                        "Note can only be modified by its creator");
+                throw new AccessDeniedException("Note can only be modified by its creator");
             }
 
             // Check subscriptions
-            BaseNotificationModule.checkSubscriptions(node, auth.getName(),
-                    "SET_NOTE", text);
+            BaseNotificationModule.checkSubscriptions(node, auth.getName(), "SET_NOTE", text);
 
             // Activity log
-            UserActivity.log(auth.getName(), "SET_NOTE", node.getUuid(),
-                    notePath, text);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "SET_NOTE", node.getUuid(), notePath, text);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -213,12 +221,13 @@ public class DbNoteModule implements NoteModule {
     }
 
     @Override
-    public List<Note> list(final String token, final String nodePath)
-            throws PathNotFoundException, RepositoryException,
+    public List<Note> list(String token, String nodeId) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
-        log.debug("list({}, {})", token, nodePath);
-        final List<Note> childs = new ArrayList<Note>();
+        log.debug("list({}, {})", token, nodeId);
+        List<Note> childs = new ArrayList<Note>();
         Authentication auth = null, oldAuth = null;
+        String nodePath = null;
+        String nodeUuid = null;
 
         try {
             if (token == null) {
@@ -228,18 +237,21 @@ public class DbNoteModule implements NoteModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    nodePath);
+            if (PathUtils.isPath(nodeId)) {
+                nodePath = nodeId;
+                nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(nodeId);
+            } else {
+                nodePath = NodeBaseDAO.getInstance().getPathFromUuid(nodeId);
+                nodeUuid = nodeId;
+            }
 
-            for (final NodeNote nNote : NodeNoteDAO.getInstance().findByParent(
-                    nodeUuid)) {
+            for (NodeNote nNote : NodeNoteDAO.getInstance().findByParent(nodeUuid)) {
                 childs.add(BaseNoteModule.getProperties(nNote, nNote.getUuid()));
             }
 
             // Activity log
-            UserActivity.log(auth.getName(), "LIST_NOTES", nodeUuid, nodePath,
-                    null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "LIST_NOTES", nodeUuid, nodePath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {

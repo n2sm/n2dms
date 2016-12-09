@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -19,10 +19,16 @@
           <a href="PropertyGroups">Property groups</a>
         </li>
         <li class="action">
-          <a href="PropertyGroups?action=register">Register property groups</a>
+          <a href="PropertyGroups?action=register">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            Register property groups
+          </a>
         </li>
         <li class="action">
-          <a href="PropertyGroups?action=edit">Edit property groups</a>
+          <a href="PropertyGroups?action=edit">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            Edit property groups
+          </a>
         </li>
       </ul>
       <br/>

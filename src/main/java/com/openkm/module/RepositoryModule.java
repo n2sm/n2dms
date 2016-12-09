@@ -1,27 +1,28 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module;
 
 import com.openkm.bean.AppVersion;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.Folder;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.DatabaseException;
@@ -38,8 +39,7 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no root folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getRootFolder(String token) throws PathNotFoundException,
-            RepositoryException, DatabaseException;
+    public Folder getRootFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException;
 
     /**
      * Obtains the user trash folder.
@@ -48,11 +48,9 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user trash folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getTrashFolder(String token) throws PathNotFoundException,
-            RepositoryException, DatabaseException;
+    public Folder getTrashFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException;
 
-    public Folder getTrashFolderBase(String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getTrashFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -62,8 +60,7 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no templates folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getTemplatesFolder(String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getTemplatesFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -73,11 +70,10 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user documents folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getPersonalFolder(String token) throws PathNotFoundException,
-            RepositoryException, DatabaseException;
+    public Folder getPersonalFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException;
 
-    public Folder getPersonalFolderBase(String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getPersonalFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -87,11 +83,10 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user documents folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getMailFolder(String token) throws PathNotFoundException,
-            RepositoryException, DatabaseException;
+    public Folder getMailFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException;
 
-    public Folder getMailFolderBase(String token) throws PathNotFoundException,
-            RepositoryException, DatabaseException;
+    public Folder getMailFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException;
 
     /**
      * Obtain the thesaurus folder of the repository.
@@ -100,8 +95,7 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user documents folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getThesaurusFolder(String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getThesaurusFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -111,21 +105,19 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user documents folder node in the repository.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Folder getCategoriesFolder(String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getCategoriesFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
-     * Remove all the items in the user trash folder for ever. You can't 
+     * Remove all the items in the user trash folder for ever. You can't
      * recover this items any more.
      * 
-     * @throws AccessDeniedException If there is any security problem: 
-     * you can't modify the user deleted folders and documents because 
-     * of lack of permissions.
+     * @throws AccessDeniedException If there is any security problem:
+     *         you can't modify the user deleted folders and documents because
+     *         of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void purgeTrash(String token) throws PathNotFoundException,
-            AccessDeniedException, LockException, RepositoryException,
+    public void purgeTrash(String token) throws PathNotFoundException, AccessDeniedException, LockException, RepositoryException,
             DatabaseException;
 
     /**
@@ -147,12 +139,11 @@ public interface RepositoryModule {
     /**
      * Test if a node path exists
      * 
-     * @param path The node path to test 
+     * @param nodeId The path that identifies an unique document or its UUID.
      * @return true if the node exist or false if not
      * @throws RepositoryException If there is any general repository problem.
      */
-    public boolean hasNode(String token, String path)
-            throws RepositoryException, DatabaseException;
+    public boolean hasNode(String token, String nodeId) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Obtain the node path with a given uuid.
@@ -162,8 +153,7 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user node in the repository with this uuid.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public String getNodePath(String token, String uuid)
-            throws PathNotFoundException, RepositoryException,
+    public String getNodePath(String token, String uuid) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -174,8 +164,7 @@ public interface RepositoryModule {
      * @throws PathNotFoundException If there is no user node in the repository with this uuid.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public String getNodeUuid(String token, String path)
-            throws PathNotFoundException, RepositoryException,
+    public String getNodeUuid(String token, String path) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException;
 
     /**
@@ -184,6 +173,16 @@ public interface RepositoryModule {
      * @param token Security token.
      * @return Application version.
      */
-    public AppVersion getAppVersion(String token) throws RepositoryException,
-            DatabaseException;
+    public AppVersion getAppVersion(String token) throws AccessDeniedException, RepositoryException, DatabaseException;
+
+    /**
+     * Copy attributes from a node to another.
+     * 
+     * @param token Security token.
+     * @param srcId The path that identifies an unique document or its UUID.
+     * @param dstId The path that identifies an unique document or its UUID.
+     * @param extAttr Which attributes need to be copied.
+     */
+    void copyAttributes(String token, String srcId, String dstId, ExtendedAttributes extAttr) throws AccessDeniedException,
+            PathNotFoundException, DatabaseException;
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,20 +35,15 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "OKM_DB_METADATA_TYPE", uniqueConstraints = { @UniqueConstraint(name = "IDX_DB_MD_TYPE_TABRCOL", columnNames = {
-        "DMT_TABLE", "DMT_REAL_COLUMN" }) })
+@Table(name = "OKM_DB_METADATA_TYPE", uniqueConstraints = { @UniqueConstraint(name = "IDX_DB_MD_TYPE_TABRCOL", columnNames = { "DMT_TABLE",
+        "DMT_REAL_COLUMN" }) })
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class DatabaseMetadataType implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String TEXT = "text";
-
     public static final String BOOLEAN = "boolean";
-
     public static final String INTEGER = "integer";
-
     public static final String LONG = "long";
-
     public static final String FILE = "file";
 
     @Id
@@ -72,7 +67,7 @@ public class DatabaseMetadataType implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -80,7 +75,7 @@ public class DatabaseMetadataType implements Serializable {
         return table;
     }
 
-    public void setTable(final String table) {
+    public void setTable(String table) {
         this.table = table;
     }
 
@@ -88,7 +83,7 @@ public class DatabaseMetadataType implements Serializable {
         return virtualColumn;
     }
 
-    public void setVirtualColumn(final String virtualColumn) {
+    public void setVirtualColumn(String virtualColumn) {
         this.virtualColumn = virtualColumn;
     }
 
@@ -96,7 +91,7 @@ public class DatabaseMetadataType implements Serializable {
         return realColumn;
     }
 
-    public void setRealColumn(final String realColumn) {
+    public void setRealColumn(String realColumn) {
         this.realColumn = realColumn;
     }
 
@@ -104,13 +99,12 @@ public class DatabaseMetadataType implements Serializable {
         return type;
     }
 
-    public void setType(final String type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

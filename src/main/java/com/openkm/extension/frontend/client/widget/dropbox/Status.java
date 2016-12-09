@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -22,8 +22,7 @@
 package com.openkm.extension.frontend.client.widget.dropbox;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -40,22 +39,15 @@ import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
  */
 public class Status extends PopupPanel {
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private Widget widget;
 
     private boolean flag_exporting = false;
-
     private boolean flag_importing = false;
-
     private boolean flag_search = false;
-
-    private boolean flag_getChilds = false;
+    private boolean flag_getChildren = false;
 
     /**
      * The status
@@ -71,11 +63,9 @@ public class Status extends PopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -91,16 +81,14 @@ public class Status extends PopupPanel {
      * Refreshing the panel
      */
     public void refresh() {
-        if (flag_exporting || flag_importing || flag_search || flag_getChilds) {
+        if (flag_exporting || flag_importing || flag_search || flag_getChildren) {
             Widget widgetBaseToCenter = Main.get().mainPanel;
-            if (flag_getChilds && widget != null) {
+            if (flag_getChildren && widget != null) {
                 widgetBaseToCenter = widget;
             }
 
-            final int left = widgetBaseToCenter.getAbsoluteLeft()
-                    + (widgetBaseToCenter.getOffsetWidth() - 200) / 2;
-            final int top = widgetBaseToCenter.getAbsoluteTop()
-                    + (widgetBaseToCenter.getOffsetHeight() - 40) / 2;
+            int left = widgetBaseToCenter.getAbsoluteLeft() + (widgetBaseToCenter.getOffsetWidth() - 200) / 2;
+            int top = widgetBaseToCenter.getAbsoluteTop() + (widgetBaseToCenter.getOffsetHeight() - 40) / 2;
 
             if (left > 0 && top > 0) {
                 setPopupPosition(left, top);
@@ -115,8 +103,7 @@ public class Status extends PopupPanel {
      * Sets the exporting log flag
      */
     public void setExporting() {
-        msg.setHTML(GeneralComunicator
-                .i18nExtension("status.dropbox.exporting"));
+        msg.setHTML(GeneralComunicator.i18nExtension("status.dropbox.exporting"));
         flag_exporting = true;
         refresh();
     }
@@ -133,8 +120,7 @@ public class Status extends PopupPanel {
      * Sets the importing log flag
      */
     public void setImporting() {
-        msg.setHTML(GeneralComunicator
-                .i18nExtension("status.dropbox.importing"));
+        msg.setHTML(GeneralComunicator.i18nExtension("status.dropbox.importing"));
         flag_importing = true;
         refresh();
     }
@@ -165,20 +151,20 @@ public class Status extends PopupPanel {
     }
 
     /**
-     * Sets the get childs flag
+     * Sets the get children flag
      */
-    public void setGetChilds(final Widget widget) {
+    public void setGetChilds(Widget widget) {
         this.widget = widget;
         msg.setHTML(Main.i18n("status.dropbox.refresh.folder"));
-        flag_getChilds = true;
+        flag_getChildren = true;
         refresh();
     }
 
     /**
-     * Unset the get childs flag
+     * Unset the get children flag
      */
     public void unsetGetChilds() {
-        flag_getChilds = false;
+        flag_getChildren = false;
         refresh();
     }
 

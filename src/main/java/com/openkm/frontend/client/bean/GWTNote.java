@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,13 +34,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTNote implements IsSerializable {
 
     private Date date;
-
     private String text;
-
     private String path;
-
     private String author;
-
     private GWTUser user;
 
     /**
@@ -53,7 +49,7 @@ public class GWTNote implements IsSerializable {
         return date;
     }
 
-    public void setDate(final Date date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -61,7 +57,7 @@ public class GWTNote implements IsSerializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -69,7 +65,7 @@ public class GWTNote implements IsSerializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -77,7 +73,7 @@ public class GWTNote implements IsSerializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -85,7 +81,7 @@ public class GWTNote implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 }

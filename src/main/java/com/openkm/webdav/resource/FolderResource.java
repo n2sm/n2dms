@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -64,32 +64,24 @@ import com.openkm.module.jcr.JcrDocumentModule;
 import com.openkm.util.ConfigUtils;
 import com.openkm.util.PathUtils;
 
-public class FolderResource implements MakeCollectionableResource,
-        PutableResource, CopyableResource, DeletableResource, MoveableResource,
+public class FolderResource implements MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource, MoveableResource,
         PropFindableResource, GetableResource, QuotaResource {
     private final Logger log = LoggerFactory.getLogger(FolderResource.class);
-
     private final List<Document> docChilds;
-
     private final List<Folder> fldChilds;
-
     private final List<Mail> mailChilds;
-
     private Folder fld;
-
     private final Path path;
 
-    public FolderResource(final Folder fld) {
-        fldChilds = null;
-        docChilds = null;
-        mailChilds = null;
-        path = null;
+    public FolderResource(Folder fld) {
+        this.fldChilds = null;
+        this.docChilds = null;
+        this.mailChilds = null;
+        this.path = null;
         this.fld = ResourceUtils.fixResourcePath(fld);
     }
 
-    public FolderResource(final Path path, final Folder fld,
-            final List<Folder> fldChilds, final List<Document> docChilds,
-            final List<Mail> mailChilds) {
+    public FolderResource(Path path, Folder fld, List<Folder> fldChilds, List<Document> docChilds, List<Mail> mailChilds) {
         this.fldChilds = fldChilds;
         this.docChilds = docChilds;
         this.mailChilds = mailChilds;
@@ -112,14 +104,13 @@ public class FolderResource implements MakeCollectionableResource,
     }
 
     @Override
-    public Object authenticate(final String user, final String password) {
+    public Object authenticate(String user, String password) {
         // log.debug("authenticate({}, {})", new Object[] { user, password });
         return ResourceFactoryImpl.REALM;
     }
 
     @Override
-    public boolean authorise(final Request request, final Method method,
-            final Auth auth) {
+    public boolean authorise(Request request, Method method, Auth auth) {
         // log.debug("authorise({}, {}, {})", new Object[] {
         // request.getAbsolutePath(), method, auth });
         return true;
@@ -141,19 +132,19 @@ public class FolderResource implements MakeCollectionableResource,
     }
 
     @Override
-    public String checkRedirect(final Request request) {
+    public String checkRedirect(Request request) {
         return null;
     }
 
     @Override
-    public Resource child(final String childName) {
+    public Resource child(String childName) {
         log.debug("child({})", childName);
 
         try {
             return ResourceUtils.getNode(path, fld.getPath() + "/" + childName);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error("PathNotFoundException: " + e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error("Exception: " + e.getMessage());
         }
 
@@ -163,38 +154,37 @@ public class FolderResource implements MakeCollectionableResource,
     @Override
     public List<? extends Resource> getChildren() {
         log.debug("getChildren()");
-        final List<Resource> resources = new ArrayList<Resource>();
+        long begin = System.currentTimeMillis();
+        List<Resource> resources = new ArrayList<Resource>();
 
         if (fldChilds != null) {
-            for (final Folder fld : fldChilds) {
+            for (Folder fld : fldChilds) {
                 resources.add(new FolderResource(fld));
             }
         }
 
         if (docChilds != null) {
-            for (final Document doc : docChilds) {
+            for (Document doc : docChilds) {
                 resources.add(new DocumentResource(doc));
             }
         }
 
         if (mailChilds != null) {
-            for (final Mail mail : mailChilds) {
+            for (Mail mail : mailChilds) {
                 resources.add(new MailResource(mail));
             }
         }
 
+        log.trace("getChildren.Time: {}", System.currentTimeMillis() - begin);
         return resources;
     }
 
     @Override
-    public Resource createNew(final String newName, final InputStream is,
-            final Long length, final String contentType) throws IOException,
-            ConflictException, NotAuthorizedException, BadRequestException {
-        log.debug("createNew({}, {}, {}, {})", new Object[] { newName, is,
-                length, contentType });
+    public Resource createNew(String newName, InputStream is, Long length, String contentType) throws IOException, ConflictException,
+            NotAuthorizedException, BadRequestException {
+        log.debug("createNew({}, {}, {}, {})", new Object[] { newName, is, length, contentType });
         Document newDoc = new Document();
-        final String fixedDocPath = ResourceUtils.fixRepositoryPath(fld
-                .getPath());
+        String fixedDocPath = ResourceUtils.fixRepositoryPath(fld.getPath());
         newDoc.setPath(fixedDocPath + "/" + newName);
 
         try {
@@ -202,22 +192,19 @@ public class FolderResource implements MakeCollectionableResource,
                 // Already exists, so create new version
                 if (Config.REPOSITORY_NATIVE) {
                     new DbDocumentModule().checkout(null, newDoc.getPath());
-                    new DbDocumentModule().checkin(null, newDoc.getPath(), is,
-                            length, "Modified from WebDAV", null);
+                    new DbDocumentModule().checkin(null, newDoc.getPath(), is, length, "Modified from WebDAV", null);
                 } else {
                     new JcrDocumentModule().checkout(null, newDoc.getPath());
-                    new JcrDocumentModule().checkin(null, newDoc.getPath(), is,
-                            "Modified from WebDAV");
+                    new JcrDocumentModule().checkin(null, newDoc.getPath(), is, "Modified from WebDAV");
                 }
             } else {
                 // Restrict for extension
                 if (!Config.RESTRICT_FILE_NAME.isEmpty()) {
-                    final StringTokenizer st = new StringTokenizer(
-                            Config.RESTRICT_FILE_NAME, Config.LIST_SEPARATOR);
+                    StringTokenizer st = new StringTokenizer(Config.RESTRICT_FILE_NAME, Config.LIST_SEPARATOR);
 
                     while (st.hasMoreTokens()) {
-                        final String wc = st.nextToken().trim();
-                        final String re = ConfigUtils.wildcard2regexp(wc);
+                        String wc = st.nextToken().trim();
+                        String re = ConfigUtils.wildcard2regexp(wc);
 
                         if (Pattern.matches(re, newName)) {
                             log.warn("Filename BAD -> {} ({})", re, wc);
@@ -228,17 +215,16 @@ public class FolderResource implements MakeCollectionableResource,
 
                 // Create a new one
                 if (Config.REPOSITORY_NATIVE) {
-                    newDoc = new DbDocumentModule().create(null, newDoc, is,
-                            length, null);
+                    newDoc = new DbDocumentModule().create(null, newDoc, is, length, null);
                 } else {
                     newDoc = new JcrDocumentModule().create(null, newDoc, is);
                 }
             }
 
             return new DocumentResource(newDoc);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.warn("PathNotFoundException: " + e.getMessage());
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failed to create: " + e.getMessage(), e);
         }
 
@@ -246,39 +232,34 @@ public class FolderResource implements MakeCollectionableResource,
     }
 
     @Override
-    public CollectionResource createCollection(final String newName)
-            throws NotAuthorizedException, ConflictException,
-            BadRequestException {
+    public CollectionResource createCollection(String newName) throws NotAuthorizedException, ConflictException, BadRequestException {
         log.debug("createCollection({})", newName);
         Folder newFld = new Folder();
-        final String fixedFldPath = ResourceUtils.fixRepositoryPath(fld
-                .getPath());
+        String fixedFldPath = ResourceUtils.fixRepositoryPath(fld.getPath());
         newFld.setPath(fixedFldPath + "/" + newName);
 
         try {
             newFld = OKMFolder.getInstance().create(null, newFld);
             return new FolderResource(newFld);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new ConflictException(this);
         }
     }
 
     @Override
-    public void sendContent(final OutputStream out, final Range range,
-            final Map<String, String> params, final String contentType)
-            throws IOException, NotAuthorizedException, BadRequestException {
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException,
+            NotAuthorizedException, BadRequestException {
         log.debug("sendContent({}, {})", params, contentType);
-        ResourceUtils
-                .createContent(out, path, fldChilds, docChilds, mailChilds);
+        ResourceUtils.createContent(out, path, fldChilds, docChilds, mailChilds);
     }
 
     @Override
-    public Long getMaxAgeSeconds(final Auth auth) {
+    public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
 
     @Override
-    public String getContentType(final String accepts) {
+    public String getContentType(String accepts) {
         return null;
     }
 
@@ -288,86 +269,68 @@ public class FolderResource implements MakeCollectionableResource,
     }
 
     @Override
-    public void delete() throws NotAuthorizedException, ConflictException,
-            BadRequestException {
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         log.debug("delete()");
 
         try {
-            final String fixedFldPath = ResourceUtils.fixRepositoryPath(fld
-                    .getPath());
+            String fixedFldPath = ResourceUtils.fixRepositoryPath(fld.getPath());
             OKMFolder.getInstance().delete(null, fixedFldPath);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new ConflictException(this);
         }
     }
 
     @Override
-    public void moveTo(final CollectionResource newParent, final String newName)
-            throws ConflictException, NotAuthorizedException,
-            BadRequestException {
+    public void moveTo(CollectionResource newParent, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
         log.debug("moveTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstFolder = newFldParent.getFolder().getPath();
-            final String srcFolder = PathUtils.getParent(fld.getPath());
-            final String fixedFldPath = ResourceUtils.fixRepositoryPath(fld
-                    .getPath());
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstFolder = newFldParent.getFolder().getPath();
+            String srcFolder = PathUtils.getParent(fld.getPath());
+            String fixedFldPath = ResourceUtils.fixRepositoryPath(fld.getPath());
 
             if (dstFolder.equals(srcFolder)) {
                 log.debug("moveTo - RENAME {} to {}", fixedFldPath, newName);
 
                 try {
-                    fld = OKMFolder.getInstance().rename(null, fixedFldPath,
-                            newName);
-                } catch (final Exception e) {
-                    throw new RuntimeException("Failed to rename to: "
-                            + newName);
+                    fld = OKMFolder.getInstance().rename(null, fixedFldPath, newName);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to rename to: " + newName);
                 }
             } else {
-                final String dstPath = newFldParent.getFolder().getPath();
-                final String fixedDstPath = ResourceUtils
-                        .fixRepositoryPath(dstPath);
-                log.debug("moveTo - MOVE from {} to {}", fixedFldPath,
-                        fixedDstPath);
+                String dstPath = newFldParent.getFolder().getPath();
+                String fixedDstPath = ResourceUtils.fixRepositoryPath(dstPath);
+                log.debug("moveTo - MOVE from {} to {}", fixedFldPath, fixedDstPath);
 
                 try {
-                    OKMFolder.getInstance().move(null, fixedFldPath,
-                            fixedDstPath);
+                    OKMFolder.getInstance().move(null, fixedFldPath, fixedDstPath);
                     fld.setPath(dstPath);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Failed to move to: " + dstPath);
                 }
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FsDirectoryResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
         }
     }
 
     @Override
-    public void copyTo(final CollectionResource newParent, final String newName)
-            throws NotAuthorizedException, BadRequestException,
-            ConflictException {
+    public void copyTo(CollectionResource newParent, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
         log.debug("copyTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstPath = newFldParent.getFolder().getPath() + "/"
-                    + newName;
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstPath = newFldParent.getFolder().getPath() + "/" + newName;
 
             try {
-                final String fixedFldPath = ResourceUtils.fixRepositoryPath(fld
-                        .getPath());
+                String fixedFldPath = ResourceUtils.fixRepositoryPath(fld.getPath());
                 OKMFolder.getInstance().copy(null, fixedFldPath, dstPath);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to copy to:" + dstPath, e);
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FolderResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FolderResource, is a: " + newParent.getClass());
         }
     }
 
@@ -383,7 +346,7 @@ public class FolderResource implements MakeCollectionableResource,
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("fld=").append(fld);
         sb.append("}");

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,9 +21,9 @@
 
 package com.openkm.jaas;
 
-import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.naming.InitialContext;
@@ -38,7 +38,7 @@ public class PrincipalUtils {
      * Obtain current authenticated subject
      */
     public static Subject getSubject() throws NamingException {
-        final InitialContext ctx = new InitialContext();
+        InitialContext ctx = new InitialContext();
         return (Subject) ctx.lookup("java:comp/env/security/subject");
     }
 
@@ -46,14 +46,14 @@ public class PrincipalUtils {
      * Obtain the logged user.
      */
     public static String getUser() throws NamingException {
-        final Subject subject = PrincipalUtils.getSubject();
+        Subject subject = PrincipalUtils.getSubject();
         String user = null;
 
-        for (final Principal principal2 : subject.getPrincipals()) {
-            final Object obj = principal2;
+        for (Iterator<java.security.Principal> it = subject.getPrincipals().iterator(); it.hasNext();) {
+            Object obj = it.next();
 
             if (!(obj instanceof java.security.acl.Group)) {
-                final java.security.Principal principal = (java.security.Principal) obj;
+                java.security.Principal principal = (java.security.Principal) obj;
                 user = principal.getName();
             }
         }
@@ -65,18 +65,17 @@ public class PrincipalUtils {
      * Obtain the list of user roles.
      */
     public static Set<String> getRoles() throws NamingException {
-        final Subject subject = PrincipalUtils.getSubject();
-        final Set<String> roles = new HashSet<String>();
+        Subject subject = PrincipalUtils.getSubject();
+        Set<String> roles = new HashSet<String>();
 
-        for (final Principal principal : subject.getPrincipals()) {
-            final Object obj = principal;
+        for (Iterator<java.security.Principal> it = subject.getPrincipals().iterator(); it.hasNext();) {
+            Object obj = it.next();
 
             if (obj instanceof java.security.acl.Group) {
-                final java.security.acl.Group group = (java.security.acl.Group) obj;
+                java.security.acl.Group group = (java.security.acl.Group) obj;
 
-                for (final Enumeration<? extends java.security.Principal> groups = group
-                        .members(); groups.hasMoreElements();) {
-                    final java.security.Principal rol = groups.nextElement();
+                for (Enumeration<? extends java.security.Principal> groups = group.members(); groups.hasMoreElements();) {
+                    java.security.Principal rol = (java.security.Principal) groups.nextElement();
                     roles.add(rol.getName());
                 }
             }
@@ -88,14 +87,14 @@ public class PrincipalUtils {
     /**
      * Check for role
      */
-    public static boolean hasRole(final String role) {
+    public static boolean hasRole(String role) {
         try {
-            final Set<String> roles = getRoles();
+            Set<String> roles = getRoles();
 
             if (roles != null) {
                 return roles.contains(role);
             }
-        } catch (final NamingException e) {
+        } catch (NamingException e) {
             // Ignore
         }
 

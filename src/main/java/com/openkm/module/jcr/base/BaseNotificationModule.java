@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.module.jcr.base;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.jcr.Node;
@@ -38,8 +39,7 @@ import com.openkm.module.common.CommonNotificationModule;
 import com.openkm.module.jcr.JcrAuthModule;
 
 public class BaseNotificationModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BaseNotificationModule.class);
+    private static Logger log = LoggerFactory.getLogger(BaseNotificationModule.class);
 
     /**
      * Check for user subscriptions and send an notification
@@ -48,16 +48,14 @@ public class BaseNotificationModule {
      * @param user User who generated the modification event
      * @param eventType Type of modification event
      */
-    public static void checkSubscriptions(final Node node, final String user,
-            final String eventType, final String comment) {
-        log.debug("checkSubscriptions({}, {}, {}, {})", new Object[] { node,
-                user, eventType, comment });
+    public static void checkSubscriptions(Node node, String user, String eventType, String comment) {
+        log.debug("checkSubscriptions({}, {}, {}, {})", new Object[] { node, user, eventType, comment });
         Set<String> users = new HashSet<String>();
-        final Set<String> mails = new HashSet<String>();
+        Set<String> mails = new HashSet<String>();
 
         try {
             users = checkSubscriptionsHelper(node);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -65,8 +63,8 @@ public class BaseNotificationModule {
          * Mail notification
          */
         try {
-            for (final String userId : users) {
-                final String mail = new JcrAuthModule().getMail(null, userId);
+            for (String userId : users) {
+                String mail = new JcrAuthModule().getMail(null, userId);
 
                 if (mail != null && !mail.isEmpty()) {
                     mails.add(mail);
@@ -74,10 +72,9 @@ public class BaseNotificationModule {
             }
 
             if (!mails.isEmpty()) {
-                CommonNotificationModule.sendMailSubscription(user,
-                        node.getPath(), eventType, comment, mails);
+                CommonNotificationModule.sendMailSubscription(user, node.getUUID(), node.getPath(), eventType, comment, mails);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -85,13 +82,11 @@ public class BaseNotificationModule {
          * Twitter notification
          */
         try {
-            if (users != null && !users.isEmpty()
-                    && !Config.SUBSCRIPTION_TWITTER_USER.equals("")
+            if (users != null && !users.isEmpty() && !Config.SUBSCRIPTION_TWITTER_USER.equals("")
                     && !Config.SUBSCRIPTION_TWITTER_PASSWORD.equals("")) {
-                CommonNotificationModule.sendTwitterSubscription(user,
-                        node.getPath(), eventType, comment, users);
+                CommonNotificationModule.sendTwitterSubscription(user, node.getPath(), eventType, comment, users);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -101,25 +96,25 @@ public class BaseNotificationModule {
     /**
      * Check for subscriptions recursively
      */
-    private static Set<String> checkSubscriptionsHelper(final Node node)
-            throws javax.jcr.RepositoryException {
+    private static Set<String> checkSubscriptionsHelper(Node node) throws javax.jcr.RepositoryException {
         log.debug("checkSubscriptionsHelper: {}", node.getPath());
-        final HashSet<String> al = new HashSet<String>();
+        HashSet<String> al = new HashSet<String>();
 
         if (node.isNodeType(Folder.TYPE) || node.isNodeType(Document.TYPE)) {
             if (node.isNodeType(Notification.TYPE)) {
-                final Value[] subscriptors = node.getProperty(
-                        Notification.SUBSCRIPTORS).getValues();
+                Value[] subscriptors = node.getProperty(Notification.SUBSCRIPTORS).getValues();
 
-                for (final Value subscriptor : subscriptors) {
-                    al.add(subscriptor.getString());
+                for (int i = 0; i < subscriptors.length; i++) {
+                    al.add(subscriptors[i].getString());
                 }
             }
 
             // An user shouldn't be notified twice
-            final Set<String> tmp = checkSubscriptionsHelper(node.getParent());
+            Set<String> tmp = checkSubscriptionsHelper(node.getParent());
 
-            for (final String usr : tmp) {
+            for (Iterator<String> it = tmp.iterator(); it.hasNext();) {
+                String usr = it.next();
+
                 if (!al.contains(usr)) {
                     al.add(usr);
                 }

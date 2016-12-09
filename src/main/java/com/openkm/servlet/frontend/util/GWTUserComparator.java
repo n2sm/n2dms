@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,31 +31,28 @@ import com.openkm.frontend.client.bean.GWTUser;
  */
 public class GWTUserComparator extends CultureComparator<GWTUser> {
 
-    protected GWTUserComparator(final String locale) {
+    protected GWTUserComparator(String locale) {
         super(locale);
     }
 
-    public static GWTUserComparator getInstance(final String locale) {
+    public static GWTUserComparator getInstance(String locale) {
         try {
-            final GWTUserComparator comparator = (GWTUserComparator) CultureComparator
-                    .getInstance(GWTUserComparator.class, locale);
+            GWTUserComparator comparator = (GWTUserComparator) CultureComparator.getInstance(GWTUserComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new GWTUserComparator(locale);
         }
     }
 
     public static GWTUserComparator getInstance() {
-        final GWTUserComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        GWTUserComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTUser arg0, final GWTUser arg1) {
-        final GWTUser first = arg0;
-        final GWTUser second = arg1;
+    public int compare(GWTUser arg0, GWTUser arg1) {
+        GWTUser first = arg0;
+        GWTUser second = arg1;
 
-        return collator.compare(first.getUsername().toLowerCase(), second
-                .getUsername().toLowerCase());
+        return collator.compare(first.getUsername().toLowerCase(), second.getUsername().toLowerCase());
     }
 }

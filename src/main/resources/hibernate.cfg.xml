@@ -17,7 +17,16 @@
     <property name="hibernate.connection.password"></property>
     ==== JDBC connection properties (end) -->
     
-    <property name="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
+    <!-- http://www.devx.com/dbzone/article/29685 -->
+    <!-- http://stackoverflow.com/questions/3689868/why-is-ehcacheprovider-deprecated -->
+    <!-- http://stackoverflow.com/questions/9846503/externarlize-ehcache-xml-to-use-properties-from-external-properties-file -->
+    <property name="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.SingletonEhCacheRegionFactory</property>
+    <!--
+    <property name="hibernate.cache.region.factory_class">net.sf.ehcache.hibernate.EhCacheRegionFactory</property>
+    <property name="net.sf.ehcache.configurationResourceName">ehcache-hbm.xml</property>
+    -->
+    <property name="hibernate.cache.use_second_level_cache">true</property>
+    <property name="hibernate.cache.use_query_cache">true</property>
     <!-- http://docs.jboss.org/hibernate/core/3.3/reference/en/html/architecture.html#architecture-current-session -->
     <!-- <property name="hibernate.current_session_context_class">thread</property> -->
     <!-- <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property> -->

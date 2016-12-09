@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,16 +25,14 @@ import java.io.Serializable;
 
 public class ProfileChat implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean chatEnabled;
-
     private boolean autoLoginEnabled;
 
     public boolean isChatEnabled() {
         return chatEnabled;
     }
 
-    public void setChatEnabled(final boolean chatEnabled) {
+    public void setChatEnabled(boolean chatEnabled) {
         this.chatEnabled = chatEnabled;
     }
 
@@ -42,13 +40,12 @@ public class ProfileChat implements Serializable {
         return autoLoginEnabled;
     }
 
-    public void setAutoLoginEnabled(final boolean autoLoginEnabled) {
+    public void setAutoLoginEnabled(boolean autoLoginEnabled) {
         this.autoLoginEnabled = autoLoginEnabled;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("chatEnabled=");
         sb.append(chatEnabled);

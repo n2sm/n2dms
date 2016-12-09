@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -37,17 +37,17 @@ public class TestService {
     private static Logger log = LoggerFactory.getLogger(TestService.class);
 
     @WebMethod
-    public void simple(@WebParam(name = "param") final String param) {
+    public void simple(@WebParam(name = "param") String param) {
         log.info("simple({})", param);
     }
 
     @WebMethod
-    public void complex(@WebParam(name = "note") final Note note) {
+    public void complex(@WebParam(name = "note") Note note) {
         log.info("complex({})", note);
     }
 
     @WebMethod
-    public String[] sort1(@WebParam(name = "array") final String[] array) {
+    public String[] sort1(@WebParam(name = "array") String[] array) {
         log.info("sort1({})", array);
 
         if (array != null) {
@@ -59,7 +59,7 @@ public class TestService {
     }
 
     @WebMethod
-    public String[] sort2(@WebParam(name = "array") final String[] array) {
+    public String[] sort2(@WebParam(name = "array") String[] array) {
         log.info("sort2({})", array);
 
         if (array != null) {
@@ -72,7 +72,7 @@ public class TestService {
     }
 
     @WebMethod
-    public String greetings(@WebParam(name = "name") final String name) {
+    public String greetings(@WebParam(name = "name") String name) {
         log.info("greetings({})", name);
         return "Hello, " + name + "!";
     }

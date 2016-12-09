@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -42,25 +43,20 @@ import com.openkm.frontend.client.extension.widget.tabworkspace.TabWorkspaceExte
  * @author jllort
  *
  */
-public class TabWorkspace extends Composite implements HasWorkspaceEvent,
-        HasWorkspaceHandlerExtension {
+public class TabWorkspace extends Composite implements HasWorkspaceEvent, HasWorkspaceHandlerExtension {
     private static final int NUMBER_OF_TABS = 4;
-
     private boolean desktopVisible = false;
-
     private boolean searchVisible = false;
-
     private boolean dashboardVisible = false;
-
     private boolean adminitrationVisible = false;
-
     private List<TabWorkspaceExtension> widgetExtensionList;
-
     private List<WorkspaceHandlerExtension> workHandlerExtensionList;
-
     public boolean[] tabVisited = new boolean[NUMBER_OF_TABS];
-
     public TabBar tabBar;
+    private int tabDesktopPos = 0;
+    private int tabSearchPos = 0;
+    private int tabDashboardPos = 0;
+    private int tabAdministrationPos = 0;
 
     /**
      * Tab Workspace
@@ -71,9 +67,8 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
         tabBar = new TabBar();
         tabBar.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
-                final int index = indexCorrectedChangeViewIndex(event
-                        .getSelectedItem().intValue());
+            public void onSelection(SelectionEvent<Integer> event) {
+                int index = indexCorrectedChangeViewIndex(event.getSelectedItem().intValue());
 
                 switch (index) {
                 case UIDockPanelConstants.DESKTOP:
@@ -88,13 +83,11 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
                     break;
 
                 case UIDockPanelConstants.DASHBOARD:
-                    Main.get().mainPanel
-                            .setView(UIDockPanelConstants.DASHBOARD);
+                    Main.get().mainPanel.setView(UIDockPanelConstants.DASHBOARD);
                     break;
 
                 case UIDockPanelConstants.ADMINISTRATION:
-                    Main.get().mainPanel
-                            .setView(UIDockPanelConstants.ADMINISTRATION);
+                    Main.get().mainPanel.setView(UIDockPanelConstants.ADMINISTRATION);
                     break;
 
                 default:
@@ -114,7 +107,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      * Language refresh
      */
     public void langRefresh() {
-        final int selected = tabBar.getSelectedTab();
+        int selected = tabBar.getSelectedTab();
 
         while (tabBar.getTabCount() > 0) {
             tabBar.selectTab(0);
@@ -137,8 +130,8 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
             tabBar.addTab(Main.i18n("tab.workspace.administration"));
         }
 
-        for (final TabWorkspaceExtension tabWorkspaceExtension : widgetExtensionList) {
-            tabBar.addTab(tabWorkspaceExtension.getTabText());
+        for (Iterator<TabWorkspaceExtension> it = widgetExtensionList.iterator(); it.hasNext();) {
+            tabBar.addTab(it.next().getTabText());
         }
 
         tabBar.selectTab(selected);
@@ -158,25 +151,25 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      * 
      * @param tabIndex The tab index value
      */
-    public void changeSelectedTab(final int tabIndex) {
+    public void changeSelectedTab(int tabIndex) {
         switch (tabIndex) {
         case UIDockPanelConstants.DESKTOP:
-            tabBar.selectTab(UIDockPanelConstants.DESKTOP);
+            tabBar.selectTab(tabDesktopPos);
             Main.get().mainPanel.setView(UIDockPanelConstants.DESKTOP);
             break;
 
         case UIDockPanelConstants.SEARCH:
-            tabBar.selectTab(UIDockPanelConstants.SEARCH);
+            tabBar.selectTab(tabSearchPos);
             Main.get().mainPanel.setView(UIDockPanelConstants.SEARCH);
             break;
 
         case UIDockPanelConstants.DASHBOARD:
-            tabBar.selectTab(UIDockPanelConstants.DASHBOARD);
+            tabBar.selectTab(tabDashboardPos);
             Main.get().mainPanel.setView(UIDockPanelConstants.DASHBOARD);
             break;
 
         case UIDockPanelConstants.ADMINISTRATION:
-            tabBar.selectTab(UIDockPanelConstants.ADMINISTRATION);
+            tabBar.selectTab(tabAdministrationPos);
             Main.get().mainPanel.setView(UIDockPanelConstants.ADMINISTRATION);
             break;
         }
@@ -189,7 +182,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      * 
      * @return index correction made depending visible panels
      */
-    public int indexCorrectedChangeViewIndex(final int index) {
+    public int indexCorrectedChangeViewIndex(int index) {
         int corrected = index;
 
         if (!desktopVisible && corrected >= UIDockPanelConstants.DESKTOP) {
@@ -204,8 +197,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
             corrected++;
         }
 
-        if (!adminitrationVisible
-                && corrected >= UIDockPanelConstants.ADMINISTRATION) {
+        if (!adminitrationVisible && corrected >= UIDockPanelConstants.ADMINISTRATION) {
             corrected++;
         }
 
@@ -217,6 +209,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      */
     public void showDesktop() {
         tabBar.addTab(Main.i18n("tab.workspace.desktop"));
+        tabDesktopPos = tabBar.getTabCount() - 1;
         desktopVisible = true;
 
     }
@@ -226,6 +219,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      */
     public void showSearh() {
         tabBar.addTab(Main.i18n("tab.workspace.search"));
+        tabSearchPos = tabBar.getTabCount() - 1;
         searchVisible = true;
     }
 
@@ -234,6 +228,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      */
     public void showDashboard() {
         tabBar.addTab(Main.i18n("tab.workspace.dashboard"));
+        tabDashboardPos = tabBar.getTabCount() - 1;
         dashboardVisible = true;
     }
 
@@ -242,6 +237,7 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      */
     public void showAdministration() {
         tabBar.addTab(Main.i18n("tab.workspace.administration"));
+        tabAdministrationPos = tabBar.getTabCount() - 1;
         adminitrationVisible = true;
     }
 
@@ -249,8 +245,9 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
      * showExtensionTabs
      */
     public boolean showExtensionTabs() {
-        for (final TabWorkspaceExtension tabExtension : widgetExtensionList) {
+        for (TabWorkspaceExtension tabExtension : widgetExtensionList) {
             tabBar.addTab(tabExtension.getTabText());
+            tabExtension.setTab(tabBar, tabBar.getTabCount() - 1);
         }
         return !widgetExtensionList.isEmpty();
     }
@@ -258,11 +255,11 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
     /**
      * getTabExtensionIndex
      */
-    public int getTabExtensionIndex(final TabWorkspaceExtension widget) {
+    public int getTabExtensionIndex(TabWorkspaceExtension widget) {
         int count = 0;
-        for (final TabWorkspaceExtension tabExtension : widgetExtensionList) {
+        for (TabWorkspaceExtension tabExtension : widgetExtensionList) {
             if (tabExtension.equals(widget)) {
-                return NUMBER_OF_TABS + count;
+                return (NUMBER_OF_TABS + count);
             }
             count++;
         }
@@ -295,29 +292,27 @@ public class TabWorkspace extends Composite implements HasWorkspaceEvent,
     /**
      * addWorkspaceExtension
      */
-    public void addWorkspaceExtension(final TabWorkspaceExtension extension) {
+    public void addWorkspaceExtension(TabWorkspaceExtension extension) {
         widgetExtensionList.add(extension);
-        extension.setPixelSize(Main.get().mainPanel.getCenterWidth(),
-                Main.get().mainPanel.getCenterHeight());
+        extension.setPixelSize(Main.get().mainPanel.getCenterWidth(), Main.get().mainPanel.getCenterHeight());
     }
 
     /**
      * getWidgetExtensionByIndex
      */
-    public Widget getWidgetExtensionByIndex(final int index) {
-        return widgetExtensionList.get(index - NUMBER_OF_TABS);
+    public Widget getWidgetExtensionByIndex(int index) {
+        return (Widget) widgetExtensionList.get(index - NUMBER_OF_TABS);
     }
 
     @Override
-    public void addWorkspaceHandlerExtension(
-            final WorkspaceHandlerExtension handlerExtension) {
+    public void addWorkspaceHandlerExtension(WorkspaceHandlerExtension handlerExtension) {
         workHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final WorkspaceEventConstant event) {
-        for (final WorkspaceHandlerExtension workspaceHandlerExtension : workHandlerExtensionList) {
-            workspaceHandlerExtension.onChange(event);
+    public void fireEvent(WorkspaceEventConstant event) {
+        for (Iterator<WorkspaceHandlerExtension> it = workHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,9 +38,7 @@ public class GWTGrantedUserComparator implements Comparator<GWTGrantedUser> {
         return INSTANCE;
     }
 
-    @Override
-    public int compare(final GWTGrantedUser arg0, final GWTGrantedUser arg1) {
-        return arg0.getUser().getUsername().toLowerCase()
-                .compareTo(arg1.getUser().getUsername().toLowerCase());
+    public int compare(GWTGrantedUser arg0, GWTGrantedUser arg1) {
+        return arg0.getUser().getUsername().toLowerCase().compareTo(arg1.getUser().getUsername().toLowerCase());
     }
 }

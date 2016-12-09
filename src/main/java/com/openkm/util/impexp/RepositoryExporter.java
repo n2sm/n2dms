@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -21,52 +21,33 @@
 
 package com.openkm.util.impexp;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.openkm.bean.Document;
 import com.openkm.bean.Folder;
 import com.openkm.bean.Mail;
 import com.openkm.bean.Version;
-import com.openkm.core.AccessDeniedException;
-import com.openkm.core.Config;
-import com.openkm.core.DatabaseException;
-import com.openkm.core.NoSuchGroupException;
-import com.openkm.core.ParseException;
-import com.openkm.core.PathNotFoundException;
-import com.openkm.core.RepositoryException;
+import com.openkm.core.*;
 import com.openkm.module.DocumentModule;
 import com.openkm.module.FolderModule;
 import com.openkm.module.MailModule;
 import com.openkm.module.ModuleManager;
 import com.openkm.util.FileLogger;
+import com.openkm.util.FileUtils;
 import com.openkm.util.MailUtils;
 import com.openkm.util.PathUtils;
-import com.openkm.util.impexp.metadata.DocumentMetadata;
-import com.openkm.util.impexp.metadata.FolderMetadata;
-import com.openkm.util.impexp.metadata.MailMetadata;
-import com.openkm.util.impexp.metadata.MetadataAdapter;
-import com.openkm.util.impexp.metadata.VersionMetadata;
+import com.openkm.util.impexp.metadata.*;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.*;
+import java.util.Iterator;
 
 public class RepositoryExporter {
-    private static Logger log = LoggerFactory
-            .getLogger(RepositoryExporter.class);
-
-    private static final String BASE_NAME = RepositoryExporter.class
-            .getSimpleName();
-
+    private static Logger log = LoggerFactory.getLogger(RepositoryExporter.class);
+    private static final String BASE_NAME = RepositoryExporter.class.getSimpleName();
     private static boolean firstTime = true;
 
     private RepositoryExporter() {
@@ -75,74 +56,58 @@ public class RepositoryExporter {
     /**
      * Performs a recursive repository content export with metadata
      */
-    public static ImpExpStats exportDocuments(final String token,
-            final String fldPath, final File fs, final boolean metadata,
-            final boolean history, final Writer out, final InfoDecorator deco)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, FileNotFoundException, IOException,
-            DatabaseException, ParseException, NoSuchGroupException,
-            MessagingException {
-        log.debug("exportDocuments({}, {}, {}, {}, {}, {}, {})", new Object[] {
-                token, fldPath, fs, metadata, history, out, deco });
+    public static ImpExpStats exportDocuments(String token, String fldPath, File fs, boolean metadata, boolean history, Writer out,
+            InfoDecorator deco) throws PathNotFoundException, AccessDeniedException, RepositoryException, IOException, DatabaseException,
+            ParseException, NoSuchGroupException, MessagingException {
+        log.debug("exportDocuments({}, {}, {}, {}, {}, {}, {})", new Object[] { token, fldPath, fs, metadata, history, out, deco });
         ImpExpStats stats;
 
         try {
-            FileLogger.info(BASE_NAME,
-                    "Start repository export from ''{0}'' to ''{1}''", fldPath,
-                    fs.getPath());
+            FileLogger.info(BASE_NAME, "Start repository export from ''{0}'' to ''{1}''", fldPath, fs.getPath());
 
             if (fs.exists()) {
                 firstTime = true;
-                stats = exportDocumentsHelper(token, fldPath, fs, metadata,
-                        history, out, deco);
+                stats = exportDocumentsHelper(token, fldPath, fs, metadata, history, out, deco);
             } else {
                 throw new FileNotFoundException(fs.getPath());
             }
 
             FileLogger.info(BASE_NAME, "Repository export finalized");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "PathNotFoundException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "PathNotFoundException ''{0}''", e.getMessage());
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "AccessDeniedException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "AccessDeniedException ''{0}''", e.getMessage());
             throw e;
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "FileNotFoundException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "FileNotFoundException ''{0}''", e.getMessage());
             throw e;
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "RepositoryException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "RepositoryException ''{0}''", e.getMessage());
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
             FileLogger.error(BASE_NAME, "IOException ''{0}''", e.getMessage());
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "DatabaseException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "DatabaseException ''{0}''", e.getMessage());
             throw e;
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "ParseException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "ParseException ''{0}''", e.getMessage());
             throw e;
-        } catch (final NoSuchGroupException e) {
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "NoSuchGroupException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "NoSuchGroupException ''{0}''", e.getMessage());
             throw e;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             log.error(e.getMessage(), e);
-            FileLogger.error(BASE_NAME, "MessagingException ''{0}''",
-                    e.getMessage());
+            FileLogger.error(BASE_NAME, "MessagingException ''{0}''", e.getMessage());
             throw e;
         }
 
@@ -153,22 +118,16 @@ public class RepositoryExporter {
     /**
      * Performs a recursive repository content export with metadata
      */
-    private static ImpExpStats exportDocumentsHelper(final String token,
-            final String fldPath, final File fs, final boolean metadata,
-            final boolean history, final Writer out, final InfoDecorator deco)
-            throws FileNotFoundException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, IOException,
-            DatabaseException, ParseException, NoSuchGroupException,
-            MessagingException {
-        log.debug(
-                "exportDocumentsHelper({}, {}, {}, {}, {}, {}, {})",
-                new Object[] { token, fldPath, fs, metadata, history, out, deco });
-        final ImpExpStats stats = new ImpExpStats();
-        final DocumentModule dm = ModuleManager.getDocumentModule();
-        final FolderModule fm = ModuleManager.getFolderModule();
-        final MailModule mm = ModuleManager.getMailModule();
-        final MetadataAdapter ma = MetadataAdapter.getInstance(token);
-        final Gson gson = new Gson();
+    private static ImpExpStats exportDocumentsHelper(String token, String fldPath, File fs, boolean metadata, boolean history, Writer out,
+            InfoDecorator deco) throws PathNotFoundException, AccessDeniedException, RepositoryException, IOException, DatabaseException,
+            ParseException, NoSuchGroupException, MessagingException {
+        log.debug("exportDocumentsHelper({}, {}, {}, {}, {}, {}, {})", new Object[] { token, fldPath, fs, metadata, history, out, deco });
+        ImpExpStats stats = new ImpExpStats();
+        DocumentModule dm = ModuleManager.getDocumentModule();
+        FolderModule fm = ModuleManager.getFolderModule();
+        MailModule mm = ModuleManager.getMailModule();
+        MetadataAdapter ma = MetadataAdapter.getInstance(token);
+        Gson gson = new Gson();
         String path = null;
         File fsPath = null;
 
@@ -177,13 +136,13 @@ public class RepositoryExporter {
             fsPath = new File(path);
             firstTime = false;
         } else {
+            String dirName = PathUtils.decodeEntities(PathUtils.getName(fldPath));
+
             // Repository path needs to be "corrected" under Windoze
-            path = fs.getPath() + File.separator
-                    + PathUtils.getName(fldPath).replace(':', '_');
+            path = fs.getPath() + File.separator + FileUtils.toValidFilename(dirName);
             fsPath = new File(path);
             fsPath.mkdirs();
-            FileLogger.info(BASE_NAME, "Created folder ''{0}''",
-                    fsPath.getPath());
+            FileLogger.info(BASE_NAME, "Created folder ''{0}''", fsPath.getPath());
 
             if (out != null) {
                 out.write(deco.print(fldPath, 0, null));
@@ -191,40 +150,65 @@ public class RepositoryExporter {
             }
         }
 
-        for (final Mail mailChild : mm.getChildren(token, fldPath)) {
-            path = fsPath.getPath() + File.separator
-                    + PathUtils.getName(mailChild.getPath()).replace(':', '_');
-            final ImpExpStats mailStats = exportMail(token,
-                    mailChild.getPath(), path + ".eml", metadata, out, deco);
+        for (Iterator<Mail> it = mm.getChildren(token, fldPath).iterator(); it.hasNext();) {
+            Mail mailChild = it.next();
 
-            // Stats
-            stats.setSize(stats.getSize() + mailStats.getSize());
-            stats.setMails(stats.getMails() + mailStats.getMails());
+            try {
+                String mailName = PathUtils.decodeEntities(PathUtils.getName(mailChild.getPath()));
+
+                // Repository path needs to be "corrected" under Windoze
+                path = fsPath.getPath() + File.separator + FileUtils.toValidFilename(mailName);
+                ImpExpStats mailStats = exportMail(token, mailChild.getPath(), path + ".eml", metadata, out, deco);
+
+                // Stats
+                stats.setSize(stats.getSize() + mailStats.getSize());
+                stats.setMails(stats.getMails() + mailStats.getMails());
+            } catch (Exception e) {
+                FileLogger.error(BASE_NAME, "{0} ''{1}''", e.toString(), e.getMessage());
+
+                if (out != null) {
+                    out.write(deco.print(mailChild.getPath(), mailChild.getSize(), e.toString()));
+                    out.flush();
+                }
+            }
         }
 
-        for (final Document docChild : dm.getChildren(token, fldPath)) {
-            path = fsPath.getPath() + File.separator
-                    + PathUtils.getName(docChild.getPath()).replace(':', '_');
-            final ImpExpStats docStats = exportDocument(token,
-                    docChild.getPath(), path, metadata, history, out, deco);
+        for (Iterator<Document> it = dm.getChildren(token, fldPath).iterator(); it.hasNext();) {
+            Document docChild = it.next();
 
-            // Stats
-            stats.setSize(stats.getSize() + docStats.getSize());
-            stats.setDocuments(stats.getDocuments() + docStats.getDocuments());
+            try {
+                String fileName = PathUtils.decodeEntities(PathUtils.getName(docChild.getPath()));
+
+                // Repository path needs to be "corrected" under Windoze
+                path = fsPath.getPath() + File.separator + FileUtils.toValidFilename(fileName);
+                ImpExpStats docStats = exportDocument(token, docChild.getPath(), path, metadata, history, out, deco);
+
+                // Stats
+                stats.setSize(stats.getSize() + docStats.getSize());
+                stats.setDocuments(stats.getDocuments() + docStats.getDocuments());
+            } catch (Exception e) {
+                FileLogger.error(BASE_NAME, "{0} ''{1}''", e.toString(), e.getMessage());
+
+                if (out != null) {
+                    out.write(deco.print(docChild.getPath(), docChild.getActualVersion().getSize(), e.toString()));
+                    out.flush();
+                }
+            }
         }
 
-        for (final Folder fldChild : fm.getChildren(token, fldPath)) {
-            final ImpExpStats tmp = exportDocumentsHelper(token,
-                    fldChild.getPath(), fsPath, metadata, history, out, deco);
-            path = fsPath.getPath() + File.separator
-                    + PathUtils.getName(fldChild.getPath()).replace(':', '_');
+        for (Iterator<Folder> it = fm.getChildren(token, fldPath).iterator(); it.hasNext();) {
+            Folder fldChild = it.next();
+            ImpExpStats tmp = exportDocumentsHelper(token, fldChild.getPath(), fsPath, metadata, history, out, deco);
+            String dirName = PathUtils.decodeEntities(PathUtils.getName(fldChild.getPath()));
+
+            // Repository path needs to be "corrected" under Windoze
+            path = fsPath.getPath() + File.separator + FileUtils.toValidFilename(dirName);
 
             // Metadata
             if (metadata) {
-                final FolderMetadata fmd = ma.getMetadata(fldChild);
-                final String json = gson.toJson(fmd);
-                final FileOutputStream fos = new FileOutputStream(path
-                        + Config.EXPORT_METADATA_EXT);
+                FolderMetadata fmd = ma.getMetadata(fldChild);
+                String json = gson.toJson(fmd);
+                FileOutputStream fos = new FileOutputStream(path + Config.EXPORT_METADATA_EXT);
                 IOUtils.write(json, fos);
                 fos.close();
             }
@@ -243,28 +227,24 @@ public class RepositoryExporter {
     /**
      * Export mail from OpenKM repository to filesystem.
      */
-    public static ImpExpStats exportMail(final String token,
-            final String mailPath, final String destPath,
-            final boolean metadata, final Writer out, final InfoDecorator deco)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, IOException, AccessDeniedException,
-            ParseException, NoSuchGroupException, MessagingException {
-        final MailModule mm = ModuleManager.getMailModule();
-        final MetadataAdapter ma = MetadataAdapter.getInstance(token);
-        final Mail mailChild = mm.getProperties(token, mailPath);
-        final Gson gson = new Gson();
-        final ImpExpStats stats = new ImpExpStats();
-        final MimeMessage msg = MailUtils.create(token, mailChild);
+    public static ImpExpStats exportMail(String token, String mailPath, String destPath, boolean metadata, Writer out, InfoDecorator deco)
+            throws PathNotFoundException, RepositoryException, DatabaseException, IOException, AccessDeniedException, ParseException,
+            NoSuchGroupException, MessagingException {
+        MailModule mm = ModuleManager.getMailModule();
+        MetadataAdapter ma = MetadataAdapter.getInstance(token);
+        Mail mailChild = mm.getProperties(token, mailPath);
+        Gson gson = new Gson();
+        ImpExpStats stats = new ImpExpStats();
+        MimeMessage msg = MailUtils.create(token, mailChild);
         FileOutputStream fos = new FileOutputStream(destPath);
         msg.writeTo(fos);
         IOUtils.closeQuietly(fos);
-        FileLogger.info(BASE_NAME, "Created document ''{0}''",
-                mailChild.getPath());
+        FileLogger.info(BASE_NAME, "Created document ''{0}''", mailChild.getPath());
 
         // Metadata
         if (metadata) {
-            final MailMetadata mmd = ma.getMetadata(mailChild);
-            final String json = gson.toJson(mmd);
+            MailMetadata mmd = ma.getMetadata(mailChild);
+            String json = gson.toJson(mmd);
             fos = new FileOutputStream(destPath + Config.EXPORT_METADATA_EXT);
             IOUtils.write(json, fos);
             IOUtils.closeQuietly(fos);
@@ -285,17 +265,14 @@ public class RepositoryExporter {
     /**
      * Export document from OpenKM repository to filesystem.
      */
-    public static ImpExpStats exportDocument(final String token,
-            final String docPath, final String destPath,
-            final boolean metadata, final boolean history, final Writer out,
-            final InfoDecorator deco) throws PathNotFoundException,
-            RepositoryException, DatabaseException, IOException,
-            AccessDeniedException, ParseException, NoSuchGroupException {
-        final DocumentModule dm = ModuleManager.getDocumentModule();
-        final MetadataAdapter ma = MetadataAdapter.getInstance(token);
-        final Document docChild = dm.getProperties(token, docPath);
-        final Gson gson = new Gson();
-        final ImpExpStats stats = new ImpExpStats();
+    public static ImpExpStats exportDocument(String token, String docPath, String destPath, boolean metadata, boolean history, Writer out,
+            InfoDecorator deco) throws PathNotFoundException, RepositoryException, DatabaseException, IOException, AccessDeniedException,
+            ParseException, NoSuchGroupException {
+        DocumentModule dm = ModuleManager.getDocumentModule();
+        MetadataAdapter ma = MetadataAdapter.getInstance(token);
+        Document docChild = dm.getProperties(token, docPath);
+        Gson gson = new Gson();
+        ImpExpStats stats = new ImpExpStats();
 
         // Version history
         if (history) {
@@ -304,63 +281,51 @@ public class RepositoryExporter {
 
             // Metadata
             if (metadata) {
-                final DocumentMetadata dmd = ma.getMetadata(docChild);
-                final String json = gson.toJson(dmd);
-                final FileOutputStream fos = new FileOutputStream(destPath
-                        + Config.EXPORT_METADATA_EXT);
+                DocumentMetadata dmd = ma.getMetadata(docChild);
+                String json = gson.toJson(dmd);
+                FileOutputStream fos = new FileOutputStream(destPath + Config.EXPORT_METADATA_EXT);
                 IOUtils.write(json, fos);
                 IOUtils.closeQuietly(fos);
             }
 
-            for (final Version ver : dm.getVersionHistory(token,
-                    docChild.getPath())) {
-                final String versionPath = destPath + "#v" + ver.getName()
-                        + "#";
+            for (Version ver : dm.getVersionHistory(token, docChild.getPath())) {
+                String versionPath = destPath + "#v" + ver.getName() + "#";
                 FileOutputStream vos = new FileOutputStream(versionPath);
-                final InputStream vis = dm.getContentByVersion(token,
-                        docChild.getPath(), ver.getName());
+                InputStream vis = dm.getContentByVersion(token, docChild.getPath(), ver.getName());
                 IOUtils.copy(vis, vos);
                 IOUtils.closeQuietly(vis);
                 IOUtils.closeQuietly(vos);
-                FileLogger.info(BASE_NAME,
-                        "Created document ''{0}'' version ''{1}''",
-                        docChild.getPath(), ver.getName());
+                FileLogger.info(BASE_NAME, "Created document ''{0}'' version ''{1}''", docChild.getPath(), ver.getName());
 
                 // Metadata
                 if (metadata) {
-                    final VersionMetadata vmd = ma.getMetadata(ver,
-                            docChild.getMimeType());
-                    final String json = gson.toJson(vmd);
-                    vos = new FileOutputStream(versionPath
-                            + Config.EXPORT_METADATA_EXT);
+                    VersionMetadata vmd = ma.getMetadata(ver, docChild.getMimeType());
+                    String json = gson.toJson(vmd);
+                    vos = new FileOutputStream(versionPath + Config.EXPORT_METADATA_EXT);
                     IOUtils.write(json, vos);
                     IOUtils.closeQuietly(vos);
                 }
             }
         } else {
             FileOutputStream fos = new FileOutputStream(destPath);
-            final InputStream is = dm.getContent(token, docChild.getPath(),
-                    false);
+            InputStream is = dm.getContent(token, docChild.getPath(), false);
             IOUtils.copy(is, fos);
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(fos);
-            FileLogger.info(BASE_NAME, "Created document ''{0}''",
-                    docChild.getPath());
+            FileLogger.info(BASE_NAME, "Created document ''{0}''", docChild.getPath());
 
             // Metadata
             if (metadata) {
-                final DocumentMetadata dmd = ma.getMetadata(docChild);
-                final String json = gson.toJson(dmd);
-                fos = new FileOutputStream(destPath
-                        + Config.EXPORT_METADATA_EXT);
+                DocumentMetadata dmd = ma.getMetadata(docChild);
+                String json = gson.toJson(dmd);
+                fos = new FileOutputStream(destPath + Config.EXPORT_METADATA_EXT);
                 IOUtils.write(json, fos);
                 IOUtils.closeQuietly(fos);
             }
         }
 
         if (out != null) {
-            out.write(deco.print(docChild.getPath(), docChild
-                    .getActualVersion().getSize(), null));
+            out.write(deco.print(docChild.getPath(), docChild.getActualVersion().getSize(), null));
             out.flush();
         }
 

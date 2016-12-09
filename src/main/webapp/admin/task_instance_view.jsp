@@ -1,7 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -83,7 +83,7 @@
               ${taskInstance.processInstance.processDefinition.name} v${taskInstance.processInstance.processDefinition.version}
             </a>
           </td>
-          <td><fmt:formatDate value="${taskInstance.create.time}" type="both"/></td>
+          <td><u:formatDate calendar="${taskInstance.create}"/></td>
         </tr>
       </table>
       <h2>Task Form</h2>
@@ -105,7 +105,7 @@
         <tr><th>Actor ID</th><th>Time</th><th>Comment</th></tr>
         <c:forEach var="cmt" items="${taskInstance.comments}" varStatus="row">
           <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
-            <td>${cmt.actorId}</td><td><fmt:formatDate value="${cmt.time.time}" type="both"/></td><td>${cmt.message}</td>
+            <td>${cmt.actorId}</td><td><u:formatDate calendar="${cmt.time}"/></td><td>${cmt.message}</td>
           </tr>
         </c:forEach>
       </table>

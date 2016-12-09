@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -35,8 +35,7 @@ import com.google.gwt.gen2.table.client.FixedWidthGrid;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -56,31 +55,19 @@ import com.openkm.frontend.client.util.OKMBundleResources;
  * @author jllort
  */
 public class SecurityUser extends Composite {
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     public UserScrollTable assignedUser;
-
     public UserScrollTable unassignedUser;
-
     private HorizontalPanel panel;
-
     private VerticalPanel buttonPanel;
-
     private SimplePanel spRight;
-
     private SimplePanel spHeight;
-
     private Image addButton;
-
     private Image removeButton;
-
-    private String path = "";
-
+    private String uuid = "";
     private int width = 612;
-
     private Map<String, Integer> actualGrants;
-
     private Map<String, Integer> changedGrants;
 
     /**
@@ -95,8 +82,8 @@ public class SecurityUser extends Composite {
         unassignedUser = new UserScrollTable(false);
         spRight = new SimplePanel();
         spHeight = new SimplePanel();
-        spRight.setWidth("1");
-        spHeight.setHeight("30");
+        spRight.setWidth("1px");
+        spHeight.setHeight("30px");
 
         addButton = new Image(OKMBundleResources.INSTANCE.add());
         removeButton = new Image(OKMBundleResources.INSTANCE.remove());
@@ -114,11 +101,9 @@ public class SecurityUser extends Composite {
         panel.add(buttonPanel);
         panel.add(assignedUser);
 
-        panel.setCellWidth(buttonPanel, "20");
-        panel.setCellVerticalAlignment(buttonPanel,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        panel.setCellHorizontalAlignment(buttonPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        panel.setCellWidth(buttonPanel, "20px");
+        panel.setCellVerticalAlignment(buttonPanel, HasAlignment.ALIGN_MIDDLE);
+        panel.setCellHorizontalAlignment(buttonPanel, HasAlignment.ALIGN_CENTER);
 
         assignedUser.addStyleName("okm-Border-Left");
         assignedUser.addStyleName("okm-Border-Right");
@@ -126,9 +111,18 @@ public class SecurityUser extends Composite {
         unassignedUser.addStyleName("okm-Border-Left");
         unassignedUser.addStyleName("okm-Border-Right");
 
-        panel.setSize(String.valueOf(width), "365");
+        panel.setSize(String.valueOf(width) + "px", "365px");
 
         initWidget(panel);
+    }
+
+    /**
+     * initSecurity
+     */
+    public void initSecurity() {
+        assignedUser.initSecurity();
+        unassignedUser.initSecurity();
+        panel.setSize(String.valueOf(width) + "px", "365px");
     }
 
     /**
@@ -136,7 +130,7 @@ public class SecurityUser extends Composite {
      */
     ClickHandler addButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (unassignedUser.getUser() != null) {
                 addUser(unassignedUser.getUser());
             }
@@ -148,7 +142,7 @@ public class SecurityUser extends Composite {
      */
     ClickHandler removeButtonHandler = new ClickHandler() {
         @Override
-        public void onClick(final ClickEvent event) {
+        public void onClick(ClickEvent event) {
             if (assignedUser.getUser() != null) {
                 removeUser(assignedUser.getUser());
             }
@@ -169,10 +163,8 @@ public class SecurityUser extends Composite {
     public void reset() {
         assignedUser.reset();
         unassignedUser.reset();
-        assignedUser.getDataTable()
-                .resize(0, assignedUser.getNumberOfColumns());
-        unassignedUser.getDataTable().resize(0,
-                unassignedUser.getNumberOfColumns());
+        assignedUser.getDataTable().resize(0, assignedUser.getNumberOfColumns());
+        unassignedUser.getDataTable().resize(0, unassignedUser.getNumberOfColumns());
     }
 
     /**
@@ -180,37 +172,32 @@ public class SecurityUser extends Composite {
      */
     public void resetUnassigned() {
         unassignedUser.reset();
-        unassignedUser.getDataTable().resize(0,
-                unassignedUser.getNumberOfColumns());
+        unassignedUser.getDataTable().resize(0, unassignedUser.getNumberOfColumns());
     }
 
     /**
      * Gets the granted users
      */
     public void getGrantedUsers() {
-        if (path != null) {
+        if (uuid != null) {
             actualGrants = new HashMap<String, Integer>();
             changedGrants = new HashMap<String, Integer>();
-            authService.getGrantedUsers(path,
-                    new AsyncCallback<List<GWTGrantedUser>>() {
-                        @Override
-                        public void onSuccess(final List<GWTGrantedUser> result) {
-                            Collections.sort(result,
-                                    GWTGrantedUserComparator.getInstance());
+            authService.getGrantedUsers(uuid, new AsyncCallback<List<GWTGrantedUser>>() {
+                @Override
+                public void onSuccess(List<GWTGrantedUser> result) {
+                    Collections.sort(result, GWTGrantedUserComparator.getInstance());
 
-                            for (final GWTGrantedUser gu : result) {
-                                actualGrants.put(gu.getUser().getId(),
-                                        gu.getPermissions());
-                                assignedUser.addRow(gu.getUser(),
-                                        gu.getPermissions(), false);
-                            }
-                        }
+                    for (GWTGrantedUser gu : result) {
+                        actualGrants.put(gu.getUser().getId(), gu.getPermissions());
+                        assignedUser.addRow(gu.getUser(), gu.getPermissions(), false);
+                    }
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("GetGrantedUsers", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("GetGrantedUsers", caught);
+                }
+            });
         }
     }
 
@@ -218,44 +205,42 @@ public class SecurityUser extends Composite {
      * Gets the ungranted users
      */
     public void getUngrantedUsers() {
-        if (path != null) {
-            authService.getUngrantedUsers(path,
-                    new AsyncCallback<List<GWTGrantedUser>>() {
-                        @Override
-                        public void onSuccess(final List<GWTGrantedUser> result) {
-                            for (final GWTGrantedUser gu : result) {
-                                unassignedUser.addRow(gu.getUser(), false);
-                            }
-                        }
+        if (uuid != null) {
+            authService.getUngrantedUsers(uuid, new AsyncCallback<List<GWTGrantedUser>>() {
+                @Override
+                public void onSuccess(List<GWTGrantedUser> result) {
+                    for (GWTGrantedUser gu : result) {
+                        unassignedUser.addRow(gu.getUser(), false);
+                    }
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("GetUngrantedUsers", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("GetUngrantedUsers", caught);
+                }
+            });
         }
     }
 
     /**
      * Gets the ungranted users by filter
      */
-    public void getFilteredUngrantedUsers(final String filter) {
-        if (path != null) {
+    public void getFilteredUngrantedUsers(String filter) {
+        if (uuid != null) {
             resetUnassigned();
-            authService.getFilteredUngrantedUsers(path, filter,
-                    new AsyncCallback<List<GWTGrantedUser>>() {
-                        @Override
-                        public void onSuccess(final List<GWTGrantedUser> result) {
-                            for (final GWTGrantedUser gu : result) {
-                                unassignedUser.addRow(gu.getUser(), false);
-                            }
-                        }
+            authService.getFilteredUngrantedUsers(uuid, filter, new AsyncCallback<List<GWTGrantedUser>>() {
+                @Override
+                public void onSuccess(List<GWTGrantedUser> result) {
+                    for (GWTGrantedUser gu : result) {
+                        unassignedUser.addRow(gu.getUser(), false);
+                    }
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().showError("GetUngrantedUsers", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("GetUngrantedUsers", caught);
+                }
+            });
         }
     }
 
@@ -263,34 +248,26 @@ public class SecurityUser extends Composite {
      * Grant the user
      */
     public void addUser(final GWTUser user) {
-        if (path != null) {
-            if (!Main.get().workspaceUserProperties.getWorkspace()
-                    .isSecurityModeMultiple()) {
+        if (uuid != null) {
+            if (!Main.get().workspaceUserProperties.getWorkspace().isSecurityModeMultiple()) {
                 Main.get().securityPopup.status.setFlag_update();
-                authService.grantUser(path, user.getId(), GWTPermission.READ,
-                        Main.get().securityPopup.recursive.getValue(),
+                authService.grantUser(uuid, user.getId(), GWTPermission.READ, Main.get().securityPopup.recursive.getValue(),
                         new AsyncCallback<Object>() {
-                            @Override
-                            public void onSuccess(final Object result) {
-                                assignedUser.addRow(user, new Integer(
-                                        GWTPermission.READ), false);
+                            public void onSuccess(Object result) {
+                                assignedUser.addRow(user, new Integer(GWTPermission.READ), false);
                                 unassignedUser.removeSelectedRow();
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
+                                Main.get().securityPopup.status.unsetFlag_update();
                             }
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
+                            public void onFailure(Throwable caught) {
+                                Main.get().securityPopup.status.unsetFlag_update();
                                 Main.get().showError("AddUser", caught);
                             }
                         });
             } else {
                 boolean modified = false;
 
-                if (isGrantChanged(user.getId(),
-                        new Integer(GWTPermission.READ))) {
+                if (isGrantChanged(user.getId(), new Integer(GWTPermission.READ))) {
                     changedGrants.put(user.getId(), GWTPermission.READ);
                     modified = true;
                 } else {
@@ -298,8 +275,7 @@ public class SecurityUser extends Composite {
                 }
 
                 unassignedUser.removeSelectedRow();
-                assignedUser.addRow(user, new Integer(GWTPermission.READ),
-                        modified);
+                assignedUser.addRow(user, new Integer(GWTPermission.READ), modified);
                 Main.get().securityPopup.securityPanel.evaluateChangeButton();
             }
         }
@@ -309,34 +285,26 @@ public class SecurityUser extends Composite {
      * Revokes all user permissions
      */
     public void removeUser(final GWTUser user) {
-        if (path != null) {
-            if (!Main.get().workspaceUserProperties.getWorkspace()
-                    .isSecurityModeMultiple()) {
+        if (uuid != null) {
+            if (!Main.get().workspaceUserProperties.getWorkspace().isSecurityModeMultiple()) {
                 Main.get().securityPopup.status.setFlag_update();
-                authService.revokeUser(path, user.getId(),
-                        Main.get().securityPopup.recursive.getValue(),
-                        new AsyncCallback<Object>() {
-                            @Override
-                            public void onSuccess(final Object result) {
-                                unassignedUser.addRow(user, false);
-                                unassignedUser.selectLastRow();
-                                assignedUser.removeSelectedRow();
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
-                            }
+                authService.revokeUser(uuid, user.getId(), Main.get().securityPopup.recursive.getValue(), new AsyncCallback<Object>() {
+                    public void onSuccess(Object result) {
+                        unassignedUser.addRow(user, false);
+                        unassignedUser.selectLastRow();
+                        assignedUser.removeSelectedRow();
+                        Main.get().securityPopup.status.unsetFlag_update();
+                    }
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
-                                Main.get().showError("RevokeUser", caught);
-                            }
-                        });
+                    public void onFailure(Throwable caught) {
+                        Main.get().securityPopup.status.unsetFlag_update();
+                        Main.get().showError("RevokeUser", caught);
+                    }
+                });
             } else {
                 boolean modified = false;
 
-                if (isGrantChanged(user.getId(), new Integer(
-                        GWTPermission.REMOVED))) {
+                if (isGrantChanged(user.getId(), new Integer(GWTPermission.REMOVED))) {
                     changedGrants.put(user.getId(), GWTPermission.REMOVED);
                     modified = true;
                 } else {
@@ -357,66 +325,52 @@ public class SecurityUser extends Composite {
      * @param user The granted user
      * @param permissions The permissions value
      */
-    public void grant(final String user, final int permissions,
-            final boolean recursive, final int flag_property) {
-        if (path != null) {
-            Log.debug("UserScrollTable.grant(" + user + ", " + permissions
-                    + ", " + recursive + ")");
+    public void grant(String user, int permissions, boolean recursive, final int flag_property) {
+        if (uuid != null) {
+            Log.debug("UserScrollTable.grant(" + user + ", " + permissions + ", " + recursive + ")");
 
-            if (!Main.get().workspaceUserProperties.getWorkspace()
-                    .isSecurityModeMultiple()) {
+            if (!Main.get().workspaceUserProperties.getWorkspace().isSecurityModeMultiple()) {
                 Main.get().securityPopup.status.setFlag_update();
-                authService.grantUser(path, user, permissions, recursive,
-                        new AsyncCallback<Object>() {
-                            @Override
-                            public void onSuccess(final Object result) {
-                                Log.debug("RoleScrollTable.callbackGrantUser.onSuccess("
-                                        + result + ")");
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
-                            }
+                authService.grantUser(uuid, user, permissions, recursive, new AsyncCallback<Object>() {
+                    public void onSuccess(Object result) {
+                        Log.debug("RoleScrollTable.callbackGrantUser.onSuccess(" + result + ")");
+                        Main.get().securityPopup.status.unsetFlag_update();
+                    }
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                Log.debug("RoleScrollTable.callbackGrantUser.onFailure("
-                                        + caught + ")");
+                    public void onFailure(Throwable caught) {
+                        Log.debug("RoleScrollTable.callbackGrantUser.onFailure(" + caught + ")");
 
-                                int col = 0;
-                                col++; // Name
+                        int col = 0;
+                        col++; // Name
 
-                                if (flag_property > UserScrollTable.PROPERTY_READ) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_READ) {
+                            col++;
+                        }
 
-                                if (flag_property > UserScrollTable.PROPERTY_WRITE) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_WRITE) {
+                            col++;
+                        }
 
-                                if (flag_property > UserScrollTable.PROPERTY_DELETE) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_DELETE) {
+                            col++;
+                        }
 
-                                if (flag_property > UserScrollTable.PROPERTY_SECURITY) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_SECURITY) {
+                            col++;
+                        }
 
-                                final int selectedRow = assignedUser
-                                        .getSelectedRow();
-                                if (selectedRow >= 0) {
-                                    ((CheckBox) assignedUser.getDataTable()
-                                            .getWidget(selectedRow, col))
-                                            .setValue(false);
-                                }
+                        int selectedRow = assignedUser.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            ((CheckBox) assignedUser.getDataTable().getWidget(selectedRow, col)).setValue(false);
+                        }
 
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
-                                Main.get().showError("GrantUser", caught);
-                            }
-                        });
+                        Main.get().securityPopup.status.unsetFlag_update();
+                        Main.get().showError("GrantUser", caught);
+                    }
+                });
             } else {
                 int newGrant = 0;
-                if (!changedGrants.containsKey(user)
-                        && actualGrants.containsKey(user)) { // Case start new grant with checkbox change
+                if (!changedGrants.containsKey(user) && actualGrants.containsKey(user)) { // Case start new grant with checkbox change
                     newGrant = actualGrants.get(user).intValue();
                 } else {
                     newGrant = changedGrants.get(user).intValue();
@@ -459,83 +413,62 @@ public class SecurityUser extends Composite {
      * @param user The user
      * @param permissions The permissions value
      */
-    public void revoke(final String user, final int permissions,
-            final boolean recursive, final int flag_property) {
-        if (path != null) {
-            Log.debug("UserScrollTable.revoke(" + user + ", " + permissions
-                    + ", " + recursive + ")");
+    public void revoke(String user, int permissions, boolean recursive, final int flag_property) {
+        if (uuid != null) {
+            Log.debug("UserScrollTable.revoke(" + user + ", " + permissions + ", " + recursive + ")");
 
-            if (!Main.get().workspaceUserProperties.getWorkspace()
-                    .isSecurityModeMultiple()) {
+            if (!Main.get().workspaceUserProperties.getWorkspace().isSecurityModeMultiple()) {
                 Main.get().securityPopup.status.setFlag_update();
-                authService.revokeUser(path, user, permissions, recursive,
-                        new AsyncCallback<Object>() {
-                            @Override
-                            public void onSuccess(final Object result) {
-                                Log.debug("RoleScrollTable.callbackRevokeUser.onSuccess("
-                                        + result + ")");
-                                final FixedWidthGrid dataTable = assignedUser
-                                        .getDataTable();
+                authService.revokeUser(uuid, user, permissions, recursive, new AsyncCallback<Object>() {
+                    public void onSuccess(Object result) {
+                        Log.debug("RoleScrollTable.callbackRevokeUser.onSuccess(" + result + ")");
+                        FixedWidthGrid dataTable = assignedUser.getDataTable();
 
-                                if (!dataTable.getSelectedRows().isEmpty()) {
-                                    final int selectedRow = dataTable
-                                            .getSelectedRows().iterator()
-                                            .next().intValue();
-                                    if (!hasSomeCheckBox(selectedRow)) {
-                                        final GWTUser userToRemove = new GWTUser();
-                                        userToRemove.setId(dataTable.getHTML(
-                                                selectedRow,
-                                                assignedUser
-                                                        .getNumberOfColumns() - 1));
-                                        userToRemove.setUsername(dataTable
-                                                .getHTML(selectedRow, 0));
-                                        unassignedUser.addRow(userToRemove,
-                                                false);
-                                        assignedUser.removeSelectedRow();
-                                    }
-                                }
-
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
+                        if (!dataTable.getSelectedRows().isEmpty()) {
+                            int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
+                            if (!hasSomeCheckBox(selectedRow)) {
+                                GWTUser userToRemove = new GWTUser();
+                                userToRemove.setId(dataTable.getHTML(selectedRow, assignedUser.getNumberOfColumns() - 1));
+                                userToRemove.setUsername(dataTable.getHTML(selectedRow, 0));
+                                unassignedUser.addRow(userToRemove, false);
+                                assignedUser.removeSelectedRow();
                             }
+                        }
 
-                            @Override
-                            public void onFailure(final Throwable caught) {
-                                Log.debug("RoleScrollTable.callbackRevokeUser.onFailure("
-                                        + caught + ")");
+                        Main.get().securityPopup.status.unsetFlag_update();
+                    }
 
-                                int col = 0;
-                                col++; // Name
+                    public void onFailure(Throwable caught) {
+                        Log.debug("RoleScrollTable.callbackRevokeUser.onFailure(" + caught + ")");
 
-                                if (flag_property > UserScrollTable.PROPERTY_READ) {
-                                    col++;
-                                }
+                        int col = 0;
+                        col++; // Name
 
-                                if (flag_property > UserScrollTable.PROPERTY_WRITE) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_READ) {
+                            col++;
+                        }
 
-                                if (flag_property > UserScrollTable.PROPERTY_DELETE) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_WRITE) {
+                            col++;
+                        }
 
-                                if (flag_property > UserScrollTable.PROPERTY_SECURITY) {
-                                    col++;
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_DELETE) {
+                            col++;
+                        }
 
-                                final int selectedRow = assignedUser
-                                        .getSelectedRow();
-                                if (selectedRow >= 0) {
-                                    ((CheckBox) assignedUser.getDataTable()
-                                            .getWidget(selectedRow, col))
-                                            .setValue(true);
-                                }
+                        if (flag_property > UserScrollTable.PROPERTY_SECURITY) {
+                            col++;
+                        }
 
-                                Main.get().securityPopup.status
-                                        .unsetFlag_update();
-                                Main.get().showError("RevokeUser", caught);
-                            }
-                        });
+                        int selectedRow = assignedUser.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            ((CheckBox) assignedUser.getDataTable().getWidget(selectedRow, col)).setValue(true);
+                        }
+
+                        Main.get().securityPopup.status.unsetFlag_update();
+                        Main.get().showError("RevokeUser", caught);
+                    }
+                });
             } else {
                 int newGrant = 0;
 
@@ -574,18 +507,15 @@ public class SecurityUser extends Composite {
                     assignedUser.markModifiedSelectedRow(modified);
                 }
 
-                final FixedWidthGrid dataTable = assignedUser.getDataTable();
+                FixedWidthGrid dataTable = assignedUser.getDataTable();
 
                 if (!dataTable.getSelectedRows().isEmpty()) {
-                    final int selectedRow = dataTable.getSelectedRows()
-                            .iterator().next().intValue();
+                    int selectedRow = ((Integer) dataTable.getSelectedRows().iterator().next()).intValue();
 
                     if (!hasSomeCheckBox(selectedRow)) {
-                        final GWTUser userToRemove = new GWTUser();
-                        userToRemove.setId(dataTable.getHTML(selectedRow,
-                                assignedUser.getNumberOfColumns() - 1));
-                        userToRemove.setUsername(dataTable.getHTML(selectedRow,
-                                0));
+                        GWTUser userToRemove = new GWTUser();
+                        userToRemove.setId(dataTable.getHTML(selectedRow, assignedUser.getNumberOfColumns() - 1));
+                        userToRemove.setUsername(dataTable.getHTML(selectedRow, 0));
                         unassignedUser.addRow(userToRemove, modified);
                         unassignedUser.selectLastRow();
                         assignedUser.removeSelectedRow();
@@ -600,22 +530,22 @@ public class SecurityUser extends Composite {
     /**
      * isNewGrant
      */
-    private boolean isGrantChanged(final String userId, final int permission) {
+    private boolean isGrantChanged(String userId, int permission) {
         if (actualGrants.containsKey(userId)) {
-            return permission != actualGrants.get(userId).intValue();
+            return (permission != actualGrants.get(userId).intValue());
         } else {
-            return permission != GWTPermission.REMOVED; // true if not removing some grant that
+            return (permission != GWTPermission.REMOVED); // true if not removing some grant that
         }
     }
 
     /**
-     * Sets the path
+     * Sets the uuid
      * 
-     * @param path The path
+     * @param uuid The uuid
      */
-    public void setPath(final String path) {
-        assignedUser.setPath(path);
-        this.path = path;
+    public void setUuid(String uuid) {
+        assignedUser.setUuid(uuid);
+        this.uuid = uuid;
     }
 
     /**
@@ -630,13 +560,13 @@ public class SecurityUser extends Composite {
      * getNewGrants
      */
     public List<Map<String, Integer>> getNewGrants() {
-        final List<Map<String, Integer>> grants = new ArrayList<Map<String, Integer>>();
-        final Map<String, Integer> addGrants = new HashMap<String, Integer>();
-        final Map<String, Integer> revokeGrants = new HashMap<String, Integer>();
+        List<Map<String, Integer>> grants = new ArrayList<Map<String, Integer>>();
+        Map<String, Integer> addGrants = new HashMap<String, Integer>();
+        Map<String, Integer> revokeGrants = new HashMap<String, Integer>();
         grants.add(addGrants);
         grants.add(revokeGrants);
 
-        for (final String user : changedGrants.keySet()) {
+        for (String user : changedGrants.keySet()) {
             if (changedGrants.get(user).intValue() == GWTPermission.REMOVED) {
                 // If actualGrants not contains role will be strange case
                 if (actualGrants.containsKey(user)) {
@@ -650,12 +580,9 @@ public class SecurityUser extends Composite {
                     // 0 1   1    B & (XOR) -> 1  ( add grant )   
                     // 1 0   1    A & (XOR) -> 1  ( revoke grant )
                     // 1 1   0       
-                    final int bitDiference = changedGrants.get(user).intValue()
-                            ^ actualGrants.get(user).intValue();
-                    final int addBit = changedGrants.get(user).intValue()
-                            & bitDiference;
-                    final int revokeBit = actualGrants.get(user).intValue()
-                            & bitDiference;
+                    int bitDiference = changedGrants.get(user).intValue() ^ actualGrants.get(user).intValue();
+                    int addBit = changedGrants.get(user).intValue() & bitDiference;
+                    int revokeBit = actualGrants.get(user).intValue() & bitDiference;
 
                     if (addBit != 0) {
                         addGrants.put(user, addBit);
@@ -683,18 +610,17 @@ public class SecurityUser extends Composite {
     /**
      * hasSomeCheckBox
      */
-    private boolean hasSomeCheckBox(final int row) {
-        final FixedWidthGrid dataTable = assignedUser.getDataTable();
+    private boolean hasSomeCheckBox(int row) {
+        FixedWidthGrid dataTable = assignedUser.getDataTable();
 
         // If user has no grants must be deleted
         int col = 0;
         col++; // Name
 
-        final boolean isChecked = ((CheckBox) dataTable.getWidget(row, col++))
-                .getValue()
-                || ((CheckBox) dataTable.getWidget(row, col++)).getValue()
-                || ((CheckBox) dataTable.getWidget(row, col++)).getValue()
-                || ((CheckBox) dataTable.getWidget(row, col++)).getValue();
+        boolean isChecked =
+                ((CheckBox) dataTable.getWidget(row, col++)).getValue() || ((CheckBox) dataTable.getWidget(row, col++)).getValue()
+                        || ((CheckBox) dataTable.getWidget(row, col++)).getValue()
+                        || ((CheckBox) dataTable.getWidget(row, col++)).getValue();
 
         return isChecked;
     }

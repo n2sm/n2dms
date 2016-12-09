@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -56,17 +56,13 @@ import com.openkm.util.WebUtils;
  */
 public class RepositorySearchServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(RepositorySearchServlet.class);
+    private static Logger log = LoggerFactory.getLogger(RepositorySearchServlet.class);
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (isAdmin(request)) {
+        if (checkMultipleInstancesAccess(request, response)) {
             if (method.equals(METHOD_GET)) {
                 doGet(request, response);
             } else if (method.equals(METHOD_POST)) {
@@ -76,13 +72,11 @@ public class RepositorySearchServlet extends BaseServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String statement = WebUtils.getString(request, "statement");
-        final String type = WebUtils.getString(request, "type");
+        String statement = WebUtils.getString(request, "statement");
+        String type = WebUtils.getString(request, "type");
         Session session = null;
         updateSessionManager(request);
 
@@ -93,26 +87,23 @@ public class RepositorySearchServlet extends BaseServlet {
                 search(session, statement, type, request, response);
 
                 // Activity log
-                UserActivity.log(request.getRemoteUser(),
-                        "ADMIN_REPOSITORY_SEARCH", null, null, type + ", "
-                                + statement);
+                UserActivity.log(request.getRemoteUser(), "ADMIN_REPOSITORY_SEARCH", null, null, type + ", " + statement);
             } else {
-                final ServletContext sc = getServletContext();
+                ServletContext sc = getServletContext();
                 sc.setAttribute("statement", null);
                 sc.setAttribute("type", null);
                 sc.setAttribute("size", null);
                 sc.setAttribute("columns", null);
                 sc.setAttribute("results", null);
-                sc.getRequestDispatcher("/admin/repository_search.jsp")
-                        .forward(request, response);
+                sc.getRequestDispatcher("/admin/repository_search.jsp").forward(request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         } finally {
@@ -123,58 +114,51 @@ public class RepositorySearchServlet extends BaseServlet {
     /**
      * Perform JCR search
      */
-    private void search(final Session session, final String statement,
-            final String type, final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, RepositoryException {
-        log.debug("search({}, {}, {}, {}, {})", new Object[] { session,
-                statement, type, request, response });
-        final ServletContext sc = getServletContext();
-        final Workspace workspace = session.getWorkspace();
-        final QueryManager queryManager = workspace.getQueryManager();
-        final Query query = queryManager.createQuery(statement, type);
-        final QueryResult result = query.execute();
-        final RowIterator it = result.getRows();
-        final String[] cols = result.getColumnNames();
-        final List<String> columns = new ArrayList<String>();
-        final List<List<String>> results = new ArrayList<List<String>>();
+    private void search(Session session, String statement, String type, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, RepositoryException {
+        log.debug("search({}, {}, {}, {}, {})", new Object[] { session, statement, type, request, response });
+        ServletContext sc = getServletContext();
+        Workspace workspace = session.getWorkspace();
+        QueryManager queryManager = workspace.getQueryManager();
+        Query query = queryManager.createQuery(statement, type);
+        QueryResult result = query.execute();
+        RowIterator it = result.getRows();
+        String[] cols = result.getColumnNames();
+        List<String> columns = new ArrayList<String>();
+        List<List<String>> results = new ArrayList<List<String>>();
 
-        for (final String col : cols) {
-            columns.add(col);
+        for (int i = 0; i < cols.length; i++) {
+            columns.add(cols[i]);
         }
 
         while (it.hasNext()) {
-            final Row row = it.nextRow();
-            final List<String> tmp = new ArrayList<String>();
+            Row row = it.nextRow();
+            List<String> tmp = new ArrayList<String>();
 
-            for (final String col : cols) {
-                if (col.startsWith("jcr:")) {
+            for (int j = 0; j < cols.length; j++) {
+                if (cols[j].startsWith("jcr:")) {
                     // Get property from row
-                    tmp.add(row.getValue(col) != null ? row.getValue(col)
-                            .getString() : "NULL");
+                    tmp.add(row.getValue(cols[j]) != null ? row.getValue(cols[j]).getString() : "NULL");
                 } else {
                     // Get property from node
-                    final String path = row.getValue(JcrConstants.JCR_PATH)
-                            .getString();
-                    final Node node = session.getRootNode().getNode(
-                            path.substring(1));
+                    String path = row.getValue(JcrConstants.JCR_PATH).getString();
+                    Node node = session.getRootNode().getNode(path.substring(1));
 
-                    if (node.hasProperty(col)) {
-                        final Property prop = node.getProperty(col);
+                    if (node.hasProperty(cols[j])) {
+                        Property prop = node.getProperty(cols[j]);
 
                         if (prop != null) {
                             if (prop.getDefinition().isMultiple()) {
-                                final Value[] values = prop.getValues();
-                                final StringBuilder sb = new StringBuilder();
+                                Value[] values = prop.getValues();
+                                StringBuilder sb = new StringBuilder();
 
-                                for (final Value value : values) {
-                                    sb.append(value.getString() + " ");
+                                for (int k = 0; k < values.length; k++) {
+                                    sb.append(values[k].getString() + " ");
                                 }
 
                                 tmp.add(sb.toString());
                             } else {
-                                tmp.add(prop.getValue() != null ? prop
-                                        .getValue().getString() : "NULL");
+                                tmp.add(prop.getValue() != null ? prop.getValue().getString() : "NULL");
                             }
                         }
                     } else {
@@ -191,8 +175,7 @@ public class RepositorySearchServlet extends BaseServlet {
         sc.setAttribute("size", it.getSize());
         sc.setAttribute("columns", columns);
         sc.setAttribute("results", results);
-        sc.getRequestDispatcher("/admin/repository_search.jsp").forward(
-                request, response);
+        sc.getRequestDispatcher("/admin/repository_search.jsp").forward(request, response);
         log.debug("search: void");
     }
 }

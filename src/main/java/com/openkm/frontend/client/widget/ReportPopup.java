@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
@@ -44,13 +44,9 @@ import com.openkm.frontend.client.widget.form.FormManager;
 public class ReportPopup extends DialogBox {
 
     private VerticalPanel vPanel;
-
     private Button cancelbutton;
-
     private Button executeButton;
-
     private GWTReport report;
-
     private FormManager manager;
 
     /**
@@ -68,7 +64,7 @@ public class ReportPopup extends DialogBox {
         cancelbutton = new Button(Main.i18n("button.cancel"));
         cancelbutton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 report = null;
                 hide();
             }
@@ -77,15 +73,11 @@ public class ReportPopup extends DialogBox {
         executeButton = new Button(Main.i18n("button.execute"));
         executeButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 if (manager.getValidationProcessor().validate()) {
                     manager.updateFormElementsValuesWithNewer(); // Updates form element values
-                    final Map<String, String> parameters = manager
-                            .getStringMapValues();
-                    parameters.put(
-                            "format",
-                            String.valueOf(Main.get().mainPanel.topPanel.mainMenu
-                                    .getReportOutput()));
+                    Map<String, String> parameters = manager.getStringMapValues();
+                    parameters.put("format", String.valueOf(Main.get().mainPanel.topPanel.mainMenu.getReportOutput()));
                     Util.executeReport(report.getId(), parameters);
                     hide();
                 }
@@ -93,18 +85,17 @@ public class ReportPopup extends DialogBox {
         });
         executeButton.setStyleName("okm-YesButton");
 
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(cancelbutton);
-        hPanel.add(Util.hSpace("5"));
+        hPanel.add(Util.hSpace("5px"));
         hPanel.add(executeButton);
 
         vPanel.add(manager.getTable());
-        vPanel.add(Util.vSpace("5"));
+        vPanel.add(Util.vSpace("5px"));
         vPanel.add(hPanel);
-        vPanel.add(Util.vSpace("5"));
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setSize("100%", "20");
+        vPanel.add(Util.vSpace("5px"));
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
+        vPanel.setSize("100%", "20px");
 
         super.hide();
         setWidget(vPanel);
@@ -113,7 +104,7 @@ public class ReportPopup extends DialogBox {
     /**
      * @param report
      */
-    public void setReport(final GWTReport report) {
+    public void setReport(GWTReport report) {
         this.report = report;
         manager.setFormElements(report.getFormElements());
         manager.edit();

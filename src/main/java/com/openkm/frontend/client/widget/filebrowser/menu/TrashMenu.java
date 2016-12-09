@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,11 +39,8 @@ import com.openkm.frontend.client.widget.MenuBase;
 public class TrashMenu extends MenuBase {
 
     private ToolBarOption toolBarOption;
-
     private MenuBar dirMenu;
-
     private MenuItem restoreItem;
-
     private MenuItem purgeItem;
 
     public TrashMenu() {
@@ -52,13 +49,10 @@ public class TrashMenu extends MenuBase {
 
         // First initialize language values
         dirMenu = new MenuBar(true);
-        restoreItem = new MenuItem(Util.menuHTML(
-                "img/icon/actions/restore.gif",
-                Main.i18n("general.menu.file.restore")), true, restore);
+        restoreItem = new MenuItem(Util.menuHTML("img/icon/actions/restore.gif", Main.i18n("general.menu.file.restore")), true, restore);
         restoreItem.addStyleName("okm-MenuItem");
         dirMenu.addItem(restoreItem);
-        purgeItem = new MenuItem(Util.menuHTML("img/icon/actions/purge.gif",
-                Main.i18n("general.menu.file.purge")), true, purge);
+        purgeItem = new MenuItem(Util.menuHTML("img/icon/actions/purge.gif", Main.i18n("general.menu.file.purge")), true, purge);
         purgeItem.addStyleName("okm-MenuItem");
         dirMenu.addItem(purgeItem);
         dirMenu.addStyleName("okm-MenuBar");
@@ -67,38 +61,32 @@ public class TrashMenu extends MenuBase {
 
     // Command menu to restore Directory or Document
     Command restore = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.restore) {
                 Main.get().mainPanel.topPanel.toolBar.executeRestore();
-                Main.get().mainPanel.desktop.browser.fileBrowser.trashMenuPopup
-                        .hide();
+                Main.get().mainPanel.desktop.browser.fileBrowser.trashMenuPopup.hide();
             }
         }
     };
 
     // Command menu to remove a Directory or Document
     Command purge = new Command() {
-        @Override
         public void execute() {
             if (toolBarOption.purge) {
                 Main.get().mainPanel.topPanel.toolBar.executePurge();
-                Main.get().mainPanel.desktop.browser.fileBrowser.trashMenuPopup
-                        .hide();
+                Main.get().mainPanel.desktop.browser.fileBrowser.trashMenuPopup.hide();
             }
         }
     };
 
     @Override
     public void langRefresh() {
-        restoreItem.setHTML(Util.menuHTML("img/icon/actions/restore.gif",
-                Main.i18n("general.menu.file.restore")));
-        purgeItem.setHTML(Util.menuHTML("img/icon/actions/purge.gif",
-                Main.i18n("general.menu.file.purge")));
+        restoreItem.setHTML(Util.menuHTML("img/icon/actions/restore.gif", Main.i18n("general.menu.file.restore")));
+        purgeItem.setHTML(Util.menuHTML("img/icon/actions/purge.gif", Main.i18n("general.menu.file.purge")));
     }
 
     @Override
-    public void setAvailableOption(final GWTAvailableOption option) {
+    public void setAvailableOption(GWTAvailableOption option) {
         if (!option.isRestoreOption()) {
             dirMenu.removeItem(restoreItem);
         }
@@ -122,7 +110,7 @@ public class TrashMenu extends MenuBase {
     }
 
     @Override
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         this.toolBarOption = toolBarOption;
         evaluateMenuOptions();
     }
@@ -133,6 +121,14 @@ public class TrashMenu extends MenuBase {
 
     @Override
     public void disableAddPropertyGroup() {
+    }
+
+    @Override
+    public void disablePdfMerge() {
+    }
+
+    @Override
+    public void enablePdfMerge() {
     }
 
     @Override

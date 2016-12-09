@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.jcr.Node;
@@ -80,25 +81,20 @@ import com.openkm.util.StackTraceUtils;
  */
 public class JCRUtils {
     private static Logger log = LoggerFactory.getLogger(JCRUtils.class);
-
     private static long activeSessions = 0;
-
     private static long sessionCreationCount = 0;
-
     private static long sessionDestroyCount = 0;
 
     /**
      * Convert a Value array to String array and add a user id.
      */
-    public static String[] usrValue2String(final Value[] values,
-            final String usrId) throws ValueFormatException,
-            IllegalStateException, javax.jcr.RepositoryException {
-        final ArrayList<String> list = new ArrayList<String>();
+    public static String[] usrValue2String(Value[] values, String usrId) throws ValueFormatException, IllegalStateException,
+            javax.jcr.RepositoryException {
+        ArrayList<String> list = new ArrayList<String>();
 
         for (int i = 0; i < values.length; i++) {
             // Admin and System user is not propagated across the child nodes
-            if (!values[i].getString().equals(Config.SYSTEM_USER)
-                    && !values[i].getString().equals(Config.ADMIN_USER)) {
+            if (!values[i].getString().equals(Config.SYSTEM_USER) && !values[i].getString().equals(Config.ADMIN_USER)) {
                 list.add(values[i].getString());
             }
         }
@@ -110,16 +106,15 @@ public class JCRUtils {
             }
         }
 
-        return list.toArray(new String[list.size()]);
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     /**
      * Convert a Value array to String array.
      */
-    public static String[] rolValue2String(final Value[] values)
-            throws ValueFormatException, IllegalStateException,
+    public static String[] rolValue2String(Value[] values) throws ValueFormatException, IllegalStateException,
             javax.jcr.RepositoryException {
-        final ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<String>();
 
         for (int i = 0; i < values.length; i++) {
             // Do not propagate private OpenKM roles
@@ -128,22 +123,20 @@ public class JCRUtils {
             }
         }
 
-        return list.toArray(new String[list.size()]);
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     /**
      * 
      */
-    public static String[] value2String(final Value[] values)
-            throws ValueFormatException, IllegalStateException,
-            javax.jcr.RepositoryException {
-        final ArrayList<String> list = new ArrayList<String>();
+    public static String[] value2String(Value[] values) throws ValueFormatException, IllegalStateException, javax.jcr.RepositoryException {
+        ArrayList<String> list = new ArrayList<String>();
 
-        for (final Value value : values) {
-            list.add(value.getString());
+        for (int i = 0; i < values.length; i++) {
+            list.add(values[i].getString());
         }
 
-        return list.toArray(new String[list.size()]);
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     /**
@@ -152,7 +145,7 @@ public class JCRUtils {
      *  
      * @param node The node to cancel.
      */
-    public static void discardsPendingChanges(final Node node) {
+    public static void discardsPendingChanges(Node node) {
         try {
             // JSR-170: page 173
             // http://www.day.com/maven/jsr170/javadocs/jcr-1.0/javax/jcr/Item.html#refresh(boolean)
@@ -161,7 +154,7 @@ public class JCRUtils {
             } else {
                 log.warn("node == NULL");
             }
-        } catch (final javax.jcr.RepositoryException e1) {
+        } catch (javax.jcr.RepositoryException e1) {
             e1.printStackTrace();
         }
     }
@@ -172,7 +165,7 @@ public class JCRUtils {
      *  
      * @param node The node to cancel.
      */
-    public static void discardsPendingChanges(final Session session) {
+    public static void discardsPendingChanges(Session session) {
         try {
             // http://www.day.com/maven/jsr170/javadocs/jcr-1.0/javax/jcr/Session.html#refresh(boolean)
             if (session != null) {
@@ -180,7 +173,7 @@ public class JCRUtils {
             } else {
                 log.warn("session == NULL");
             }
-        } catch (final javax.jcr.RepositoryException e1) {
+        } catch (javax.jcr.RepositoryException e1) {
             e1.printStackTrace();
         }
     }
@@ -189,15 +182,14 @@ public class JCRUtils {
      * Make a silent logout
      * See http://jackrabbit.510166.n4.nabble.com/Lock-token-not-being-added-to-session-td2018601.html
      */
-    public static void logout(final Session session) {
+    public static void logout(Session session) {
         if (session != null && session.isLive()) {
-            for (final String lt : session.getLockTokens()) {
+            for (String lt : session.getLockTokens()) {
                 log.debug("Remove LockToken: {}", lt);
                 session.removeLockToken(lt);
             }
             session.logout();
-            log.debug("#{} - {} Destroy session {} from {}", new Object[] {
-                    ++sessionDestroyCount, --activeSessions, session,
+            log.debug("#{} - {} Destroy session {} from {}", new Object[] { ++sessionDestroyCount, --activeSessions, session,
                     StackTraceUtils.whoCalledMe() });
         }
     }
@@ -205,12 +197,11 @@ public class JCRUtils {
     /**
      * Load lock tokens from database
      */
-    public static void loadLockTokens(final Session session)
-            throws DatabaseException, javax.jcr.RepositoryException {
-        final List<LockToken> ltList = LockTokenDAO.findByUser(session
-                .getUserID());
+    public static void loadLockTokens(Session session) throws DatabaseException, javax.jcr.RepositoryException {
+        List<LockToken> ltList = LockTokenDAO.findByUser(session.getUserID());
 
-        for (final LockToken lt : ltList) {
+        for (Iterator<LockToken> it = ltList.iterator(); it.hasNext();) {
+            LockToken lt = it.next();
             session.addLockToken(lt.getToken());
         }
     }
@@ -218,10 +209,9 @@ public class JCRUtils {
     /**
      * Add lock token to user data
      */
-    public static void addLockToken(final Session session, final Node node)
-            throws DatabaseException, javax.jcr.RepositoryException {
+    public static void addLockToken(Session session, Node node) throws DatabaseException, javax.jcr.RepositoryException {
         log.debug("addLockToken({}, {})", session, node);
-        final LockToken lt = new LockToken();
+        LockToken lt = new LockToken();
         lt.setUser(session.getUserID());
         lt.setToken(getLockToken(node.getUUID()));
         LockTokenDAO.add(lt);
@@ -231,8 +221,7 @@ public class JCRUtils {
     /**
      * Remove lock token from user data
      */
-    public static void removeLockToken(final Session session, final Node node)
-            throws DatabaseException, javax.jcr.RepositoryException {
+    public static void removeLockToken(Session session, Node node) throws DatabaseException, javax.jcr.RepositoryException {
         log.debug("removeLockToken({}, {})", session, node);
         LockTokenDAO.delete(session.getUserID(), getLockToken(node.getUUID()));
         log.debug("removeLockToken: void");
@@ -241,10 +230,9 @@ public class JCRUtils {
     /**
      * Obtain lock token from node
      */
-    public static String getLockToken(final Session session, final Node node)
-            throws LockException, javax.jcr.RepositoryException {
-        final LockManager lm = ((SessionImpl) session).getLockManager();
-        final Lock lock = ((LockManagerImpl) lm).getLock((NodeImpl) node);
+    public static String getLockToken(Session session, Node node) throws LockException, javax.jcr.RepositoryException {
+        LockManager lm = ((SessionImpl) session).getLockManager();
+        Lock lock = ((LockManagerImpl) lm).getLock((NodeImpl) node);
 
         if (lock != null) {
             return lock.getLockToken();
@@ -256,8 +244,8 @@ public class JCRUtils {
     /**
      * Obtain lock token from node id
      */
-    public static String getLockToken(final String id) {
-        final StringBuffer buf = new StringBuffer();
+    public static String getLockToken(String id) {
+        StringBuffer buf = new StringBuffer();
         buf.append(id.toString());
         buf.append('-');
         buf.append(getCheckDigit(id.toString()));
@@ -269,22 +257,22 @@ public class JCRUtils {
      * 
      * @see org.apache.jackrabbit.core.lock.LockToken.getCheckDigit(String uuid)
      */
-    private static char getCheckDigit(final String uuid) {
+    private static char getCheckDigit(String uuid) {
         int result = 0;
 
         int multiplier = 36;
         for (int i = 0; i < uuid.length(); i++) {
-            final char c = uuid.charAt(i);
+            char c = uuid.charAt(i);
             if (c >= '0' && c <= '9') {
-                final int num = c - '0';
+                int num = c - '0';
                 result += multiplier * num;
                 multiplier--;
             } else if (c >= 'A' && c <= 'F') {
-                final int num = c - 'A' + 10;
+                int num = c - 'A' + 10;
                 result += multiplier * num;
                 multiplier--;
             } else if (c >= 'a' && c <= 'f') {
-                final int num = c - 'a' + 10;
+                int num = c - 'a' + 10;
                 result += multiplier * num;
                 multiplier--;
             }
@@ -306,49 +294,38 @@ public class JCRUtils {
     /**
      * 
      */
-    public static void grant(final Session session, final String path,
-            final String principal, final String privilege)
-            throws javax.jcr.RepositoryException {
-        final AccessControlManager acm = ((SessionImpl) session)
-                .getAccessControlManager();
-        final AccessControlPolicyIterator acpi = acm
-                .getApplicablePolicies(path);
-        final AccessControlPolicy acp = acpi.nextAccessControlPolicy();
-        final Privilege[] privileges = new Privilege[] { acm
-                .privilegeFromName(Privilege.JCR_ALL) };
-        ((AccessControlList) acp).addAccessControlEntry(new PrincipalImpl(
-                principal), privileges);
+    public static void grant(Session session, String path, String principal, String privilege) throws javax.jcr.RepositoryException {
+        AccessControlManager acm = ((SessionImpl) session).getAccessControlManager();
+        AccessControlPolicyIterator acpi = acm.getApplicablePolicies(path);
+        AccessControlPolicy acp = acpi.nextAccessControlPolicy();
+        Privilege[] privileges = new Privilege[] { acm.privilegeFromName(Privilege.JCR_ALL) };
+        ((AccessControlList) acp).addAccessControlEntry(new PrincipalImpl(principal), privileges);
         session.save();
     }
 
     /**
      * Repository Hot-Backup 
      */
-    public static File hotBackup(final String base) throws RepositoryException,
-            IOException {
+    public static File hotBackup(String base) throws RepositoryException, IOException {
         log.debug("hotBackup({})", base);
-        final String date = new SimpleDateFormat("yyyyMMddHHmmss")
-                .format(new Date());
-        final String backDirName = Config.CONTEXT + "_" + date;
+        String date = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String backDirName = Config.CONTEXT + "_" + date;
         File backDir = null;
 
         if (base == null || base.equals("")) {
-            backDir = new File(System.getProperty("java.io.tmpdir")
-                    + File.separator + backDirName);
+            backDir = new File(System.getProperty("java.io.tmpdir") + File.separator + backDirName);
         } else {
             backDir = new File(base, backDirName);
         }
 
         FileUtils.deleteQuietly(backDir);
         backDir.mkdir();
-        final boolean oldSystemReadonly = Config.SYSTEM_READONLY;
+        boolean oldSystemReadonly = Config.SYSTEM_READONLY;
 
         try {
             Config.SYSTEM_READONLY = true;
-            RepositoryCopier.copy(
-                    (RepositoryImpl) JcrRepositoryModule.getRepository(),
-                    backDir);
-        } catch (final javax.jcr.RepositoryException e) {
+            RepositoryCopier.copy((RepositoryImpl) JcrRepositoryModule.getRepository(), backDir);
+        } catch (javax.jcr.RepositoryException e) {
             FileUtils.deleteQuietly(backDir);
             throw new RepositoryException(e.getMessage(), e);
         } finally {
@@ -362,8 +339,7 @@ public class JCRUtils {
     /**
      * Get JCR Session
      */
-    public static Session getSession() throws javax.jcr.LoginException,
-            javax.jcr.RepositoryException, DatabaseException {
+    public static Session getSession() throws javax.jcr.LoginException, javax.jcr.RepositoryException, DatabaseException {
         Subject subject = null;
         Object obj = null;
 
@@ -371,11 +347,10 @@ public class JCRUtils {
         // Subject userSubject=(Subject)PolicyContext.getContext("javax.security.auth.Subject.container");
         if (EnvironmentDetector.isServerJBoss()) {
             try {
-                final InitialContext ctx = new InitialContext();
-                subject = (Subject) ctx
-                        .lookup("java:/comp/env/security/subject");
+                InitialContext ctx = new InitialContext();
+                subject = (Subject) ctx.lookup("java:/comp/env/security/subject");
                 ctx.close();
-            } catch (final NamingException e) {
+            } catch (NamingException e) {
                 throw new javax.jcr.LoginException(e.getMessage());
             }
         } else if (EnvironmentDetector.isServerTomcat()) {
@@ -385,15 +360,14 @@ public class JCRUtils {
         // Obtain JCR session
         if (subject != null) {
             obj = Subject.doAs(subject, new PrivilegedAction<Object>() {
-                @Override
                 public Object run() {
                     Session s = null;
 
                     try {
                         s = JcrRepositoryModule.getRepository().login();
-                    } catch (final javax.jcr.LoginException e) {
+                    } catch (javax.jcr.LoginException e) {
                         return e;
-                    } catch (final javax.jcr.RepositoryException e) {
+                    } catch (javax.jcr.RepositoryException e) {
                         return e;
                     }
 
@@ -408,9 +382,8 @@ public class JCRUtils {
         } else if (obj instanceof javax.jcr.RepositoryException) {
             throw (javax.jcr.RepositoryException) obj;
         } else if (obj instanceof javax.jcr.Session) {
-            final Session session = (javax.jcr.Session) obj;
-            log.debug("#{} - {} Create session {} from {}", new Object[] {
-                    ++sessionCreationCount, ++activeSessions, session,
+            Session session = (javax.jcr.Session) obj;
+            log.debug("#{} - {} Create session {} from {}", new Object[] { ++sessionCreationCount, ++activeSessions, session,
                     StackTraceUtils.whoCalledMe() });
             JcrAuthModule.loadUserData(session);
             return session;
@@ -422,8 +395,7 @@ public class JCRUtils {
     /**
      * Get node type
      */
-    public static String getNodeType(final Node node)
-            throws javax.jcr.RepositoryException {
+    public static String getNodeType(Node node) throws javax.jcr.RepositoryException {
         String ret = "unknown";
 
         if (node.isNodeType(Document.TYPE)) {
@@ -440,27 +412,24 @@ public class JCRUtils {
     /**
      * Get node uuid from path
      */
-    public static String getUUID(final Session session, final String path)
-            throws javax.jcr.RepositoryException {
-        final Node rootNode = session.getRootNode();
-        final Node node = rootNode.getNode(path.substring(1));
+    public static String getUUID(Session session, String path) throws javax.jcr.RepositoryException {
+        Node rootNode = session.getRootNode();
+        Node node = rootNode.getNode(path.substring(1));
         return node.getUUID();
     }
 
     /**
      * Get node path from uuid
      */
-    public static String getPath(final Session session, final String uuid)
-            throws javax.jcr.RepositoryException {
-        final Node node = session.getNodeByUUID(uuid);
+    public static String getPath(Session session, String uuid) throws javax.jcr.RepositoryException {
+        Node node = session.getNodeByUUID(uuid);
         return node.getPath();
     }
 
     /**
      * Get property from node
      */
-    public static Property getProperty(final Node node, final String name)
-            throws javax.jcr.RepositoryException {
+    public static Property getProperty(Node node, String name) throws javax.jcr.RepositoryException {
         if (node.hasProperty(name)) {
             return node.getProperty(name);
         } else {
@@ -471,8 +440,7 @@ public class JCRUtils {
     /**
      * Get property from node
      */
-    public static String getStringProperty(final Node node, final String name)
-            throws javax.jcr.RepositoryException {
+    public static String getStringProperty(Node node, String name) throws javax.jcr.RepositoryException {
         if (node.hasProperty(name)) {
             return node.getProperty(name).getString();
         } else {
@@ -483,20 +451,18 @@ public class JCRUtils {
     /**
      * Calculate user quota
      */
-    public static long calculateQuota(final Session session)
-            throws javax.jcr.RepositoryException {
+    public static long calculateQuota(Session session) throws javax.jcr.RepositoryException {
         // "/jcr:root/okm:root//element(*, okm:document)[okm:content/@okm:author='"+session.getUserID()+"']";
-        final String qs = "/jcr:root//element(*, okm:document)[okm:content/@okm:author='"
-                + session.getUserID() + "']";
-        final Workspace workspace = session.getWorkspace();
-        final QueryManager queryManager = workspace.getQueryManager();
-        final Query query = queryManager.createQuery(qs, Query.XPATH);
-        final QueryResult result = query.execute();
+        String qs = "/jcr:root//element(*, okm:document)[okm:content/@okm:author='" + session.getUserID() + "']";
+        Workspace workspace = session.getWorkspace();
+        QueryManager queryManager = workspace.getQueryManager();
+        Query query = queryManager.createQuery(qs, Query.XPATH);
+        QueryResult result = query.execute();
         long size = 0;
 
-        for (final NodeIterator nit = result.getNodes(); nit.hasNext();) {
-            final Node node = nit.nextNode();
-            final Node contentNode = node.getNode(Document.CONTENT);
+        for (NodeIterator nit = result.getNodes(); nit.hasNext();) {
+            Node node = nit.nextNode();
+            Node contentNode = node.getNode(Document.CONTENT);
             size += contentNode.getProperty(Document.SIZE).getLong();
         }
 

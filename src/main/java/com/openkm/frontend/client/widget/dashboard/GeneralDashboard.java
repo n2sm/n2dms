@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,27 +42,19 @@ import com.openkm.frontend.client.service.OKMDashboardServiceAsync;
  *
  */
 public class GeneralDashboard extends Composite {
-    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT
-            .create(OKMDashboardService.class);
+    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT.create(OKMDashboardService.class);
 
     private final int NUMBER_OF_COLUMNS = 2;
 
     private HorizontalPanel hPanel;
-
     private VerticalPanel vPanelLeft;
-
     private VerticalPanel vPanelRight;
 
     private DashboardWidget lastWeekTopDownloadedDocuments;
-
     private DashboardWidget lastMonthTopDownloadedDocuments;
-
     private DashboardWidget lastMonthTopModifiedDocuments;
-
     private DashboardWidget lastWeekTopModifiedDocuments;
-
     private DashboardWidget lastModifiedDocuments;
-
     private DashboardWidget lastUploadedDocuments;
 
     private boolean showStatus = false;
@@ -75,33 +67,24 @@ public class GeneralDashboard extends Composite {
         vPanelRight = new VerticalPanel();
         hPanel = new HorizontalPanel();
 
-        lastWeekTopDownloadedDocuments = new DashboardWidget(
-                "LastWeekTopDownloadedDocuments",
-                "dashboard.general.last.week.top.downloaded.documents",
-                "img/icon/actions/download.gif", true,
-                "lastWeekTopDownloadedDocuments");
-        lastMonthTopDownloadedDocuments = new DashboardWidget(
-                "LastMonthTopDownloadedDocuments",
-                "dashboard.general.last.month.top.downloaded.documents",
-                "img/icon/actions/download.gif", false,
-                "lastMonthTopDownloadedDocuments");
-        lastWeekTopModifiedDocuments = new DashboardWidget(
-                "LastWeekTopModifiedDocuments",
-                "dashboard.general.last.week.top.modified.documents",
-                "img/icon/actions/checkin.gif", false,
-                "lastWeekTopModifiedDocuments");
-        lastMonthTopModifiedDocuments = new DashboardWidget(
-                "LastMonthTopModifiedDocuments",
-                "dashboard.general.last.month.top.modified.documents",
-                "img/icon/actions/checkin.gif", false,
-                "lastMonthTopModifiedDocuments");
-        lastModifiedDocuments = new DashboardWidget("LastModifiedDocuments",
-                "dashboard.user.last.modified.documents",
-                "img/icon/actions/checkin.gif", true, "lastModifiedDocuments");
-        lastUploadedDocuments = new DashboardWidget("LastUploadedDocuments",
-                "dashboard.general.last.uploaded.documents",
-                "img/icon/actions/add_document.gif", false,
-                "lastUploadedDocuments");
+        lastWeekTopDownloadedDocuments =
+                new DashboardWidget("LastWeekTopDownloadedDocuments", "dashboard.general.last.week.top.downloaded.documents",
+                        "img/icon/actions/download.gif", true, "lastWeekTopDownloadedDocuments");
+        lastMonthTopDownloadedDocuments =
+                new DashboardWidget("LastMonthTopDownloadedDocuments", "dashboard.general.last.month.top.downloaded.documents",
+                        "img/icon/actions/download.gif", false, "lastMonthTopDownloadedDocuments");
+        lastWeekTopModifiedDocuments =
+                new DashboardWidget("LastWeekTopModifiedDocuments", "dashboard.general.last.week.top.modified.documents",
+                        "img/icon/actions/checkin.gif", false, "lastWeekTopModifiedDocuments");
+        lastMonthTopModifiedDocuments =
+                new DashboardWidget("LastMonthTopModifiedDocuments", "dashboard.general.last.month.top.modified.documents",
+                        "img/icon/actions/checkin.gif", false, "lastMonthTopModifiedDocuments");
+        lastModifiedDocuments =
+                new DashboardWidget("LastModifiedDocuments", "dashboard.user.last.modified.documents", "img/icon/actions/checkin.gif",
+                        true, "lastModifiedDocuments");
+        lastUploadedDocuments =
+                new DashboardWidget("LastUploadedDocuments", "dashboard.general.last.uploaded.documents",
+                        "img/icon/actions/add_document.gif", false, "lastUploadedDocuments");
 
         vPanelLeft.add(lastWeekTopDownloadedDocuments);
         vPanelLeft.add(lastMonthTopDownloadedDocuments);
@@ -133,8 +116,8 @@ public class GeneralDashboard extends Composite {
      * 
      * @param width
      */
-    public void setWidth(final int width) {
-        final int columnWidth = width / NUMBER_OF_COLUMNS;
+    public void setWidth(int width) {
+        int columnWidth = width / NUMBER_OF_COLUMNS;
 
         // Trying to distribute widgets on columns with max size
         lastWeekTopDownloadedDocuments.setWidth(columnWidth);
@@ -148,110 +131,104 @@ public class GeneralDashboard extends Composite {
     /**
      * Get last week top downloaded documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastWeekTopDownloadedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastWeekTopDownloadedDocuments.setDocuments(result);
-            lastWeekTopDownloadedDocuments.setHeaderResults(result.size());
-            lastWeekTopDownloadedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastWeekTopDownloadedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastWeekTopDownloadedDocuments.setDocuments(result);
+                    lastWeekTopDownloadedDocuments.setHeaderResults(result.size());
+                    lastWeekTopDownloadedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getLastWeekTopDownloadedDocuments", caught);
-            lastWeekTopDownloadedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getLastWeekTopDownloadedDocuments", caught);
+                    lastWeekTopDownloadedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Get last month top downloaded documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastMonthTopDownloadedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastMonthTopDownloadedDocuments.setDocuments(result);
-            lastMonthTopDownloadedDocuments.setHeaderResults(result.size());
-            lastMonthTopDownloadedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastMonthTopDownloadedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastMonthTopDownloadedDocuments.setDocuments(result);
+                    lastMonthTopDownloadedDocuments.setHeaderResults(result.size());
+                    lastMonthTopDownloadedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getLastMonthTopDownloadedDocuments", caught);
-            lastMonthTopDownloadedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getLastMonthTopDownloadedDocuments", caught);
+                    lastMonthTopDownloadedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets last months top modified documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastMonthTopModifiedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastMonthTopModifiedDocuments.setDocuments(result);
-            lastMonthTopModifiedDocuments.setHeaderResults(result.size());
-            lastMonthTopModifiedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastMonthTopModifiedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastMonthTopModifiedDocuments.setDocuments(result);
+                    lastMonthTopModifiedDocuments.setHeaderResults(result.size());
+                    lastMonthTopModifiedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getLastMonthTopModifiedDocuments", caught);
-            lastMonthTopModifiedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getLastMonthTopModifiedDocuments", caught);
+                    lastMonthTopModifiedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets last week top modified documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastWeekTopModifiedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastWeekTopModifiedDocuments.setDocuments(result);
-            lastWeekTopModifiedDocuments.setHeaderResults(result.size());
-            lastWeekTopModifiedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastWeekTopModifiedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastWeekTopModifiedDocuments.setDocuments(result);
+                    lastWeekTopModifiedDocuments.setHeaderResults(result.size());
+                    lastWeekTopModifiedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getLastWeekTopModifiedDocuments", caught);
-            lastWeekTopModifiedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getLastWeekTopModifiedDocuments", caught);
+                    lastWeekTopModifiedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * Gets last modified documents callback
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastModifiedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastModifiedDocuments.setDocuments(result);
-            lastModifiedDocuments.setHeaderResults(result.size());
-            lastModifiedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastModifiedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastModifiedDocuments.setDocuments(result);
+                    lastModifiedDocuments.setHeaderResults(result.size());
+                    lastModifiedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("getLastModifiedDocuments", caught);
-            lastModifiedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("getLastModifiedDocuments", caught);
+                    lastModifiedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * get last week top uploaded documents
      */
-    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastUploadedDocuments = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            lastUploadedDocuments.setDocuments(result);
-            lastUploadedDocuments.setHeaderResults(result.size());
-            lastUploadedDocuments.unsetRefreshing();
-        }
+    final AsyncCallback<List<GWTDashboardDocumentResult>> callbackGetLastUploadedDocuments =
+            new AsyncCallback<List<GWTDashboardDocumentResult>>() {
+                public void onSuccess(List<GWTDashboardDocumentResult> result) {
+                    lastUploadedDocuments.setDocuments(result);
+                    lastUploadedDocuments.setHeaderResults(result.size());
+                    lastUploadedDocuments.unsetRefreshing();
+                }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().showError("callbackGetLastUploadedDocuments", caught);
-            lastUploadedDocuments.unsetRefreshing();
-        }
-    };
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("callbackGetLastUploadedDocuments", caught);
+                    lastUploadedDocuments.unsetRefreshing();
+                }
+            };
 
     /**
      * getLastWeekTopDownloadedDocuments
@@ -260,8 +237,7 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastWeekTopDownloadedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastWeekTopDownloadedDocuments(callbackGetLastWeekTopDownloadedDocuments);
+        dashboardService.getLastWeekTopDownloadedDocuments(callbackGetLastWeekTopDownloadedDocuments);
     }
 
     /**
@@ -271,8 +247,7 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastMonthTopDownloadedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastMonthTopDownloadedDocuments(callbackGetLastMonthTopDownloadedDocuments);
+        dashboardService.getLastMonthTopDownloadedDocuments(callbackGetLastMonthTopDownloadedDocuments);
     }
 
     /**
@@ -282,8 +257,7 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastMonthTopModifiedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastMonthTopModifiedDocuments(callbackGetLastMonthTopModifiedDocuments);
+        dashboardService.getLastMonthTopModifiedDocuments(callbackGetLastMonthTopModifiedDocuments);
     }
 
     /**
@@ -293,8 +267,7 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastWeekTopModifiedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastWeekTopModifiedDocuments(callbackGetLastWeekTopModifiedDocuments);
+        dashboardService.getLastWeekTopModifiedDocuments(callbackGetLastWeekTopModifiedDocuments);
     }
 
     /**
@@ -304,8 +277,7 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastModifiedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastModifiedDocuments(callbackGetLastModifiedDocuments);
+        dashboardService.getLastModifiedDocuments(callbackGetLastModifiedDocuments);
     }
 
     /**
@@ -315,17 +287,16 @@ public class GeneralDashboard extends Composite {
         if (showStatus) {
             lastUploadedDocuments.setRefreshing();
         }
-        dashboardService
-                .getLastUploadedDocuments(callbackGetLastUploadedDocuments);
+        dashboardService.getLastUploadedDocuments(callbackGetLastUploadedDocuments);
     }
 
     /**
      * Refresh all panels
      */
     public void refreshAll() {
-        showStatus = Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD
-                && Main.get().mainPanel.dashboard.getActualView() == UIDashboardConstants.DASHBOARD_GENERAL;
+        showStatus =
+                ((Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD) && (Main.get().mainPanel.dashboard
+                        .getActualView() == UIDashboardConstants.DASHBOARD_GENERAL));
         getLastWeekTopDownloadedDocuments();
         getLastMonthTopDownloadedDocuments();
         getLastMonthTopModifiedDocuments();

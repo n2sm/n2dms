@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,11 +21,13 @@
 
 package com.openkm.frontend.client.widget.dashboard.keymap;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import com.openkm.frontend.client.bean.GWTKeyword;
 
 /**
@@ -37,13 +39,9 @@ import com.openkm.frontend.client.bean.GWTKeyword;
 public class TagCloud extends Composite {
 
     private int minFrequency = 1;
-
     private int maxFrequency = 1;
-
     private static final int MIN_FONT_SIZE = 8;
-
     private static final int MAX_FONT_SIZE = 25;
-
     private FlowPanel flowPanel;
 
     /**
@@ -61,16 +59,14 @@ public class TagCloud extends Composite {
      * 
      * @return Size value
      */
-    public int getLabelSize(final int frequency) {
+    public int getLabelSize(int frequency) {
         // Lineal interpolation
         //int multiplier = (MAX_FONT_SIZE-MIN_FONT_SIZE)/(maxFrequency-minFrequency);  
         //int fontSize = MIN_FONT_SIZE + ((maxFrequency-(maxFrequency-(frequency-minFrequency)))*multiplier);
 
         // Logarithmic interpolation
-        final double weight = (Math.log(frequency) - Math.log(minFrequency))
-                / (Math.log(maxFrequency) - Math.log(minFrequency));
-        final int fontSize = MIN_FONT_SIZE
-                + (int) Math.round((MAX_FONT_SIZE - MIN_FONT_SIZE) * weight);
+        double weight = (Math.log(frequency) - Math.log(minFrequency)) / (Math.log(maxFrequency) - Math.log(minFrequency));
+        int fontSize = MIN_FONT_SIZE + (int) Math.round((MAX_FONT_SIZE - MIN_FONT_SIZE) * weight);
 
         return fontSize;
     }
@@ -80,11 +76,12 @@ public class TagCloud extends Composite {
      * 
      * @param keywordsList Keyword list to calculate frequencies
      */
-    public void calculateFrequencies(final List<GWTKeyword> keywordsList) {
+    public void calculateFrequencies(List<GWTKeyword> keywordsList) {
         minFrequency = 1;
         maxFrequency = 1;
 
-        for (final GWTKeyword keyword : keywordsList) {
+        for (Iterator<GWTKeyword> it = keywordsList.iterator(); it.hasNext();) {
+            GWTKeyword keyword = it.next();
             if (minFrequency > keyword.getFrequency()) {
                 minFrequency = keyword.getFrequency();
             }
@@ -102,17 +99,17 @@ public class TagCloud extends Composite {
      * 
      * @return Some color
      */
-    public String getColor(final int fontSize) {
-        String color = "c3d9ff";
+    public String getColor(int fontSize) {
+        String color = "#c3d9ff";
 
         if (fontSize > 20) {
-            color = "488bff";
+            color = "#488bff";
         } else if (fontSize > 15) {
-            color = "6ca2ff";
+            color = "#6ca2ff";
         } else if (fontSize > 10) {
-            color = "8bb6ff";
+            color = "#8bb6ff";
         } else if (fontSize > 5) {
-            color = "a5c6ff";
+            color = "#a5c6ff";
         }
 
         return color;
@@ -144,7 +141,7 @@ public class TagCloud extends Composite {
      * 
      * @param widget The widget to be added
      */
-    public void add(final Widget widget) {
+    public void add(Widget widget) {
         flowPanel.add(widget);
     }
 
@@ -162,7 +159,7 @@ public class TagCloud extends Composite {
      * 
      * @param minFrequency
      */
-    public void setMinFrequency(final int minFrequency) {
+    public void setMinFrequency(int minFrequency) {
         this.minFrequency = minFrequency;
     }
 
@@ -180,7 +177,7 @@ public class TagCloud extends Composite {
      * 
      * @param maxFrequency The max frequency
      */
-    public void setMaxFrequency(final int maxFrequency) {
+    public void setMaxFrequency(int maxFrequency) {
         this.maxFrequency = maxFrequency;
     }
 }

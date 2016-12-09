@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,43 +34,31 @@ import com.openkm.frontend.client.bean.GWTUser;
 public interface OKMAuthServiceAsync {
     public void logout(AsyncCallback<?> callback);
 
-    public void getGrantedUsers(String nodePath,
-            AsyncCallback<List<GWTGrantedUser>> callback);
+    public void getGrantedUsers(String nodePath, AsyncCallback<List<GWTGrantedUser>> callback);
 
-    public void getGrantedRoles(String nodePath,
-            AsyncCallback<Map<String, Integer>> callback);
+    public void getGrantedRoles(String nodePath, AsyncCallback<Map<String, Integer>> callback);
 
     public void getRemoteUser(AsyncCallback<String> callback);
 
-    public void getUngrantedUsers(String nodePath,
-            AsyncCallback<List<GWTGrantedUser>> callback);
+    public void getUngrantedUsers(String nodePath, AsyncCallback<List<GWTGrantedUser>> callback);
 
-    public void getUngrantedRoles(String nodePath,
-            AsyncCallback<List<String>> callback);
+    public void getUngrantedRoles(String nodePath, AsyncCallback<List<String>> callback);
 
-    public void getFilteredUngrantedUsers(String nodePath, String filter,
-            AsyncCallback<List<GWTGrantedUser>> callback);
+    public void getFilteredUngrantedUsers(String nodePath, String filter, AsyncCallback<List<GWTGrantedUser>> callback);
 
-    public void getFilteredUngrantedRoles(String nodePath, String filter,
-            AsyncCallback<List<String>> callback);
+    public void getFilteredUngrantedRoles(String nodePath, String filter, AsyncCallback<List<String>> callback);
 
-    public void grantUser(String path, String user, int permissions,
-            boolean recursive, AsyncCallback<?> callback);
+    public void grantUser(String path, String user, int permissions, boolean recursive, AsyncCallback<?> callback);
 
-    public void revokeUser(String path, String user, boolean recursive,
-            AsyncCallback<?> callback);
+    public void revokeUser(String path, String user, boolean recursive, AsyncCallback<?> callback);
 
-    public void revokeUser(String path, String user, int permissions,
-            boolean recursive, AsyncCallback<?> callback);
+    public void revokeUser(String path, String user, int permissions, boolean recursive, AsyncCallback<?> callback);
 
-    public void grantRole(String path, String role, int permissions,
-            boolean recursive, AsyncCallback<?> callback);
+    public void grantRole(String path, String role, int permissions, boolean recursive, AsyncCallback<?> callback);
 
-    public void revokeRole(String path, String role, boolean recursive,
-            AsyncCallback<?> callback);
+    public void revokeRole(String path, String role, boolean recursive, AsyncCallback<?> callback);
 
-    public void revokeRole(String path, String role, int permissions,
-            boolean recursive, AsyncCallback<?> callback);
+    public void revokeRole(String path, String role, int permissions, boolean recursive, AsyncCallback<?> callback);
 
     public void keepAlive(AsyncCallback<?> callback);
 
@@ -78,14 +66,10 @@ public interface OKMAuthServiceAsync {
 
     public void getAllRoles(AsyncCallback<List<String>> callback);
 
-    public void getFilteredAllUsers(String filter, List<String> selectedUsers,
-            AsyncCallback<List<GWTUser>> callback);
+    public void getFilteredAllUsers(String filter, List<String> selectedUsers, AsyncCallback<List<GWTUser>> callback);
 
-    public void getFilteredAllRoles(String filter, List<String> selectedRoles,
-            AsyncCallback<List<String>> callback);
+    public void getFilteredAllRoles(String filter, List<String> selectedRoles, AsyncCallback<List<String>> callback);
 
-    public void changeSecurity(String path, Map<String, Integer> grantUsers,
-            Map<String, Integer> revokeUsers, Map<String, Integer> grantRoles,
-            Map<String, Integer> revokeRoles, boolean recursive,
-            AsyncCallback<?> callback);
+    public void changeSecurity(String path, Map<String, Integer> grantUsers, Map<String, Integer> revokeUsers,
+            Map<String, Integer> grantRoles, Map<String, Integer> revokeRoles, boolean recursive, AsyncCallback<?> callback);
 }

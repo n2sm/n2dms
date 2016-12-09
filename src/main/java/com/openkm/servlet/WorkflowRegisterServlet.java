@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -53,97 +53,80 @@ import com.openkm.util.JBPMUtils;
  * Workflow Register Servlet
  */
 public class WorkflowRegisterServlet extends HttpServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(WorkflowRegisterServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(WorkflowRegisterServlet.class);
     private static final long serialVersionUID = 1L;
 
     /**
      * Handle GET and POST
      */
-    @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("service({}, {}", request, response);
         request.setCharacterEncoding("UTF-8");
-        final PrintWriter out = response.getWriter();
+        PrintWriter out = response.getWriter();
 
         try {
-            final String user = PrincipalUtils.getUser();
+            String user = PrincipalUtils.getUser();
 
             if (Config.ADMIN_USER.equals(user)) {
-                final String msg = handleRequest(request);
+                String msg = handleRequest(request);
                 log.info("Status: {}", msg);
                 out.print(msg);
                 out.flush();
             } else {
-                log.warn("Workflow should be registered by {}",
-                        Config.ADMIN_USER);
+                log.warn("Workflow should be registered by {}", Config.ADMIN_USER);
             }
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "FileUploadException: " + e.getMessage());
-        } catch (final IOException e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "FileUploadException: " + e.getMessage());
+        } catch (IOException e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "IOException: " + e.getMessage());
-        } catch (final Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "IOException: " + e.getMessage());
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             IOUtils.closeQuietly(out);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private String handleRequest(final HttpServletRequest request)
-            throws FileUploadException, IOException, Exception {
+    private String handleRequest(HttpServletRequest request) throws FileUploadException, IOException, Exception {
         log.debug("handleRequest({})", request);
 
         if (ServletFileUpload.isMultipartContent(request)) {
-            final FileItemFactory factory = new DiskFileItemFactory();
-            final ServletFileUpload upload = new ServletFileUpload(factory);
-            final List<FileItem> items = upload.parseRequest(request);
+            FileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            List<FileItem> items = upload.parseRequest(request);
 
             if (items.isEmpty()) {
-                final String msg = "No process file in the request";
+                String msg = "No process file in the request";
                 log.warn(msg);
                 return msg;
             } else {
-                final FileItem fileItem = items.get(0);
+                FileItem fileItem = (FileItem) items.get(0);
 
-                if (fileItem.getContentType().indexOf(
-                        "application/x-zip-compressed") == -1) {
-                    final String msg = "Not a process archive";
+                if (fileItem.getContentType().indexOf("application/x-zip-compressed") == -1) {
+                    String msg = "Not a process archive";
                     log.warn(msg);
                     throw new Exception(msg);
                 } else {
-                    log.info("Deploying process archive: {}",
-                            fileItem.getName());
-                    final JbpmContext jbpmContext = JBPMUtils.getConfig()
-                            .createJbpmContext();
+                    log.info("Deploying process archive: {}", fileItem.getName());
+                    JbpmContext jbpmContext = JBPMUtils.getConfig().createJbpmContext();
                     InputStream isForms = null;
                     ZipInputStream zis = null;
 
                     try {
                         zis = new ZipInputStream(fileItem.getInputStream());
-                        final ProcessDefinition processDefinition = ProcessDefinition
-                                .parseParZipInputStream(zis);
+                        ProcessDefinition processDefinition = ProcessDefinition.parseParZipInputStream(zis);
 
                         // Check XML form definition
-                        final FileDefinition fileDef = processDefinition
-                                .getFileDefinition();
+                        FileDefinition fileDef = processDefinition.getFileDefinition();
                         isForms = fileDef.getInputStream("forms.xml");
                         FormUtils.parseWorkflowForms(isForms);
 
-                        log.debug("Created a processdefinition: {}",
-                                processDefinition.getName());
+                        log.debug("Created a processdefinition: {}", processDefinition.getName());
                         jbpmContext.deployProcessDefinition(processDefinition);
-                        return "Process " + processDefinition.getName()
-                                + " deployed successfully";
+                        return "Process " + processDefinition.getName() + " deployed successfully";
                     } finally {
                         IOUtils.closeQuietly(isForms);
                         IOUtils.closeQuietly(zis);

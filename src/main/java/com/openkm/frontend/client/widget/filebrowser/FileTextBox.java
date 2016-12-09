@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,6 +26,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -37,11 +38,8 @@ import com.openkm.frontend.client.Main;
 public class FileTextBox extends Composite {
 
     public static final int ACTION_NONE = -1;
-
     public static final int ACTION_RENAME = 0;
-
     private TextBox textBox;
-
     private int action = ACTION_RENAME;
 
     /**
@@ -51,17 +49,15 @@ public class FileTextBox extends Composite {
         textBox = new TextBox();
         textBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 switch (event.getNativeKeyCode()) {
                 case (char) KeyCodes.KEY_ENTER:
                     switch (action) {
                     case ACTION_RENAME:
                         if (textBox.getText().length() > 0) {
-                            Main.get().mainPanel.desktop.browser.fileBrowser
-                                    .rename(textBox.getText());
+                            Main.get().mainPanel.desktop.browser.fileBrowser.rename(textBox.getText());
                         } else {
-                            Main.get().mainPanel.desktop.browser.fileBrowser
-                                    .hideRename();
+                            Main.get().mainPanel.desktop.browser.fileBrowser.hideRename();
                         }
                         break;
                     }
@@ -71,8 +67,7 @@ public class FileTextBox extends Composite {
                 case (char) KeyCodes.KEY_ESCAPE:
                     switch (action) {
                     case ACTION_RENAME:
-                        Main.get().mainPanel.desktop.browser.fileBrowser
-                                .hideRename();
+                        Main.get().mainPanel.desktop.browser.fileBrowser.hideRename();
                         break;
                     }
                     Main.get().mainPanel.enableKeyShorcuts(); // Enables general keys applications
@@ -97,7 +92,7 @@ public class FileTextBox extends Composite {
      * 
      * @param text The text
      */
-    public void setText(final String text) {
+    public void setText(String text) {
         textBox.setVisibleLength(text.length() + 5);
         textBox.setText(text);
     }
@@ -115,7 +110,7 @@ public class FileTextBox extends Composite {
      * 
      * @param action The action value
      */
-    public void setAction(final int action) {
+    public void setAction(int action) {
         this.action = action;
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,7 +42,7 @@ public class ProfileDAO {
     /**
      * Create
      */
-    public static long create(final Profile up) throws DatabaseException {
+    public static long create(Profile up) throws DatabaseException {
         log.debug("create({})", up);
         Session session = null;
         Transaction tx = null;
@@ -50,11 +50,11 @@ public class ProfileDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Long id = (Long) session.save(up);
+            Long id = (Long) session.save(up);
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -65,7 +65,7 @@ public class ProfileDAO {
     /**
      * Update
      */
-    public static void update(final Profile up) throws DatabaseException {
+    public static void update(Profile up) throws DatabaseException {
         log.debug("update({})", up);
         Session session = null;
         Transaction tx = null;
@@ -75,7 +75,7 @@ public class ProfileDAO {
             tx = session.beginTransaction();
             session.update(up);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -88,7 +88,7 @@ public class ProfileDAO {
     /**
      * Delete
      */
-    public static void delete(final long upId) throws DatabaseException {
+    public static void delete(long upId) throws DatabaseException {
         log.debug("delete({})", upId);
         Session session = null;
         Transaction tx = null;
@@ -96,10 +96,10 @@ public class ProfileDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Profile up = (Profile) session.load(Profile.class, upId);
+            Profile up = (Profile) session.load(Profile.class, upId);
             session.delete(up);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -112,19 +112,19 @@ public class ProfileDAO {
     /**
      * Find by pk
      */
-    public static Profile findByPk(final long upId) throws DatabaseException {
+    public static Profile findByPk(long upId) throws DatabaseException {
         log.debug("findByPk({})", upId);
-        final String qs = "from Profile prf where prf.id=:id";
+        String qs = "from Profile prf where prf.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", upId);
-            final Profile ret = (Profile) q.setMaxResults(1).uniqueResult();
+            Profile ret = (Profile) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -135,25 +135,23 @@ public class ProfileDAO {
      * Find by pk
      */
     @SuppressWarnings("unchecked")
-    public static List<Profile> findAll(final boolean filterByActive)
-            throws DatabaseException {
+    public static List<Profile> findAll(boolean filterByActive) throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from Profile prf "
-                + (filterByActive ? "where prf.active=:active" : "");
+        String qs = "from Profile prf " + (filterByActive ? "where prf.active=:active" : "");
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
 
             if (filterByActive) {
                 q.setBoolean("active", true);
             }
 
-            final List<Profile> ret = q.list();
+            List<Profile> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -163,20 +161,19 @@ public class ProfileDAO {
     /**
      * Find by user
      */
-    public static Profile findByUser(final String user)
-            throws DatabaseException {
+    public static Profile findByUser(String user) throws DatabaseException {
         log.debug("findByUser({})", user);
-        final String qs = "select profile from UserConfig uc where uc.user=:user";
+        String qs = "select profile from UserConfig uc where uc.user=:user";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
-            final Profile ret = (Profile) q.setMaxResults(1).uniqueResult();
+            Profile ret = (Profile) q.setMaxResults(1).uniqueResult();
             log.debug("findByUser: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);

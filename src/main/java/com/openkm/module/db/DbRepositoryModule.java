@@ -1,26 +1,27 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
@@ -28,11 +29,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import javax.mail.MessagingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import com.openkm.bean.AppVersion;
+import com.openkm.bean.ExtendedAttributes;
 import com.openkm.bean.Folder;
 import com.openkm.bean.Permission;
 import com.openkm.bean.PropertyGroup;
@@ -43,6 +47,7 @@ import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.ItemExistsException;
 import com.openkm.core.LockException;
+import com.openkm.core.NoSuchGroupException;
 import com.openkm.core.ParseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
@@ -56,15 +61,16 @@ import com.openkm.module.RepositoryModule;
 import com.openkm.module.db.base.BaseFolderModule;
 import com.openkm.module.db.stuff.DbSessionManager;
 import com.openkm.spring.PrincipalUtils;
+import com.openkm.util.FileUtils;
 import com.openkm.util.FormUtils;
 import com.openkm.util.MailUtils;
 import com.openkm.util.PathUtils;
 import com.openkm.util.UserActivity;
 import com.openkm.util.WarUtils;
+import com.openkm.util.impexp.RepositoryExporter;
 
 public class DbRepositoryModule implements RepositoryModule {
-    private static Logger log = LoggerFactory
-            .getLogger(DbRepositoryModule.class);
+    private static Logger log = LoggerFactory.getLogger(DbRepositoryModule.class);
 
     /**
      * Initialize the repository.
@@ -72,15 +78,23 @@ public class DbRepositoryModule implements RepositoryModule {
      * @return The root path of the initialized repository.
      * @throws DatabaseException If there is any general repository problem.
      */
-    public synchronized static String initialize() throws RepositoryException,
-            DatabaseException {
+    public synchronized static String initialize() throws RepositoryException, DatabaseException {
         log.debug("initialize()");
 
         // Initializes Repository
-        final String okmRootPath = create();
+        String okmRootPath = create();
 
-        // Store system session token
-        DbSessionManager.getInstance().putSystemSession();
+        try {
+            // Store system session token
+            DbSessionManager.getInstance().putSystemSession();
+            DbAuthModule.loadUserData(Config.SYSTEM_USER);
+        } catch (ItemExistsException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (PathNotFoundException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (AccessDeniedException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        }
 
         log.debug("initialize: {}", okmRootPath);
         return okmRootPath;
@@ -89,17 +103,15 @@ public class DbRepositoryModule implements RepositoryModule {
     /**
      * Create OpenKM repository structure
      */
-    public synchronized static String create() throws RepositoryException,
-            DatabaseException {
+    public synchronized static String create() throws RepositoryException, DatabaseException {
         String okmRootUuid = null;
         NodeFolder okmRootNode = null;
         String okmRootPath = null;
 
         try {
-            okmRootUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    "/" + Repository.ROOT);
+            okmRootUuid = NodeBaseDAO.getInstance().getUuidFromPath("/" + Repository.ROOT);
             okmRootNode = NodeFolderDAO.getInstance().findByPk(okmRootUuid);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.info("No {} node found", Repository.ROOT);
         }
 
@@ -109,7 +121,7 @@ public class DbRepositoryModule implements RepositoryModule {
 
                 // Create okm:root
                 log.info("Create {}", Repository.ROOT);
-                final NodeFolder okmRoot = createBase(Repository.ROOT);
+                NodeFolder okmRoot = createBase(Repository.ROOT);
                 okmRootUuid = okmRoot.getUuid();
 
                 // Create okm:thesaurus
@@ -138,10 +150,10 @@ public class DbRepositoryModule implements RepositoryModule {
 
                 // Create okm:config
                 log.info("Create config");
-                final com.openkm.dao.bean.Config cfg = new com.openkm.dao.bean.Config();
+                com.openkm.dao.bean.Config cfg = new com.openkm.dao.bean.Config();
 
                 // Generate installation UUID
-                final String uuid = UUID.randomUUID().toString();
+                String uuid = UUID.randomUUID().toString();
                 cfg.setType(com.openkm.dao.bean.Config.HIDDEN);
                 cfg.setKey(Config.PROPERTY_REPOSITORY_UUID);
                 cfg.setValue(uuid);
@@ -157,35 +169,32 @@ public class DbRepositoryModule implements RepositoryModule {
                 log.info("Repository already created");
 
                 // Get installation UUID
-                com.openkm.dao.bean.Config cfg = ConfigDAO
-                        .findByPk(Config.PROPERTY_REPOSITORY_UUID);
-                final String uuid = cfg.getValue();
+                com.openkm.dao.bean.Config cfg = ConfigDAO.findByPk(Config.PROPERTY_REPOSITORY_UUID);
+                String uuid = cfg.getValue();
                 Repository.setUuid(uuid);
 
                 // Test repository version
                 cfg = ConfigDAO.findByPk(Config.PROPERTY_REPOSITORY_VERSION);
-                final String repoVer = cfg.getValue();
+                String repoVer = cfg.getValue();
 
                 if (!WarUtils.getAppVersion().getMajor().equals(repoVer)) {
-                    log.warn("### Actual repository version (" + repoVer
-                            + ") differs from application repository version ("
+                    log.warn("### Actual repository version (" + repoVer + ") differs from application repository version ("
                             + WarUtils.getAppVersion().getMajor() + ") ###");
                     log.warn("### You should upgrade the repository ###");
                 }
             }
 
-            okmRootPath = NodeBaseDAO.getInstance()
-                    .getPathFromUuid(okmRootUuid);
-        } catch (final PathNotFoundException e) {
+            okmRootPath = NodeBaseDAO.getInstance().getPathFromUuid(okmRootUuid);
+        } catch (PathNotFoundException e) {
             // Should not happen
             throw new RepositoryException("PathNotFound: " + e.getMessage());
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             // Should not happen
             throw new RepositoryException("AccessDenied: " + e.getMessage());
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             // Should not happen
             throw new RepositoryException("ItemExists: " + e.getMessage());
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         }
 
@@ -195,10 +204,9 @@ public class DbRepositoryModule implements RepositoryModule {
     /**
      * Create base node
      */
-    private static NodeFolder createBase(final String name)
-            throws PathNotFoundException, AccessDeniedException,
-            ItemExistsException, DatabaseException {
-        final NodeFolder base = new NodeFolder();
+    private static NodeFolder createBase(String name) throws PathNotFoundException, AccessDeniedException, ItemExistsException,
+            DatabaseException {
+        NodeFolder base = new NodeFolder();
 
         // Add basic properties
         base.setParent(Config.ROOT_NODE_UUID);
@@ -208,9 +216,12 @@ public class DbRepositoryModule implements RepositoryModule {
         base.setUuid(UUID.randomUUID().toString());
         base.setCreated(Calendar.getInstance());
 
+        if (Config.STORE_NODE_PATH) {
+            base.setPath("/" + name);
+        }
+
         // Auth info
-        final int perms = Permission.READ | Permission.WRITE
-                | Permission.DELETE | Permission.SECURITY;
+        int perms = Permission.READ | Permission.WRITE | Permission.DELETE | Permission.SECURITY;
         base.getUserPermissions().put(Config.ADMIN_USER, perms);
         base.getRolePermissions().put(Config.DEFAULT_USER_ROLE, perms);
 
@@ -219,9 +230,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getRootFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getRootFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getRootFolder({})", token);
         Folder rootFolder = new Folder();
         Authentication auth = null, oldAuth = null;
@@ -234,18 +243,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String rootPath = "/" + Repository.ROOT;
-            final String rootUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    rootPath);
-            final NodeFolder rootNode = NodeFolderDAO.getInstance().findByPk(
-                    rootUuid);
-            rootFolder = BaseFolderModule.getProperties(auth.getName(),
-                    rootNode);
+            String rootPath = "/" + Repository.ROOT;
+            String rootUuid = NodeBaseDAO.getInstance().getUuidFromPath(rootPath);
+            NodeFolder rootNode = NodeFolderDAO.getInstance().findByPk(rootUuid);
+            rootFolder = BaseFolderModule.getProperties(auth.getName(), rootNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_ROOT_FOLDER",
-                    rootNode.getUuid(), rootPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_ROOT_FOLDER", rootNode.getUuid(), rootPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -258,9 +263,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getTrashFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getTrashFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getTrashFolder({})", token);
         Folder trashFolder = new Folder();
         Authentication auth = null, oldAuth = null;
@@ -273,19 +276,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String trashPath = "/" + Repository.TRASH + "/"
-                    + auth.getName();
-            final String trashUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    trashPath);
-            final NodeFolder trashNode = NodeFolderDAO.getInstance().findByPk(
-                    trashUuid);
-            trashFolder = BaseFolderModule.getProperties(auth.getName(),
-                    trashNode);
+            String trashPath = "/" + Repository.TRASH + "/" + auth.getName();
+            String trashUuid = NodeBaseDAO.getInstance().getUuidFromPath(trashPath);
+            NodeFolder trashNode = NodeFolderDAO.getInstance().findByPk(trashUuid);
+            trashFolder = BaseFolderModule.getProperties(auth.getName(), trashNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_TRASH_FOLDER",
-                    trashNode.getUuid(), trashPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_TRASH_FOLDER", trashNode.getUuid(), trashPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -298,8 +296,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getTrashFolderBase(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getTrashFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getTrashFolderBase({})", token);
         Folder trashFolder = new Folder();
@@ -313,18 +310,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String trashPath = "/" + Repository.TRASH;
-            final String trashUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    trashPath);
-            final NodeFolder trashNode = NodeFolderDAO.getInstance().findByPk(
-                    trashUuid);
-            trashFolder = BaseFolderModule.getProperties(auth.getName(),
-                    trashNode);
+            String trashPath = "/" + Repository.TRASH;
+            String trashUuid = NodeBaseDAO.getInstance().getUuidFromPath(trashPath);
+            NodeFolder trashNode = NodeFolderDAO.getInstance().findByPk(trashUuid);
+            trashFolder = BaseFolderModule.getProperties(auth.getName(), trashNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_TRASH_FOLDER_BASE",
-                    trashNode.getUuid(), trashPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_TRASH_FOLDER_BASE", trashNode.getUuid(), trashPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -337,8 +330,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getTemplatesFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getTemplatesFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getTemplatesFolder({})", token);
         Folder templatesFolder = new Folder();
@@ -352,18 +344,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String templatesPath = "/" + Repository.TEMPLATES;
-            final String templatesUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(templatesPath);
-            final NodeFolder templatesNode = NodeFolderDAO.getInstance()
-                    .findByPk(templatesUuid);
-            templatesFolder = BaseFolderModule.getProperties(auth.getName(),
-                    templatesNode);
+            String templatesPath = "/" + Repository.TEMPLATES;
+            String templatesUuid = NodeBaseDAO.getInstance().getUuidFromPath(templatesPath);
+            NodeFolder templatesNode = NodeFolderDAO.getInstance().findByPk(templatesUuid);
+            templatesFolder = BaseFolderModule.getProperties(auth.getName(), templatesNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_TEMPLATES_FOLDER",
-                    templatesNode.getUuid(), templatesPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_TEMPLATES_FOLDER", templatesNode.getUuid(), templatesPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -376,8 +364,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getPersonalFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getPersonalFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getPersonalFolder({})", token);
         Folder personalFolder = new Folder();
@@ -391,19 +378,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String personalPath = "/" + Repository.PERSONAL + "/"
-                    + auth.getName();
-            final String personalUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(personalPath);
-            final NodeFolder personalNode = NodeFolderDAO.getInstance()
-                    .findByPk(personalUuid);
-            personalFolder = BaseFolderModule.getProperties(auth.getName(),
-                    personalNode);
+            String personalPath = "/" + Repository.PERSONAL + "/" + auth.getName();
+            String personalUuid = NodeBaseDAO.getInstance().getUuidFromPath(personalPath);
+            NodeFolder personalNode = NodeFolderDAO.getInstance().findByPk(personalUuid);
+            personalFolder = BaseFolderModule.getProperties(auth.getName(), personalNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PERSONAL_FOLDER",
-                    personalNode.getUuid(), personalPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_PERSONAL_FOLDER", personalNode.getUuid(), personalPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -416,8 +398,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getPersonalFolderBase(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getPersonalFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getPersonalFolderBase({})", token);
         Folder personalFolder = new Folder();
@@ -431,18 +412,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String personalPath = "/" + Repository.PERSONAL;
-            final String personalUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(personalPath);
-            final NodeFolder personalNode = NodeFolderDAO.getInstance()
-                    .findByPk(personalUuid);
-            personalFolder = BaseFolderModule.getProperties(auth.getName(),
-                    personalNode);
+            String personalPath = "/" + Repository.PERSONAL;
+            String personalUuid = NodeBaseDAO.getInstance().getUuidFromPath(personalPath);
+            NodeFolder personalNode = NodeFolderDAO.getInstance().findByPk(personalUuid);
+            personalFolder = BaseFolderModule.getProperties(auth.getName(), personalNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_PERSONAL_FOLDER_BASE",
-                    personalNode.getUuid(), personalPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_PERSONAL_FOLDER_BASE", personalNode.getUuid(), personalPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -455,9 +432,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getMailFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException {
+    public Folder getMailFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getMailFolder({})", token);
         Folder mailFolder = new Folder();
         Authentication auth = null, oldAuth = null;
@@ -470,18 +445,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailPath = MailUtils.getUserMailPath(auth.getName());
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-            final NodeFolder mailNode = NodeFolderDAO.getInstance().findByPk(
-                    mailUuid);
-            mailFolder = BaseFolderModule.getProperties(auth.getName(),
-                    mailNode);
+            String mailPath = MailUtils.getUserMailPath(auth.getName());
+            String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailPath);
+            NodeFolder mailNode = NodeFolderDAO.getInstance().findByPk(mailUuid);
+            mailFolder = BaseFolderModule.getProperties(auth.getName(), mailNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_MAIL_FOLDER",
-                    mailNode.getUuid(), mailPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_MAIL_FOLDER", mailNode.getUuid(), mailPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -494,8 +465,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getMailFolderBase(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getMailFolderBase(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getMailFolderBase({})", token);
         Folder mailFolder = new Folder();
@@ -509,18 +479,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String mailPath = "/" + Repository.MAIL;
-            final String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    mailPath);
-            final NodeFolder mailNode = NodeFolderDAO.getInstance().findByPk(
-                    mailUuid);
-            mailFolder = BaseFolderModule.getProperties(auth.getName(),
-                    mailNode);
+            String mailPath = "/" + Repository.MAIL;
+            String mailUuid = NodeBaseDAO.getInstance().getUuidFromPath(mailPath);
+            NodeFolder mailNode = NodeFolderDAO.getInstance().findByPk(mailUuid);
+            mailFolder = BaseFolderModule.getProperties(auth.getName(), mailNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_MAIL_FOLDER_BASE",
-                    mailNode.getUuid(), mailPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_MAIL_FOLDER_BASE", mailNode.getUuid(), mailPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -533,8 +499,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getThesaurusFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getThesaurusFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getThesaurusFolder({})", token);
         Folder thesaurusFolder = new Folder();
@@ -548,18 +513,14 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String thesaurusPath = "/" + Repository.THESAURUS;
-            final String thesaurusUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(thesaurusPath);
-            final NodeFolder thesaurusNode = NodeFolderDAO.getInstance()
-                    .findByPk(thesaurusUuid);
-            thesaurusFolder = BaseFolderModule.getProperties(auth.getName(),
-                    thesaurusNode);
+            String thesaurusPath = "/" + Repository.THESAURUS;
+            String thesaurusUuid = NodeBaseDAO.getInstance().getUuidFromPath(thesaurusPath);
+            NodeFolder thesaurusNode = NodeFolderDAO.getInstance().findByPk(thesaurusUuid);
+            thesaurusFolder = BaseFolderModule.getProperties(auth.getName(), thesaurusNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_THESAURUS_FOLDER",
-                    thesaurusNode.getUuid(), thesaurusPath, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_THESAURUS_FOLDER", thesaurusNode.getUuid(), thesaurusPath, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -572,8 +533,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public Folder getCategoriesFolder(final String token)
-            throws PathNotFoundException, RepositoryException,
+    public Folder getCategoriesFolder(String token) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getCategoriesFolder({})", token);
         Folder categoriesFolder = new Folder();
@@ -587,17 +547,13 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String categoriesUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath("/" + Repository.CATEGORIES);
-            final NodeFolder categoriesNode = NodeFolderDAO.getInstance()
-                    .findByPk(categoriesUuid);
-            categoriesFolder = BaseFolderModule.getProperties(auth.getName(),
-                    categoriesNode);
+            String categoriesUuid = NodeBaseDAO.getInstance().getUuidFromPath("/" + Repository.CATEGORIES);
+            NodeFolder categoriesNode = NodeFolderDAO.getInstance().findByPk(categoriesUuid);
+            categoriesFolder = BaseFolderModule.getProperties(auth.getName(), categoriesNode);
 
             // Activity log
-            UserActivity.log(auth.getName(), "GET_CATEGORIES_FOLDER",
-                    categoriesNode.getUuid(), categoriesFolder.getPath(), null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "GET_CATEGORIES_FOLDER", categoriesNode.getUuid(), categoriesFolder.getPath(), null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -610,8 +566,7 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public void purgeTrash(final String token) throws PathNotFoundException,
-            AccessDeniedException, LockException, RepositoryException,
+    public void purgeTrash(String token) throws PathNotFoundException, AccessDeniedException, LockException, RepositoryException,
             DatabaseException {
         log.debug("purgeTrash({})", token);
         Authentication auth = null, oldAuth = null;
@@ -628,29 +583,37 @@ public class DbRepositoryModule implements RepositoryModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String userTrashPath = "/" + Repository.TRASH + "/"
-                    + auth.getName();
-            final String userTrashUuid = NodeBaseDAO.getInstance()
-                    .getUuidFromPath(userTrashPath);
+            String userTrashPath = "/" + Repository.TRASH + "/" + auth.getName();
+            String userTrashUuid = NodeBaseDAO.getInstance().getUuidFromPath(userTrashPath);
 
             if (BaseFolderModule.hasLockedNodes(userTrashUuid)) {
-                throw new LockException(
-                        "Can't delete a folder with child locked nodes");
+                throw new LockException("Can't delete a folder with child locked nodes");
             }
 
             if (!BaseFolderModule.hasWriteAccess(userTrashUuid)) {
-                throw new AccessDeniedException(
-                        "Can't delete a folder with readonly nodes");
+                throw new AccessDeniedException("Can't delete a folder with readonly nodes");
+            }
+
+            if (Config.REPOSITORY_PURGATORY_HOME != null && !Config.REPOSITORY_PURGATORY_HOME.isEmpty()) {
+                File dateDir = FileUtils.createDateDir(Config.REPOSITORY_PURGATORY_HOME);
+                File dstPath = new File(dateDir, PathUtils.getName(userTrashPath));
+                dstPath.mkdir();
+                RepositoryExporter.exportDocuments(null, userTrashPath, dstPath, true, false, null, null);
             }
 
             NodeFolderDAO.getInstance().purge(userTrashUuid, false);
 
             // Activity log
-            UserActivity.log(auth.getName(), "PURGE_TRASH", userTrashUuid,
-                    userTrashPath, null);
-        } catch (final IOException e) {
+            UserActivity.log(auth.getName(), "PURGE_TRASH", userTrashUuid, userTrashPath, null);
+        } catch (IOException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (ParseException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (NoSuchGroupException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (MessagingException e) {
+            throw new RepositoryException(e.getMessage(), e);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -662,35 +625,36 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public String getUpdateMessage(final String token)
-            throws RepositoryException {
+    public String getUpdateMessage(String token) throws RepositoryException {
         return Repository.getUpdateMsg();
     }
 
     @Override
-    public String getRepositoryUuid(final String token)
-            throws RepositoryException {
+    public String getRepositoryUuid(String token) throws RepositoryException {
         return Repository.getUuid();
     }
 
     @Override
-    public boolean hasNode(final String token, final String path)
-            throws RepositoryException, DatabaseException {
-        log.debug("hasNode({}, {})", token, path);
+    public boolean hasNode(String token, String nodeId) throws AccessDeniedException, RepositoryException, DatabaseException {
+        log.debug("hasNode({}, {})", token, nodeId);
         boolean ret = false;
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            ret = NodeBaseDAO.getInstance().itemPathExists(path);
-        } catch (final DatabaseException e) {
+            if (PathUtils.isPath(nodeId)) {
+                ret = NodeBaseDAO.getInstance().itemPathExists(nodeId);
+            } else {
+                ret = NodeBaseDAO.getInstance().itemUuidExists(nodeId);
+            }
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -703,24 +667,23 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public String getNodePath(final String token, final String uuid)
-            throws PathNotFoundException, RepositoryException,
+    public String getNodePath(String token, String uuid) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getNodePath({}, {})", token, uuid);
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
         String ret = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
             ret = NodeBaseDAO.getInstance().getPathFromUuid(uuid);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -733,24 +696,23 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public String getNodeUuid(final String token, final String path)
-            throws PathNotFoundException, RepositoryException,
+    public String getNodeUuid(String token, String path) throws AccessDeniedException, PathNotFoundException, RepositoryException,
             DatabaseException {
         log.debug("getNodeUuid({}, {})", token, path);
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
         String ret = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
             ret = NodeBaseDAO.getInstance().getUuidFromPath(path);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -763,19 +725,18 @@ public class DbRepositoryModule implements RepositoryModule {
     }
 
     @Override
-    public AppVersion getAppVersion(final String token)
-            throws RepositoryException, DatabaseException {
+    public AppVersion getAppVersion(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getAppVersion({})", token);
         @SuppressWarnings("unused")
-        Authentication oldAuth = null;
+        Authentication auth = null, oldAuth = null;
         AppVersion ret = null;
 
         try {
             if (token == null) {
-                PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthentication();
             } else {
                 oldAuth = PrincipalUtils.getAuthentication();
-                PrincipalUtils.getAuthenticationByToken(token);
+                auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
             ret = WarUtils.getAppVersion();
@@ -789,25 +750,79 @@ public class DbRepositoryModule implements RepositoryModule {
         return ret;
     }
 
+    @Override
+    public void copyAttributes(String token, String srcId, String dstId, ExtendedAttributes extAttr) throws AccessDeniedException,
+            PathNotFoundException, DatabaseException {
+        log.debug("copyAttributes({}, {}, {}, {})", new Object[] { token, srcId, dstId, extAttr });
+        @SuppressWarnings("unused")
+        Authentication auth = null, oldAuth = null;
+        String srcPath = null;
+        String srcUuid = null;
+        String dstPath = null;
+        String dstUuid = null;
+
+        if (Config.SYSTEM_READONLY) {
+            throw new AccessDeniedException("System is in read-only mode");
+        }
+
+        try {
+            if (token == null) {
+                auth = PrincipalUtils.getAuthentication();
+            } else {
+                oldAuth = PrincipalUtils.getAuthentication();
+                auth = PrincipalUtils.getAuthenticationByToken(token);
+            }
+
+            if (PathUtils.isPath(srcId)) {
+                srcPath = srcId;
+                srcUuid = NodeBaseDAO.getInstance().getUuidFromPath(srcId);
+            } else {
+                srcPath = NodeBaseDAO.getInstance().getPathFromUuid(srcId);
+                srcUuid = srcId;
+            }
+
+            if (PathUtils.isPath(dstId)) {
+                dstPath = dstId;
+                dstUuid = NodeBaseDAO.getInstance().getUuidFromPath(dstId);
+            } else {
+                dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstId);
+                dstUuid = dstId;
+            }
+
+            NodeBaseDAO.getInstance().copyAttributes(srcUuid, dstUuid, extAttr);
+
+            // Check subscriptions
+            // BaseNotificationModule.checkSubscriptions(dstNode, PrincipalUtils.getUser(), "COPY_ATTRIBUTES", null);
+
+            // Activity log
+            UserActivity.log(PrincipalUtils.getUser(), "COPY_ATTRIBUTES", dstUuid, srcPath, dstPath);
+        } catch (DatabaseException e) {
+            throw e;
+        } finally {
+            if (token != null) {
+                PrincipalUtils.setAuthentication(oldAuth);
+            }
+        }
+    }
+
     /**
      * Register custom node definition from file.
+     * 
+     * @param pgDefFile Path to file where is the Property Groups definition.
      */
-    public synchronized static void registerPropertyGroups(final String xml)
-            throws IOException, ParseException, DatabaseException {
+    public synchronized static void registerPropertyGroups(String pgDefFile) throws IOException, ParseException, DatabaseException {
         // Check xml property groups definition
         FormUtils.resetPropertyGroupsForms();
-        final Map<PropertyGroup, List<FormElement>> pgForms = FormUtils
-                .parsePropertyGroupsForms(xml);
+        Map<PropertyGroup, List<FormElement>> pgForms = FormUtils.parsePropertyGroupsForms(pgDefFile);
 
-        for (final Entry<PropertyGroup, List<FormElement>> pgForm : pgForms
-                .entrySet()) {
-            final PropertyGroup pg = pgForm.getKey();
-            final RegisteredPropertyGroup rpg = new RegisteredPropertyGroup();
+        for (Entry<PropertyGroup, List<FormElement>> pgForm : pgForms.entrySet()) {
+            PropertyGroup pg = pgForm.getKey();
+            RegisteredPropertyGroup rpg = new RegisteredPropertyGroup();
             rpg.setName(pg.getName());
 
-            for (final FormElement fe : pgForm.getValue()) {
-                final String name = fe.getName();
-                final String type = fe.getClass().getName();
+            for (FormElement fe : pgForm.getValue()) {
+                String name = fe.getName();
+                String type = fe.getClass().getName();
                 rpg.getProperties().put(name, type);
             }
 

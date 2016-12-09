@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
@@ -39,29 +40,22 @@ public class WidgetUtil {
     /**
      * Draws a tag cloud
      */
-    public static void drawTagCloud(final TagCloud keywordsCloud,
-            final Collection<String> keywords) {
+    public static void drawTagCloud(final TagCloud keywordsCloud, Collection<String> keywords) {
         // Deletes all tag clouds keys
         keywordsCloud.clear();
-        keywordsCloud
-                .setMinFrequency(Main.get().mainPanel.dashboard.keyMapDashboard
-                        .getTotalMinFrequency());
-        keywordsCloud
-                .setMaxFrequency(Main.get().mainPanel.dashboard.keyMapDashboard
-                        .getTotalMaxFrequency());
+        keywordsCloud.setMinFrequency(Main.get().mainPanel.dashboard.keyMapDashboard.getTotalMinFrequency());
+        keywordsCloud.setMaxFrequency(Main.get().mainPanel.dashboard.keyMapDashboard.getTotalMaxFrequency());
 
-        for (final String keyword : keywords) {
-            final HTML tagKey = new HTML(keyword);
+        for (Iterator<String> it = keywords.iterator(); it.hasNext();) {
+            String keyword = it.next();
+            HTML tagKey = new HTML(keyword);
             tagKey.setStyleName("okm-cloudTags");
-            final Style linkStyle = tagKey.getElement().getStyle();
-            final int fontSize = keywordsCloud
-                    .getLabelSize(Main.get().mainPanel.dashboard.keyMapDashboard
-                            .getKeywordRate(keyword));
+            Style linkStyle = tagKey.getElement().getStyle();
+            int fontSize = keywordsCloud.getLabelSize(Main.get().mainPanel.dashboard.keyMapDashboard.getKeywordRate(keyword));
             linkStyle.setProperty("fontSize", fontSize + "pt");
             linkStyle.setProperty("color", keywordsCloud.getColor(fontSize));
             if (fontSize > 0) {
-                linkStyle.setProperty("top",
-                        (keywordsCloud.getMaxFontSize() - fontSize) / 2 + "px");
+                linkStyle.setProperty("top", (keywordsCloud.getMaxFontSize() - fontSize) / 2 + "px");
             }
             keywordsCloud.add(tagKey);
         }

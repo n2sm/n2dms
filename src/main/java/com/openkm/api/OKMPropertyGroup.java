@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -23,6 +23,7 @@ package com.openkm.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -49,6 +50,7 @@ import com.openkm.core.ParseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.core.RepositoryException;
 import com.openkm.extension.core.ExtensionException;
+import com.openkm.form.suggestion.SuggestionException;
 import com.openkm.module.ModuleManager;
 import com.openkm.module.PropertyGroupModule;
 
@@ -57,7 +59,6 @@ import com.openkm.module.PropertyGroupModule;
  */
 public class OKMPropertyGroup implements PropertyGroupModule {
     private static Logger log = LoggerFactory.getLogger(OKMPropertyGroup.class);
-
     private static OKMPropertyGroup instance = new OKMPropertyGroup();
 
     private OKMPropertyGroup() {
@@ -68,92 +69,80 @@ public class OKMPropertyGroup implements PropertyGroupModule {
     }
 
     @Override
-    public void addGroup(final String token, final String nodePath,
-            final String grpName) throws NoSuchGroupException, LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException, AutomationException {
-        log.debug("addGroup({}, {}, {})", new Object[] { token, nodePath,
-                grpName });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+    public void addGroup(String token, String nodePath, String grpName) throws NoSuchGroupException, LockException, PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        log.debug("addGroup({}, {}, {})", new Object[] { token, nodePath, grpName });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
         cm.addGroup(token, nodePath, grpName);
         log.debug("addGroup: void");
     }
 
     @Override
-    public void removeGroup(final String token, final String nodePath,
-            final String grpName) throws AccessDeniedException,
-            NoSuchGroupException, LockException, PathNotFoundException,
-            RepositoryException, DatabaseException, ExtensionException {
-        log.debug("removeGroup({}, {}, {})", new Object[] { token, nodePath,
-                grpName });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+    public void removeGroup(String token, String nodePath, String grpName) throws AccessDeniedException, NoSuchGroupException,
+            LockException, PathNotFoundException, RepositoryException, DatabaseException, ExtensionException {
+        log.debug("removeGroup({}, {}, {})", new Object[] { token, nodePath, grpName });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
         cm.removeGroup(token, nodePath, grpName);
         log.debug("removeGroup: void");
     }
 
     @Override
-    public List<PropertyGroup> getGroups(final String token,
-            final String nodePath) throws IOException, ParseException,
+    public List<PropertyGroup> getGroups(String token, String nodePath) throws IOException, ParseException, AccessDeniedException,
             PathNotFoundException, RepositoryException, DatabaseException {
         log.debug("getGroups({}, {})", token, nodePath);
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final List<PropertyGroup> ret = cm.getGroups(token, nodePath);
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<PropertyGroup> ret = cm.getGroups(token, nodePath);
         log.debug("getGroups: {}", ret);
         return ret;
     }
 
     @Override
-    public List<PropertyGroup> getAllGroups(final String token)
-            throws IOException, ParseException, RepositoryException,
+    public List<PropertyGroup> getAllGroups(String token) throws IOException, ParseException, AccessDeniedException, RepositoryException,
             DatabaseException {
         log.debug("getAllGroups({})", token);
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final List<PropertyGroup> ret = cm.getAllGroups(token);
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<PropertyGroup> ret = cm.getAllGroups(token);
         log.debug("getAllGroups: {}", ret);
         return ret;
     }
 
     @Override
-    public List<FormElement> getProperties(final String token,
-            final String nodePath, final String grpName) throws IOException,
-            ParseException, NoSuchGroupException, PathNotFoundException,
-            RepositoryException, DatabaseException {
-        log.debug("getProperties({}, {}, {})", new Object[] { token, nodePath,
-                grpName });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final List<FormElement> ret = cm
-                .getProperties(token, nodePath, grpName);
+    public List<FormElement> getProperties(String token, String nodePath, String grpName) throws IOException, ParseException,
+            NoSuchGroupException, AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        log.debug("getProperties({}, {}, {})", new Object[] { token, nodePath, grpName });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<FormElement> ret = cm.getProperties(token, nodePath, grpName);
         log.debug("getProperties: {}", ret);
         return ret;
     }
 
     @Override
-    public void setProperties(final String token, final String nodeId,
-            final String grpName, final List<FormElement> properties)
-            throws IOException, ParseException, NoSuchPropertyException,
-            NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException, AutomationException {
-        log.debug("setProperties({}, {}, {}, {})", new Object[] { token,
-                nodeId, grpName, properties });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+    public void setProperties(String token, String nodeId, String grpName, List<FormElement> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        log.debug("setProperties({}, {}, {}, {})", new Object[] { token, nodeId, grpName, properties });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
         cm.setProperties(token, nodeId, grpName, properties);
         log.debug("setProperties: void");
     }
 
-    public void setPropertiesSimple(final String token, final String nodeId,
-            final String grpName, final Map<String, String> properties)
-            throws IOException, ParseException, NoSuchPropertyException,
-            NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException, AutomationException {
-        log.debug("setPropertiesSimple({}, {}, {}, {})", new Object[] { token,
-                nodeId, grpName, properties });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final List<FormElement> al = new ArrayList<FormElement>();
+    public static void setPropertySimple(String token, String nodeId, String propGroup, String propName, String propValue)
+            throws IOException, ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException,
+            AccessDeniedException, RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        Map<String, String> props = new HashMap<String, String>();
+        props.put(propName, propValue);
+        OKMPropertyGroup.getInstance().setPropertiesSimple(token, nodeId, propGroup, props);
+    }
 
-        for (final FormElement fe : cm.getProperties(token, nodeId, grpName)) {
-            final String value = properties.get(fe.getName());
+    public void setPropertiesSimple(String token, String nodeId, String grpName, Map<String, String> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException, AutomationException {
+        log.debug("setPropertiesSimple({}, {}, {}, {})", new Object[] { token, nodeId, grpName, properties });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<FormElement> al = new ArrayList<FormElement>();
+
+        for (FormElement fe : cm.getProperties(token, nodeId, grpName)) {
+            String value = properties.get(fe.getName());
 
             if (value != null) {
                 if (fe instanceof Input) {
@@ -165,14 +154,13 @@ public class OKMPropertyGroup implements PropertyGroupModule {
                 } else if (fe instanceof CheckBox) {
                     ((CheckBox) fe).setValue(Boolean.valueOf(value));
                 } else if (fe instanceof Select) {
-                    final Select sel = (Select) fe;
+                    Select sel = (Select) fe;
 
-                    for (final Option opt : sel.getOptions()) {
-                        final StringTokenizer st = new StringTokenizer(value,
-                                Config.LIST_SEPARATOR);
+                    for (Option opt : sel.getOptions()) {
+                        StringTokenizer st = new StringTokenizer(value, Config.LIST_SEPARATOR);
 
                         while (st.hasMoreTokens()) {
-                            final String optVal = st.nextToken().trim();
+                            String optVal = st.nextToken().trim();
 
                             if (opt.getValue().equals(optVal)) {
                                 opt.setSelected(true);
@@ -184,8 +172,7 @@ public class OKMPropertyGroup implements PropertyGroupModule {
                     }
                 } else {
                     log.warn("Unknown property definition: {}", fe.getName());
-                    throw new ParseException("Unknown property definition: "
-                            + fe.getName());
+                    throw new ParseException("Unknown property definition: " + fe.getName());
                 }
             }
 
@@ -197,25 +184,40 @@ public class OKMPropertyGroup implements PropertyGroupModule {
     }
 
     @Override
-    public List<FormElement> getPropertyGroupForm(final String token,
-            final String grpName) throws ParseException, IOException,
+    public List<FormElement> getPropertyGroupForm(String token, String grpName) throws ParseException, IOException, AccessDeniedException,
             RepositoryException, DatabaseException {
         log.debug("getPropertyGroupForm({}, {})", token, grpName);
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final List<FormElement> ret = cm.getPropertyGroupForm(token, grpName);
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<FormElement> ret = cm.getPropertyGroupForm(token, grpName);
         log.debug("getPropertyGroupForm: {}", ret);
         return ret;
     }
 
     @Override
-    public boolean hasGroup(final String token, final String nodeId,
-            final String grpName) throws IOException, ParseException,
+    public boolean hasGroup(String token, String nodeId, String grpName) throws IOException, ParseException, AccessDeniedException,
             PathNotFoundException, RepositoryException, DatabaseException {
-        log.debug("hasGroup({}, {}, {})",
-                new Object[] { token, nodeId, grpName });
-        final PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
-        final boolean ret = cm.hasGroup(token, nodeId, grpName);
+        log.debug("hasGroup({}, {}, {})", new Object[] { token, nodeId, grpName });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        boolean ret = cm.hasGroup(token, nodeId, grpName);
         log.debug("hasGroup: {}", ret);
         return ret;
+    }
+
+    @Override
+    public List<String> getSuggestions(String token, String nodeId, String grpName, String propName) throws AccessDeniedException,
+            PathNotFoundException, IOException, ParseException, NoSuchGroupException, SuggestionException, DatabaseException {
+        log.debug("getSuggestions({}, {}, {}, {})", new Object[] { token, nodeId, grpName, propName });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        List<String> ret = cm.getSuggestions(token, nodeId, grpName, propName);
+        log.debug("getSuggestions: {}", ret);
+        return ret;
+    }
+
+    @Override
+    public void registerDefinition(String token, String pgDef) throws ParseException, AccessDeniedException, DatabaseException, IOException {
+        log.debug("registerDefinition({}, {})", new Object[] { token, pgDef });
+        PropertyGroupModule cm = ModuleManager.getPropertyGroupModule();
+        cm.registerDefinition(token, pgDef);
+        log.debug("registerDefinition: void");
     }
 }

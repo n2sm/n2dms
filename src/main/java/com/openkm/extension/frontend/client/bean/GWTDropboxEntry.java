@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -29,35 +29,20 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTDropboxEntry implements IsSerializable {
     private long bytes;
-
     private String clientMTime;
-
     private String hash;
-
     private String icon;
-
     private boolean deleted;
-
     private boolean dir;
-
     private String mimeType;
-
     private String modified;
-
     private String path;
-
     private String rev;
-
     private String root;
-
     private String size;
-
     private boolean thumbExists;
-
     private String fileName;
-
     private String parentPath;
-
     private boolean children;
 
     /**
@@ -71,7 +56,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return bytes;
     }
 
-    public void setBytes(final long bytes) {
+    public void setBytes(long bytes) {
         this.bytes = bytes;
     }
 
@@ -79,7 +64,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return clientMTime;
     }
 
-    public void setClientMTime(final String clientMTime) {
+    public void setClientMTime(String clientMTime) {
         this.clientMTime = clientMTime;
     }
 
@@ -87,7 +72,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return hash;
     }
 
-    public void setHash(final String hash) {
+    public void setHash(String hash) {
         this.hash = hash;
     }
 
@@ -95,7 +80,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return icon;
     }
 
-    public void setIcon(final String icon) {
+    public void setIcon(String icon) {
         this.icon = icon;
     }
 
@@ -103,7 +88,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return deleted;
     }
 
-    public void setDeleted(final boolean deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 
@@ -111,7 +96,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return dir;
     }
 
-    public void setDir(final boolean dir) {
+    public void setDir(boolean dir) {
         this.dir = dir;
     }
 
@@ -119,7 +104,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -127,7 +112,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return modified;
     }
 
-    public void setModified(final String modified) {
+    public void setModified(String modified) {
         this.modified = modified;
     }
 
@@ -135,7 +120,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -143,7 +128,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return rev;
     }
 
-    public void setRev(final String rev) {
+    public void setRev(String rev) {
         this.rev = rev;
     }
 
@@ -151,7 +136,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return root;
     }
 
-    public void setRoot(final String root) {
+    public void setRoot(String root) {
         this.root = root;
     }
 
@@ -159,7 +144,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return size;
     }
 
-    public void setSize(final String size) {
+    public void setSize(String size) {
         this.size = size;
     }
 
@@ -167,7 +152,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return thumbExists;
     }
 
-    public void setThumbExists(final boolean thumbExists) {
+    public void setThumbExists(boolean thumbExists) {
         this.thumbExists = thumbExists;
     }
 
@@ -175,7 +160,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return fileName;
     }
 
-    public void setFileName(final String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
@@ -183,7 +168,7 @@ public class GWTDropboxEntry implements IsSerializable {
         return parentPath;
     }
 
-    public void setParentPath(final String parentPath) {
+    public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
 
@@ -191,13 +176,12 @@ public class GWTDropboxEntry implements IsSerializable {
         return children;
     }
 
-    public void setChildren(final boolean children) {
+    public void setChildren(boolean children) {
         this.children = children;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("fileName=").append(fileName);
         sb.append(", mimeType=").append(mimeType);

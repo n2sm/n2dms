@@ -1,22 +1,22 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.module.common;
@@ -32,22 +32,19 @@ import com.openkm.principal.PrincipalAdapterException;
 
 public class CommonAuthModule {
     private static Logger log = LoggerFactory.getLogger(CommonAuthModule.class);
-
     private static PrincipalAdapter principalAdapter = null;
 
     /**
      * Get users
      */
-    public static List<String> getUsers(final String token)
-            throws PrincipalAdapterException {
+    public static List<String> getUsers() throws PrincipalAdapterException {
         log.debug("getUsers()");
         List<String> list = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             list = principalAdapter.getUsers();
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -59,16 +56,14 @@ public class CommonAuthModule {
     /**
      * Get roles
      */
-    public static List<String> getRoles(final String token)
-            throws PrincipalAdapterException {
+    public static List<String> getRoles() throws PrincipalAdapterException {
         log.debug("getRoles()");
         List<String> list = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             list = principalAdapter.getRoles();
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -80,16 +75,14 @@ public class CommonAuthModule {
     /**
      * Get users by role
      */
-    public static List<String> getUsersByRole(final String token,
-            final String role) throws PrincipalAdapterException {
+    public static List<String> getUsersByRole(String role) throws PrincipalAdapterException {
         log.debug("getUsersByRole({})", role);
         List<String> list = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             list = principalAdapter.getUsersByRole(role);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -101,16 +94,14 @@ public class CommonAuthModule {
     /**
      * Get roles from user
      */
-    public static List<String> getRolesByUser(final String token,
-            final String user) throws PrincipalAdapterException {
+    public static List<String> getRolesByUser(String user) throws PrincipalAdapterException {
         log.debug("getRolesByUser({})", user);
         List<String> list = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             list = principalAdapter.getRolesByUser(user);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -122,16 +113,14 @@ public class CommonAuthModule {
     /**
      * Get mail from user
      */
-    public static String getMail(final String token, final String user)
-            throws PrincipalAdapterException {
-        log.debug("getMail({}, {})", token, user);
+    public static String getMail(String user) throws PrincipalAdapterException {
+        log.debug("getMail({})", user);
         String mail = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             mail = principalAdapter.getMail(user);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -143,21 +132,19 @@ public class CommonAuthModule {
     /**
      * Get name from user.
      */
-    public static String getName(final String token, final String user)
-            throws PrincipalAdapterException {
-        log.debug("getName({}, {})", token, user);
+    public static String getName(String user) throws PrincipalAdapterException {
+        log.debug("getName({})", user);
         String name = null;
 
         try {
-            final PrincipalAdapter principalAdapter = CommonAuthModule
-                    .getPrincipalAdapter();
+            PrincipalAdapter principalAdapter = CommonAuthModule.getPrincipalAdapter();
             name = principalAdapter.getName(user);
 
             // Prevent NPE when looking for name of deleted users
             if (name == null) {
                 name = user;
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -169,21 +156,19 @@ public class CommonAuthModule {
     /**
      * Singleton pattern for global Principal Adapter.
      */
-    public static PrincipalAdapter getPrincipalAdapter()
-            throws PrincipalAdapterException {
+    public static synchronized PrincipalAdapter getPrincipalAdapter() throws PrincipalAdapterException {
         if (principalAdapter == null) {
             try {
                 log.info("PrincipalAdapter: {}", Config.PRINCIPAL_ADAPTER);
-                final Object object = Class.forName(Config.PRINCIPAL_ADAPTER)
-                        .newInstance();
+                Object object = Class.forName(Config.PRINCIPAL_ADAPTER).newInstance();
                 principalAdapter = (PrincipalAdapter) object;
-            } catch (final ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
                 log.error(e.getMessage(), e);
                 throw new PrincipalAdapterException(e.getMessage(), e);
-            } catch (final InstantiationException e) {
+            } catch (InstantiationException e) {
                 log.error(e.getMessage(), e);
                 throw new PrincipalAdapterException(e.getMessage(), e);
-            } catch (final IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 log.error(e.getMessage(), e);
                 throw new PrincipalAdapterException(e.getMessage(), e);
             }

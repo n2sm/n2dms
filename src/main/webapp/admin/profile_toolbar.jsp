@@ -43,6 +43,19 @@
       </td>
     </tr>
     <tr>
+      <td>Similar documents</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfToolbar.similarDocumentVisible}">
+            <input name="prf_toolbar_similar_document_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_toolbar_similar_document_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
       <td>Download</td>
       <td>
         <c:choose>
@@ -64,6 +77,19 @@
           </c:when>
           <c:otherwise>
             <input name="prf_toolbar_download_pdf_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
+      <td>Print</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfToolbar.printVisible}">
+            <input name="prf_toolbar_print_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_toolbar_print_visible" type="checkbox"/>
           </c:otherwise>
         </c:choose>
       </td>
@@ -277,7 +303,20 @@
       </td>
     </tr>
     <tr>
-      <td>OMR</td>
+      <td>Splitter resize</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfToolbar.splitterResizeVisible}">
+            <input name="prf_toolbar_splitter_resize_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_toolbar_splitter_resize_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
+      <td nowrap>OMR</td>
       <td>
         <c:choose>
           <c:when test="${prf.prfToolbar.omrVisible}">

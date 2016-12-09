@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -48,7 +48,7 @@ public interface HasWidgetEvent {
          * 
          * @param type
          */
-        private WidgetEventConstant(final int type) {
+        private WidgetEventConstant(int type) {
             this.type = type;
         }
 
@@ -57,8 +57,7 @@ public interface HasWidgetEvent {
         }
     }
 
-    WidgetEventConstant FINISH_STARTUP = new WidgetEventConstant(
-            WidgetEventConstant.EVENT_FINISH_STARTUP);
+    WidgetEventConstant FINISH_STARTUP = new WidgetEventConstant(WidgetEventConstant.EVENT_FINISH_STARTUP);
 
     /**
      * @param event

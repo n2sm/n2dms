@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,46 +34,29 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
     private static final long serialVersionUID = -2927629831091624036L;
 
     private long id;
-
     private Calendar start;
-
     private Calendar end;
-
     private Calendar dueDate;
-
     private String name;
-
     private String description;
-
     private String actorId;
-
     private Set<String> pooledActors;
-
     private Calendar create;
-
     private boolean open;
-
     private boolean last;
-
     private boolean suspended;
-
     private boolean startTaskInstance;
-
     private List<Comment> comments;
-
     private Token token;
-
     private List<Transition> availableTransitions;
-
     private Map<String, Object> variables;
-
     private ProcessInstance processInstance;
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -81,7 +64,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return actorId;
     }
 
-    public void setActorId(final String actorId) {
+    public void setActorId(String actorId) {
         this.actorId = actorId;
     }
 
@@ -89,7 +72,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -97,7 +80,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return create;
     }
 
-    public void setCreate(final Calendar create) {
+    public void setCreate(Calendar create) {
         this.create = create;
     }
 
@@ -105,7 +88,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return processInstance;
     }
 
-    public void setProcessInstance(final ProcessInstance processInstance) {
+    public void setProcessInstance(ProcessInstance processInstance) {
         this.processInstance = processInstance;
     }
 
@@ -113,7 +96,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return start;
     }
 
-    public void setStart(final Calendar start) {
+    public void setStart(Calendar start) {
         this.start = start;
     }
 
@@ -121,7 +104,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return end;
     }
 
-    public void setEnd(final Calendar end) {
+    public void setEnd(Calendar end) {
         this.end = end;
     }
 
@@ -129,7 +112,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return dueDate;
     }
 
-    public void setDueDate(final Calendar dueDate) {
+    public void setDueDate(Calendar dueDate) {
         this.dueDate = dueDate;
     }
 
@@ -137,7 +120,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -145,7 +128,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return comments;
     }
 
-    public void setComments(final List<Comment> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 
@@ -153,7 +136,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return open;
     }
 
-    public void setOpen(final boolean open) {
+    public void setOpen(boolean open) {
         this.open = open;
     }
 
@@ -161,7 +144,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return last;
     }
 
-    public void setLast(final boolean last) {
+    public void setLast(boolean last) {
         this.last = last;
     }
 
@@ -169,7 +152,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return startTaskInstance;
     }
 
-    public void setStartTaskInstance(final boolean startTaskInstance) {
+    public void setStartTaskInstance(boolean startTaskInstance) {
         this.startTaskInstance = startTaskInstance;
     }
 
@@ -177,7 +160,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return pooledActors;
     }
 
-    public void setPooledActors(final Set<String> pooledActors) {
+    public void setPooledActors(Set<String> pooledActors) {
         this.pooledActors = pooledActors;
     }
 
@@ -185,20 +168,19 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return suspended;
     }
 
-    public void setSuspended(final boolean suspended) {
+    public void setSuspended(boolean suspended) {
         this.suspended = suspended;
     }
 
-    @Override
-    public int compareTo(final TaskInstance arg0) {
-        return new Long(id).compareTo(arg0.id);
+    public int compareTo(TaskInstance arg0) {
+        return new Long(this.id).compareTo(arg0.id);
     }
 
     public Token getToken() {
         return token;
     }
 
-    public void setToken(final Token token) {
+    public void setToken(Token token) {
         this.token = token;
     }
 
@@ -206,7 +188,7 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return variables;
     }
 
-    public void setVariables(final Map<String, Object> variables) {
+    public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
     }
 
@@ -214,14 +196,12 @@ public class TaskInstance implements Serializable, Comparable<TaskInstance> {
         return availableTransitions;
     }
 
-    public void setAvailableTransitions(
-            final List<Transition> availableTransitions) {
+    public void setAvailableTransitions(List<Transition> availableTransitions) {
         this.availableTransitions = availableTransitions;
     }
 
-    @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append("name=");
         sb.append(name);

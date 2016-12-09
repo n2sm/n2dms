@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,36 +24,30 @@ package com.openkm.bean;
 import java.io.Serializable;
 import java.util.Calendar;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "note")
 public class Note implements Serializable {
     private static final long serialVersionUID = 913105621262127904L;
 
     public static final String TYPE = "okm:note";
-
     public static final String LIST = "okm:notes";
-
     public static final String LIST_TYPE = "okm:notes";
-
     public static final String MIX_TYPE = "mix:notes";
-
     public static final String DATE = "okm:date";
-
     public static final String USER = "okm:user";
-
     public static final String TEXT = "okm:text";
 
     private Calendar date;
-
     private String author;
-
     private String text;
-
     private String path;
 
     public Calendar getDate() {
         return date;
     }
 
-    public void setDate(final Calendar date) {
+    public void setDate(Calendar date) {
         this.date = date;
     }
 
@@ -61,7 +55,7 @@ public class Note implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -69,7 +63,7 @@ public class Note implements Serializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
@@ -77,13 +71,12 @@ public class Note implements Serializable {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("date=");
         sb.append(date == null ? null : date.getTime());

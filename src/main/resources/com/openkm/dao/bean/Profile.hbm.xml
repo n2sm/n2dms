@@ -27,6 +27,15 @@
       <property name="uploadNotifyUsers" type="true_false" not-null="true">
         <column name="PRF_MSC_UPLD_NOTI_USR" default="'T'"/>
       </property>
+      <property name="notifyExternalUsers" type="true_false" not-null="true">
+        <column name="PRF_MSC_NOTI_EXTERNAL_USR" default="'F'"/>
+      </property>
+      <property name="acrobatPluginPreview" type="true_false" not-null="true">
+        <column name="PRF_MSC_ACRO_PLUGIN_PRE" default="'F'"/>
+      </property>
+      <property name="increaseVersion" type="true_false" not-null="true">
+        <column name="PRF_MSC_INCREASE_VER" default="'T'"/>
+      </property>
       <set name="extensions" table="OKM_PROFILE_MSC_EXTENSION" lazy="false">
         <key column="PEX_ID" not-null="true"/>
         <element column="PEX_EXTENSION" type="string"/>
@@ -44,17 +53,35 @@
     <!-- CHAT -->
     <component name="prfChat" class="com.openkm.dao.bean.ProfileChat">
       <property name="chatEnabled" type="true_false" not-null="true">
-        <column name="PRF_CHT_CHAT_EN" default="'T'"/>
+        <column name="PRF_CHT_CHAT_EN" default="'F'" />
       </property>
       <property name="autoLoginEnabled" type="true_false" not-null="true">
-        <column name="PRF_CHT_AUTO_LOGIN_EN" default="'T'"/>
+        <column name="PRF_CHT_AUTO_LOGIN_EN" default="'F'" />
       </property>
     </component>
     
     <!-- PAGINATION -->
-    <component name="prfExplorer" class="com.openkm.dao.bean.ProfileExplorer">
+    <component name="prfPagination" class="com.openkm.dao.bean.ProfilePagination">
+      <property name="paginationEnabled" type="true_false" not-null="true">
+        <column name="PRF_PAG_PAGINATION_EN" default="'F'"/>
+      </property>
+      <property name="pageList" not-null="true">
+        <column name="PRF_PAG_PAGE_LIST" default="'10;25;50;100'"/>
+      </property>
       <property name="typeFilterEnabled" type="true_false" not-null="true">
         <column name="PRF_PAG_TYPE_FILTER_EN" default="'F'"/>
+      </property>
+      <property name="miscFilterEnabled" type="true_false" not-null="true">
+        <column name="PRF_PAG_MISC_FILTER_EN" default="'F'"/>
+      </property>
+      <property name="showFoldersEnabled" type="true_false" not-null="true">
+        <column name="PRF_PAG_SHOW_FLDS_EN" default="'T'"/>
+      </property>
+      <property name="showDocumentsEnabled" type="true_false" not-null="true">
+        <column name="PRF_PAG_SHOW_DOCS_EN" default="'T'"/>
+      </property>
+      <property name="showMailsEnabled" type="true_false" not-null="true">
+        <column name="PRF_PAG_SHOW_MAILS_EN" default="'T'"/>
       </property>
     </component>
     
@@ -96,6 +123,9 @@
       <property name="mailVisible" type="true_false" not-null="true">
         <column name="PRF_STCK_MAIL_VIS" default="'T'"/>
       </property>
+      <property name="metadataVisible" type="true_false" not-null="true">
+        <column name="PRF_STCK_METADATA_VIS" default="'T'"/>
+      </property>
       <property name="trashVisible" type="true_false" not-null="true">
         <column name="PRF_STCK_TRASH_VIS" default="'T'"/>
       </property>
@@ -103,6 +133,9 @@
     
     <!-- TAB -->
     <component name="prfTab" class="com.openkm.dao.bean.ProfileTab">
+      <property name="defaultTab" not-null="true">
+        <column name="PRF_TB_DEFAULT" default="'desktop'"/>
+      </property>
       <property name="desktopVisible" type="true_false" not-null="true">
         <column name="PRF_TB_DESKTOP_VIS" default="'T'"/>
       </property>
@@ -225,6 +258,9 @@
 	    <property name="findDocumentVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_FI_FIND_DOC_VIS" default="'T'"/>
 	    </property>
+	    <property name="similarDocumentVisible" type="true_false" not-null="true">
+	      <column name="PRF_MN_FI_SIMILAR_DOC_VIS" default="'T'"/>
+	    </property>
 	    <property name="goFolderVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_FI_GO_FLD_VIS" default="'T'"/>
 	    </property>
@@ -270,6 +306,9 @@
 	    <property name="sendDocumentAttachmentVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_FI_SEND_DOC_ATTACH_VIS" default="'T'"/>
 	    </property>
+	    <property name="forwardMailVisible" type="true_false" not-null="true">
+	      <column name="PRF_MN_FI_FORWARD_MAIL_VIS" default="'T'"/>
+	    </property>
       </component>
 
       <!-- MENU EDIT -->
@@ -307,8 +346,11 @@
 	    <property name="removeSubscriptionVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_ED_REM_SUBS_VIS" default="'T'"/>
 	    </property>
-	     <property name="addPropertyGroupVisible" type="true_false" not-null="true">
+	    <property name="addPropertyGroupVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_ED_ADD_PROP_GRP_VIS" default="'T'"/>
+	    </property>
+	    <property name="updatePropertyGroupVisible" type="true_false" not-null="true">
+	      <column name="PRF_MN_ED_UPDATE_PROP_GRP_VIS" default="'T'"/>
 	    </property>
 	    <property name="removePropertyGroupVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_ED_REM_PROP_GRP_VIS" default="'T'"/>
@@ -369,6 +411,12 @@
 	    <property name="preferencesVisible" type="true_false" not-null="true">
 	      <column name="PRF_MN_TL_PREFS_VIS" default="'T'"/>
 	    </property>
+        <property name="omrVisible" type="true_false" not-null="true">
+          <column name="PRF_MN_TL_OMR_VIS" default="'T'" />
+        </property>
+        <property name="convertVisible" type="true_false" not-null="true">
+          <column name="PRF_MN_TL_CONVERT_VIS" default="'T'"/>
+        </property>
       </component>
       
       <!-- MENU HELP -->
@@ -408,11 +456,17 @@
 	  <property name="findDocumentVisible" type="true_false" not-null="true">
 	    <column name="PRF_TB_FIND_DOC_VIS" default="'T'"/>
 	  </property>
+	  <property name="similarDocumentVisible" type="true_false" not-null="true">
+	    <column name="PRF_TB_SIMILAR_DOC_VIS" default="'T'"/>
+	  </property>
 	  <property name="downloadVisible" type="true_false" not-null="true">
 	    <column name="PRF_TB_DOWNLOAD_VIS" default="'T'"/>
 	  </property>
 	  <property name="downloadPdfVisible" type="true_false" not-null="true">
 	    <column name="PRF_TB_DOWNLOAD_PDF_VIS" default="'T'"/>
+	  </property>
+	  <property name="printVisible" type="true_false" not-null="true">
+	    <column name="PRF_TB_PRINT_VIS" default="'T'"/>
 	  </property>
 	  <property name="lockVisible" type="true_false" not-null="true">
 	    <column name="PRF_TB_LOCK_VIS" default="'T'"/>
@@ -462,9 +516,12 @@
 	  <property name="uploaderVisible" type="true_false" not-null="true">
 	    <column name="PRF_TB_UPLOADER_VIS" default="'T'"/>
 	  </property>
-	  <property name="omrVisible" type="true_false" not-null="true">
-	    <column name="PRF_TB_OMR_VIS" default="'T'"/>
+	  <property name="splitterResizeVisible" type="true_false" not-null="true">
+	    <column name="PRF_TB_SPLITTER_RS_VIS" default="'T'"/>
 	  </property>
+      <property name="omrVisible" type="true_false" not-null="true">
+        <column name="PRF_TB_OMR_VIS" default="'T'" />
+      </property>
     </component>
     
     <!-- FILE BROWSER -->
@@ -492,6 +549,32 @@
 	  </property>
 	  <property name="versionVisible" type="true_false" not-null="true">
 	    <column name="PRF_FB_VERSION_VIS" default="'T'"/>
+	  </property>
+	  
+	  <!-- FILE BROWSER - COLUMNS WIDTH -->
+	  <property name="statusWidth" not-null="true">
+	    <column name="PRF_FB_STATUS_WIDTH" default="'60'"/>
+	  </property>
+	  <property name="massiveWidth" not-null="true">
+	    <column name="PRF_FB_MASSIVE_WIDTH" default="'30'"/>
+	  </property>
+	  <property name="iconWidth" not-null="true">
+	    <column name="PRF_FB_ICON_WIDTH" default="'25'"/>
+	  </property>
+	  <property name="nameWidth" not-null="true">
+	    <column name="PRF_FB_NAME_WIDTH" default="'250'"/>
+	  </property>
+	  <property name="sizeWidth" not-null="true">
+	    <column name="PRF_FB_SIZE_PDF_WIDTH" default="'60'"/>
+	  </property>
+	  <property name="lastModifiedWidth" not-null="true">
+	    <column name="PRF_FB_LAST_MOD_WIDTH" default="'150'"/>
+	  </property>
+	  <property name="authorWidth" not-null="true">
+	    <column name="PRF_FB_AUTHOR_WIDTH" default="'120'"/>
+	  </property>
+	  <property name="versionWidth" not-null="true">
+	    <column name="PRF_FB_VERSION_WIDTH" default="'60'"/>
 	  </property>
     </component>
   </class>

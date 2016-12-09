@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,18 +33,14 @@ import com.openkm.dao.NodeDocumentDAO;
  * @author pavila
  */
 public class TextExtractorThread implements Runnable {
-    private static Logger log = LoggerFactory
-            .getLogger(TextExtractorThread.class);
-
+    private static Logger log = LoggerFactory.getLogger(TextExtractorThread.class);
     private static volatile long global = 1;
-
     private long id = 0;
-
     private TextExtractorWork work = null;
 
-    public TextExtractorThread(final TextExtractorWork work) {
+    public TextExtractorThread(TextExtractorWork work) {
         this.work = work;
-        id = global++;
+        this.id = global++;
     }
 
     @Override
@@ -53,9 +49,9 @@ public class TextExtractorThread implements Runnable {
             log.debug("processConcurrent.Working {} on {}", id, work);
             NodeDocumentDAO.getInstance().textExtractorHelper(work);
             log.debug("processConcurrent.Finish {} on {}", id, work);
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             log.warn(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.warn(e.getMessage(), e);
         }
     }

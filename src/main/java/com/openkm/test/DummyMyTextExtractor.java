@@ -14,8 +14,7 @@ public class DummyMyTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(DummyMyTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(DummyMyTextExtractor.class);
 
     /**
      * Creates a new <code>TextExtractor</code> instance.
@@ -29,9 +28,7 @@ public class DummyMyTextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         log.info("******************* EXTRACT");
         return new StringReader("");
     }

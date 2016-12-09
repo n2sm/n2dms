@@ -58,41 +58,29 @@ import com.openkm.util.PathUtils;
  * 
  * @author sochoa
  */
-public class DropboxServlet extends OKMRemoteServiceServlet implements
-        OKMDropboxService {
+public class DropboxServlet extends OKMRemoteServiceServlet implements OKMDropboxService {
     private static Logger log = LoggerFactory.getLogger(DropboxServlet.class);
-
     private static final long serialVersionUID = 1L;
-
     private static final String CATEGORY_DOCUMENT = "document";
-
     private static final String CATEGORY_FOLDER = "folder";
-
     private Dropbox dropbox;
-
     private static final Map<String, List<GWTDropboxStatusListener>> statusMap = new HashMap<String, List<GWTDropboxStatusListener>>();
 
     @Override
     public String authorize() throws OKMException {
         try {
             dropbox = new Dropbox();
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             return null; // Case not allows application
-        } catch (final DropboxServerException e) {
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
         }
 
         return dropbox.getInfo().url;
@@ -100,10 +88,10 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
 
     @Override
     public GWTDropboxAccount access() throws OKMException {
-        final GWTDropboxAccount gwtDropboxAccount = new GWTDropboxAccount();
+        GWTDropboxAccount gwtDropboxAccount = new GWTDropboxAccount();
 
         try {
-            final String usrId = getThreadLocalRequest().getRemoteUser();
+            String usrId = getThreadLocalRequest().getRemoteUser();
 
             if (dropbox == null) {
                 if (DropboxDAO.getInstance().findByPk(usrId) != null) {
@@ -122,99 +110,69 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
             gwtDropboxAccount.setQuotaShared(account.quotaShared);
             gwtDropboxAccount.setReferralLink(account.referralLink);
             gwtDropboxAccount.setUid(account.uid);
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             return null;
-        } catch (final DropboxServerException e) {
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Database), e.getMessage());
         }
 
         return gwtDropboxAccount;
     }
 
     @Override
-    public void exportDocument(final String path, final String uuid)
-            throws OKMException {
+    public void exportDocument(String path, String uuid) throws OKMException {
         InputStream is = null;
 
         try {
-            final String docPath = OKMRepository.getInstance().getNodePath(
-                    null, uuid);
-            final Document doc = OKMDocument.getInstance().getProperties(null,
-                    docPath);
+            String docPath = OKMRepository.getInstance().getNodePath(null, uuid);
+            Document doc = OKMDocument.getInstance().getProperties(null, docPath);
             is = OKMDocument.getInstance().getContent(null, docPath, true);
-            final String dbPath = path + "/" + PathUtils.getName(docPath);
+            String dbPath = path + "/" + PathUtils.getName(docPath);
             dropbox.uploadFile(dbPath, is, doc.getActualVersion().getSize());
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final DropboxUnlinkedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
         } finally {
             IOUtils.closeQuietly(is);
         }
     }
 
     @Override
-    public void exportFolder(final String path, final String uuid)
-            throws OKMException {
+    public void exportFolder(String path, String uuid) throws OKMException {
         try {
             // Clean status list
             if (statusMap.containsKey(getThreadLocalRequest().getRemoteUser())) {
@@ -222,117 +180,86 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
             }
 
             exportFolderToDropbox(path, uuid);
-        } catch (final PathNotFoundException e) {
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final DropboxUnlinkedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse),
-                    e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchGroupException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
         }
     }
 
     @Override
-    public List<GWTDropboxEntry> search(final String query,
-            final String category) throws OKMException {
-        final List<GWTDropboxEntry> list = new ArrayList<GWTDropboxEntry>();
+    public List<GWTDropboxEntry> search(String query, String category) throws OKMException {
+        List<GWTDropboxEntry> list = new ArrayList<GWTDropboxEntry>();
 
         try {
-            final List<Entry> listEntry = dropbox.search(query);
+            List<Entry> listEntry = dropbox.search(query);
 
-            for (final Entry entry : listEntry) {
-                final GWTDropboxEntry gwtDropboxEntry = copy(entry);
+            for (Entry entry : listEntry) {
+                GWTDropboxEntry gwtDropboxEntry = copy(entry);
 
                 if (category.equals(CATEGORY_FOLDER) && entry.isDir) {
                     list.add(gwtDropboxEntry);
                 } else if (category.equals(CATEGORY_DOCUMENT) && !entry.isDir) {
                     // Change MIME Type to defined into OpenKM
-                    gwtDropboxEntry.setMimeType(MimeTypeConfig.mimeTypes
-                            .getContentType(entry.fileName()));
+                    gwtDropboxEntry.setMimeType(MimeTypeConfig.mimeTypes.getContentType(entry.fileName()));
                     list.add(gwtDropboxEntry);
                 } else if (category.equals("")) {
                     // Change MIME Type to defined into OpenKM
-                    gwtDropboxEntry.setMimeType(MimeTypeConfig.mimeTypes
-                            .getContentType(entry.fileName()));
+                    gwtDropboxEntry.setMimeType(MimeTypeConfig.mimeTypes.getContentType(entry.fileName()));
                     list.add(gwtDropboxEntry);
                 }
             }
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
         }
 
         return list;
     }
 
     @Override
-    public void importDocument(final GWTDropboxEntry gwtDropboxEntry,
-            final String path) throws OKMException {
+    public void importDocument(GWTDropboxEntry gwtDropboxEntry, String path) throws OKMException {
         File tmp = null;
         FileOutputStream fos = null;
         InputStream is = null;
@@ -347,86 +274,54 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
             doc.setPath(path + "/" + gwtDropboxEntry.getFileName());
             doc = OKMDocument.getInstance().create(null, doc, is);
             addToStatus(doc); // status log
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final FileSizeExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (FileSizeExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
-        } catch (final UserQuotaExceededException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_FileSizeExceeded), e.getMessage());
+        } catch (UserQuotaExceededException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_UserQuoteExceed), e.getMessage());
-        } catch (final VirusDetectedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_UserQuoteExceed), e.getMessage());
+        } catch (VirusDetectedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Virus),
-                    e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Virus), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final UnsupportedMimeTypeException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (UnsupportedMimeTypeException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_UnsupportedMimeType), e.getMessage());
+        } catch (ItemExistsException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Automation), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse),
-                    e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Extension), e.getMessage());
         } finally {
             IOUtils.closeQuietly(fos);
             IOUtils.closeQuietly(is);
@@ -435,8 +330,7 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     }
 
     @Override
-    public void importFolder(final GWTDropboxEntry gwtDropboxEntry,
-            final String path) throws OKMException {
+    public void importFolder(GWTDropboxEntry gwtDropboxEntry, String path) throws OKMException {
         try {
             // Clean status list
             if (statusMap.containsKey(getThreadLocalRequest().getRemoteUser())) {
@@ -444,81 +338,51 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
             }
 
             importFolderToDropbox(gwtDropboxEntry, path);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Database), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Automation), e.getMessage());
-        } catch (final ItemExistsException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Automation), e.getMessage());
+        } catch (ItemExistsException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_ItemExists), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_ItemExists), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_Extension), e.getMessage());
-        } catch (final DropboxUnlinkedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final PrincipalAdapterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_PrincipalAdapter), e.getMessage());
-        } catch (final IOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Parse),
-                    e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMDropboxService,
-                    ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Extension), e.getMessage());
         }
     }
 
@@ -527,67 +391,50 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
         GWTDropboxEntry gwtDropboxEntry = new GWTDropboxEntry();
 
         try {
-            final Entry entry = dropbox.getRoot();
+            Entry entry = dropbox.getRoot();
             gwtDropboxEntry = copy(entry);
             gwtDropboxEntry.setChildren(true);
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
         }
 
         return gwtDropboxEntry;
     }
 
     @Override
-    public List<GWTDropboxEntry> getChildren(final String parentPath)
-            throws OKMException {
-        final List<GWTDropboxEntry> list = new ArrayList<GWTDropboxEntry>();
+    public List<GWTDropboxEntry> getChildren(String parentPath) throws OKMException {
+        List<GWTDropboxEntry> list = new ArrayList<GWTDropboxEntry>();
 
         try {
-            final List<Entry> listEntry = dropbox.getClildren(parentPath);
-            for (final Entry entry : listEntry) {
+            List<Entry> listEntry = dropbox.getClildren(parentPath);
+            for (Entry entry : listEntry) {
                 if (entry.isDir) {
-                    final GWTDropboxEntry gwtDropboxEntry = copy(entry);
+                    GWTDropboxEntry gwtDropboxEntry = copy(entry);
                     list.add(gwtDropboxEntry);
                 }
             }
-        } catch (final DropboxUnlinkedException e) {
+        } catch (DropboxUnlinkedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxServerException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxServerException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxIOException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxIOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
-        } catch (final DropboxException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
+        } catch (DropboxException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService,
-                            ErrorCode.CAUSE_Dropbox), e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMDropboxService, ErrorCode.CAUSE_Dropbox), e.getMessage());
         }
 
         return list;
@@ -596,10 +443,8 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     /**
      * copy from dropbox entry to GWTDropboxEntry
      */
-    private GWTDropboxEntry copy(final Entry e)
-            throws DropboxUnlinkedException, DropboxServerException,
-            DropboxIOException, DropboxException {
-        final GWTDropboxEntry dropboxEntry = new GWTDropboxEntry();
+    private GWTDropboxEntry copy(Entry e) throws DropboxUnlinkedException, DropboxServerException, DropboxIOException, DropboxException {
+        GWTDropboxEntry dropboxEntry = new GWTDropboxEntry();
 
         dropboxEntry.setBytes(e.bytes);
         dropboxEntry.setClientMTime(e.clientMtime);
@@ -623,8 +468,7 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
 
     @Override
     public List<GWTDropboxStatusListener> statusListener() throws OKMException {
-        final List<GWTDropboxStatusListener> doneList = new ArrayList<GWTDropboxStatusListener>(
-                getStatusList());
+        List<GWTDropboxStatusListener> doneList = new ArrayList<GWTDropboxStatusListener>(getStatusList());
         getStatusList().removeAll(doneList);
         return doneList;
     }
@@ -632,24 +476,19 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     /**
      * exportFolderToDropbox
      */
-    private void exportFolderToDropbox(String path, final String uuid)
-            throws PathNotFoundException, RepositoryException,
-            DatabaseException, DropboxUnlinkedException,
-            DropboxServerException, DropboxIOException, DropboxException,
-            PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, OKMException {
-        final String fldPath = OKMRepository.getInstance().getNodePath(null,
-                uuid);
+    private void exportFolderToDropbox(String path, String uuid) throws AccessDeniedException, PathNotFoundException, RepositoryException,
+            DatabaseException, DropboxUnlinkedException, DropboxServerException, DropboxIOException, DropboxException,
+            PrincipalAdapterException, IOException, ParseException, NoSuchGroupException, OKMException {
+        String fldPath = OKMRepository.getInstance().getNodePath(null, uuid);
         if (!path.equals("/")) {
             path += "/";
         }
 
         path += PathUtils.getName(fldPath);
-        final Entry entry = dropbox.createFolder(path);
+        Entry entry = dropbox.createFolder(path);
 
         // export folders
-        for (final Folder folder : OKMFolder.getInstance().getChildren(null,
-                fldPath)) {
+        for (Folder folder : OKMFolder.getInstance().getChildren(null, fldPath)) {
             if (OKMFolder.getInstance().getChildren(null, folder.getPath()) != null) {
                 exportFolderToDropbox(entry.path, folder.getUuid());
                 addToStatus(folder); // status log
@@ -657,8 +496,7 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
         }
 
         // export documents
-        for (final Document document : OKMDocument.getInstance().getChildren(
-                null, fldPath)) {
+        for (Document document : OKMDocument.getInstance().getChildren(null, fldPath)) {
             exportDocument(entry.path, document.getUuid());
             addToStatus(document); // status log
         }
@@ -667,20 +505,17 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     /**
      * importFolderToDropbox
      */
-    private void importFolderToDropbox(final GWTDropboxEntry gwtDropboxEntry,
-            final String path) throws PathNotFoundException,
-            ItemExistsException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException, AutomationException,
-            OKMException, DropboxUnlinkedException, DropboxServerException,
-            DropboxIOException, DropboxException, PrincipalAdapterException,
-            IOException, ParseException, NoSuchGroupException {
+    private void importFolderToDropbox(GWTDropboxEntry gwtDropboxEntry, String path) throws PathNotFoundException, ItemExistsException,
+            AccessDeniedException, RepositoryException, DatabaseException, AutomationException, OKMException, DropboxUnlinkedException,
+            DropboxServerException, DropboxIOException, DropboxException, PrincipalAdapterException, IOException, ParseException,
+            NoSuchGroupException, ExtensionException {
         Folder folder = new Folder();
         folder.setPath(path + "/" + gwtDropboxEntry.getFileName());
         folder = OKMFolder.getInstance().create(null, folder);
         addToStatus(folder); // status log
 
-        for (final Entry entry : dropbox.getClildren(gwtDropboxEntry.getPath())) {
-            final GWTDropboxEntry dropboxEntry = copy(entry);
+        for (Entry entry : dropbox.getClildren(gwtDropboxEntry.getPath())) {
+            GWTDropboxEntry dropboxEntry = copy(entry);
 
             if (dropboxEntry.isDir()) {
                 importFolderToDropbox(dropboxEntry, folder.getPath());
@@ -694,11 +529,9 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     /**
      * addToStatus
      */
-    private void addToStatus(final Folder folder)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTDropboxStatusListener dsl = new GWTDropboxStatusListener();
+    private void addToStatus(Folder folder) throws PrincipalAdapterException, IOException, ParseException, NoSuchGroupException,
+            AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTDropboxStatusListener dsl = new GWTDropboxStatusListener();
         dsl.setFolder(GWTUtil.copy(folder, null));
         getStatusList().add(dsl);
     }
@@ -706,11 +539,9 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
     /**
      * addToStatus
      */
-    private void addToStatus(final Document doc)
-            throws PrincipalAdapterException, IOException, ParseException,
-            NoSuchGroupException, PathNotFoundException, RepositoryException,
-            DatabaseException {
-        final GWTDropboxStatusListener dsl = new GWTDropboxStatusListener();
+    private void addToStatus(Document doc) throws PrincipalAdapterException, IOException, ParseException, NoSuchGroupException,
+            AccessDeniedException, PathNotFoundException, RepositoryException, DatabaseException {
+        GWTDropboxStatusListener dsl = new GWTDropboxStatusListener();
         dsl.setDocument(GWTUtil.copy(doc, null));
         getStatusList().add(dsl);
     }
@@ -720,7 +551,7 @@ public class DropboxServlet extends OKMRemoteServiceServlet implements
      */
     private synchronized List<GWTDropboxStatusListener> getStatusList() {
         List<GWTDropboxStatusListener> status = null;
-        final String user = getThreadLocalRequest().getRemoteUser();
+        String user = getThreadLocalRequest().getRemoteUser();
 
         if (statusMap.containsKey(user)) {
             status = statusMap.get(user);

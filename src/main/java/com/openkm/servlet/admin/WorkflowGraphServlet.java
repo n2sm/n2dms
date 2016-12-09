@@ -20,31 +20,24 @@ import com.openkm.util.WebUtils;
  */
 public class WorkflowGraphServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
+    private static Logger log = LoggerFactory.getLogger(WorkflowGraphServlet.class);
 
-    private static Logger log = LoggerFactory
-            .getLogger(WorkflowGraphServlet.class);
-
-    @Override
-    protected void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        final long id = WebUtils.getLong(request, "id");
-        final String node = WebUtils.getString(request, "node");
+        long id = WebUtils.getLong(request, "id");
+        String node = WebUtils.getString(request, "node");
         ;
-        final ServletOutputStream sos = response.getOutputStream();
+        ServletOutputStream sos = response.getOutputStream();
         updateSessionManager(request);
 
         try {
             // Get image
-            final byte[] data = OKMWorkflow.getInstance()
-                    .getProcessDefinitionImage(null, id, node);
+            byte[] data = OKMWorkflow.getInstance().getProcessDefinitionImage(null, id, node);
 
             if (data != null) {
                 // Disable browser cache
                 response.setHeader("Expires", "Sat, 6 May 1971 12:00:00 GMT");
-                response.setHeader("Cache-Control",
-                        "max-age=0, must-revalidate");
+                response.setHeader("Cache-Control", "max-age=0, must-revalidate");
                 response.addHeader("Cache-Control", "post-check=0, pre-check=0");
 
                 // Send data
@@ -55,13 +48,13 @@ public class WorkflowGraphServlet extends BaseServlet {
                 response.setContentType("text/plain");
                 sos.write("Null process definition image".getBytes());
             }
-        } catch (final WorkflowException e) {
+        } catch (WorkflowException e) {
             log.error(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
             sos.flush();

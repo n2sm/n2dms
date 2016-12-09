@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -77,75 +77,52 @@ import com.openkm.dao.bean.Report;
  */
 public class ReportUtils {
     private static Logger log = LoggerFactory.getLogger(ReportUtils.class);
-
     public static Map<String, JasperReport> JasperCharged = new HashMap<String, JasperReport>();
 
     public static final int OUTPUT_TEXT = 0;
-
     public static final int OUTPUT_HTML = 1;
-
     public static final int OUTPUT_PDF = 2;
-
     public static final int OUTPUT_RTF = 3;
-
     public static final int OUTPUT_CSV = 4;
-
     public static final int OUTPUT_ODT = 5;
-
     public static final int OUTPUT_DOCX = 6;
 
     public static final String MIME_JASPER = "application/x-jasper";
-
     public static final String MIME_JRXML = "application/x-jrxml";
-
     public static final String MIME_REPORT = "application/x-report";
 
     public static final String MIME_TEXT = "text/plain";
-
     public static final String MIME_HTML = "text/html";
-
     public static final String MIME_PDF = "application/pdf";
-
     public static final String MIME_RTF = "application/rtf";
-
     public static final String MIME_CSV = "text/csv";
-
     public static final String MIME_ODT = "application/vnd.oasis.opendocument.text";
-
     public static final String MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-    public static final String[] FILE_MIME = { MIME_TEXT, MIME_HTML, MIME_PDF,
-            MIME_RTF, MIME_CSV, MIME_ODT, MIME_DOCX };
-
-    public static final String[] FILE_EXTENSION = { ".txt", ".html", ".pdf",
-            ".rtf", ".csv", ".odt", ".docx" };
+    public static final String[] FILE_MIME = { MIME_TEXT, MIME_HTML, MIME_PDF, MIME_RTF, MIME_CSV, MIME_ODT, MIME_DOCX };
+    public static final String[] FILE_EXTENSION = { ".txt", ".html", ".pdf", ".rtf", ".csv", ".odt", ".docx" };
 
     /**
      * Generates a report based on a map collection (from file)
      */
-    public static OutputStream generateReport(final OutputStream out,
-            final String fileReport, final Map<String, Object> params,
-            final int outputType, final Collection<Map<String, Object>> list)
-            throws Exception {
+    public static OutputStream generateReport(OutputStream out, String fileReport, Map<String, Object> params, int outputType,
+            Collection<Map<String, Object>> list) throws Exception {
         if (!JasperCharged.containsKey(fileReport)) {
-            final ClassLoader cl = Thread.currentThread()
-                    .getContextClassLoader();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
             try {
-                final JasperReport jasperReport = JasperCompileManager
-                        .compileReport(cl.getResourceAsStream(fileReport));
+                JasperReport jasperReport = JasperCompileManager.compileReport(cl.getResourceAsStream(fileReport));
                 JasperCharged.put(fileReport, jasperReport);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Compiling error: " + e.getMessage());
             }
         }
 
         try {
-            final JasperReport jasperReport = JasperCharged.get(fileReport);
-            final JasperPrint print = JasperFillManager.fillReport(
-                    jasperReport, params, new JRMapCollectionDataSource(list));
+            JasperReport jasperReport = (JasperReport) JasperCharged.get(fileReport);
+            JasperPrint print = JasperFillManager.fillReport(jasperReport, params, new JRMapCollectionDataSource(list));
             export(out, outputType, print);
-        } catch (final JRException je) {
+        } catch (JRException je) {
             throw new JRException("Error generating report", je);
         }
 
@@ -155,14 +132,10 @@ public class ReportUtils {
     /**
      * Generates a report based on a map collection (from stream)
      */
-    public static OutputStream generateReport(final OutputStream out,
-            final InputStream report, final Map<String, Object> params,
-            final int outputType, final Collection<Map<String, Object>> list)
-            throws JRException {
-        final JasperReport jasperReport = JasperCompileManager
-                .compileReport(report);
-        final JasperPrint print = JasperFillManager.fillReport(jasperReport,
-                params, new JRMapCollectionDataSource(list));
+    public static OutputStream generateReport(OutputStream out, InputStream report, Map<String, Object> params, int outputType,
+            Collection<Map<String, Object>> list) throws JRException {
+        JasperReport jasperReport = JasperCompileManager.compileReport(report);
+        JasperPrint print = JasperFillManager.fillReport(jasperReport, params, new JRMapCollectionDataSource(list));
         export(out, outputType, print);
         return out;
     }
@@ -170,24 +143,21 @@ public class ReportUtils {
     /**
      * Generates a report based on a map collection (from stream)
      */
-    public static OutputStream generateReport(final OutputStream out,
-            final JasperReport jr, final Map<String, Object> params,
-            final int outputType) throws JRException, EvalError {
-        final JRQuery query = jr.getQuery();
+    public static OutputStream generateReport(OutputStream out, JasperReport jr, Map<String, Object> params, int outputType)
+            throws JRException, EvalError {
+        JRQuery query = jr.getQuery();
 
         if (query != null) {
-            final Interpreter bsh = new Interpreter(null, System.out,
-                    System.err, false);
+            Interpreter bsh = new Interpreter(null, System.out, System.err, false);
 
             // Set parameters
-            for (final Map.Entry<String, Object> entry : params.entrySet()) {
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
                 bsh.set(entry.getKey(), entry.getValue());
             }
 
             @SuppressWarnings("rawtypes")
-            final Collection list = (Collection) bsh.eval(query.getText());
-            final JasperPrint print = JasperFillManager.fillReport(jr, params,
-                    new JRMapCollectionDataSource(list));
+            Collection list = (Collection) bsh.eval(query.getText());
+            JasperPrint print = JasperFillManager.fillReport(jr, params, new JRMapCollectionDataSource(list));
             export(out, outputType, print);
         } else {
             throw new JRException("Null report query string");
@@ -199,28 +169,24 @@ public class ReportUtils {
     /**
      * Generates a report based on a JDBC connection (from file)
      */
-    public static OutputStream generateReport(final OutputStream out,
-            final String fileReport, final Map<String, Object> params,
-            final int outputType, final Connection con) throws Exception {
+    public static OutputStream generateReport(OutputStream out, String fileReport, Map<String, Object> params, int outputType,
+            Connection con) throws Exception {
         if (!JasperCharged.containsKey(fileReport)) {
-            final ClassLoader cl = Thread.currentThread()
-                    .getContextClassLoader();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
             try {
-                final JasperReport jasperReport = JasperCompileManager
-                        .compileReport(cl.getResourceAsStream(fileReport));
+                JasperReport jasperReport = JasperCompileManager.compileReport(cl.getResourceAsStream(fileReport));
                 JasperCharged.put(fileReport, jasperReport);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Compiling error: " + e.getMessage());
             }
         }
 
         try {
-            final JasperReport jasperReport = JasperCharged.get(fileReport);
-            final JasperPrint print = JasperFillManager.fillReport(
-                    jasperReport, params, con);
+            JasperReport jasperReport = (JasperReport) JasperCharged.get(fileReport);
+            JasperPrint print = JasperFillManager.fillReport(jasperReport, params, con);
             export(out, outputType, print);
-        } catch (final JRException je) {
+        } catch (JRException je) {
             throw new JRException("Error generating report", je);
         }
 
@@ -230,10 +196,9 @@ public class ReportUtils {
     /**
      * Generates a report based on a JDBC connection (from stream)
      */
-    public static OutputStream generateReport(final OutputStream out,
-            final JasperReport jr, final Map<String, Object> params,
-            final int outputType, final Connection con) throws JRException {
-        final JasperPrint print = JasperFillManager.fillReport(jr, params, con);
+    public static OutputStream generateReport(OutputStream out, JasperReport jr, Map<String, Object> params, int outputType, Connection con)
+            throws JRException {
+        JasperPrint print = JasperFillManager.fillReport(jr, params, con);
         export(out, outputType, print);
         return out;
     }
@@ -241,42 +206,37 @@ public class ReportUtils {
     /**
      * Export report
      */
-    private static void export(final OutputStream out, final int outputType,
-            final JasperPrint print) throws JRException {
+    private static void export(OutputStream out, int outputType, JasperPrint print) throws JRException {
         switch (outputType) {
         case OUTPUT_TEXT:
-            final JRTextExporter textExp = new JRTextExporter();
+            JRTextExporter textExp = new JRTextExporter();
             textExp.setParameter(JRTextExporterParameter.PAGE_HEIGHT, 300);
             textExp.setParameter(JRTextExporterParameter.PAGE_WIDTH, 100);
             textExp.setParameter(JRTextExporterParameter.CHARACTER_WIDTH, 80);
-            textExp.setParameter(JRExporterParameter.CHARACTER_ENCODING,
-                    "UTF-8");
+            textExp.setParameter(JRExporterParameter.CHARACTER_ENCODING, "UTF-8");
             textExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             textExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
             textExp.exportReport();
             break;
 
         case OUTPUT_PDF:
-            final JRPdfExporter pdfExp = new JRPdfExporter();
+            JRPdfExporter pdfExp = new JRPdfExporter();
             pdfExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             pdfExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
             pdfExp.exportReport();
             break;
 
         case OUTPUT_HTML:
-            final JRHtmlExporter htmlExp = new JRHtmlExporter();
-            htmlExp.setParameter(JRExporterParameter.CHARACTER_ENCODING,
-                    "UTF-8");
+            JRHtmlExporter htmlExp = new JRHtmlExporter();
+            htmlExp.setParameter(JRExporterParameter.CHARACTER_ENCODING, "UTF-8");
             htmlExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             htmlExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
-            htmlExp.setParameter(
-                    JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN,
-                    Boolean.FALSE);
+            htmlExp.setParameter(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN, Boolean.FALSE);
             htmlExp.exportReport();
             break;
 
         case OUTPUT_RTF:
-            final JRRtfExporter rtfExp = new JRRtfExporter();
+            JRRtfExporter rtfExp = new JRRtfExporter();
             rtfExp.setParameter(JRExporterParameter.CHARACTER_ENCODING, "UTF-8");
             rtfExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             rtfExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
@@ -284,7 +244,7 @@ public class ReportUtils {
             break;
 
         case OUTPUT_CSV:
-            final JRCsvExporter csvExp = new JRCsvExporter();
+            JRCsvExporter csvExp = new JRCsvExporter();
             csvExp.setParameter(JRExporterParameter.CHARACTER_ENCODING, "UTF-8");
             csvExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             csvExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
@@ -292,14 +252,14 @@ public class ReportUtils {
             break;
 
         case OUTPUT_ODT:
-            final JROdtExporter odtExp = new JROdtExporter();
+            JROdtExporter odtExp = new JROdtExporter();
             odtExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             odtExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
             odtExp.exportReport();
             break;
 
         case OUTPUT_DOCX:
-            final JRDocxExporter docxExp = new JRDocxExporter();
+            JRDocxExporter docxExp = new JRDocxExporter();
             docxExp.setParameter(JRExporterParameter.JASPER_PRINT, print);
             docxExp.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
             docxExp.exportReport();
@@ -310,17 +270,16 @@ public class ReportUtils {
     /**
      * Get report parameters
      */
-    public static List<FormElement> getReportParameters(final long rpId)
-            throws ParseException, DatabaseException, IOException {
+    public static List<FormElement> getReportParameters(long rpId) throws ParseException, DatabaseException, IOException {
         log.debug("getReportParameters({})", rpId);
+        long begin = System.currentTimeMillis();
         List<FormElement> params = null;
         ByteArrayInputStream bais = null;
         ZipInputStream zis = null;
 
         try {
-            final Report rp = ReportDAO.findByPk(rpId);
-            bais = new ByteArrayInputStream(SecureStore.b64Decode(rp
-                    .getFileContent()));
+            Report rp = ReportDAO.findByPk(rpId);
+            bais = new ByteArrayInputStream(SecureStore.b64Decode(rp.getFileContent()));
             zis = new ZipInputStream(bais);
             ZipEntry zi = null;
 
@@ -338,13 +297,14 @@ public class ReportUtils {
 
             // Activity log
             // UserActivity.log(session.getUserID(), "GET_REPORT_PARAMETERS", rpId+"", null);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
         } finally {
             IOUtils.closeQuietly(zis);
             IOUtils.closeQuietly(bais);
         }
 
+        log.trace("getReportParameters.Time: {}", System.currentTimeMillis() - begin);
         log.debug("getReportParameters: {}", params);
         return params;
     }
@@ -352,9 +312,8 @@ public class ReportUtils {
     /**
      * Execute report
      */
-    public static ByteArrayOutputStream execute(final Report rp,
-            final Map<String, Object> params, final int format)
-            throws JRException, IOException, EvalError {
+    public static ByteArrayOutputStream execute(Report rp, final Map<String, Object> params, final int format) throws JRException,
+            IOException, EvalError {
         ByteArrayOutputStream baos = null;
         ByteArrayInputStream bais = null;
         ZipInputStream zis = null;
@@ -362,8 +321,7 @@ public class ReportUtils {
 
         try {
             baos = new ByteArrayOutputStream();
-            bais = new ByteArrayInputStream(SecureStore.b64Decode(rp
-                    .getFileContent()));
+            bais = new ByteArrayInputStream(SecureStore.b64Decode(rp.getFileContent()));
             JasperReport jr = null;
 
             // Obtain or compile report
@@ -379,8 +337,7 @@ public class ReportUtils {
 
                 while ((zi = zis.getNextEntry()) != null) {
                     if (!zi.isDirectory()) {
-                        final String mimeType = MimeTypeConfig.mimeTypes
-                                .getContentType(zi.getName());
+                        String mimeType = MimeTypeConfig.mimeTypes.getContentType(zi.getName());
 
                         if (ReportUtils.MIME_JRXML.equals(mimeType)) {
                             log.debug("Report type: JRXML inside ARCHIVE");
@@ -397,8 +354,8 @@ public class ReportUtils {
 
             // Guess if SQL or BSH
             if (jr != null) {
-                final JRQuery query = jr.getQuery();
-                final String tq = query.getText().trim();
+                JRQuery query = jr.getQuery();
+                String tq = query.getText().trim();
 
                 if (tq.toUpperCase().startsWith("SELECT")) {
                     log.debug("Report type: DATABASE");
@@ -422,15 +379,14 @@ public class ReportUtils {
     /**
      * Execute report
      */
-    private static void executeDatabase(final Session dbSession,
-            final ByteArrayOutputStream baos, final JasperReport jr,
+    private static void executeDatabase(Session dbSession, final ByteArrayOutputStream baos, final JasperReport jr,
             final Map<String, Object> params, final int format) {
         dbSession.doWork(new Work() {
             @Override
-            public void execute(final Connection con) throws SQLException {
+            public void execute(Connection con) throws SQLException {
                 try {
                     ReportUtils.generateReport(baos, jr, params, format, con);
-                } catch (final JRException e) {
+                } catch (JRException e) {
                     throw new SQLException(e.getMessage(), e);
                 }
             }

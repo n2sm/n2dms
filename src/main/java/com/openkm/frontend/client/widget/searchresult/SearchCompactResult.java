@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,9 +32,11 @@ import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTDocument;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTMail;
+import com.openkm.frontend.client.bean.GWTProfileFileBrowser;
 import com.openkm.frontend.client.bean.GWTQueryParams;
 import com.openkm.frontend.client.bean.GWTQueryResult;
 import com.openkm.frontend.client.util.CommonUI;
+import com.openkm.frontend.client.util.ScrollTableHelper;
 import com.openkm.frontend.client.util.Util;
 
 /**
@@ -46,15 +48,13 @@ import com.openkm.frontend.client.util.Util;
 public class SearchCompactResult extends Composite {
 
     // Number of columns
-    public static final int NUMBER_OF_COLUMNS = 8;
+    private int numberOfColumns = 0;
 
     public ExtendedScrollTable table;
-
     private FixedWidthFlexTable headerTable;
-
     private FixedWidthGrid dataTable;
-
     public MenuPopup menuPopup;
+    private GWTProfileFileBrowser profileFileBrowser;
 
     /**
      * SearchCompactResult
@@ -63,61 +63,49 @@ public class SearchCompactResult extends Composite {
         menuPopup = new MenuPopup();
         menuPopup.setStyleName("okm-SearchResult-MenuPopup");
 
-        final ScrollTableImages scrollTableImages = new ScrollTableImages() {
-            @Override
+        ScrollTableImages scrollTableImages = new ScrollTableImages() {
             public AbstractImagePrototype scrollTableAscending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_asc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_asc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_asc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableDescending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_desc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_desc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_desc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableFillWidth() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/fill_width.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/fill_width.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/fill_width.gif\"/>";
                     }
@@ -127,33 +115,10 @@ public class SearchCompactResult extends Composite {
 
         headerTable = new FixedWidthFlexTable();
         dataTable = new FixedWidthGrid();
-        table = new ExtendedScrollTable(dataTable, headerTable,
-                scrollTableImages);
+        table = new ExtendedScrollTable(dataTable, headerTable, scrollTableImages);
         table.setCellSpacing(0);
         table.setCellPadding(2);
-        table.setSize("540", "140");
-
-        // Level 1 headers
-        headerTable.setHTML(0, 0, Main.i18n("search.result.score"));
-        headerTable.setHTML(0, 1, "&nbsp;");
-        headerTable.setHTML(0, 2, Main.i18n("search.result.name"));
-        headerTable.setHTML(0, 3, Main.i18n("search.result.size"));
-        headerTable.setHTML(0, 4, Main.i18n("search.result.date.update"));
-        headerTable.setHTML(0, 5, Main.i18n("search.result.author"));
-        headerTable.setHTML(0, 6, Main.i18n("search.result.version"));
-
-        // Format    
-        table.setColumnWidth(0, 70);
-        table.setColumnWidth(1, 25);
-        table.setColumnWidth(2, 150);
-        table.setColumnWidth(3, 100);
-        table.setColumnWidth(4, 150);
-        table.setColumnWidth(5, 110);
-        table.setColumnWidth(6, 90);
-
-        table.setPreferredColumnWidth(0, 70);
-        table.setPreferredColumnWidth(1, 25);
-        table.setPreferredColumnWidth(4, 150);
+        table.setSize("540px", "140px");
 
         table.addStyleName("okm-DisableSelect");
         table.addStyleName("okm-Input");
@@ -165,12 +130,26 @@ public class SearchCompactResult extends Composite {
      * Refreshing lang
      */
     public void langRefresh() {
-        headerTable.setHTML(0, 0, Main.i18n("search.result.score"));
-        headerTable.setHTML(0, 2, Main.i18n("search.result.name"));
-        headerTable.setHTML(0, 3, Main.i18n("search.result.size"));
-        headerTable.setHTML(0, 4, Main.i18n("search.result.date.update"));
-        headerTable.setHTML(0, 5, Main.i18n("search.result.author"));
-        headerTable.setHTML(0, 6, Main.i18n("search.result.version"));
+        int col = 0;
+        headerTable.setHTML(0, col++, Main.i18n("search.result.score"));
+        if (profileFileBrowser.isIconVisible()) {
+            col++; // nothing to be translated here
+        }
+        if (profileFileBrowser.isNameVisible()) {
+            headerTable.setHTML(0, col++, Main.i18n("search.result.name"));
+        }
+        if (profileFileBrowser.isSizeVisible()) {
+            headerTable.setHTML(0, col++, Main.i18n("search.result.size"));
+        }
+        if (profileFileBrowser.isLastModifiedVisible()) {
+            headerTable.setHTML(0, col++, Main.i18n("search.result.date.update"));
+        }
+        if (profileFileBrowser.isAuthorVisible()) {
+            headerTable.setHTML(0, col++, Main.i18n("search.result.author"));
+        }
+        if (profileFileBrowser.isVersionVisible()) {
+            headerTable.setHTML(0, col++, Main.i18n("search.result.version"));
+        }
         menuPopup.langRefresh();
     }
 
@@ -184,7 +163,7 @@ public class SearchCompactResult extends Composite {
         }
 
         table.reset();
-        table.getDataTable().resize(0, NUMBER_OF_COLUMNS);
+        table.getDataTable().resize(0, numberOfColumns);
     }
 
     /**
@@ -192,7 +171,7 @@ public class SearchCompactResult extends Composite {
      * 
      * @param doc The doc to add
      */
-    public void addRow(final GWTQueryResult gwtQueryResult) {
+    public void addRow(GWTQueryResult gwtQueryResult) {
         table.addRow(gwtQueryResult);
     }
 
@@ -233,14 +212,14 @@ public class SearchCompactResult extends Composite {
                 docPath = getDocument().getPath();
             }
 
-            path = docPath.substring(0, docPath.lastIndexOf("/"));
+            path = Util.getParent(docPath);
 
         } else if (table.isFolderSelected()) {
             path = getFolder().getPath();
 
         } else if (table.isMailSelected()) {
             docPath = getMail().getPath();
-            path = docPath.substring(0, docPath.lastIndexOf("/"));
+            path = Util.getParent(docPath);
         }
 
         CommonUI.openPath(path, docPath);
@@ -291,16 +270,13 @@ public class SearchCompactResult extends Composite {
      * Call Back get search
      */
     final AsyncCallback<GWTQueryParams> callbackGetSearch = new AsyncCallback<GWTQueryParams>() {
-        @Override
-        public void onSuccess(final GWTQueryParams result) {
-            final GWTQueryParams gWTParams = result;
-            Main.get().mainPanel.search.searchBrowser.searchIn
-                    .setSavedSearch(gWTParams);
+        public void onSuccess(GWTQueryParams result) {
+            GWTQueryParams gWTParams = result;
+            Main.get().mainPanel.search.searchBrowser.searchIn.setSavedSearch(gWTParams);
             removeAllRows();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getSearch", caught);
         }
     };
@@ -319,7 +295,7 @@ public class SearchCompactResult extends Composite {
      * 
      * @param selected The select panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
         table.setSelectedPanel(selected);
     }
 
@@ -342,5 +318,58 @@ public class SearchCompactResult extends Composite {
      */
     public void refreshSort() {
         table.refreshSort();
+    }
+
+    /**
+     * setProfileFileBrowser
+     * 
+     * @param profileFileBrowser
+     */
+    public void setProfileFileBrowser(GWTProfileFileBrowser profileFileBrowser) {
+        this.profileFileBrowser = profileFileBrowser;
+
+        int col = 0;
+        // Relevance can not be hidden
+        headerTable.setHTML(0, col, Main.i18n("search.result.score"));
+        ScrollTableHelper.setColumnWidth(table, col, 80, ScrollTableHelper.FIXED);
+        col++;
+
+        if (profileFileBrowser.isIconVisible()) {
+            headerTable.setHTML(0, col, "&nbsp;");
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getIconWidth()), ScrollTableHelper.FIXED);
+            col++;
+        }
+        if (profileFileBrowser.isNameVisible()) {
+            headerTable.setHTML(0, col, Main.i18n("search.result.name"));
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getNameWidth()), ScrollTableHelper.GREAT,
+                    true, false);
+            col++;
+        }
+        if (profileFileBrowser.isSizeVisible()) {
+            headerTable.setHTML(0, col, Main.i18n("search.result.size"));
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getSizeWidth()), ScrollTableHelper.MEDIUM);
+            col++;
+        }
+        if (profileFileBrowser.isLastModifiedVisible()) {
+            headerTable.setHTML(0, col, Main.i18n("search.result.date.update"));
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getLastModifiedWidth()),
+                    ScrollTableHelper.MEDIUM);
+            col++;
+        }
+        if (profileFileBrowser.isAuthorVisible()) {
+            headerTable.setHTML(0, col, Main.i18n("search.result.author"));
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getAuthorWidth()), ScrollTableHelper.MEDIUM,
+                    true, false);
+            col++;
+        }
+        if (profileFileBrowser.isVersionVisible()) {
+            headerTable.setHTML(0, col, Main.i18n("search.result.version"));
+            ScrollTableHelper.setColumnWidth(table, col, Integer.parseInt(profileFileBrowser.getVersionWidth()), ScrollTableHelper.FIXED);
+            col++;
+        }
+        headerTable.setHTML(0, col++, ""); // used to store data
+        numberOfColumns = col;
+        table.setColDataIndex(numberOfColumns - 1); // Columns starts with value 0
+        table.setProfileFileBrowser(profileFileBrowser);
     }
 }

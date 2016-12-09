@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -33,8 +33,8 @@
         <c:forEach var="se" items="${sessions}" varStatus="row">
           <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
             <td width="20px">${row.index + 1}</td><td>${se.user}</td><td>${se.id}</td><td>${se.ip}</td><td>${se.host}</td>
-            <td><fmt:formatDate value="${se.creation.time}" type="both"/></td>
-            <td><fmt:formatDate value="${se.lastAccess.time}" type="both"/></td>
+            <td><u:formatDate calendar="${se.creation}"/></td>
+            <td><u:formatDate calendar="${se.lastAccess}"/></td>
           </tr>
         </c:forEach>
       </table>

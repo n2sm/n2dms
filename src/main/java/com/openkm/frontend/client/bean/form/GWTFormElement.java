@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,26 +31,31 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTFormElement implements IsSerializable {
     protected String label = "";
-
     protected String name = "";
-
     protected String width = "100px";
-
     protected String height = "25px";
 
     public String getWidth() {
+        // Ensure is not only a number
+        if (!width.endsWith("%") && !width.endsWith("px")) {
+            return (width + "px");
+        }
         return width;
     }
 
-    public void setWidth(final String width) {
+    public void setWidth(String width) {
         this.width = width;
     }
 
     public String getHeight() {
+        // Ensure is not only a number
+        if (!height.endsWith("%") && !height.endsWith("px")) {
+            return (height + "px");
+        }
         return height;
     }
 
-    public void setHeight(final String height) {
+    public void setHeight(String height) {
         this.height = height;
     }
 
@@ -58,7 +63,7 @@ public class GWTFormElement implements IsSerializable {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -66,7 +71,7 @@ public class GWTFormElement implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

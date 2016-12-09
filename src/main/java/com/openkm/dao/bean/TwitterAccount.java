@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,20 +25,16 @@ import java.io.Serializable;
 
 public class TwitterAccount implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private long id = 0;
-
     private String user = "";
-
     private String twitterUser = "";
-
     private boolean active = false;
 
     public long getId() {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -46,7 +42,7 @@ public class TwitterAccount implements Serializable {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -54,7 +50,7 @@ public class TwitterAccount implements Serializable {
         return twitterUser;
     }
 
-    public void setTwitterUser(final String twitterUser) {
+    public void setTwitterUser(String twitterUser) {
         this.twitterUser = twitterUser;
     }
 
@@ -62,13 +58,12 @@ public class TwitterAccount implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=");
         sb.append(id);

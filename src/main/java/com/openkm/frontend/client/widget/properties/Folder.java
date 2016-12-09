@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -51,25 +51,14 @@ import com.openkm.frontend.client.widget.thesaurus.ThesaurusSelectPopup;
  */
 public class Folder extends Composite {
     private ScrollPanel scrollPanel;
-
     private FlexTable tableProperties;
-
     private FlexTable tableSubscribedUsers;
-
     private FlexTable table;
-
     private GWTFolder folder;
-
     private HorizontalPanel hPanelSubscribedUsers;
-
     private HTML subcribedUsersText;
-
     private CategoryManager categoryManager;
-
     private KeywordManager keywordManager;
-
-    private boolean visible = true;
-
     private boolean remove = true;
 
     /**
@@ -78,94 +67,78 @@ public class Folder extends Composite {
     public Folder() {
         folder = new GWTFolder();
         categoryManager = new CategoryManager(CategoryManager.ORIGIN_FOLDER);
-        keywordManager = new KeywordManager(
-                ThesaurusSelectPopup.FOLDER_PROPERTIES);
+        keywordManager = new KeywordManager(ThesaurusSelectPopup.FOLDER_PROPERTIES);
         table = new FlexTable();
         tableProperties = new FlexTable();
         tableSubscribedUsers = new FlexTable();
         scrollPanel = new ScrollPanel(table);
 
-        tableProperties.setWidth("100%");
-        tableProperties
-                .setHTML(0, 0, "<b>" + Main.i18n("folder.uuid") + "</b>");
+        tableProperties.setHTML(0, 0, "<b>" + Main.i18n("folder.uuid") + "</b>");
         tableProperties.setHTML(0, 1, "");
-        tableProperties
-                .setHTML(1, 0, "<b>" + Main.i18n("folder.name") + "</b>");
+        tableProperties.setHTML(1, 0, "<b>" + Main.i18n("folder.name") + "</b>");
         tableProperties.setHTML(1, 1, "");
-        tableProperties.setHTML(2, 0, "<b>" + Main.i18n("folder.parent")
-                + "</b>");
+        tableProperties.setHTML(2, 0, "<b>" + Main.i18n("folder.parent") + "</b>");
         tableProperties.setHTML(2, 1, "");
-        tableProperties.setHTML(3, 0, "<b>" + Main.i18n("folder.created")
-                + "</b>");
+        tableProperties.setHTML(3, 0, "<b>" + Main.i18n("folder.created") + "</b>");
         tableProperties.setHTML(3, 1, "");
-        tableProperties.setHTML(4, 0, "<b>" + Main.i18n("folder.subscribed")
-                + "</b>");
+        tableProperties.setHTML(4, 0, "<b>" + Main.i18n("folder.subscribed") + "</b>");
         tableProperties.setHTML(4, 1, "");
-        tableProperties.setHTML(5, 0,
-                "<b>" + Main.i18n("folder.number.folders") + "</b>");
+        tableProperties.setHTML(5, 0, "<b>" + Main.i18n("folder.number.folders") + "</b>");
         tableProperties.setHTML(5, 1, "");
-        tableProperties.setHTML(6, 0,
-                "<b>" + Main.i18n("folder.number.documents") + "</b>");
+        tableProperties.setHTML(6, 0, "<b>" + Main.i18n("folder.number.documents") + "</b>");
         tableProperties.setHTML(6, 1, "");
-        tableProperties.setHTML(7, 0, "<b>" + Main.i18n("folder.number.mails")
-                + "</b>");
+        tableProperties.setHTML(7, 0, "<b>" + Main.i18n("folder.number.mails") + "</b>");
         tableProperties.setHTML(7, 1, "");
-        tableProperties.setHTML(8, 0, "<b>" + Main.i18n("folder.keywords")
-                + "</b>");
+        tableProperties.setHTML(8, 0, "<b>" + Main.i18n("folder.keywords") + "</b>");
         tableProperties.setHTML(8, 1, "");
         tableProperties.setHTML(9, 0, "<b>" + Main.i18n("folder.url") + "</b>");
         tableProperties.setWidget(9, 1, new HTML(""));
-        tableProperties.setHTML(10, 0, "<b>" + Main.i18n("folder.webdav")
-                + "</b>");
+        tableProperties.setHTML(10, 0, "<b>" + Main.i18n("folder.webdav") + "</b>");
         tableProperties.setWidget(10, 1, new HTML(""));
 
-        tableProperties.getCellFormatter().setVerticalAlignment(8, 0,
-                HasVerticalAlignment.ALIGN_TOP);
+        tableProperties.getCellFormatter().setVerticalAlignment(8, 0, HasAlignment.ALIGN_TOP);
 
         // Sets the tagcloud
-        keywordManager.getKeywordCloud().setWidth("350");
+        keywordManager.getKeywordCloud().setWidth("350px");
 
-        final VerticalPanel vPanel2 = new VerticalPanel();
+        VerticalPanel vPanel2 = new VerticalPanel();
 
         hPanelSubscribedUsers = new HorizontalPanel();
-        subcribedUsersText = new HTML("<b>"
-                + Main.i18n("folder.subscribed.users") + "<b>");
+        subcribedUsersText = new HTML("<b>" + Main.i18n("folder.subscribed.users") + "<b>");
 
         hPanelSubscribedUsers.add(subcribedUsersText);
         hPanelSubscribedUsers.add(new HTML("&nbsp;"));
-        hPanelSubscribedUsers.setCellVerticalAlignment(subcribedUsersText,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        hPanelSubscribedUsers.setCellVerticalAlignment(subcribedUsersText, HasAlignment.ALIGN_MIDDLE);
 
         vPanel2.add(hPanelSubscribedUsers);
         vPanel2.add(tableSubscribedUsers);
-        final HTML space2 = new HTML("");
+        HTML space2 = new HTML("");
         vPanel2.add(space2);
         vPanel2.add(keywordManager.getKeywordCloudText());
         vPanel2.add(keywordManager.getKeywordCloud());
-        final HTML space3 = new HTML("");
+        HTML space3 = new HTML("");
         vPanel2.add(space3);
         vPanel2.add(categoryManager.getPanelCategories());
         vPanel2.add(categoryManager.getSubscribedCategoriesTable());
 
-        vPanel2.setCellHeight(space2, "10");
-        vPanel2.setCellHeight(space3, "10");
+        vPanel2.setCellHeight(space2, "10px");
+        vPanel2.setCellHeight(space3, "10px");
 
         table.setWidget(0, 0, tableProperties);
         table.setHTML(0, 1, "");
         table.setWidget(0, 2, vPanel2);
 
         // The hidden column extends table to 100% width
-        final CellFormatter cellFormatter = table.getCellFormatter();
-        cellFormatter.setWidth(0, 1, "25");
-        cellFormatter
-                .setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-        cellFormatter
-                .setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
+        CellFormatter cellFormatter = table.getCellFormatter();
+        cellFormatter.setWidth(0, 1, "25px");
+        cellFormatter.setVerticalAlignment(0, 0, HasAlignment.ALIGN_TOP);
+        cellFormatter.setVerticalAlignment(0, 2, HasAlignment.ALIGN_TOP);
 
         // Sets wordWrap for al rows
         for (int i = 0; i < 11; i++) {
             setRowWordWarp(i, 0, true, tableProperties);
         }
+
         setRowWordWarp(0, 0, true, tableSubscribedUsers);
 
         tableProperties.setStyleName("okm-DisableSelect");
@@ -182,9 +155,8 @@ public class Folder extends Composite {
      * @param warp
      * @param table The table to change word wrap
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp, final FlexTable table) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp, FlexTable table) {
+        CellFormatter cellFormatter = table.getCellFormatter();
 
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, false);
@@ -203,52 +175,39 @@ public class Folder extends Composite {
      * 
      * @param folder The folder object
      */
-    public void set(final GWTFolder folder) {
-        this.folder = folder;
+    public void set(GWTFolder fld) {
+        this.folder = fld;
 
         // URL clipboard button
         String url = Main.get().workspaceUserProperties.getApplicationURL();
-        url += "?uuid="
-                + URL.encodeQueryString(URL.encodeQueryString(folder.getUuid()));
-        tableProperties.setWidget(9, 1, new HTML(
-                "<div id=\"folderurlclipboardcontainer\"></div>\n"));
-        Util.createFolderURLClipboardButton(url);
+        url += "?uuid=" + URL.encodeQueryString(URL.encodeQueryString(folder.getUuid()));
+        tableProperties.setWidget(9, 1, new HTML("<div id=\"urlClipboard\"></div>\n"));
+        Util.createClipboardButton("urlClipboard", url);
 
         // Webdav
-        String webdavUrl = Main.get().workspaceUserProperties
-                .getApplicationURL();
+        String webdavUrl = Main.get().workspaceUserProperties.getApplicationURL();
         String webdavPath = folder.getPath();
 
         // Replace only in case webdav fix is enabled
-        if (Main.get().workspaceUserProperties.getWorkspace() != null
-                && Main.get().workspaceUserProperties.getWorkspace()
-                        .isWebdavFix()) {
+        if (Main.get().workspaceUserProperties.getWorkspace() != null && Main.get().workspaceUserProperties.getWorkspace().isWebdavFix()) {
             webdavPath = webdavPath.replace("okm:", "okm_");
         }
 
         // Login case write empty folder
-        if (!webdavUrl.equals("")) {
-            // webdavPath = Util.encodePathElements(webdavPath);
-            webdavUrl = webdavUrl.substring(0, webdavUrl.lastIndexOf('/'))
-                    + "/webdav" + webdavPath;
+        if (!webdavUrl.isEmpty()) {
+            webdavPath = Util.encodePathElements(webdavPath);
+            webdavUrl = webdavUrl.substring(0, webdavUrl.lastIndexOf('/')) + "/webdav" + webdavPath;
         }
 
-        tableProperties.setWidget(10, 1, new HTML(
-                "<div id=\"folderwebdavclipboardcontainer\"></div>\n"));
-        Util.createFolderWebDavClipboardButton(webdavUrl);
+        tableProperties.setWidget(10, 1, new HTML("<div id=\"webdavClipboard\"></div>\n"));
+        Util.createClipboardButton("webdavClipboard", webdavUrl);
 
         tableProperties.setHTML(0, 1, folder.getUuid());
         tableProperties.setHTML(1, 1, folder.getName());
         tableProperties.setHTML(2, 1, folder.getParentPath());
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
         tableProperties
-                .setHTML(
-                        3,
-                        1,
-                        dtf.format(folder.getCreated()) + " "
-                                + Main.i18n("folder.by") + " "
-                                + folder.getUser().getUsername());
+                .setHTML(3, 1, dtf.format(folder.getCreated()) + " " + Main.i18n("folder.by") + " " + folder.getUser().getUsername());
 
         if (folder.isSubscribed()) {
             tableProperties.setHTML(4, 1, Main.i18n("folder.subscribed.yes"));
@@ -258,8 +217,12 @@ public class Folder extends Composite {
 
         tableProperties.setWidget(8, 1, keywordManager.getKeywordPanel());
 
-        remove = (folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE
-                && visible;
+        // Enable select
+        tableProperties.getFlexCellFormatter().setStyleName(0, 1, "okm-EnableSelect");
+        tableProperties.getFlexCellFormatter().setStyleName(1, 1, "okm-EnableSelect");
+        tableProperties.getFlexCellFormatter().setStyleName(2, 1, "okm-EnableSelect");
+
+        remove = ((folder.getPermissions() & GWTPermission.WRITE) == GWTPermission.WRITE);
 
         // Enables or disables change keywords with user permissions and document is not check-out or locked
         if (remove) {
@@ -272,15 +235,15 @@ public class Folder extends Composite {
 
         // Case categories, metadata or thesausus view is enabled file browser panel must be selected to have keywords and
         // categories tab panel enabled. Never should be asigned to categories, metadata or thesaurus folders.
-        if ((Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES || Main
-                .get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS)
-                && !Main.get().mainPanel.desktop.browser.fileBrowser
-                        .isPanelSelected()) {
+        if ((Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES
+                || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_METADATA || Main.get().mainPanel.desktop.navigator
+                .getStackIndex() == UIDesktopConstants.NAVIGATOR_THESAURUS)
+                && !Main.get().mainPanel.desktop.browser.fileBrowser.isPanelSelected()) {
             keywordManager.setVisible(false);
             categoryManager.setVisible(false);
         }
 
-        // Sets wordWrap for al rows
+        // Sets wordWrap for all rows
         for (int i = 0; i < 9; i++) {
             setRowWordWarp(i, 1, true, tableProperties);
         }
@@ -289,16 +252,13 @@ public class Folder extends Composite {
         tableSubscribedUsers.removeAllRows();
 
         // Sets the folder subscribers
-        for (final GWTUser subscriptor : folder.getSubscriptors()) {
-            tableSubscribedUsers.setHTML(tableSubscribedUsers.getRowCount(), 0,
-                    subscriptor.getUsername());
-            setRowWordWarp(tableSubscribedUsers.getRowCount() - 1, 0, true,
-                    tableSubscribedUsers);
+        for (GWTUser subscriptor : folder.getSubscriptors()) {
+            tableSubscribedUsers.setHTML(tableSubscribedUsers.getRowCount(), 0, subscriptor.getUsername());
+            setRowWordWarp(tableSubscribedUsers.getRowCount() - 1, 0, true, tableSubscribedUsers);
         }
 
         // Some preoperties only must be visible on taxonomy or trash view
-        final int actualView = Main.get().mainPanel.desktop.navigator
-                .getStackIndex();
+        int actualView = Main.get().mainPanel.desktop.navigator.getStackIndex();
         switch (actualView) {
         case UIDesktopConstants.NAVIGATOR_TAXONOMY: // Some preperties only must be visible on taxonomy or trash view
         case UIDesktopConstants.NAVIGATOR_TRASH:
@@ -333,11 +293,6 @@ public class Folder extends Composite {
             tableProperties.getRowFormatter().setVisible(7, true); // Number of e-mails
             break;
         }
-        if (actualView == UIDesktopConstants.NAVIGATOR_TRASH) {
-            tableProperties.getCellFormatter().setVisible(8, 0, false);
-        } else {
-            tableProperties.getCellFormatter().setVisible(8, 0, true);
-        }
 
         // keywords
         keywordManager.reset();
@@ -362,21 +317,21 @@ public class Folder extends Composite {
     /**
      * setNumberOfFolders
      */
-    public void setNumberOfFolders(final int num) {
+    public void setNumberOfFolders(int num) {
         tableProperties.setHTML(5, 1, "" + num);
     }
 
     /**
      * setNumberOfDocuments
      */
-    public void setNumberOfDocuments(final int num) {
+    public void setNumberOfDocuments(int num) {
         tableProperties.setHTML(6, 1, "" + num);
     }
 
     /**
      * setNumberOfMails
      */
-    public void setNumberOfMails(final int num) {
+    public void setNumberOfMails(int num) {
         tableProperties.setHTML(7, 1, "" + num);
     }
 
@@ -384,53 +339,40 @@ public class Folder extends Composite {
      * Language refresh
      */
     public void langRefresh() {
-        tableProperties
-                .setHTML(0, 0, "<b>" + Main.i18n("folder.uuid") + "</b>");
-        tableProperties
-                .setHTML(1, 0, "<b>" + Main.i18n("folder.name") + "</b>");
-        tableProperties.setHTML(2, 0, "<b>" + Main.i18n("folder.parent")
-                + "</b>");
-        tableProperties.setHTML(3, 0, "<b>" + Main.i18n("folder.created")
-                + "</b>");
-        tableProperties.setHTML(4, 0, "<b>" + Main.i18n("folder.subscribed")
-                + "</b>");
-        tableProperties.setHTML(5, 0,
-                "<b>" + Main.i18n("folder.number.folders") + "</b>");
-        tableProperties.setHTML(6, 0,
-                "<b>" + Main.i18n("folder.number.documents") + "</b>");
-        tableProperties.setHTML(7, 0, "<b>" + Main.i18n("folder.number.mails")
-                + "</b>");
-        tableProperties.setHTML(8, 0, "<b>" + Main.i18n("folder.keywords")
-                + "</b>");
+        tableProperties.setHTML(0, 0, "<b>" + Main.i18n("folder.uuid") + "</b>");
+        tableProperties.setHTML(1, 0, "<b>" + Main.i18n("folder.name") + "</b>");
+        tableProperties.setHTML(2, 0, "<b>" + Main.i18n("folder.parent") + "</b>");
+        tableProperties.setHTML(3, 0, "<b>" + Main.i18n("folder.created") + "</b>");
+        tableProperties.setHTML(4, 0, "<b>" + Main.i18n("folder.subscribed") + "</b>");
+        tableProperties.setHTML(5, 0, "<b>" + Main.i18n("folder.number.folders") + "</b>");
+        tableProperties.setHTML(6, 0, "<b>" + Main.i18n("folder.number.documents") + "</b>");
+        tableProperties.setHTML(7, 0, "<b>" + Main.i18n("folder.number.mails") + "</b>");
+        tableProperties.setHTML(8, 0, "<b>" + Main.i18n("folder.keywords") + "</b>");
         tableProperties.setHTML(9, 0, "<b>" + Main.i18n("folder.url") + "</b>");
-        tableProperties.setHTML(10, 0, "<b>" + Main.i18n("folder.webdav")
-                + "</b>");
+        tableProperties.setHTML(10, 0, "<b>" + Main.i18n("folder.webdav") + "</b>");
 
         if (folder != null) {
             if (folder.isSubscribed()) {
-                tableProperties.setHTML(4, 1,
-                        Main.i18n("folder.subscribed.yes"));
+                tableProperties.setHTML(4, 1, Main.i18n("folder.subscribed.yes"));
             } else {
-                tableProperties
-                        .setHTML(4, 1, Main.i18n("folder.subscribed.no"));
+                tableProperties.setHTML(4, 1, Main.i18n("folder.subscribed.no"));
             }
         }
 
-        subcribedUsersText.setHTML("<b>" + Main.i18n("folder.subscribed.users")
-                + "<b>");
+        subcribedUsersText.setHTML("<b>" + Main.i18n("folder.subscribed.users") + "<b>");
     }
 
     /**
      * addKeyword document
      */
-    public void addKeyword(final String keyword) {
+    public void addKeyword(String keyword) {
         keywordManager.addKeyword(keyword);
     }
 
     /**
      * removeKeyword document
      */
-    public void removeKeyword(final String keyword) {
+    public void removeKeyword(String keyword) {
         keywordManager.removeKeyword(keyword);
     }
 
@@ -439,21 +381,21 @@ public class Folder extends Composite {
      * 
      * @param ktr
      */
-    public void removeKeyword(final KeywordToRemove ktr) {
+    public void removeKeyword(KeywordToRemove ktr) {
         keywordManager.removeKeyword(ktr);
     }
 
     /**
      * addCategory document
      */
-    public void addCategory(final GWTFolder category) {
+    public void addCategory(GWTFolder category) {
         categoryManager.addCategory(category);
     }
 
     /**
      * removeCategory document
      */
-    public void removeCategory(final String UUID) {
+    public void removeCategory(String UUID) {
         categoryManager.removeCategory(UUID);
     }
 
@@ -462,7 +404,7 @@ public class Folder extends Composite {
      * 
      * @param category
      */
-    public void removeCategory(final CategoryToRemove obj) {
+    public void removeCategory(CategoryToRemove obj) {
         categoryManager.removeCategory(obj);
     }
 
@@ -471,8 +413,7 @@ public class Folder extends Composite {
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
-        this.visible = visible;
+    public void setVisibleButtons(boolean visible) {
         keywordManager.setVisible(visible);
         categoryManager.setVisible(visible);
     }
@@ -482,7 +423,7 @@ public class Folder extends Composite {
      * 
      * @param keyword The key to be removed
      */
-    public void removeKey(final String keyword) {
+    public void removeKey(String keyword) {
         keywordManager.removeKey(keyword);
     }
 
@@ -491,7 +432,7 @@ public class Folder extends Composite {
      * 
      * @param key
      */
-    public void addKeywordToPendinList(final String key) {
+    public void addKeywordToPendinList(String key) {
         keywordManager.addKeywordToPendinList(key);
     }
 
@@ -515,7 +456,7 @@ public class Folder extends Composite {
     /**
      * @param enabled
      */
-    public void setKeywordEnabled(final boolean enabled) {
+    public void setKeywordEnabled(boolean enabled) {
         keywordManager.setKeywordEnabled(enabled);
     }
 

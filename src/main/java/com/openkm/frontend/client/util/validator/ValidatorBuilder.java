@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,7 +24,7 @@ package com.openkm.frontend.client.util.validator;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -47,555 +47,312 @@ import eu.maydu.gwt.validation.client.validators.strings.EmailValidator;
  */
 public class ValidatorBuilder {
 
-    public static void addValidator(
-            final ValidationProcessor validationProcessor,
-            final FocusAction focusAction, final HorizontalPanel hPanel,
-            final String name, final GWTValidator validator, final Widget widget) {
-        final String type = validator.getType();
+    public static void addValidator(ValidationProcessor validationProcessor, FocusAction focusAction, HorizontalPanel hPanel, String name,
+            GWTValidator validator, Widget widget) {
+        String type = validator.getType();
         if (type.equals("req")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.required.field"));
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.required.field"));
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_req",
-                                new NotEmptyValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_req",
+                        new NotEmptyValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
 
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_req",
-                                new NotEmptyValidator((TextArea) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_req",
+                        new NotEmptyValidator((TextArea) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
 
             } else if (widget instanceof ListBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_req",
-                                new ListBoxValidator((ListBox) widget, "")
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(name + "_req", new ListBoxValidator((ListBox) widget, "")
+                        .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                        .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
 
             } else if (widget instanceof FlexTable) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
                 validationProcessor
                         .addValidators(
                                 name + "_req",
-                                new NotEmptyFlextTableValidator(
-                                        (FlexTable) widget)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                                new NotEmptyFlextTableValidator((FlexTable) widget).addActionForFailure(
+                                        new StyleAction("okm-validationFailedBorder")).addActionForFailure(
+                                        new ErrorMsgLabelTextAction(errorLabel)));
 
             } else if (widget instanceof FileUpload) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
                 validationProcessor
                         .addValidators(
                                 name + "_req",
-                                new NotEmptyFileUploadValidator(
-                                        (FileUpload) widget)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                                new NotEmptyFileUploadValidator((FileUpload) widget).addActionForFailure(
+                                        new StyleAction("okm-validationFailedBorder")).addActionForFailure(
+                                        new ErrorMsgLabelTextAction(errorLabel)));
 
             }
 
         } else if (type.equals("email")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.mail.required.field"));
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.mail.required.field"));
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_email",
-                                new EmailValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_email",
+                        new EmailValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
 
             }
 
         } else if (type.equals("url")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.url.required.field"));
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.url.required.field"));
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_url",
-                                new URLValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_url",
+                        new URLValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("minlen")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.minlen.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.minlen.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_minlen",
-                                new StringMinLengthValidator((TextBox) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_minlen",
+                        new StringMinLengthValidator((TextBox) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_minlen",
-                                new StringMinLengthValidator((TextArea) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_minlen",
+                        new StringMinLengthValidator((TextArea) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("maxlen")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.maxlen.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.maxlen.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_maxlen",
-                                new StringMaxLengthValidator((TextBox) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_maxlen",
+                        new StringMaxLengthValidator((TextBox) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_maxlen",
-                                new StringMaxLengthValidator((TextArea) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_maxlen",
+                        new StringMaxLengthValidator((TextArea) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("lt")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.lt.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.lt.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_lt",
-                                new StringLtValidator((TextBox) widget,
-                                        validator.getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(name + "_lt", new StringLtValidator((TextBox) widget, validator.getParameter())
+                        .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                        .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_lt",
-                                new StringLtValidator((TextArea) widget,
-                                        validator.getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(name + "_lt", new StringLtValidator((TextArea) widget, validator.getParameter())
+                        .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                        .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("gt")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.gt.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.gt.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_gt",
-                                new StringGtValidator((TextBox) widget,
-                                        validator.getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(name + "_gt", new StringGtValidator((TextBox) widget, validator.getParameter())
+                        .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                        .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_gt",
-                                new StringGtValidator((TextArea) widget,
-                                        validator.getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(name + "_gt", new StringGtValidator((TextArea) widget, validator.getParameter())
+                        .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                        .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("min")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.min.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.min.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_min",
-                                new IntegerMinValidator((TextBox) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_min",
+                        new IntegerMinValidator((TextBox) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_min",
-                                new IntegerMinValidator((TextArea) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_min",
+                        new IntegerMinValidator((TextArea) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("max")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.max.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.max.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_max",
-                                new IntegerMaxValidator((TextBox) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_max",
+                        new IntegerMaxValidator((TextBox) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_max",
-                                new IntegerMaxValidator((TextArea) widget,
-                                        Integer.parseInt(validator
-                                                .getParameter()))
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_max",
+                        new IntegerMaxValidator((TextArea) widget, Integer.parseInt(validator.getParameter()))
+                                .addActionForFailure(focusAction).addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("regexp")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.regexp.required") + " - ("
-                            + validator.getParameter() + ")");
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.regexp.required") + " - (" + validator.getParameter() + ")");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_regexp",
-                                new RegularExpressionValidator(
-                                        (TextBox) widget, validator
-                                                .getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_regexp",
+                        new RegularExpressionValidator((TextBox) widget, validator.getParameter()).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_regexp",
-                                new RegularExpressionValidator(
-                                        (TextArea) widget, validator
-                                                .getParameter())
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_regexp",
+                        new RegularExpressionValidator((TextArea) widget, validator.getParameter()).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("alpha")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.alphanumeric.required"));
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.alphanumeric.required"));
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_alpha",
-                                new AlphaNumericValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_alpha",
+                        new AlphaNumericValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_alpha",
-                                new AlphaNumericValidator((TextArea) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_alpha",
+                        new AlphaNumericValidator((TextArea) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("num")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.numeric.required"));
+            HTML space = new HTML("");
+            Label errorLabel = new Label(Main.i18n("validation.numeric.required"));
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_num",
-                                new NumericValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_num",
+                        new NumericValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_num",
-                                new NumericValidator((TextArea) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_num",
+                        new NumericValidator((TextArea) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
 
         } else if (type.equals("dec")) {
-            final HTML space = new HTML("");
-            final Label errorLabel = new Label(
-                    Main.i18n("validation.decimal.required") + " - (000"
-                            + Main.i18n("general.decimal.pattern") + "00)");
+            HTML space = new HTML("");
+            Label errorLabel =
+                    new Label(Main.i18n("validation.decimal.required") + " - (000" + Main.i18n("general.decimal.pattern") + "00)");
             errorLabel.setStyleName("okm-validationFailedText");
             hPanel.add(space);
             hPanel.add(errorLabel);
-            hPanel.setCellWidth(space, "5");
+            hPanel.setCellWidth(space, "5px");
             if (widget instanceof TextBox) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_MIDDLE);
-                validationProcessor
-                        .addValidators(
-                                name + "_dec",
-                                new DecimalValidator((TextBox) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_MIDDLE);
+                validationProcessor.addValidators(
+                        name + "_dec",
+                        new DecimalValidator((TextBox) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             } else if (widget instanceof TextArea) {
-                hPanel.setCellVerticalAlignment(errorLabel,
-                        HasVerticalAlignment.ALIGN_TOP);
-                validationProcessor
-                        .addValidators(
-                                name + "_dec",
-                                new DecimalValidator((TextArea) widget)
-                                        .addActionForFailure(focusAction)
-                                        .addActionForFailure(
-                                                new StyleAction(
-                                                        "okm-validationFailedBorder"))
-                                        .addActionForFailure(
-                                                new ErrorMsgLabelTextAction(
-                                                        errorLabel)));
+                hPanel.setCellVerticalAlignment(errorLabel, HasAlignment.ALIGN_TOP);
+                validationProcessor.addValidators(
+                        name + "_dec",
+                        new DecimalValidator((TextArea) widget).addActionForFailure(focusAction)
+                                .addActionForFailure(new StyleAction("okm-validationFailedBorder"))
+                                .addActionForFailure(new ErrorMsgLabelTextAction(errorLabel)));
             }
         }
     }

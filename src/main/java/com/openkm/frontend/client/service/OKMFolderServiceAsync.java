@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,9 +22,11 @@
 package com.openkm.frontend.client.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.openkm.frontend.client.bean.GWTFolder;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 
 /**
  * OKMFolderServiceAsync
@@ -33,16 +35,13 @@ import com.openkm.frontend.client.bean.GWTFolder;
  *
  */
 public interface OKMFolderServiceAsync {
-    public void getChilds(String fldId, boolean extraColumns,
-            AsyncCallback<List<GWTFolder>> callback);
+    public void getChilds(String fldId, boolean extraColumns, Map<String, GWTFilter> mapFilter, AsyncCallback<List<GWTFolder>> callback);
 
     public void delete(String fldPath, AsyncCallback<?> callback);
 
-    public void create(String fldId, String fldIdParent,
-            AsyncCallback<GWTFolder> callback);
+    public void create(String fldId, String fldIdParent, AsyncCallback<GWTFolder> callback);
 
-    public void rename(String fldId, String newName,
-            AsyncCallback<GWTFolder> callback);
+    public void rename(String fldId, String newName, AsyncCallback<GWTFolder> callback);
 
     public void move(String fldPath, String dstPath, AsyncCallback<?> callback);
 
@@ -54,9 +53,9 @@ public interface OKMFolderServiceAsync {
 
     public void isValid(String fldPath, AsyncCallback<Boolean> callback);
 
-    public void getCategorizedChilds(String fldId,
-            AsyncCallback<List<GWTFolder>> callback);
+    public void getCategorizedChilds(String fldId, Map<String, GWTFilter> mapFilter, AsyncCallback<List<GWTFolder>> callback);
 
-    public void getThesaurusChilds(String fldId,
-            AsyncCallback<List<GWTFolder>> callback);
+    public void getMetadataChilds(String fldId, Map<String, GWTFilter> mapFilter, AsyncCallback<List<GWTFolder>> callback);
+
+    public void getThesaurusChilds(String fldId, Map<String, GWTFilter> mapFilter, AsyncCallback<List<GWTFolder>> callback);
 }

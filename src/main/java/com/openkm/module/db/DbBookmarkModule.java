@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -24,6 +24,7 @@ package com.openkm.module.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.openkm.util.FormatUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -44,9 +45,8 @@ public class DbBookmarkModule implements BookmarkModule {
     private static Logger log = LoggerFactory.getLogger(DbBookmarkModule.class);
 
     @Override
-    public Bookmark add(final String token, final String nodePath,
-            final String name) throws AccessDeniedException,
-            PathNotFoundException, RepositoryException, DatabaseException {
+    public Bookmark add(String token, String nodePath, String name) throws AccessDeniedException, PathNotFoundException,
+            RepositoryException, DatabaseException {
         log.debug("add({}, {}, {})", new Object[] { token, nodePath, name });
         Bookmark newBookmark = null;
         Authentication auth = null, oldAuth = null;
@@ -63,10 +63,9 @@ public class DbBookmarkModule implements BookmarkModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(
-                    nodePath);
-            final String nodeType = NodeBaseDAO.getInstance()
-                    .getNodeTypeByUuid(nodeUuid);
+            String nodeUuid = NodeBaseDAO.getInstance().getUuidFromPath(nodePath);
+            String nodeType = NodeBaseDAO.getInstance().getNodeTypeByUuid(nodeUuid);
+            name = FormatUtil.sanitizeInput(name);
             newBookmark = new Bookmark();
             newBookmark.setUser(auth.getName());
             newBookmark.setName(name);
@@ -75,9 +74,8 @@ public class DbBookmarkModule implements BookmarkModule {
             BookmarkDAO.create(newBookmark);
 
             // Activity log
-            UserActivity.log(auth.getName(), "BOOKMARK_ADD", nodeUuid,
-                    nodePath, name);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "BOOKMARK_ADD", nodeUuid, nodePath, name);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -90,9 +88,7 @@ public class DbBookmarkModule implements BookmarkModule {
     }
 
     @Override
-    public Bookmark get(final String token, final int bmId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public Bookmark get(String token, int bmId) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("get({}, {})", token, bmId);
         Bookmark bookmark = null;
         Authentication auth = null, oldAuth = null;
@@ -112,9 +108,8 @@ public class DbBookmarkModule implements BookmarkModule {
             bookmark = BookmarkDAO.findByPk(bmId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "BOOKMARK_GET",
-                    Integer.toString(bmId), null, bookmark.toString());
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "BOOKMARK_GET", Integer.toString(bmId), null, bookmark.toString());
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -127,9 +122,7 @@ public class DbBookmarkModule implements BookmarkModule {
     }
 
     @Override
-    public void remove(final String token, final int bmId)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void remove(String token, int bmId) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("remove({}, {})", token, bmId);
         Authentication auth = null, oldAuth = null;
 
@@ -148,9 +141,8 @@ public class DbBookmarkModule implements BookmarkModule {
             BookmarkDAO.delete(bmId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "BOOKMARK_REMOVE",
-                    Integer.toString(bmId), null, null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "BOOKMARK_REMOVE", Integer.toString(bmId), null, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -162,9 +154,7 @@ public class DbBookmarkModule implements BookmarkModule {
     }
 
     @Override
-    public Bookmark rename(final String token, final int bmId,
-            final String newName) throws AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public Bookmark rename(String token, int bmId, String newName) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("rename({}, {}, {})", new Object[] { token, bmId, newName });
         Bookmark renamedBookmark = null;
         Authentication auth = null, oldAuth = null;
@@ -181,15 +171,15 @@ public class DbBookmarkModule implements BookmarkModule {
                 auth = PrincipalUtils.getAuthenticationByToken(token);
             }
 
-            final Bookmark bm = BookmarkDAO.findByPk(bmId);
+            newName = FormatUtil.sanitizeInput(newName);
+            Bookmark bm = BookmarkDAO.findByPk(bmId);
             bm.setName(newName);
             BookmarkDAO.update(bm);
             renamedBookmark = BookmarkDAO.findByPk(bmId);
 
             // Activity log
-            UserActivity.log(auth.getName(), "BOOKMARK_RENAME",
-                    Integer.toString(bmId), null, newName);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "BOOKMARK_RENAME", Integer.toString(bmId), null, newName);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {
@@ -202,8 +192,7 @@ public class DbBookmarkModule implements BookmarkModule {
     }
 
     @Override
-    public List<Bookmark> getAll(final String token)
-            throws RepositoryException, DatabaseException {
+    public List<Bookmark> getAll(String token) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getAll({})", token);
         List<Bookmark> ret = new ArrayList<Bookmark>();
         Authentication auth = null, oldAuth = null;
@@ -219,9 +208,8 @@ public class DbBookmarkModule implements BookmarkModule {
             ret = BookmarkDAO.findByUser(auth.getName());
 
             // Activity log
-            UserActivity.log(auth.getName(), "BOOKMARK_GET_ALL", null, null,
-                    null);
-        } catch (final DatabaseException e) {
+            UserActivity.log(auth.getName(), "BOOKMARK_GET_ALL", null, null, null);
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token != null) {

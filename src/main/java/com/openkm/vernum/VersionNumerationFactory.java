@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,9 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.openkm.core.Config;
 
 public class VersionNumerationFactory {
-    private static Logger log = LoggerFactory
-            .getLogger(VersionNumerationFactory.class);
-
+    private static Logger log = LoggerFactory.getLogger(VersionNumerationFactory.class);
     private static VersionNumerationAdapter verNumAdapter = null;
 
     /**
@@ -38,17 +36,15 @@ public class VersionNumerationFactory {
     public static VersionNumerationAdapter getVersionNumerationAdapter() {
         if (verNumAdapter == null) {
             try {
-                log.info("VersionNumerationAdapter: {}",
-                        Config.VERSION_NUMERATION_ADAPTER);
-                final Object object = Class.forName(
-                        Config.VERSION_NUMERATION_ADAPTER).newInstance();
+                log.info("VersionNumerationAdapter: {}", Config.VERSION_NUMERATION_ADAPTER);
+                Object object = Class.forName(Config.VERSION_NUMERATION_ADAPTER).newInstance();
                 verNumAdapter = (VersionNumerationAdapter) object;
-            } catch (final ClassNotFoundException e) {
-                //throw new PrincipalAdapterException(e.getMessage(), e);
-            } catch (final InstantiationException e) {
-                //throw new PrincipalAdapterException(e.getMessage(), e);
-            } catch (final IllegalAccessException e) {
-                //throw new PrincipalAdapterException(e.getMessage(), e);
+            } catch (ClassNotFoundException e) {
+                log.warn("ClassNotFoundException: " + Config.VERSION_NUMERATION_ADAPTER, e);
+            } catch (InstantiationException e) {
+                log.warn("InstantiationException: " + Config.VERSION_NUMERATION_ADAPTER, e);
+            } catch (IllegalAccessException e) {
+                log.warn("IllegalAccessException: " + Config.VERSION_NUMERATION_ADAPTER, e);
             }
         }
 

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -42,11 +42,10 @@ import com.openkm.core.MimeTypeConfig;
 
 public class WebDAVFilter implements Filter {
     private final Logger log = LoggerFactory.getLogger(WebDAVFilter.class);
-
     private ServletContext ctx = null;
 
     @Override
-    public void init(final FilterConfig fConfig) throws ServletException {
+    public void init(FilterConfig fConfig) throws ServletException {
         ctx = fConfig.getServletContext();
     }
 
@@ -55,35 +54,31 @@ public class WebDAVFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain)
-            throws IOException, ServletException {
-        log.debug("doFilter({}, {}, {})", new Object[] { request, response,
-                chain });
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        log.debug("doFilter({}, {}, {})", new Object[] { request, response, chain });
+        long begin = System.currentTimeMillis();
 
         if (Config.SYSTEM_WEBDAV_SERVER) {
             response.setContentType(MimeTypeConfig.MIME_HTML);
             handleRequest(request, response);
         } else {
             response.setContentType(MimeTypeConfig.MIME_TEXT);
-            final PrintWriter out = response.getWriter();
+            PrintWriter out = response.getWriter();
             out.println("WebDAV is disabled. Contact with your administrator.");
             out.flush();
             out.close();
         }
 
+        log.trace("doFilter.Time: {}", System.currentTimeMillis() - begin);
         log.debug("doFilter: void");
     }
 
     /**
      * Handle WebDAV requests.
      */
-    private void handleRequest(final ServletRequest request,
-            final ServletResponse response) throws IOException,
-            ServletException {
+    private void handleRequest(ServletRequest request, ServletResponse response) throws IOException, ServletException {
         try {
-            WebDavService.get().handleRequest((HttpServletRequest) request,
-                    (HttpServletResponse) response, ctx);
+            WebDavService.get().handleRequest((HttpServletRequest) request, (HttpServletResponse) response, ctx);
         } finally {
             response.getOutputStream().flush();
             response.flushBuffer();

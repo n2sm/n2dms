@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ page import="com.openkm.dao.bean.Css" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -43,7 +43,7 @@
   <title>Edit css</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -127,8 +127,12 @@
             </tr>
             <tr>
               <td colspan="2" align="right">
-                <input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-                <input type="submit" value="Send"/>
+                <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+                <c:choose>
+                  <c:when test="${action == 'create'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                  <c:when test="${action == 'edit'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                  <c:when test="${action == 'delete'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+                </c:choose>
               </td>
             </tr>
           </table>

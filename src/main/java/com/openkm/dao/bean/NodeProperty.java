@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -37,8 +37,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
-@Table(name = "OKM_NODE_PROPERTY", uniqueConstraints = { @UniqueConstraint(name = "IDX_NOD_PROP_NODGRPNAM", columnNames = {
-        "NPG_NODE", "NPG_GROUP", "NPG_NAME" }) })
+@Table(name = "OKM_NODE_PROPERTY", uniqueConstraints = { @UniqueConstraint(name = "IDX_NOD_PROP_NODGRPNAM", columnNames = { "NPG_NODE",
+        "NPG_GROUP", "NPG_NAME" }) })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NodeProperty implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -65,7 +65,7 @@ public class NodeProperty implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -73,7 +73,7 @@ public class NodeProperty implements Serializable {
         return group;
     }
 
-    public void setGroup(final String group) {
+    public void setGroup(String group) {
         this.group = group;
     }
 
@@ -81,7 +81,7 @@ public class NodeProperty implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -89,7 +89,7 @@ public class NodeProperty implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -97,13 +97,12 @@ public class NodeProperty implements Serializable {
         return node;
     }
 
-    public void setNode(final NodeBase node) {
+    public void setNode(NodeBase node) {
         this.node = node;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", node=").append(node == null ? null : node.getUuid());

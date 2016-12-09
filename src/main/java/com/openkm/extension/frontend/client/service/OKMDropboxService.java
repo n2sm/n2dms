@@ -26,19 +26,15 @@ public interface OKMDropboxService extends RemoteService {
 
     public void exportFolder(String path, String uuid) throws OKMException;
 
-    public List<GWTDropboxEntry> search(String query, String category)
-            throws OKMException;
+    public List<GWTDropboxEntry> search(String query, String category) throws OKMException;
 
-    public void importDocument(GWTDropboxEntry gwtDropboxEntry, String path)
-            throws OKMException;
+    public void importDocument(GWTDropboxEntry gwtDropboxEntry, String path) throws OKMException;
 
-    public void importFolder(GWTDropboxEntry gwtDropboxEntry, String path)
-            throws OKMException;
+    public void importFolder(GWTDropboxEntry gwtDropboxEntry, String path) throws OKMException;
 
     public GWTDropboxEntry getRootDropbox() throws OKMException;
 
-    public List<GWTDropboxEntry> getChildren(String parentPath)
-            throws OKMException;
+    public List<GWTDropboxEntry> getChildren(String parentPath) throws OKMException;
 
     public List<GWTDropboxStatusListener> statusListener() throws OKMException;
 }

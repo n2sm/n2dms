@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -8,7 +8,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PUomOSE.  See the
@@ -36,7 +36,6 @@ import com.openkm.dao.bean.Omr;
 
 public class OmrDAO {
     private static Logger log = LoggerFactory.getLogger(OmrDAO.class);
-
     private static OmrDAO single = new OmrDAO();
 
     private OmrDAO() {
@@ -49,7 +48,7 @@ public class OmrDAO {
     /**
      * Create
      */
-    public long create(final Omr om) throws DatabaseException {
+    public long create(Omr om) throws DatabaseException {
         log.debug("create({})", om);
         Session session = null;
         Transaction tx = null;
@@ -57,11 +56,11 @@ public class OmrDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Long id = (Long) session.save(om);
+            Long id = (Long) session.save(om);
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -72,13 +71,12 @@ public class OmrDAO {
     /**
      * Update template
      */
-    public void updateTemplate(final Omr om) throws DatabaseException {
+    public void updateTemplate(Omr om) throws DatabaseException {
         log.debug("updateTemplate({})", om);
-        final String qs = "select om.templateFileContent, om.templateFileName, templateFileMime, "
-                + "om.ascFileContent, om.ascFileName, ascFileMime, "
-                + "om.configFileContent, om.configFileName, configFileMime, "
-                + "om.fieldsFileContent, om.fieldsFileName, fieldsFileMime "
-                + "from Omr om where om.id=:id";
+        String qs =
+                "select om.templateFileContent, om.templateFileName, templateFileMime, "
+                        + "om.ascFileContent, om.ascFileName, ascFileMime, " + "om.configFileContent, om.configFileName, configFileMime, "
+                        + "om.fieldsFileContent, om.fieldsFileName, fieldsFileMime " + "from Omr om where om.id=:id";
         Session session = null;
         Transaction tx = null;
 
@@ -86,33 +84,29 @@ public class OmrDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setParameter("id", om.getId());
-            final Object[] data = (Object[]) q.setMaxResults(1).uniqueResult();
+            Object[] data = (Object[]) q.setMaxResults(1).uniqueResult();
 
-            if (om.getTemplateFileContent() == null
-                    || om.getTemplateFileContent().length == 0) {
+            if (om.getTemplateFileContent() == null || om.getTemplateFileContent().length == 0) {
                 om.setTemplateFilContent((byte[]) data[0]);
                 om.setTemplateFileName((String) data[1]);
                 om.setTemplateFileMime((String) data[2]);
             }
 
-            if (om.getAscFileContent() == null
-                    || om.getAscFileContent().length == 0) {
+            if (om.getAscFileContent() == null || om.getAscFileContent().length == 0) {
                 om.setAscFileContent((byte[]) data[3]);
                 om.setAscFileName((String) data[4]);
                 om.setAscFileMime((String) data[5]);
             }
 
-            if (om.getConfigFileContent() == null
-                    || om.getConfigFileContent().length == 0) {
+            if (om.getConfigFileContent() == null || om.getConfigFileContent().length == 0) {
                 om.setConfigFileContent((byte[]) data[6]);
                 om.setConfigFileName((String) data[7]);
                 om.setConfigFileMime((String) data[8]);
             }
 
-            if (om.getFieldsFileContent() == null
-                    || om.getFieldsFileContent().length == 0) {
+            if (om.getFieldsFileContent() == null || om.getFieldsFileContent().length == 0) {
                 om.setFieldsFileContent((byte[]) data[9]);
                 om.setFieldsFileName((String) data[10]);
                 om.setFieldsFileMime((String) data[11]);
@@ -120,7 +114,7 @@ public class OmrDAO {
 
             session.update(om);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -133,7 +127,7 @@ public class OmrDAO {
     /**
      * Update 
      */
-    public void update(final Omr om) throws DatabaseException {
+    public void update(Omr om) throws DatabaseException {
         log.debug("update({})", om);
         Session session = null;
         Transaction tx = null;
@@ -143,7 +137,7 @@ public class OmrDAO {
             tx = session.beginTransaction();
             session.update(om);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -156,7 +150,7 @@ public class OmrDAO {
     /**
      * Delete
      */
-    public void delete(final long omId) throws DatabaseException {
+    public void delete(long omId) throws DatabaseException {
         log.debug("delete({})", omId);
         Session session = null;
         Transaction tx = null;
@@ -164,10 +158,10 @@ public class OmrDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Omr om = (Omr) session.load(Omr.class, omId);
+            Omr om = (Omr) session.load(Omr.class, omId);
             session.delete(om);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -180,20 +174,20 @@ public class OmrDAO {
     /**
      * Find by pk
      */
-    public Omr findByPk(final long omId) throws DatabaseException {
+    public Omr findByPk(long omId) throws DatabaseException {
         log.debug("findByPk({})", omId);
-        final String qs = "from Omr om where om.id=:id";
+        String qs = "from Omr om where om.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", omId);
-            final Omr ret = (Omr) q.setMaxResults(1).uniqueResult();
+            Omr ret = (Omr) q.setMaxResults(1).uniqueResult();
             initializeOMR(ret);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -206,17 +200,17 @@ public class OmrDAO {
     @SuppressWarnings("unchecked")
     public List<Omr> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from Omr om order by om.name";
+        String qs = "from Omr om order by om.name";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<Omr> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<Omr> ret = q.list();
             initializeOMR(ret);
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -229,20 +223,20 @@ public class OmrDAO {
     @SuppressWarnings("unchecked")
     public List<Omr> findAllActive() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from Omr om where om.active=:active order by om.name";
+        String qs = "from Omr om where om.active=:active order by om.name";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs).setCacheable(true);
+            Query q = session.createQuery(qs).setCacheable(true);
             q.setBoolean("active", true);
-            final List<Omr> ret = q.list();
+            List<Omr> ret = q.list();
             HibernateUtil.commit(tx);
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -254,18 +248,18 @@ public class OmrDAO {
      * getProperties
      */
     @SuppressWarnings("unchecked")
-    public List<String> getProperties(final long omId) throws DatabaseException {
+    public List<String> getProperties(long omId) throws DatabaseException {
         log.debug("getProperties({})", omId);
-        final String qs = "select om.properties from Omr om where om.id=:id";
+        String qs = "select om.properties from Omr om where om.id=:id";
         Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", omId);
-            final List<String> ret = q.list();
+            List<String> ret = q.list();
             log.debug("getProperties: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -275,8 +269,8 @@ public class OmrDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initializeOMR(final List<Omr> omrList) {
-        for (final Omr oTemplate : omrList) {
+    private void initializeOMR(List<Omr> omrList) {
+        for (Omr oTemplate : omrList) {
             initializeOMR(oTemplate);
         }
     }
@@ -284,7 +278,7 @@ public class OmrDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initializeOMR(final Omr omr) {
+    private void initializeOMR(Omr omr) {
         if (omr != null) {
             Hibernate.initialize(omr);
             Hibernate.initialize(omr.getProperties());

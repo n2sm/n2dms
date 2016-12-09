@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -52,8 +52,7 @@ public class AudioTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(AudioTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(AudioTextExtractor.class);
 
     /**
      * Creates a new <code>AudioTextExtractor</code> instance.
@@ -67,10 +66,8 @@ public class AudioTextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
     @SuppressWarnings("unchecked")
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         File tmpFile = null;
 
         try {
@@ -80,26 +77,26 @@ public class AudioTextExtractor extends AbstractTextExtractor {
                 tmpFile = File.createTempFile("okm", ".ogg");
             }
 
-            final FileOutputStream fos = new FileOutputStream(tmpFile);
+            FileOutputStream fos = new FileOutputStream(tmpFile);
             IOUtils.copy(stream, fos);
             fos.close();
 
-            final StringBuffer sb = new StringBuffer();
-            final AudioFile af = AudioFileIO.read(tmpFile);
-            final Tag tag = af.getTag();
+            StringBuffer sb = new StringBuffer();
+            AudioFile af = AudioFileIO.read(tmpFile);
+            Tag tag = af.getTag();
 
-            for (final Iterator<Object> it = tag.getFields(); it.hasNext();) {
-                final Object o = it.next();
+            for (Iterator<Object> it = tag.getFields(); it.hasNext();) {
+                Object o = it.next();
 
                 if (o instanceof TextId3Frame) {
-                    final TextId3Frame tf = (TextId3Frame) o;
+                    TextId3Frame tf = (TextId3Frame) o;
                     sb.append("[ID3] ");
                     sb.append(tf.getId());
                     sb.append("=");
                     sb.append(tf.getContent());
                     sb.append("\n");
                 } else if (o instanceof OggTagField) {
-                    final OggTagField tf = (OggTagField) o;
+                    OggTagField tf = (OggTagField) o;
                     sb.append("[OGG] ");
                     sb.append(tf.getId());
                     sb.append("=");
@@ -110,7 +107,7 @@ public class AudioTextExtractor extends AbstractTextExtractor {
 
             log.debug("TEXT: " + sb.toString());
             return new StringReader(sb.toString());
-        } catch (final CannotReadException e) {
+        } catch (CannotReadException e) {
             log.warn("Failed to extract tag information", e);
             return new StringReader("");
         } finally {

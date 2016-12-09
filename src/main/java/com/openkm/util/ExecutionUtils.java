@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -46,7 +46,6 @@ import com.openkm.util.cl.JarClassLoader;
 
 public class ExecutionUtils {
     private static Logger log = LoggerFactory.getLogger(ExecutionUtils.class);
-
     private static ExecutionUtils single = new ExecutionUtils();
 
     private ExecutionUtils() {
@@ -63,17 +62,17 @@ public class ExecutionUtils {
      *         1 - StdOut
      *         2 - StdErr
      */
-    public static Object[] runScript(final File script) throws EvalError {
-        final Object[] ret = new Object[3];
+    public static Object[] runScript(File script) throws EvalError {
+        Object[] ret = new Object[3];
         FileReader fr = null;
 
         try {
             if (script.exists() && script.canRead()) {
-                final ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
-                final PrintStream out = new PrintStream(baosOut);
-                final ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
-                final PrintStream err = new PrintStream(baosErr);
-                final Interpreter i = new Interpreter(null, out, err, false);
+                ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
+                PrintStream out = new PrintStream(baosOut);
+                ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
+                PrintStream err = new PrintStream(baosErr);
+                Interpreter i = new Interpreter(null, out, err, false);
                 fr = new FileReader(script);
 
                 ret[0] = i.eval(fr);
@@ -85,7 +84,7 @@ public class ExecutionUtils {
             } else {
                 log.warn("Unable to read script: {}", script.getPath());
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.warn(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(fr);
@@ -102,13 +101,13 @@ public class ExecutionUtils {
      *         1 - StdOut
      *         2 - StdErr
      */
-    public static Object[] runScript(final String script) throws EvalError {
-        final Object[] ret = new Object[3];
-        final ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(baosOut);
-        final ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
-        final PrintStream err = new PrintStream(baosErr);
-        final Interpreter i = new Interpreter(null, out, err, false);
+    public static Object[] runScript(String script) throws EvalError {
+        Object[] ret = new Object[3];
+        ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baosOut);
+        ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
+        PrintStream err = new PrintStream(baosErr);
+        Interpreter i = new Interpreter(null, out, err, false);
 
         ret[0] = i.eval(script);
 
@@ -125,27 +124,25 @@ public class ExecutionUtils {
     /**
      * Execute jar from file
      */
-    public Object runJar(final File jar) {
+    public Object runJar(File jar) {
         Object ret = null;
 
         try {
             if (jar.exists() && jar.canRead()) {
-                final ClassLoader cl = getClass().getClassLoader();
-                final JarClassLoader jcl = new JarClassLoader(jar.toURI()
-                        .toURL(), cl);
-                final String mainClass = jcl.getMainClassName();
+                ClassLoader cl = getClass().getClassLoader();
+                JarClassLoader jcl = new JarClassLoader(jar.toURI().toURL(), cl);
+                String mainClass = jcl.getMainClassName();
 
                 if (mainClass != null) {
-                    final Class<?> c = jcl.loadClass(mainClass);
-                    ret = ClassLoaderUtils.invokeMainMethodFromClass(c,
-                            new String[] {});
+                    Class<?> c = jcl.loadClass(mainClass);
+                    ret = ClassLoaderUtils.invokeMainMethodFromClass(c, new String[] {});
                 } else {
                     log.error("Main class not defined at: {}", jar.getPath());
                 }
             } else {
                 log.warn("Unable to read jar: {}", jar.getPath());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -156,18 +153,17 @@ public class ExecutionUtils {
     /**
      * Execute jar from file
      */
-    public Object runJar(final File jar, final String methodName) {
+    public Object runJar(File jar, String methodName) {
         Object ret = null;
 
         try {
             if (jar.exists() && jar.canRead()) {
-                final ClassLoader cl = getClass().getClassLoader();
-                final JarClassLoader jcl = new JarClassLoader(jar.toURI()
-                        .toURL(), cl);
-                final String mainClass = jcl.getMainClassName();
+                ClassLoader cl = getClass().getClassLoader();
+                JarClassLoader jcl = new JarClassLoader(jar.toURI().toURL(), cl);
+                String mainClass = jcl.getMainClassName();
 
                 if (mainClass != null) {
-                    final Class<?> c = jcl.loadClass(mainClass);
+                    Class<?> c = jcl.loadClass(mainClass);
                     ret = ClassLoaderUtils.invokeMethodFromClass(c, methodName);
                 } else {
                     log.error("Main class not defined at: {}", jar.getPath());
@@ -175,7 +171,7 @@ public class ExecutionUtils {
             } else {
                 log.warn("Unable to read jar: {}", jar.getPath());
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -186,22 +182,21 @@ public class ExecutionUtils {
     /**
      * Execute jar
      */
-    public Object runJar(final byte[] jar) {
+    public Object runJar(byte[] jar) {
         Object ret = null;
 
         try {
-            final ClassLoader cl = getClass().getClassLoader();
-            final BinaryClassLoader jcl = new BinaryClassLoader(jar, cl);
-            final String mainClass = jcl.getMainClassName();
+            ClassLoader cl = getClass().getClassLoader();
+            BinaryClassLoader jcl = new BinaryClassLoader(jar, cl);
+            String mainClass = jcl.getMainClassName();
 
             if (mainClass != null) {
-                final Class<?> c = jcl.loadClass(mainClass);
-                ret = ClassLoaderUtils.invokeMainMethodFromClass(c,
-                        new String[] {});
+                Class<?> c = jcl.loadClass(mainClass);
+                ret = ClassLoaderUtils.invokeMainMethodFromClass(c, new String[] {});
             } else {
                 log.error("Main class not defined at jar");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -212,21 +207,21 @@ public class ExecutionUtils {
     /**
      * Execute jar
      */
-    public Object runJar(final byte[] jar, final String methodName) {
+    public Object runJar(byte[] jar, String methodName) {
         Object ret = null;
 
         try {
-            final ClassLoader cl = getClass().getClassLoader();
-            final BinaryClassLoader jcl = new BinaryClassLoader(jar, cl);
-            final String mainClass = jcl.getMainClassName();
+            ClassLoader cl = getClass().getClassLoader();
+            BinaryClassLoader jcl = new BinaryClassLoader(jar, cl);
+            String mainClass = jcl.getMainClassName();
 
             if (mainClass != null) {
-                final Class<?> c = jcl.loadClass(mainClass);
+                Class<?> c = jcl.loadClass(mainClass);
                 ret = ClassLoaderUtils.invokeMethodFromClass(c, methodName);
             } else {
                 log.error("Main class not defined at jar");
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -237,36 +232,31 @@ public class ExecutionUtils {
     /**
      * Execute command line
      */
-    public static ExecutionResult runCmd(final String cmd)
-            throws SecurityException, InterruptedException, IOException {
+    public static ExecutionResult runCmd(String cmd) throws SecurityException, InterruptedException, IOException {
         log.debug("runCmd({})", cmd);
-        return runCmdImpl(cmd.split(" "),
-                TimeUnit.MINUTES.toMillis(Config.SYSTEM_EXECUTION_TIMEOUT));
+        return runCmdImpl(cmd.split(" "), TimeUnit.MINUTES.toMillis(Config.SYSTEM_EXECUTION_TIMEOUT));
     }
 
     /**
      * Execute command line
      */
-    public static ExecutionResult runCmd(final String cmd[])
-            throws SecurityException, InterruptedException, IOException {
+    public static ExecutionResult runCmd(String cmd[]) throws SecurityException, InterruptedException, IOException {
         log.debug("runCmd({})", Arrays.toString(cmd));
-        return runCmdImpl(cmd,
-                TimeUnit.MINUTES.toMillis(Config.SYSTEM_EXECUTION_TIMEOUT));
+        return runCmdImpl(cmd, TimeUnit.MINUTES.toMillis(Config.SYSTEM_EXECUTION_TIMEOUT));
     }
 
     /**
      * Execute command line: implementation
      */
-    private static ExecutionResult runCmdImpl(final String cmd[],
-            final long timeout) throws SecurityException, InterruptedException,
+    private static ExecutionResult runCmdImpl(final String cmd[], final long timeout) throws SecurityException, InterruptedException,
             IOException {
         log.debug("runCmdImpl({}, {})", Arrays.toString(cmd), timeout);
-        final ExecutionResult ret = new ExecutionResult();
-        final long start = System.currentTimeMillis();
+        ExecutionResult ret = new ExecutionResult();
+        long start = System.currentTimeMillis();
         final ProcessBuilder pb = new ProcessBuilder(cmd);
         final Process process = pb.start();
 
-        final Timer t = new Timer("Process Execution Timeout");
+        Timer t = new Timer("Process Execution Timeout");
         t.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -279,7 +269,7 @@ public class ExecutionUtils {
         try {
             ret.setStdout(IOUtils.toString(process.getInputStream()));
             ret.setStderr(IOUtils.toString(process.getErrorStream()));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             // Ignore
         }
 
@@ -297,8 +287,7 @@ public class ExecutionUtils {
         }
 
         process.destroy();
-        log.debug("Elapse time: {}",
-                FormatUtil.formatSeconds(System.currentTimeMillis() - start));
+        log.debug("Elapse time: {}", FormatUtil.formatSeconds(System.currentTimeMillis() - start));
         return ret;
     }
 }

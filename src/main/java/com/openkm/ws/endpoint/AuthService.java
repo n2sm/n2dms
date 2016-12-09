@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -21,6 +21,7 @@
 
 package com.openkm.ws.endpoint;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,42 +47,37 @@ public class AuthService {
     private static Logger log = LoggerFactory.getLogger(AuthService.class);
 
     @WebMethod
-    public String login(@WebParam(name = "user") final String user,
-            @WebParam(name = "password") final String password)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public String login(@WebParam(name = "user") String user, @WebParam(name = "password") String password) throws AccessDeniedException,
+            RepositoryException, DatabaseException {
         log.debug("login({}, {})", user, password);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final String token = am.login(user, password);
+        AuthModule am = ModuleManager.getAuthModule();
+        String token = am.login(user, password);
         log.debug("login: {}", token);
         return token;
     }
 
     @WebMethod
-    public void logout(@WebParam(name = "token") final String token)
-            throws RepositoryException, DatabaseException {
+    public void logout(@WebParam(name = "token") String token) throws RepositoryException, DatabaseException {
         log.debug("logout({})", token);
-        final AuthModule am = ModuleManager.getAuthModule();
+        AuthModule am = ModuleManager.getAuthModule();
         am.logout(token);
         log.debug("logout: void");
     }
 
     @WebMethod
-    public IntegerPair[] getGrantedRoles(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public IntegerPair[] getGrantedRoles(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getGrantedRoles({}, {})", token, nodePath);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final Map<String, Integer> hm = am.getGrantedRoles(token, nodePath);
-        final Set<String> keys = hm.keySet();
-        final IntegerPair[] result = new IntegerPair[keys.size()];
+        AuthModule am = ModuleManager.getAuthModule();
+        Map<String, Integer> hm = am.getGrantedRoles(token, nodePath);
+        Set<String> keys = hm.keySet();
+        IntegerPair[] result = new IntegerPair[keys.size()];
         int i = 0;
 
         // Marshall HashMap
-        for (final String key : keys) {
-            final IntegerPair p = new IntegerPair();
+        for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+            String key = it.next();
+            IntegerPair p = new IntegerPair();
             p.setKey(key);
             p.setValue(hm.get(key));
             result[i++] = p;
@@ -92,21 +88,19 @@ public class AuthService {
     }
 
     @WebMethod
-    public IntegerPair[] getGrantedUsers(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
+    public IntegerPair[] getGrantedUsers(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath)
+            throws PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("getGrantedUsers({}, {})", token, nodePath);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final Map<String, Integer> hm = am.getGrantedUsers(token, nodePath);
-        final Set<String> keys = hm.keySet();
-        final IntegerPair[] result = new IntegerPair[keys.size()];
+        AuthModule am = ModuleManager.getAuthModule();
+        Map<String, Integer> hm = am.getGrantedUsers(token, nodePath);
+        Set<String> keys = hm.keySet();
+        IntegerPair[] result = new IntegerPair[keys.size()];
         int i = 0;
 
         // Marshall HashMap
-        for (final String key : keys) {
-            final IntegerPair p = new IntegerPair();
+        for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+            String key = it.next();
+            IntegerPair p = new IntegerPair();
             p.setKey(key);
             p.setValue(hm.get(key));
             result[i++] = p;
@@ -117,131 +111,105 @@ public class AuthService {
     }
 
     @WebMethod
-    public String[] getRoles(@WebParam(name = "token") final String token)
-            throws PrincipalAdapterException {
+    public String[] getRoles(@WebParam(name = "token") String token) throws PrincipalAdapterException {
         log.debug("getRoles({})", token);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final List<String> col = am.getRoles(token);
-        final String[] result = col.toArray(new String[col.size()]);
+        AuthModule am = ModuleManager.getAuthModule();
+        List<String> col = am.getRoles(token);
+        String[] result = col.toArray(new String[col.size()]);
         log.debug("getRoles: {}", result);
         return result;
     }
 
     @WebMethod
-    public String[] getUsers(@WebParam(name = "token") final String token)
-            throws PrincipalAdapterException {
+    public String[] getUsers(@WebParam(name = "token") String token) throws PrincipalAdapterException {
         log.debug("getUsers({})", token);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final List<String> col = am.getUsers(token);
-        final String[] result = col.toArray(new String[col.size()]);
+        AuthModule am = ModuleManager.getAuthModule();
+        List<String> col = am.getUsers(token);
+        String[] result = col.toArray(new String[col.size()]);
         log.debug("getUsers: {]", result);
         return result;
     }
 
     @WebMethod
-    public void grantRole(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "role") final String role,
-            @WebParam(name = "permissions") final int permissions,
-            @WebParam(name = "recursive") final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("grantRole({}, {}, {}, {}, {})", new Object[] { token,
-                nodePath, role, permissions, recursive });
-        final AuthModule am = ModuleManager.getAuthModule();
+    public void grantRole(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "role") String role, @WebParam(name = "permissions") int permissions,
+            @WebParam(name = "recursive") boolean recursive) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("grantRole({}, {}, {}, {}, {})", new Object[] { token, nodePath, role, permissions, recursive });
+        AuthModule am = ModuleManager.getAuthModule();
         am.grantRole(token, nodePath, role, permissions, recursive);
         log.debug("grantRole: void");
     }
 
     @WebMethod
-    public void grantUser(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "user") final String user,
-            @WebParam(name = "permissions") final int permissions,
-            @WebParam(name = "recursive") final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("grantUser({}, {}, {}, {}, {})", new Object[] { token,
-                nodePath, user, permissions, recursive });
-        final AuthModule am = ModuleManager.getAuthModule();
+    public void grantUser(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "user") String user, @WebParam(name = "permissions") int permissions,
+            @WebParam(name = "recursive") boolean recursive) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("grantUser({}, {}, {}, {}, {})", new Object[] { token, nodePath, user, permissions, recursive });
+        AuthModule am = ModuleManager.getAuthModule();
         am.grantUser(token, nodePath, user, permissions, recursive);
         log.debug("grantUser: void");
     }
 
     @WebMethod
-    public void revokeRole(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "user") final String user,
-            @WebParam(name = "permissions") final int permissions,
-            @WebParam(name = "recursive") final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("revokeRole({}, {}, {}, {}, {})", new Object[] { token,
-                nodePath, user, permissions, recursive });
-        final AuthModule am = ModuleManager.getAuthModule();
-        am.revokeRole(token, nodePath, user, permissions, recursive);
+    public void revokeRole(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "role") String role, @WebParam(name = "permissions") int permissions,
+            @WebParam(name = "recursive") boolean recursive) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("revokeRole({}, {}, {}, {}, {})", new Object[] { token, nodePath, role, permissions, recursive });
+        AuthModule am = ModuleManager.getAuthModule();
+        am.revokeRole(token, nodePath, role, permissions, recursive);
         log.debug("revokeRole: void");
     }
 
     @WebMethod
-    public void revokeUser(@WebParam(name = "token") final String token,
-            @WebParam(name = "nodePath") final String nodePath,
-            @WebParam(name = "user") final String user,
-            @WebParam(name = "permissions") final int permissions,
-            @WebParam(name = "recursive") final boolean recursive)
-            throws PathNotFoundException, AccessDeniedException,
-            RepositoryException, DatabaseException {
-        log.debug("revokeUser({}, {}, {}, {}, {})", new Object[] { token,
-                nodePath, user, permissions, recursive });
-        final AuthModule am = ModuleManager.getAuthModule();
+    public void revokeUser(@WebParam(name = "token") String token, @WebParam(name = "nodePath") String nodePath,
+            @WebParam(name = "user") String user, @WebParam(name = "permissions") int permissions,
+            @WebParam(name = "recursive") boolean recursive) throws PathNotFoundException, AccessDeniedException, RepositoryException,
+            DatabaseException {
+        log.debug("revokeUser({}, {}, {}, {}, {})", new Object[] { token, nodePath, user, permissions, recursive });
+        AuthModule am = ModuleManager.getAuthModule();
         am.revokeUser(token, nodePath, user, permissions, recursive);
         log.debug("revokeUser: void");
     }
 
     @WebMethod
-    public String[] getUsersByRole(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "role") final String role)
+    public String[] getUsersByRole(@WebParam(name = "token") String token, @WebParam(name = "role") String role)
             throws PrincipalAdapterException {
         log.debug("getUsersByRole({}, {})", token, role);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final List<String> col = am.getUsersByRole(token, role);
-        final String[] result = col.toArray(new String[col.size()]);
+        AuthModule am = ModuleManager.getAuthModule();
+        List<String> col = am.getUsersByRole(token, role);
+        String[] result = col.toArray(new String[col.size()]);
         log.debug("getUsersByRole: {}", result);
         return result;
     }
 
     @WebMethod
-    public String[] getRolesByUser(
-            @WebParam(name = "token") final String token,
-            @WebParam(name = "user") final String user)
+    public String[] getRolesByUser(@WebParam(name = "token") String token, @WebParam(name = "user") String user)
             throws PrincipalAdapterException {
         log.debug("getRolesByUser({}, {})", token, user);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final List<String> col = am.getRolesByUser(token, user);
-        final String[] result = col.toArray(new String[col.size()]);
+        AuthModule am = ModuleManager.getAuthModule();
+        List<String> col = am.getRolesByUser(token, user);
+        String[] result = col.toArray(new String[col.size()]);
         log.debug("getRolesByUser: {}", result);
         return result;
     }
 
     @WebMethod
-    public String getMail(@WebParam(name = "token") final String token,
-            @WebParam(name = "user") final String user)
-            throws PrincipalAdapterException {
+    public String getMail(@WebParam(name = "token") String token, @WebParam(name = "user") String user) throws PrincipalAdapterException {
         log.debug("getMail({}, {})", token, user);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final String ret = am.getMail(token, user);
+        AuthModule am = ModuleManager.getAuthModule();
+        String ret = am.getMail(token, user);
         log.debug("getMail: {}", ret);
         return ret;
     }
 
     @WebMethod
-    public String getName(@WebParam(name = "token") final String token,
-            @WebParam(name = "user") final String user)
-            throws PrincipalAdapterException {
+    public String getName(@WebParam(name = "token") String token, @WebParam(name = "user") String user) throws PrincipalAdapterException {
         log.debug("getName({}, {})", token, user);
-        final AuthModule am = ModuleManager.getAuthModule();
-        final String ret = am.getName(token, user);
+        AuthModule am = ModuleManager.getAuthModule();
+        String ret = am.getName(token, user);
         log.debug("getName: {}", ret);
         return ret;
     }

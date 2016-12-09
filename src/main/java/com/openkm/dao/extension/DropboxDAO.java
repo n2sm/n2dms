@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -40,7 +40,6 @@ import com.openkm.dao.bean.extension.DropboxToken;
  */
 public class DropboxDAO {
     private static Logger log = LoggerFactory.getLogger(DropboxDAO.class);
-
     private static DropboxDAO single = new DropboxDAO();
 
     private DropboxDAO() {
@@ -53,7 +52,7 @@ public class DropboxDAO {
     /**
      * Create
      */
-    public void create(final DropboxToken dbt) throws DatabaseException {
+    public void create(DropboxToken dbt) throws DatabaseException {
         log.debug("create({})", dbt);
         Session session = null;
         Transaction tx = null;
@@ -64,7 +63,7 @@ public class DropboxDAO {
             session.save(dbt);
             HibernateUtil.commit(tx);
             log.debug("create: {}");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -75,23 +74,22 @@ public class DropboxDAO {
     /**
      * Find by pk
      */
-    public DropboxToken findByPk(final String usrId) throws DatabaseException {
+    public DropboxToken findByPk(String usrId) throws DatabaseException {
         log.debug("findByPk({})", usrId);
-        final String qs = "from DropboxToken dbt where dbt.user=:user";
+        String qs = "from DropboxToken dbt where dbt.user=:user";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", usrId);
-            final DropboxToken ret = (DropboxToken) q.setMaxResults(1)
-                    .uniqueResult();
+            DropboxToken ret = (DropboxToken) q.setMaxResults(1).uniqueResult();
             HibernateUtil.commit(tx);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

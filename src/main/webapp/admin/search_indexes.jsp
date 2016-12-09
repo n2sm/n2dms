@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
@@ -13,7 +13,7 @@
   <title>Search indexes</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -35,8 +35,8 @@
             <td colspan="5" align="right">
               <form action="ListIndexes">
                 <input type="hidden" name="action" value="search"/>
-                <input type="text" name="exp" value="${exp}" size="45"/>
-                <input type="submit" value="Search"/>
+                <input type="text" name="exp" value="${exp}" style="width: 80%"/>
+                <input type="submit" value="Search" class="searchButton"/>
               </form>
             </td>
           </tr>

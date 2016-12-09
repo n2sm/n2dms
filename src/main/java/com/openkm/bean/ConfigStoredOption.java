@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -25,20 +25,16 @@ import java.io.Serializable;
 
 public class ConfigStoredOption implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String SELECTED = "*";
-
     private String name;
-
     private String value;
-
     private boolean selected;
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -46,7 +42,7 @@ public class ConfigStoredOption implements Serializable {
         return value;
     }
 
-    public void setValue(final String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -54,13 +50,12 @@ public class ConfigStoredOption implements Serializable {
         return selected;
     }
 
-    public void setSelected(final boolean selected) {
+    public void setSelected(boolean selected) {
         this.selected = selected;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("name=").append(name);
         sb.append(", value=").append(value);

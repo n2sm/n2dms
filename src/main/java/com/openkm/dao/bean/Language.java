@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,24 +32,19 @@ import java.util.Set;
  */
 public class Language implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String DEFAULT = "en-GB";
 
     private String id;
-
     private String name;
-
     private String imageContent;
-
     private String imageMime;
-
     private Set<Translation> translations = new HashSet<Translation>();
 
     public String getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -57,7 +52,7 @@ public class Language implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -65,7 +60,7 @@ public class Language implements Serializable {
         return translations;
     }
 
-    public void setTranslations(final Set<Translation> translations) {
+    public void setTranslations(Set<Translation> translations) {
         this.translations = translations;
     }
 
@@ -73,7 +68,7 @@ public class Language implements Serializable {
         return imageContent;
     }
 
-    public void setImageContent(final String imageContent) {
+    public void setImageContent(String imageContent) {
         this.imageContent = imageContent;
     }
 
@@ -81,24 +76,18 @@ public class Language implements Serializable {
         return imageMime;
     }
 
-    public void setImageMime(final String imageMime) {
+    public void setImageMime(String imageMime) {
         this.imageMime = imageMime;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("id=");
-        sb.append(id);
-        sb.append(", name=");
-        sb.append(name);
-        sb.append(", imageMime=");
-        sb.append(imageMime);
-        sb.append(", imageContent=");
-        sb.append("[BIG]");
-        sb.append(", translations=");
-        sb.append(translations);
+        sb.append("id=").append(id);
+        sb.append(", name=").append(name);
+        sb.append(", imageMime=").append(imageMime);
+        sb.append(", imageContent=").append("[BIG]");
+        sb.append(", translations=").append(translations);
         sb.append("}");
         return sb.toString();
     }

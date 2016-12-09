@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -66,16 +66,16 @@
             <td>
               <select name="ar_event"  class=":required :min_length;1 :only_on_blur" id="ar_event">
               	<option value="">-</option>
-            	<c:forEach var="event" items="${events}">
-            	<c:choose>
-                    <c:when test="${event == ar.event}">
-                      <option value="${event}" selected="selected">${event}</option>
+              	<c:forEach var="event" items="${events}">
+    			  <c:choose>
+                    <c:when test="${event.key == ar.event}">
+                      <option value="${event.key}" selected="selected">${event.value}</option>
                     </c:when>
                     <c:otherwise>
-                      <option value="${event}">${event}</option>
+                      <option value="${event.key}">${event.value}</option>
                     </c:otherwise>
                   </c:choose>
-	    		</c:forEach>
+				</c:forEach>
            	  </select>
             </td>
           </tr>
@@ -125,8 +125,12 @@
           </tr>
           <tr>
             <td colspan="2" align="right">
-              <input type="button" onclick="javascript:window.history.back()" value="Cancel"/>
-              <input type="submit" value="Send"/>
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <c:choose>
+                <c:when test="${action == 'create'}"><input type="submit" value="Create" class="yesButton"/></c:when>
+                <c:when test="${action == 'edit'}"><input type="submit" value="Edit" class="yesButton"/></c:when>
+                <c:when test="${action == 'delete'}"><input type="submit" value="Delete" class="yesButton"/></c:when>
+              </c:choose>
             </td>
           </tr>
         </table>

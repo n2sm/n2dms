@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,41 +32,23 @@ import java.util.Set;
 public class MailMetadata {
     // okm:mail
     private String uuid;
-
     private String path;
-
     private String name;
-
     private long size;
-
     private String from;
-
     private List<String> reply = new ArrayList<String>();
-
     private List<String> to = new ArrayList<String>();
-
     private List<String> cc = new ArrayList<String>();
-
     private List<String> bcc = new ArrayList<String>();
-
     private Calendar sentDate;
-
     private Calendar receivedDate;
-
     private String subject;
-
     private String content;
-
     private String mimeType;
-
     private String author;
-
     private Calendar created;
-
     private Set<String> keywords = new HashSet<String>();
-
     private Set<CategoryMetadata> categories = new HashSet<CategoryMetadata>();
-
     private List<DocumentMetadata> attachments = new ArrayList<DocumentMetadata>();
 
     // mix:scripting
@@ -80,14 +62,13 @@ public class MailMetadata {
 
     // mix:accessControlled
     private Map<String, Integer> grantedUsers = new HashMap<String, Integer>();
-
     private Map<String, Integer> grantedRoles = new HashMap<String, Integer>();
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -95,7 +76,7 @@ public class MailMetadata {
         return path;
     }
 
-    public void setPath(final String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -103,7 +84,7 @@ public class MailMetadata {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -111,7 +92,7 @@ public class MailMetadata {
         return size;
     }
 
-    public void setSize(final long size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -119,7 +100,7 @@ public class MailMetadata {
         return from;
     }
 
-    public void setFrom(final String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
@@ -127,7 +108,7 @@ public class MailMetadata {
         return reply;
     }
 
-    public void setReply(final List<String> reply) {
+    public void setReply(List<String> reply) {
         this.reply = reply;
     }
 
@@ -135,7 +116,7 @@ public class MailMetadata {
         return to;
     }
 
-    public void setTo(final List<String> to) {
+    public void setTo(List<String> to) {
         this.to = to;
     }
 
@@ -143,7 +124,7 @@ public class MailMetadata {
         return cc;
     }
 
-    public void setCc(final List<String> cc) {
+    public void setCc(List<String> cc) {
         this.cc = cc;
     }
 
@@ -151,7 +132,7 @@ public class MailMetadata {
         return bcc;
     }
 
-    public void setBcc(final List<String> bcc) {
+    public void setBcc(List<String> bcc) {
         this.bcc = bcc;
     }
 
@@ -159,7 +140,7 @@ public class MailMetadata {
         return sentDate;
     }
 
-    public void setSentDate(final Calendar sentDate) {
+    public void setSentDate(Calendar sentDate) {
         this.sentDate = sentDate;
     }
 
@@ -167,7 +148,7 @@ public class MailMetadata {
         return receivedDate;
     }
 
-    public void setReceivedDate(final Calendar receivedDate) {
+    public void setReceivedDate(Calendar receivedDate) {
         this.receivedDate = receivedDate;
     }
 
@@ -175,7 +156,7 @@ public class MailMetadata {
         return subject;
     }
 
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         this.subject = subject;
     }
 
@@ -183,7 +164,7 @@ public class MailMetadata {
         return content;
     }
 
-    public void setContent(final String content) {
+    public void setContent(String content) {
         this.content = content;
     }
 
@@ -191,7 +172,7 @@ public class MailMetadata {
         return mimeType;
     }
 
-    public void setMimeType(final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
@@ -199,7 +180,7 @@ public class MailMetadata {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -207,7 +188,7 @@ public class MailMetadata {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -215,7 +196,7 @@ public class MailMetadata {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -223,7 +204,7 @@ public class MailMetadata {
         return categories;
     }
 
-    public void setCategories(final Set<CategoryMetadata> categories) {
+    public void setCategories(Set<CategoryMetadata> categories) {
         this.categories = categories;
     }
 
@@ -231,7 +212,7 @@ public class MailMetadata {
         return attachments;
     }
 
-    public void setAttachments(final List<DocumentMetadata> attachments) {
+    public void setAttachments(List<DocumentMetadata> attachments) {
         this.attachments = attachments;
     }
 
@@ -239,7 +220,7 @@ public class MailMetadata {
         return scripting;
     }
 
-    public void setScripting(final String scripting) {
+    public void setScripting(String scripting) {
         this.scripting = scripting;
     }
 
@@ -247,7 +228,7 @@ public class MailMetadata {
         return notes;
     }
 
-    public void setNotes(final List<NoteMetadata> notes) {
+    public void setNotes(List<NoteMetadata> notes) {
         this.notes = notes;
     }
 
@@ -255,8 +236,7 @@ public class MailMetadata {
         return propertyGroups;
     }
 
-    public void setPropertyGroups(
-            final List<PropertyGroupMetadata> propertyGroups) {
+    public void setPropertyGroups(List<PropertyGroupMetadata> propertyGroups) {
         this.propertyGroups = propertyGroups;
     }
 
@@ -264,7 +244,7 @@ public class MailMetadata {
         return grantedUsers;
     }
 
-    public void setGrantedUsers(final Map<String, Integer> grantedUsers) {
+    public void setGrantedUsers(Map<String, Integer> grantedUsers) {
         this.grantedUsers = grantedUsers;
     }
 
@@ -272,13 +252,12 @@ public class MailMetadata {
         return grantedRoles;
     }
 
-    public void setGrantedRoles(final Map<String, Integer> grantedRoles) {
+    public void setGrantedRoles(Map<String, Integer> grantedRoles) {
         this.grantedRoles = grantedRoles;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=");
         sb.append(uuid);

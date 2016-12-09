@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,25 +34,19 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BinaryClassLoader extends ClassLoader implements
-        MultipleClassLoader {
-    private static Logger log = LoggerFactory
-            .getLogger(BinaryClassLoader.class);
-
+public class BinaryClassLoader extends ClassLoader implements MultipleClassLoader {
+    private static Logger log = LoggerFactory.getLogger(BinaryClassLoader.class);
     private Hashtable<String, Class<?>> classes = new Hashtable<String, Class<?>>();
-
     private Hashtable<String, byte[]> resources = new Hashtable<String, byte[]>();
-
     private String mainClassName = null;
 
-    public BinaryClassLoader(final byte[] buf) throws IOException {
+    public BinaryClassLoader(byte[] buf) throws IOException {
         super();
         createCache(buf);
 
     }
 
-    public BinaryClassLoader(final byte[] buf, final ClassLoader parent)
-            throws IOException {
+    public BinaryClassLoader(byte[] buf, ClassLoader parent) throws IOException {
         super(parent);
         createCache(buf);
     }
@@ -60,31 +54,29 @@ public class BinaryClassLoader extends ClassLoader implements
     /**
      * Create internal classes and resources cache
      */
-    private void createCache(final byte[] buf) throws IOException {
+    private void createCache(byte[] buf) throws IOException {
         ByteArrayInputStream bais = null;
         JarInputStream jis = null;
-        final byte[] buffer = new byte[1024 * 4];
+        byte[] buffer = new byte[1024 * 4];
 
         try {
             bais = new ByteArrayInputStream(buf);
             jis = new JarInputStream(bais);
-            final Attributes attr = jis.getManifest().getMainAttributes();
-            mainClassName = attr != null ? attr
-                    .getValue(Attributes.Name.MAIN_CLASS) : null;
+            Attributes attr = jis.getManifest().getMainAttributes();
+            mainClassName = attr != null ? attr.getValue(Attributes.Name.MAIN_CLASS) : null;
 
             for (JarEntry entry = null; (entry = jis.getNextJarEntry()) != null;) {
-                final String name = entry.getName();
+                String name = entry.getName();
 
                 if (!entry.isDirectory()) {
-                    final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
                     for (int n = 0; -1 != (n = jis.read(buffer));) {
                         byteStream.write(buffer, 0, n);
                     }
 
                     if (name.endsWith(".class")) {
-                        final String className = name.substring(0,
-                                name.indexOf('.')).replace('/', '.');
+                        String className = name.substring(0, name.indexOf('.')).replace('/', '.');
                         resources.put(className, byteStream.toByteArray());
                     } else {
                         resources.put(name, byteStream.toByteArray());
@@ -93,7 +85,7 @@ public class BinaryClassLoader extends ClassLoader implements
                     byteStream.close();
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(jis);
@@ -114,7 +106,7 @@ public class BinaryClassLoader extends ClassLoader implements
      * Find class
      */
     @Override
-    public Class<?> findClass(final String className) {
+    public Class<?> findClass(String className) {
         log.debug("findClass({})", className);
         Class<?> ret = classes.get(className);
 
@@ -125,11 +117,11 @@ public class BinaryClassLoader extends ClassLoader implements
         // Check for system class
         try {
             return findSystemClass(className);
-        } catch (final ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             // Ignore
         }
 
-        final byte[] classByte = resources.get(className);
+        byte[] classByte = resources.get(className);
 
         if (classByte != null) {
             ret = defineClass(className, classByte, 0, classByte.length, null);
@@ -145,9 +137,9 @@ public class BinaryClassLoader extends ClassLoader implements
      * Get resource input stream
      */
     @Override
-    public InputStream getResourceAsStream(final String name) {
+    public InputStream getResourceAsStream(String name) {
         log.debug("getResourceAsStream({})", name);
-        final byte[] bytes = resources.get(name);
+        byte[] bytes = resources.get(name);
 
         if (bytes != null) {
             return new ByteArrayInputStream(bytes);

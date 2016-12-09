@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Danilo Tomasoni
+ * Copyright (c) 2006-2015 Danilo Tomasoni
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,6 +34,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
 import com.openkm.dao.AuthDAO;
 import com.openkm.dao.bean.User;
@@ -41,64 +42,51 @@ import com.openkm.util.MailUtils;
 import com.openkm.util.WebUtils;
 
 public class PasswordResetServlet extends HttpServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(PasswordResetServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(PasswordResetServlet.class);
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final ServletContext sc = getServletContext();
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        ServletContext sc = getServletContext();
         sc.removeAttribute("forgot");
         sc.removeAttribute("failed");
         response.sendRedirect("login.jsp");
     }
 
-    @Override
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String username = WebUtils.getString(request, "username");
-        final ServletContext sc = getServletContext();
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String username = WebUtils.getString(request, "username");
+        ServletContext sc = getServletContext();
         User usr = null;
 
-        try {
-            usr = AuthDAO.findUserByPk(username);
-        } catch (final DatabaseException e) {
-            log.error(getServletName() + " User '" + username + "' not found");
-        }
-
-        if (usr != null) {
+        if (Config.USER_PASSWORD_RESET) {
             try {
-                final String password = RandomStringUtils.randomAlphanumeric(8);
-                AuthDAO.updateUserPassword(username, password);
-                MailUtils
-                        .sendMessage(
-                                usr.getEmail(),
-                                usr.getEmail(),
-                                "Password reset",
-                                "Your new password is: "
-                                        + password
-                                        + "<br/>"
-                                        + "To change it log in and then go to 'Tools' > 'Preferences' > 'User Configuration'.");
-                sc.setAttribute("resetOk", usr.getEmail());
-                response.sendRedirect("password_reset.jsp");
-            } catch (final MessagingException e) {
-                log.error(e.getMessage(), e);
-                sc.setAttribute("resetFailed",
-                        "Failed to send the new password by email");
-                response.sendRedirect("password_reset.jsp");
-            } catch (final DatabaseException e) {
-                log.error(e.getMessage(), e);
-                sc.setAttribute("resetFailed", "Failed reset the user password");
-                response.sendRedirect("password_reset.jsp");
+                usr = AuthDAO.findUserByPk(username);
+            } catch (DatabaseException e) {
+                log.error(getServletName() + " User '" + username + "' not found");
+            }
+
+            if (usr != null) {
+                try {
+                    String password = RandomStringUtils.randomAlphanumeric(8);
+                    AuthDAO.updateUserPassword(username, password);
+                    MailUtils.sendMessage(usr.getEmail(), usr.getEmail(), "Password reset", "Your new password is: " + password + "<br/>"
+                            + "To change it log in and then go to 'Tools' > 'Preferences' > 'User Configuration'.");
+                    sc.setAttribute("resetOk", usr.getEmail());
+                    response.sendRedirect("password_reset.jsp");
+                } catch (MessagingException e) {
+                    log.error(e.getMessage(), e);
+                    sc.setAttribute("resetFailed", "Failed to send the new password by email");
+                    response.sendRedirect("password_reset.jsp");
+                } catch (DatabaseException e) {
+                    log.error(e.getMessage(), e);
+                    sc.setAttribute("resetFailed", "Failed reset the user password");
+                    response.sendRedirect("password_reset.jsp");
+                }
+            } else {
+                sc.setAttribute("resetFailed", "Invalid user name provided");
+                sc.getRequestDispatcher("/password_reset.jsp").forward(request, response);
             }
         } else {
-            sc.setAttribute("resetFailed", "Invalid user name provided");
-            sc.getRequestDispatcher("/password_reset.jsp").forward(request,
-                    response);
+            sc.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
 }

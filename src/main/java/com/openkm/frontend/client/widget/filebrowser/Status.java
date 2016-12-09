@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,8 +22,7 @@
 package com.openkm.frontend.client.widget.filebrowser;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
@@ -41,65 +40,38 @@ import com.openkm.frontend.client.widget.foldertree.ExtendedPopupPanel;
 public class Status extends ExtendedPopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private boolean flag_Folder_getChilds = false;
-
     private boolean flag_Document_getChilds = false;
-
     private boolean flag_Mail_getChilds = false;
-
     private boolean flag_Folder_delete = false;
-
     private boolean flag_Document_delete = false;
-
     private boolean flag_Checkout = false;
-
     private boolean flag_Lock = false;
-
     private boolean flag_UnLock = false;
-
     private boolean flag_Document_rename = false;
-
     private boolean flag_Folder_rename = false;
-
     private boolean flag_Document_purge = false;
-
     private boolean flag_Folder_purge = false;
-
     private boolean flag_GetFolder = false;
-
     private boolean flag_GetDocument = false;
-
     private boolean flag_AddSubscription = false;
-
     private boolean flag_RemoveSubscription = false;
-
     private boolean flag_Mail_delete = false;
-
     private boolean flag_Mail_purge = false;
-
     private boolean flag_Mail_getProperties = false;
-
     private boolean flag_Mail_rename = false;
-
     private boolean flag_CreateFromTemplate = false;
-
     private boolean flag_Ordering = false;
-
     private boolean flag_getChilds = false;
-
     private Widget widget;
 
     /**
      * Status
      */
-    public Status(final Widget widget) {
+    public Status(Widget widget) {
         super(false, true);
         this.widget = widget;
         hPanel = new HorizontalPanel();
@@ -111,11 +83,9 @@ public class Status extends ExtendedPopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -131,28 +101,19 @@ public class Status extends ExtendedPopupPanel {
      * Refresh
      */
     public void refresh() {
-        if (flag_Folder_getChilds || flag_Document_getChilds
-                || flag_Folder_delete || flag_Document_delete || flag_Checkout
-                || flag_Lock || flag_UnLock || flag_Document_rename
-                || flag_Folder_rename || flag_Document_purge
-                || flag_Folder_purge || flag_GetFolder || flag_GetDocument
-                || flag_AddSubscription || flag_RemoveSubscription
-                || flag_Mail_getChilds || flag_Mail_delete || flag_Mail_purge
-                || flag_Mail_getProperties || flag_Mail_rename
-                || flag_CreateFromTemplate || flag_Ordering || flag_getChilds) {
-            final int left = (widget.getAbsoluteLeft()
-                    + widget.getOffsetWidth() - 200)
-                    / 2 + widget.getAbsoluteLeft();
-            final int top = (widget.getAbsoluteTop() + widget.getOffsetHeight())
-                    / 2 + TopPanel.PANEL_HEIGHT;
+        if (flag_Folder_getChilds || flag_Document_getChilds || flag_Folder_delete || flag_Document_delete || flag_Checkout || flag_Lock
+                || flag_UnLock || flag_Document_rename || flag_Folder_rename || flag_Document_purge || flag_Folder_purge || flag_GetFolder
+                || flag_GetDocument || flag_AddSubscription || flag_RemoveSubscription || flag_Mail_getChilds || flag_Mail_delete
+                || flag_Mail_purge || flag_Mail_getProperties || flag_Mail_rename || flag_CreateFromTemplate || flag_Ordering
+                || flag_getChilds) {
+            int left = ((widget.getAbsoluteLeft() + widget.getOffsetWidth() - 200) / 2) + widget.getAbsoluteLeft();
+            int top = ((widget.getAbsoluteTop() + widget.getOffsetHeight()) / 2) + TopPanel.PANEL_HEIGHT;
             setPopupPosition(left, top);
-            Main.get().mainPanel.desktop.browser.fileBrowser.panel
-                    .addStyleName("okm-PanelRefreshing");
+            Main.get().mainPanel.desktop.browser.fileBrowser.panel.addStyleName("okm-PanelRefreshing");
             super.show();
         } else {
             super.hide();
-            Main.get().mainPanel.desktop.browser.fileBrowser.panel
-                    .removeStyleName("okm-PanelRefreshing");
+            Main.get().mainPanel.desktop.browser.fileBrowser.panel.removeStyleName("okm-PanelRefreshing");
         }
     }
 

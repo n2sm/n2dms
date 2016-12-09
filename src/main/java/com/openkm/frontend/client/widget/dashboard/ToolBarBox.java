@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,11 +40,11 @@ import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.openkm.frontend.client.constants.Style;
 
 /**
  * ToolBarBox
@@ -52,13 +52,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author jllort
  *
  */
-public class ToolBarBox extends HorizontalPanel implements HasClickHandlers,
-        HasAllMouseHandlers {
+public class ToolBarBox extends HorizontalPanel implements HasClickHandlers, HasAllMouseHandlers {
 
     private VerticalPanel vPanel;
-
     private Image image;
-
     private HTML html;
 
     /**
@@ -67,13 +64,13 @@ public class ToolBarBox extends HorizontalPanel implements HasClickHandlers,
      * @param url
      * @param text
      */
-    public ToolBarBox(final Image img, final String text) {
+    public ToolBarBox(Image img, String text) {
         super();
         sinkEvents(Event.ONCLICK | Event.MOUSEEVENTS);
 
         vPanel = new VerticalPanel();
-        final HTML space1 = new HTML("&nbsp;");
-        final HTML space2 = new HTML("&nbsp;");
+        HTML space1 = new HTML("&nbsp;");
+        HTML space2 = new HTML("&nbsp;");
         image = img;
         html = new HTML(text);
         html.setText(text);
@@ -87,20 +84,18 @@ public class ToolBarBox extends HorizontalPanel implements HasClickHandlers,
         add(vPanel);
         add(space2);
 
-        vPanel.setCellHorizontalAlignment(html,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(html, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
 
-        setCellVerticalAlignment(vPanel, HasVerticalAlignment.ALIGN_MIDDLE);
-        setCellHorizontalAlignment(vPanel, HasHorizontalAlignment.ALIGN_CENTER);
+        setCellVerticalAlignment(vPanel, HasAlignment.ALIGN_MIDDLE);
+        setCellHorizontalAlignment(vPanel, HasAlignment.ALIGN_CENTER);
 
         setCellWidth(space1, "15");
         setCellWidth(space2, "15");
 
-        html.setStyleName("okm-noWrap");
+        html.getElement().getStyle().setProperty(Style.STYLE_WHITE_SPACE, "nowrap");
 
-        setHeight("59");
+        setHeight("59px"); // -1px caused by border in parent widget
         setWidth("100%");
     }
 
@@ -109,7 +104,7 @@ public class ToolBarBox extends HorizontalPanel implements HasClickHandlers,
      * 
      * @param text
      */
-    public void setLabelText(final String text) {
+    public void setLabelText(String text) {
         html.setText(text);
         html.setTitle(text);
         image.setTitle(text);
@@ -119,59 +114,49 @@ public class ToolBarBox extends HorizontalPanel implements HasClickHandlers,
      * @see com.google.gwt.event.dom.client.HasClickHandlers#addClickHandler(com.google.gwt.event.dom.client.ClickHandler)
      */
     @Override
-    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+    public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addHandler(handler, ClickEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseDownHandlers#addMouseDownHandler(com.google.gwt.event.dom.client.MouseDownHandler)
      */
-    @Override
-    public HandlerRegistration addMouseDownHandler(
-            final MouseDownHandler handler) {
+    public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
         return addDomHandler(handler, MouseDownEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseMoveHandlers#addMouseMoveHandler(com.google.gwt.event.dom.client.MouseMoveHandler)
      */
-    @Override
-    public HandlerRegistration addMouseMoveHandler(
-            final MouseMoveHandler handler) {
+    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
         return addDomHandler(handler, MouseMoveEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseOutHandlers#addMouseOutHandler(com.google.gwt.event.dom.client.MouseOutHandler)
      */
-    @Override
-    public HandlerRegistration addMouseOutHandler(final MouseOutHandler handler) {
+    public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
         return addDomHandler(handler, MouseOutEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseOverHandlers#addMouseOverHandler(com.google.gwt.event.dom.client.MouseOverHandler)
      */
-    @Override
-    public HandlerRegistration addMouseOverHandler(
-            final MouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
         return addDomHandler(handler, MouseOverEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseUpHandlers#addMouseUpHandler(com.google.gwt.event.dom.client.MouseUpHandler)
      */
-    @Override
-    public HandlerRegistration addMouseUpHandler(final MouseUpHandler handler) {
+    public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
         return addDomHandler(handler, MouseUpEvent.getType());
     }
 
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.HasMouseWheelHandlers#addMouseWheelHandler(com.google.gwt.event.dom.client.MouseWheelHandler)
      */
-    @Override
-    public HandlerRegistration addMouseWheelHandler(
-            final MouseWheelHandler handler) {
+    public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
         return addDomHandler(handler, MouseWheelEvent.getType());
     }
 }

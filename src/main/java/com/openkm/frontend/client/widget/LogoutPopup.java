@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -31,7 +31,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.service.OKMAuthService;
@@ -44,13 +43,10 @@ import com.openkm.frontend.client.service.OKMAuthServiceAsync;
  */
 public class LogoutPopup extends DialogBox implements ClickHandler {
     private VerticalPanel vPanel;
-
     private HTML text;
-
     private Button button;
 
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     /**
      * Logout popup
@@ -63,8 +59,8 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
         text = new HTML(Main.i18n("logout.logout"));
         button = new Button(Main.i18n("button.close"), this);
 
-        vPanel.setWidth("250");
-        vPanel.setHeight("100");
+        vPanel.setWidth("250px");
+        vPanel.setHeight("100px");
 
         vPanel.add(new HTML("<br>"));
         vPanel.add(text);
@@ -72,10 +68,8 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
         vPanel.add(button);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(text,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(text, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, VerticalPanel.ALIGN_CENTER);
 
         button.setStyleName("okm-YesButton");
 
@@ -87,14 +81,12 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
      * OKM logout
      */
     final AsyncCallback<Object> callbackLogout = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             text.setText(Main.i18n("logout.closed"));
             button.setEnabled(true);
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Log.debug("callbackLogout.onFailure(" + caught + ")");
             Main.get().showError("Logout", caught);
         }
@@ -104,8 +96,7 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
      * (non-Javadoc)
      * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
      */
-    @Override
-    public void onClick(final ClickEvent event) {
+    public void onClick(ClickEvent event) {
         super.hide();
         Window.open("index.jsp", "_self", null);
     }
@@ -124,8 +115,8 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
      */
     public void logout() {
         button.setEnabled(false);
-        final int left = (Window.getClientWidth() - 300) / 2;
-        final int top = (Window.getClientHeight() - 200) / 2;
+        int left = (Window.getClientWidth() - 300) / 2;
+        int top = (Window.getClientHeight() - 200) / 2;
         setPopupPosition(left, top);
         setText(Main.i18n("logout.label"));
         show();
@@ -155,11 +146,10 @@ public class LogoutPopup extends DialogBox implements ClickHandler {
      * logoutAfterChat();
      */
     private void logoutAfterChat() {
-        final Timer timer = new Timer() {
+        Timer timer = new Timer() {
             @Override
             public void run() {
-                if (!Main.get().mainPanel.bottomPanel.userInfo
-                        .isPendingToClose()) {
+                if (!Main.get().mainPanel.bottomPanel.userInfo.isPendingToClose()) {
                     authService.logout(callbackLogout);
                 } else {
                     logoutAfterChat();

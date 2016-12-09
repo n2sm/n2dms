@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,10 +44,8 @@ public class ConfigUtils {
     /**
      * Read a boolean property.
      */
-    public static boolean getBooleanProperty(final Properties config,
-            final String key, final boolean defaultValue) {
-        final String property = config.getProperty(key,
-                String.valueOf(defaultValue));
+    public static boolean getBooleanProperty(Properties config, String key, boolean defaultValue) {
+        String property = config.getProperty(key, String.valueOf(defaultValue));
         return Boolean.parseBoolean(property);
     }
 
@@ -56,12 +54,9 @@ public class ConfigUtils {
      * 
      * http://www.thinkplexx.com/learn/howto/java/system/java-resource-loading-explained-absolute-and-relative-names-difference-between-classloader-and-class-resource-loading
      */
-    public static InputStream getResourceAsStream(final String resource)
-            throws IOException {
-        final String stripped = resource.startsWith("/") ? resource
-                .substring(1) : resource;
-        final ClassLoader classLoader = Thread.currentThread()
-                .getContextClassLoader();
+    public static InputStream getResourceAsStream(String resource) throws IOException {
+        String stripped = resource.startsWith("/") ? resource.substring(1) : resource;
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream stream = null;
 
         if (classLoader != null) {
@@ -73,8 +68,7 @@ public class ConfigUtils {
         }
 
         if (stream == null) {
-            stream = Config.class.getClassLoader()
-                    .getResourceAsStream(stripped);
+            stream = Config.class.getClassLoader().getResourceAsStream(stripped);
         }
 
         if (stream == null) {
@@ -87,12 +81,9 @@ public class ConfigUtils {
     /**
      * Resource locator helper
      */
-    public static List<String> getResources(final String resourceBase)
-            throws URISyntaxException, IOException {
-        final String stripped = resourceBase.startsWith("/") ? resourceBase
-                .substring(1) : resourceBase;
-        final ClassLoader classLoader = Thread.currentThread()
-                .getContextClassLoader();
+    public static List<String> getResources(String resourceBase) throws URISyntaxException, IOException {
+        String stripped = resourceBase.startsWith("/") ? resourceBase.substring(1) : resourceBase;
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         List<String> resources = null;
 
         if (classLoader != null) {
@@ -100,8 +91,7 @@ public class ConfigUtils {
         }
 
         if (resources == null) {
-            resources = getResourceListing(Config.class.getClassLoader(),
-                    stripped);
+            resources = getResourceListing(Config.class.getClassLoader(), stripped);
         }
 
         if (resources == null) {
@@ -111,9 +101,8 @@ public class ConfigUtils {
         return resources;
     }
 
-    public static List<String> getResourceListing(final ClassLoader cl,
-            final String path) throws URISyntaxException, IOException {
-        final URL dirUrl = cl.getResource(path);
+    public static List<String> getResourceListing(ClassLoader cl, String path) throws URISyntaxException, IOException {
+        URL dirUrl = cl.getResource(path);
 
         if (dirUrl != null && dirUrl.getProtocol().equals("file")) {
             /* A file path: easy enough */
@@ -131,19 +120,18 @@ public class ConfigUtils {
 
         if (dirUrl != null && dirUrl.getProtocol().equals("jar")) {
             /* A JAR path */
-            final String jarPath = dirUrl.getPath().substring(5,
-                    dirUrl.getPath().indexOf("!")); // strip out only the JAR
-            // file
-            final JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-            final Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries in jar
-            final Set<String> result = new HashSet<String>(); // avoid duplicates in case it is a subdirectory
+            String jarPath = dirUrl.getPath().substring(5, dirUrl.getPath().indexOf("!")); // strip out only the JAR
+                                                                                           // file
+            JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+            Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries in jar
+            Set<String> result = new HashSet<String>(); // avoid duplicates in case it is a subdirectory
 
             while (entries.hasMoreElements()) {
-                final String name = entries.nextElement().getName();
+                String name = entries.nextElement().getName();
 
                 if (name.startsWith(path)) { // filter according to the path
                     String entry = name.substring(path.length());
-                    final int checkSubdir = entry.indexOf("/");
+                    int checkSubdir = entry.indexOf("/");
 
                     if (checkSubdir >= 0) {
                         // if it is a subdirectory, we just return the directory name
@@ -157,18 +145,17 @@ public class ConfigUtils {
             return new ArrayList<String>(result);
         }
 
-        throw new UnsupportedOperationException("Cannot list files for URL "
-                + dirUrl);
+        throw new UnsupportedOperationException("Cannot list files for URL " + dirUrl);
     }
 
     /**
      * Compile wildcard to regexp
      */
-    public static String wildcard2regexp(final String wildcard) {
-        final StringBuffer sb = new StringBuffer("^");
+    public static String wildcard2regexp(String wildcard) {
+        StringBuffer sb = new StringBuffer("^");
 
         for (int i = 0; i < wildcard.length(); i++) {
-            final char c = wildcard.charAt(i);
+            char c = wildcard.charAt(i);
 
             switch (c) {
             case '.':

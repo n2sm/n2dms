@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,16 +25,15 @@ import com.openkm.util.FormatUtil;
 
 public class HTMLDetailedInfoDecorator implements InfoDecorator {
     private int idx;
-
     private int total;
 
-    public HTMLDetailedInfoDecorator(final int total) {
+    public HTMLDetailedInfoDecorator(int total) {
         this.total = total;
     }
 
     @Override
-    public String print(final String path, final long size, final String error) {
-        final StringBuffer sb = new StringBuffer();
+    public String print(String path, long size, String error) {
+        StringBuffer sb = new StringBuffer();
 
         if (idx++ % 2 == 0) {
             sb.append("<tr class=\"even\">");

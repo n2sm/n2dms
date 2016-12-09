@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,8 +26,8 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 
 import eu.maydu.gwt.validation.client.ValidationAction;
 import eu.maydu.gwt.validation.client.ValidationResult;
-import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.Validator;
+import eu.maydu.gwt.validation.client.ValidationResult.ValidationError;
 import eu.maydu.gwt.validation.client.i18n.StandardValidationMessages;
 import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
 
@@ -37,96 +37,77 @@ import eu.maydu.gwt.validation.client.i18n.ValidationMessages;
  * @author jllort
  *
  */
-public class StringMinLengthValidator extends
-        Validator<StringMinLengthValidator> {
+public class StringMinLengthValidator extends Validator<StringMinLengthValidator> {
 
     protected TextBoxBase text;
-
     protected SuggestBox suggest;
-
     protected int min;
 
-    public StringMinLengthValidator(final TextBoxBase text) {
+    public StringMinLengthValidator(TextBoxBase text) {
         this(text, false);
     }
 
-    public StringMinLengthValidator(final TextBoxBase text, final int min) {
+    public StringMinLengthValidator(TextBoxBase text, int min) {
         this(text, min, false);
     }
 
-    public StringMinLengthValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMinLengthValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain) {
         this(text, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMinLengthValidator(final TextBoxBase text,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMinLengthValidator(TextBoxBase text, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringMinLengthValidator(final TextBoxBase text, final int min,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMinLengthValidator(TextBoxBase text, int min, boolean preventsPropagationOfValidationChain) {
         this(text, min, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMinLengthValidator(final TextBoxBase text, final int min,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMinLengthValidator(TextBoxBase text, int min, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (text == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (text == null)
             throw new IllegalArgumentException("text must not be null");
-        }
         this.text = text;
         setMin(min);
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
-    public StringMinLengthValidator(final SuggestBox suggest) {
+    public StringMinLengthValidator(SuggestBox suggest) {
         this(suggest, false);
     }
 
-    public StringMinLengthValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain) {
+    public StringMinLengthValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain) {
         this(suggest, preventsPropagationOfValidationChain, null);
     }
 
-    public StringMinLengthValidator(final SuggestBox suggest,
-            final boolean preventsPropagationOfValidationChain,
-            final String customMsgKey) {
+    public StringMinLengthValidator(SuggestBox suggest, boolean preventsPropagationOfValidationChain, String customMsgKey) {
         super();
-        setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
-        if (suggest == null) {
+        this.setPreventsPropagationOfValidationChain(preventsPropagationOfValidationChain);
+        if (suggest == null)
             throw new IllegalArgumentException("suggest must not be null");
-        }
         this.suggest = suggest;
-        setCustomMsgKey(customMsgKey);
+        this.setCustomMsgKey(customMsgKey);
     }
 
     @Override
-    public ValidationResult validate(final ValidationMessages allMessages) {
-        final StandardValidationMessages messages = allMessages
-                .getStandardMessages();
+    public ValidationResult validate(ValidationMessages allMessages) {
+        StandardValidationMessages messages = allMessages.getStandardMessages();
         String str;
-        if (text != null) {
+        if (text != null)
             str = text.getText();
-        } else {
+        else
             str = suggest.getText();
-        }
-        if (str == null) {
+        if (str == null)
             str = "";
-        }
-        if (str.length() < min) {
-            final ValidationResult result = new ValidationResult();
-            final ValidationError error = result.new ValidationError(null,
-                    getErrorMessage(allMessages, messages.validator_min()));
+        if (str.length() < this.min) {
+            ValidationResult result = new ValidationResult();
+            ValidationError error = result.new ValidationError(null, getErrorMessage(allMessages, messages.validator_min()));
             result.getErrors().add(error);
             return result;
         }
@@ -134,20 +115,17 @@ public class StringMinLengthValidator extends
         return null;
     }
 
-    @Override
-    public void invokeActions(final ValidationResult result) {
+    public void invokeActions(ValidationResult result) {
         if (text != null) {
-            for (final ValidationAction<TextBoxBase> action : getFailureActions()) {
+            for (ValidationAction<TextBoxBase> action : getFailureActions())
                 action.invoke(result, text);
-            }
         } else {
-            for (final ValidationAction<SuggestBox> action : getFailureActions()) {
+            for (ValidationAction<SuggestBox> action : getFailureActions())
                 action.invoke(result, suggest);
-            }
         }
     }
 
-    public StringMinLengthValidator setMin(final int min) {
+    public StringMinLengthValidator setMin(int min) {
         this.min = min;
         return this;
     }

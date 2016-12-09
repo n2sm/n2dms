@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client.widget.searchsaved;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +31,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTQueryParams;
 import com.openkm.frontend.client.service.OKMSearchService;
@@ -43,22 +43,16 @@ import com.openkm.frontend.client.service.OKMSearchServiceAsync;
  * @author jllort
  */
 public class SearchSaved extends Composite {
-    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT
-            .create(OKMSearchService.class);
+    private final OKMSearchServiceAsync searchService = (OKMSearchServiceAsync) GWT.create(OKMSearchService.class);
 
     private ExtendedFlexTable table;
-
     public MenuPopup menuPopup;
-
     private Status status;
-
     private boolean firstTime = true;
 
     // Holds the data rows of the table this is a list of RowData Object
     public Map<Long, GWTQueryParams> data;
-
     private long dataIndexValue = 0;
-
     private long searchIdToDelete = 0;
 
     /**
@@ -94,6 +88,7 @@ public class SearchSaved extends Composite {
     public void showMenu() {
         // The browser menu depends on actual view
         // Must substract top position from Y Screen Position
+        menuPopup.evaluateMenuOptions();
         menuPopup.setPopupPosition(table.getMouseX(), table.getMouseY());
         menuPopup.show();
     }
@@ -111,12 +106,11 @@ public class SearchSaved extends Composite {
      * Call Back get search
      */
     final AsyncCallback<List<GWTQueryParams>> callbackGetSearchs = new AsyncCallback<List<GWTQueryParams>>() {
-        @Override
-        public void onSuccess(final List<GWTQueryParams> result) {
+        public void onSuccess(List<GWTQueryParams> result) {
             table.removeAllRows();
 
-            for (final GWTQueryParams gwtQueryParams : result) {
-                addRow(gwtQueryParams);
+            for (Iterator<GWTQueryParams> it = result.iterator(); it.hasNext();) {
+                addRow(it.next());
             }
             if (!firstTime) {
                 status.unsetFlag_getSearchs();
@@ -125,8 +119,7 @@ public class SearchSaved extends Composite {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             if (!firstTime) {
                 status.unsetFlag_getSearchs();
             } else {
@@ -141,16 +134,14 @@ public class SearchSaved extends Composite {
      * Call Back delete search
      */
     final AsyncCallback<Object> callbackDeleteSearch = new AsyncCallback<Object>() {
-        @Override
-        public void onSuccess(final Object result) {
+        public void onSuccess(Object result) {
             table.removeRow(getSelectedRow());
             table.selectPrevRow();
             data.remove(new Long(searchIdToDelete));
             status.unsetFlag_deleteSearch();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             status.unsetFlag_deleteSearch();
             Main.get().showError("DeleteSearch", caught);
         }
@@ -161,7 +152,7 @@ public class SearchSaved extends Composite {
      * 
      * @param search Search parameters to be saved.
      */
-    public void addNewSavedSearch(final GWTQueryParams search) {
+    public void addNewSavedSearch(GWTQueryParams search) {
         addRow(search);
     }
 
@@ -170,25 +161,23 @@ public class SearchSaved extends Composite {
      * 
      * @param search Search parameters to be added.
      */
-    private void addRow(final GWTQueryParams search) {
-        final int rows = table.getRowCount();
+    private void addRow(GWTQueryParams search) {
+        int rows = table.getRowCount();
 
         data.put(new Long(dataIndexValue), search);
-
         table.setHTML(rows, 0, "&nbsp;");
+
         table.setHTML(rows, 1, search.getQueryName());
         table.setHTML(rows, 2, "" + dataIndexValue++);
         table.setHTML(rows, 3, "");
         table.getCellFormatter().setVisible(rows, 2, false);
 
         // The hidden column extends table to 100% width
-        final CellFormatter cellFormatter = table.getCellFormatter();
-        cellFormatter.setWidth(rows, 0, "30");
-        cellFormatter.setHeight(rows, 0, "20");
-        cellFormatter.setHorizontalAlignment(rows, 0,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        cellFormatter.setVerticalAlignment(rows, 0,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        CellFormatter cellFormatter = table.getCellFormatter();
+        cellFormatter.setWidth(rows, 0, "30px");
+        cellFormatter.setHeight(rows, 0, "20px");
+        cellFormatter.setHorizontalAlignment(rows, 0, HasAlignment.ALIGN_CENTER);
+        cellFormatter.setVerticalAlignment(rows, 0, HasAlignment.ALIGN_MIDDLE);
         cellFormatter.setWidth(rows, 3, "100%");
 
         table.getRowFormatter().setStyleName(rows, "okm-SearchSaved");
@@ -202,9 +191,8 @@ public class SearchSaved extends Composite {
      * @param columns Number of row columns
      * @param warp
      */
-    private void setRowWordWarp(final int row, final int columns,
-            final boolean warp) {
-        final CellFormatter cellFormatter = table.getCellFormatter();
+    private void setRowWordWarp(int row, int columns, boolean warp) {
+        CellFormatter cellFormatter = table.getCellFormatter();
         for (int i = 0; i < columns; i++) {
             cellFormatter.setWordWrap(row, i, false);
         }
@@ -226,9 +214,8 @@ public class SearchSaved extends Composite {
      */
     public void getSearch() {
         if (getSelectedRow() >= 0) {
-            final long id = Long.parseLong(table.getText(getSelectedRow(), 2));
-            Main.get().mainPanel.search.searchBrowser.searchResult
-                    .getSearch(data.get(id));
+            long id = Long.parseLong(table.getText(getSelectedRow(), 2));
+            Main.get().mainPanel.search.searchBrowser.searchResult.getSearch(data.get(id));
         }
     }
 
@@ -239,7 +226,7 @@ public class SearchSaved extends Composite {
      */
     public GWTQueryParams getSavedSearch() {
         if (getSelectedRow() >= 0) {
-            final long id = Long.parseLong(table.getText(getSelectedRow(), 2));
+            long id = Long.parseLong(table.getText(getSelectedRow(), 2));
             return data.get(id);
         } else {
             return null;
@@ -252,11 +239,8 @@ public class SearchSaved extends Composite {
     public void deleteSearch() {
         if (getSelectedRow() >= 0) {
             status.setFlag_deleteSearch();
-            searchIdToDelete = Long.parseLong(table
-                    .getText(getSelectedRow(), 2));
-
-            searchService.deleteSearch(data.get(searchIdToDelete).getId(),
-                    callbackDeleteSearch);
+            searchIdToDelete = Long.parseLong(table.getText(getSelectedRow(), 2));
+            searchService.deleteSearch(data.get(searchIdToDelete).getId(), callbackDeleteSearch);
         }
     }
 
@@ -265,7 +249,7 @@ public class SearchSaved extends Composite {
      * 
      * @param selected The selected panel value
      */
-    public void setSelectedPanel(final boolean selected) {
+    public void setSelectedPanel(boolean selected) {
         table.setSelectedPanel(selected);
     }
 

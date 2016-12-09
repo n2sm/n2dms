@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,8 +43,7 @@ public interface BookmarkModule {
      * @thows PathNotFoundException If there is no node with this nodePath.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Bookmark add(String token, String nodePath, String name)
-            throws AccessDeniedException, PathNotFoundException,
+    public Bookmark add(String token, String nodePath, String name) throws AccessDeniedException, PathNotFoundException,
             RepositoryException, DatabaseException;
 
     /**
@@ -57,8 +56,7 @@ public interface BookmarkModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Bookmark get(String token, int bmId) throws AccessDeniedException,
-            RepositoryException, DatabaseException;
+    public Bookmark get(String token, int bmId) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Remove a bookmark.
@@ -69,8 +67,7 @@ public interface BookmarkModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public void remove(String token, int bmId) throws AccessDeniedException,
-            RepositoryException, DatabaseException;
+    public void remove(String token, int bmId) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Rename a previous stored bookmark.
@@ -83,9 +80,7 @@ public interface BookmarkModule {
      * you can't modify the node because of lack of permissions.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public Bookmark rename(String token, int bmId, String newName)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException;
+    public Bookmark rename(String token, int bmId, String newName) throws AccessDeniedException, RepositoryException, DatabaseException;
 
     /**
      * Retrive an user bookmark collection.
@@ -94,6 +89,5 @@ public interface BookmarkModule {
      * @return All the user bookmarks.
      * @throws RepositoryException If there is any general repository problem.
      */
-    public List<Bookmark> getAll(String token) throws RepositoryException,
-            DatabaseException;
+    public List<Bookmark> getAll(String token) throws AccessDeniedException, RepositoryException, DatabaseException;
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,23 +40,14 @@ public interface HasMailEvent {
     public static class MailEventConstant {
 
         static final int EVENT_MAIL_CHANGED = 1;
-
         static final int EVENT_PANEL_RESIZED = 2;
-
         static final int EVENT_TAB_CHANGED = 3;
-
         static final int EVENT_SECURITY_CHANGED = 4;
-
         static final int EVENT_SET_VISIBLE_BUTTONS = 5;
-
         static final int EVENT_MAIL_DELETED = 6;
-
         static final int EVENT_KEYWORD_REMOVED = 7;
-
         static final int EVENT_KEYWORD_ADDED = 8;
-
         static final int EVENT_CATEGORY_ADDED = 9;
-
         static final int EVENT_CATEGORY_REMOVED = 10;
 
         private int type = 0;
@@ -66,7 +57,7 @@ public interface HasMailEvent {
          * 
          * @param type
          */
-        private MailEventConstant(final int type) {
+        private MailEventConstant(int type) {
             this.type = type;
         }
 
@@ -75,35 +66,16 @@ public interface HasMailEvent {
         }
     }
 
-    MailEventConstant MAIL_CHANGED = new MailEventConstant(
-            MailEventConstant.EVENT_MAIL_CHANGED);
-
-    MailEventConstant PANEL_RESIZED = new MailEventConstant(
-            MailEventConstant.EVENT_PANEL_RESIZED);
-
-    MailEventConstant TAB_CHANGED = new MailEventConstant(
-            MailEventConstant.EVENT_TAB_CHANGED);
-
-    MailEventConstant SECURITY_CHANGED = new MailEventConstant(
-            MailEventConstant.EVENT_SECURITY_CHANGED);
-
-    MailEventConstant SET_VISIBLE_BUTTONS = new MailEventConstant(
-            MailEventConstant.EVENT_SET_VISIBLE_BUTTONS);
-
-    MailEventConstant MAIL_DELETED = new MailEventConstant(
-            MailEventConstant.EVENT_MAIL_DELETED);
-
-    MailEventConstant KEYWORD_REMOVED = new MailEventConstant(
-            MailEventConstant.EVENT_KEYWORD_REMOVED);
-
-    MailEventConstant KEYWORD_ADDED = new MailEventConstant(
-            MailEventConstant.EVENT_KEYWORD_ADDED);
-
-    MailEventConstant CATEGORY_ADDED = new MailEventConstant(
-            MailEventConstant.EVENT_CATEGORY_ADDED);
-
-    MailEventConstant CATEGORY_REMOVED = new MailEventConstant(
-            MailEventConstant.EVENT_CATEGORY_REMOVED);
+    MailEventConstant MAIL_CHANGED = new MailEventConstant(MailEventConstant.EVENT_MAIL_CHANGED);
+    MailEventConstant PANEL_RESIZED = new MailEventConstant(MailEventConstant.EVENT_PANEL_RESIZED);
+    MailEventConstant TAB_CHANGED = new MailEventConstant(MailEventConstant.EVENT_TAB_CHANGED);
+    MailEventConstant SECURITY_CHANGED = new MailEventConstant(MailEventConstant.EVENT_SECURITY_CHANGED);
+    MailEventConstant SET_VISIBLE_BUTTONS = new MailEventConstant(MailEventConstant.EVENT_SET_VISIBLE_BUTTONS);
+    MailEventConstant MAIL_DELETED = new MailEventConstant(MailEventConstant.EVENT_MAIL_DELETED);
+    MailEventConstant KEYWORD_REMOVED = new MailEventConstant(MailEventConstant.EVENT_KEYWORD_REMOVED);
+    MailEventConstant KEYWORD_ADDED = new MailEventConstant(MailEventConstant.EVENT_KEYWORD_ADDED);
+    MailEventConstant CATEGORY_ADDED = new MailEventConstant(MailEventConstant.EVENT_CATEGORY_ADDED);
+    MailEventConstant CATEGORY_REMOVED = new MailEventConstant(MailEventConstant.EVENT_CATEGORY_REMOVED);
 
     /**
      * @param event

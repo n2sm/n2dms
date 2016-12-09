@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,17 +37,11 @@ public class FileUploadResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean hasAutomation = false;
-
     private String path = "";
-
     private List<String> groupsList = new ArrayList<String>();
-
     private List<String> workflowList = new ArrayList<String>();
-
     private boolean showWizardCategories = false;
-
     private boolean showWizardKeywords = false;
-
     private boolean digitalSignature = false;
 
     private String error = "";
@@ -56,7 +50,7 @@ public class FileUploadResponse implements Serializable {
         return path;
     }
 
-    public void setPath(final String path) throws UnsupportedEncodingException {
+    public void setPath(String path) throws UnsupportedEncodingException {
         this.path = URLEncoder.encode(path, "UTF-8");
     }
 
@@ -64,7 +58,7 @@ public class FileUploadResponse implements Serializable {
         return groupsList;
     }
 
-    public void setGroupsList(final List<String> groupsList) {
+    public void setGroupsList(List<String> groupsList) {
         this.groupsList = groupsList;
     }
 
@@ -72,7 +66,7 @@ public class FileUploadResponse implements Serializable {
         return workflowList;
     }
 
-    public void setWorkflowList(final List<String> workflowList) {
+    public void setWorkflowList(List<String> workflowList) {
         this.workflowList = workflowList;
     }
 
@@ -80,7 +74,7 @@ public class FileUploadResponse implements Serializable {
         return showWizardCategories;
     }
 
-    public void setShowWizardCategories(final boolean showWizardCategories) {
+    public void setShowWizardCategories(boolean showWizardCategories) {
         this.showWizardCategories = showWizardCategories;
     }
 
@@ -88,7 +82,7 @@ public class FileUploadResponse implements Serializable {
         return showWizardKeywords;
     }
 
-    public void setShowWizardKeywords(final boolean showWizardKeywords) {
+    public void setShowWizardKeywords(boolean showWizardKeywords) {
         this.showWizardKeywords = showWizardKeywords;
     }
 
@@ -96,7 +90,7 @@ public class FileUploadResponse implements Serializable {
         return hasAutomation;
     }
 
-    public void setHasAutomation(final boolean hasAutomation) {
+    public void setHasAutomation(boolean hasAutomation) {
         this.hasAutomation = hasAutomation;
     }
 
@@ -104,7 +98,7 @@ public class FileUploadResponse implements Serializable {
         return error;
     }
 
-    public void setError(final String error) {
+    public void setError(String error) {
         this.error = error;
     }
 
@@ -112,13 +106,12 @@ public class FileUploadResponse implements Serializable {
         return digitalSignature;
     }
 
-    public void setDigitalSignature(final boolean digitalSignature) {
+    public void setDigitalSignature(boolean digitalSignature) {
         this.digitalSignature = digitalSignature;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("path=").append(path);
         sb.append(", showWizardCategories=").append(showWizardCategories);

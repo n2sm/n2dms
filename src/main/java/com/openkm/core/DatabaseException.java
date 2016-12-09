@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,15 +31,15 @@ public class DatabaseException extends Exception {
         super();
     }
 
-    public DatabaseException(final String message) {
+    public DatabaseException(String message) {
         super(message);
     }
 
-    public DatabaseException(final String message, final Throwable cause) {
+    public DatabaseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DatabaseException(final Throwable arg0) {
+    public DatabaseException(Throwable arg0) {
         super(arg0);
     }
 }

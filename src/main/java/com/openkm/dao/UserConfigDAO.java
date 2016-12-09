@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -53,7 +53,7 @@ public class UserConfigDAO {
     /**
      * Create
      */
-    public static void create(final UserConfig uc) throws DatabaseException {
+    public static void create(UserConfig uc) throws DatabaseException {
         log.debug("create({})", uc);
         Session session = null;
         Transaction tx = null;
@@ -63,7 +63,7 @@ public class UserConfigDAO {
             tx = session.beginTransaction();
             session.save(uc);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -76,7 +76,7 @@ public class UserConfigDAO {
     /**
      * Update
      */
-    public static void update(final UserConfig uc) throws DatabaseException {
+    public static void update(UserConfig uc) throws DatabaseException {
         log.debug("update({})", uc);
         Session session = null;
         Transaction tx = null;
@@ -86,7 +86,7 @@ public class UserConfigDAO {
             tx = session.beginTransaction();
             session.update(uc);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -99,22 +99,21 @@ public class UserConfigDAO {
     /**
      * Update user config profile
      */
-    public static void updateProfile(final String ucUser, final int upId)
-            throws DatabaseException {
+    public static void updateProfile(String ucUser, int upId) throws DatabaseException {
         log.debug("updateProfile({}, {})", ucUser, upId);
-        final String qs = "update UserConfig uc set uc.profile=:profile where uc.user=:user";
+        String qs = "update UserConfig uc set uc.profile=:profile where uc.user=:user";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setEntity("profile", ProfileDAO.findByPk(upId));
             q.setString("user", ucUser);
             q.executeUpdate();
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -127,7 +126,7 @@ public class UserConfigDAO {
     /**
      * Delete
      */
-    public static void delete(final String user) throws DatabaseException {
+    public static void delete(String user) throws DatabaseException {
         log.debug("delete({})", user);
         Session session = null;
         Transaction tx = null;
@@ -135,11 +134,10 @@ public class UserConfigDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final UserConfig uc = (UserConfig) session.load(UserConfig.class,
-                    user);
+            UserConfig uc = (UserConfig) session.load(UserConfig.class, user);
             session.delete(uc);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -152,24 +150,23 @@ public class UserConfigDAO {
     /**
      * Set user home
      */
-    public static void setHome(final UserConfig uc) throws DatabaseException {
+    public static void setHome(UserConfig uc) throws DatabaseException {
         log.info("setHome({})", uc);
-        final String qs = "update UserConfig uc set uc.homePath=:path, uc.homeNode=:node, "
-                + "uc.homeType=:type where uc.user=:user";
+        String qs = "update UserConfig uc set uc.homePath=:path, uc.homeNode=:node, " + "uc.homeType=:type where uc.user=:user";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("path", uc.getHomePath());
             q.setString("node", uc.getHomeNode());
             q.setString("type", uc.getHomeType());
             q.setString("user", uc.getUser());
             q.executeUpdate();
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -182,8 +179,7 @@ public class UserConfigDAO {
     /**
      * Find by pk
      */
-    public static UserConfig findByPk(final javax.jcr.Session jcrSession,
-            final String user) throws DatabaseException, RepositoryException {
+    public static UserConfig findByPk(javax.jcr.Session jcrSession, String user) throws DatabaseException, RepositoryException {
         log.debug("findByPk({}, {})", jcrSession, user);
         Session session = null;
         Transaction tx = null;
@@ -194,8 +190,7 @@ public class UserConfigDAO {
             UserConfig ret = (UserConfig) session.get(UserConfig.class, user);
 
             if (ret == null) {
-                final Node okmRoot = jcrSession.getRootNode().getNode(
-                        Repository.ROOT);
+                Node okmRoot = jcrSession.getRootNode().getNode(Repository.ROOT);
                 ret = new UserConfig();
                 ret.setHomePath(okmRoot.getPath());
                 ret.setHomeNode(okmRoot.getUUID());
@@ -205,18 +200,16 @@ public class UserConfigDAO {
                 session.save(ret);
             } else {
                 try {
-                    final Node node = jcrSession.getNodeByUUID(ret
-                            .getHomeNode());
+                    Node node = jcrSession.getNodeByUUID(ret.getHomeNode());
 
                     if (!node.getPath().equals(ret.getHomePath())) {
                         ret.setHomePath(node.getPath());
                         ret.setHomeType(JCRUtils.getNodeType(node));
                         session.update(ret);
                     }
-                } catch (final javax.jcr.ItemNotFoundException e) {
+                } catch (javax.jcr.ItemNotFoundException e) {
                     // If user home is missing, set a default one
-                    final Node okmRoot = jcrSession.getRootNode().getNode(
-                            Repository.ROOT);
+                    Node okmRoot = jcrSession.getRootNode().getNode(Repository.ROOT);
                     ret.setHomePath(okmRoot.getPath());
                     ret.setHomeNode(okmRoot.getUUID());
                     ret.setHomeType(Folder.TYPE);
@@ -227,10 +220,10 @@ public class UserConfigDAO {
             HibernateUtil.commit(tx);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final javax.jcr.RepositoryException e) {
+        } catch (javax.jcr.RepositoryException e) {
             HibernateUtil.rollback(tx);
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -241,27 +234,24 @@ public class UserConfigDAO {
     /**
      * Find by pk
      */
-    public static UserConfig findByPk(final String user)
-            throws PathNotFoundException, DatabaseException {
+    public static UserConfig findByPk(String user) throws PathNotFoundException, DatabaseException {
         log.debug("findByPk({})", user);
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
             UserConfig ret = (UserConfig) session.get(UserConfig.class, user);
 
             if (ret == null) {
-                final String repoRootPath = "/" + Repository.ROOT;
-                final String repoRootUuid = NodeBaseDAO.getInstance()
-                        .getUuidFromPath(repoRootPath);
-                final NodeFolder nfHome = (NodeFolder) session.load(
-                        NodeFolder.class, repoRootUuid);
+                String repoRootPath = "/" + Repository.ROOT;
+                String repoRootUuid = NodeBaseDAO.getInstance().getUuidFromPath(repoRootPath);
+                NodeFolder nfHome = (NodeFolder) session.load(NodeFolder.class, repoRootUuid);
 
                 ret = new UserConfig();
-                final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                        session, nfHome.getUuid());
+                String path = NodeBaseDAO.getInstance().getPathFromUuid(session, nfHome.getUuid());
                 ret.setHomePath(path);
                 ret.setHomeNode(nfHome.getUuid());
                 ret.setHomeType(Folder.TYPE);
@@ -270,12 +260,10 @@ public class UserConfigDAO {
 
                 session.save(ret);
             } else {
-                NodeBase nfHome = (NodeBase) session.get(NodeBase.class,
-                        ret.getHomeNode());
+                NodeBase nfHome = (NodeBase) session.get(NodeBase.class, ret.getHomeNode());
 
                 if (nfHome != null) {
-                    final String path = NodeBaseDAO.getInstance()
-                            .getPathFromUuid(session, nfHome.getUuid());
+                    String path = NodeBaseDAO.getInstance().getPathFromUuid(session, nfHome.getUuid());
                     ret.setHomePath(path);
                     ret.setHomeNode(nfHome.getUuid());
 
@@ -289,14 +277,11 @@ public class UserConfigDAO {
 
                     session.update(ret);
                 } else {
-                    final String repoRootPath = "/" + Repository.ROOT;
-                    final String repoRootUuid = NodeBaseDAO.getInstance()
-                            .getUuidFromPath(repoRootPath);
-                    nfHome = (NodeFolder) session.load(NodeFolder.class,
-                            repoRootUuid);
+                    String repoRootPath = "/" + Repository.ROOT;
+                    String repoRootUuid = NodeBaseDAO.getInstance().getUuidFromPath(repoRootPath);
+                    nfHome = (NodeFolder) session.load(NodeFolder.class, repoRootUuid);
 
-                    final String path = NodeBaseDAO.getInstance()
-                            .getPathFromUuid(session, nfHome.getUuid());
+                    String path = NodeBaseDAO.getInstance().getPathFromUuid(session, nfHome.getUuid());
                     ret.setHomePath(path);
                     ret.setHomeNode(nfHome.getUuid());
                     ret.setHomeType(Folder.TYPE);
@@ -306,12 +291,13 @@ public class UserConfigDAO {
             }
 
             HibernateUtil.commit(tx);
+            log.trace("findByPk.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

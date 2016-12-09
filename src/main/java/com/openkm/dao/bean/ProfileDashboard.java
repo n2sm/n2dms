@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,24 +25,18 @@ import java.io.Serializable;
 
 public class ProfileDashboard implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean userVisible;
-
     private boolean mailVisible;
-
     private boolean newsVisible;
-
     private boolean generalVisible;
-
     private boolean workflowVisible;
-
     private boolean keywordsVisible;
 
     public boolean isUserVisible() {
         return userVisible;
     }
 
-    public void setUserVisible(final boolean userVisible) {
+    public void setUserVisible(boolean userVisible) {
         this.userVisible = userVisible;
     }
 
@@ -50,7 +44,7 @@ public class ProfileDashboard implements Serializable {
         return mailVisible;
     }
 
-    public void setMailVisible(final boolean mailVisible) {
+    public void setMailVisible(boolean mailVisible) {
         this.mailVisible = mailVisible;
     }
 
@@ -58,7 +52,7 @@ public class ProfileDashboard implements Serializable {
         return newsVisible;
     }
 
-    public void setNewsVisible(final boolean newsVisible) {
+    public void setNewsVisible(boolean newsVisible) {
         this.newsVisible = newsVisible;
     }
 
@@ -66,7 +60,7 @@ public class ProfileDashboard implements Serializable {
         return generalVisible;
     }
 
-    public void setGeneralVisible(final boolean generalVisible) {
+    public void setGeneralVisible(boolean generalVisible) {
         this.generalVisible = generalVisible;
     }
 
@@ -74,7 +68,7 @@ public class ProfileDashboard implements Serializable {
         return workflowVisible;
     }
 
-    public void setWorkflowVisible(final boolean workflowVisible) {
+    public void setWorkflowVisible(boolean workflowVisible) {
         this.workflowVisible = workflowVisible;
     }
 
@@ -82,13 +76,12 @@ public class ProfileDashboard implements Serializable {
         return keywordsVisible;
     }
 
-    public void setKeywordsVisible(final boolean keywordsVisible) {
+    public void setKeywordsVisible(boolean keywordsVisible) {
         this.keywordsVisible = keywordsVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("userVisible=");
         sb.append(userVisible);

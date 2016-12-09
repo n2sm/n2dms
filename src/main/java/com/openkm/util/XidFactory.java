@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,7 +27,6 @@ import javax.transaction.xa.Xid;
 
 public class XidFactory {
     private static final int FORMAT_ID = 0x4f4b4d; // OKM
-
     private static int count = 0;
 
     private XidFactory() {
@@ -35,25 +34,22 @@ public class XidFactory {
 
     public static synchronized Xid createXid() {
         return new Xid() {
-            @Override
             public int getFormatId() {
                 return FORMAT_ID;
             }
 
-            @Override
             public byte[] getGlobalTransactionId() {
-                final byte[] gti = new byte[64];
-                final ByteBuffer bb = ByteBuffer.wrap(gti);
+                byte[] gti = new byte[64];
+                ByteBuffer bb = ByteBuffer.wrap(gti);
                 bb.putLong(Thread.currentThread().getId());
                 bb.putLong(System.currentTimeMillis());
                 bb.putLong(count++);
                 return gti;
             }
 
-            @Override
             public byte[] getBranchQualifier() {
-                final byte[] bq = new byte[64];
-                final ByteBuffer bb = ByteBuffer.wrap(bq);
+                byte[] bq = new byte[64];
+                ByteBuffer bb = ByteBuffer.wrap(bq);
                 bb.putLong(Thread.currentThread().getId());
                 bb.putLong(System.currentTimeMillis());
                 bb.putInt(count++);

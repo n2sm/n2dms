@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,23 +40,17 @@ import com.openkm.frontend.client.bean.GWTResultSet;
 public interface OKMSearchService extends RemoteService {
     public List<GWTQueryParams> getAllSearchs() throws OKMException;
 
-    public Long saveSearch(GWTQueryParams params, String type)
-            throws OKMException;
+    public Long saveSearch(GWTQueryParams params, String type) throws OKMException;
 
     public void deleteSearch(long id) throws OKMException;
 
-    public GWTResultSet findPaginated(GWTQueryParams params, int offset,
-            int limit) throws OKMException;
+    public GWTResultSet findPaginated(GWTQueryParams params, int offset, int limit) throws OKMException;
 
-    public List<GWTKeyword> getKeywordMap(List<String> filter)
-            throws OKMException;
+    public List<GWTKeyword> getKeywordMap(List<String> filter) throws OKMException;
 
     public GWTResultSet find(GWTQueryParams params) throws OKMException;
 
-    public void share(long qpId) throws OKMException;
+    public GWTResultSet findSimpleQueryPaginated(String statement, int offset, int limit) throws OKMException;
 
-    public void unshare(long qpId) throws OKMException;
-
-    public GWTResultSet findSimpleQueryPaginated(String statement, int offset,
-            int limit) throws OKMException;
+    public GWTResultSet findMoreLikeThis(String uuid) throws OKMException;
 }

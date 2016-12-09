@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.openkm.core.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,7 +34,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.openkm.module.db.stuff.DbSessionManager;
 
@@ -50,7 +51,7 @@ public class PrincipalUtils {
      * Obtain the logged user.
      */
     public static String getUser() {
-        final Authentication auth = getAuthentication();
+        Authentication auth = getAuthentication();
         String user = null;
 
         if (auth != null) {
@@ -64,11 +65,11 @@ public class PrincipalUtils {
      * Obtain the list of user roles.
      */
     public static Set<String> getRoles() {
-        final Authentication auth = getAuthentication();
-        final Set<String> roles = new HashSet<String>();
+        Authentication auth = getAuthentication();
+        Set<String> roles = new HashSet<String>();
 
         if (auth != null) {
-            for (final GrantedAuthority ga : auth.getAuthorities()) {
+            for (GrantedAuthority ga : auth.getAuthorities()) {
                 roles.add(ga.getAuthority());
             }
         }
@@ -79,13 +80,13 @@ public class PrincipalUtils {
     /**
      * Check for role
      */
-    public static boolean hasRole(final String role) {
-        final Authentication auth = getAuthentication();
+    public static boolean hasRole(String role) {
+        Authentication auth = getAuthentication();
 
         if (auth != null) {
-            final User user = (User) auth.getPrincipal();
+            UserDetails user = (UserDetails) auth.getPrincipal();
 
-            for (final GrantedAuthority ga : user.getAuthorities()) {
+            for (GrantedAuthority ga : user.getAuthorities()) {
                 if (ga.getAuthority().equals(role)) {
                     return true;
                 }
@@ -98,11 +99,15 @@ public class PrincipalUtils {
     /**
      * Get Authentication by token and also set it as current Authentication.
      */
-    public static Authentication getAuthenticationByToken(final String token) {
-        final Authentication auth = DbSessionManager.getInstance()
-                .getAuthentication(token);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        return auth;
+    public static Authentication getAuthenticationByToken(String token) throws AccessDeniedException {
+        Authentication auth = DbSessionManager.getInstance().getAuthentication(token);
+
+        if (auth != null) {
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            return auth;
+        } else {
+            throw new AccessDeniedException("Invalid token: " + token);
+        }
     }
 
     /**
@@ -119,18 +124,17 @@ public class PrincipalUtils {
     /**
      * Set authentication token
      */
-    public static void setAuthentication(final Authentication auth) {
+    public static void setAuthentication(Authentication auth) {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     /**
      * Create authentication token
      */
-    public static Authentication createAuthentication(final String user,
-            final Set<String> roles) {
-        final List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    public static Authentication createAuthentication(String user, Set<String> roles) {
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
-        for (final String role : roles) {
+        for (String role : roles) {
             authorities.add(new SimpleGrantedAuthority(role));
         }
 

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.frontend.client.widget.dashboard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -47,29 +48,19 @@ import com.openkm.frontend.client.service.OKMDashboardServiceAsync;
  */
 public class NewsDashboard extends WidgetToFire {
 
-    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT
-            .create(OKMDashboardService.class);
+    private final OKMDashboardServiceAsync dashboardService = (OKMDashboardServiceAsync) GWT.create(OKMDashboardService.class);
 
     private final int NUMBER_OF_COLUMNS = 2;
 
     private HorizontalPanel hPanel;
-
     private Map<String, DashboardWidget> hWidgetSearch = new HashMap<String, DashboardWidget>();
-
     private Map<String, GWTQueryParams> keyMap = new HashMap<String, GWTQueryParams>();
-
     private VerticalPanel vPanelLeft;
-
     private VerticalPanel vPanelRight;
-
     private int columnWidth = 0;
-
     private int actualSearchRefreshing = 0;
-
     private String actualRefreshingKey = "0";
-
     private boolean refreshFind = true;
-
     private int newsDocuments = 0;
 
     private boolean showStatus = false;
@@ -92,15 +83,15 @@ public class NewsDashboard extends WidgetToFire {
      * Gets all search callback
      */
     final AsyncCallback<List<GWTQueryParams>> callbackGetUserSearchs = new AsyncCallback<List<GWTQueryParams>>() {
-        @Override
-        public void onSuccess(final List<GWTQueryParams> result) {
+        public void onSuccess(List<GWTQueryParams> result) {
             // Drops widget panel , prevent user deletes query
-            for (final String string : keyMap.keySet()) {
-                final int key = Integer.parseInt(string);
+            for (Iterator<String> it = keyMap.keySet().iterator(); it.hasNext();) {
+                int key = Integer.parseInt(it.next());
                 boolean found = false;
 
                 // looking for key
-                for (final GWTQueryParams params : result) {
+                for (Iterator<GWTQueryParams> itx = result.iterator(); itx.hasNext();) {
+                    GWTQueryParams params = itx.next();
                     if (params.getId() == key) {
                         found = true;
                         break;
@@ -109,8 +100,7 @@ public class NewsDashboard extends WidgetToFire {
 
                 // if has been removed must remove from list
                 if (!found) {
-                    final DashboardWidget dashboardWidget = hWidgetSearch
-                            .get(key);
+                    DashboardWidget dashboardWidget = hWidgetSearch.get(key);
                     if (dashboardWidget.getParent().equals(vPanelLeft)) {
                         vPanelLeft.remove(dashboardWidget);
                     } else if (dashboardWidget.getParent().equals(vPanelRight)) {
@@ -121,24 +111,20 @@ public class NewsDashboard extends WidgetToFire {
             }
 
             // Adds new widget
-            for (final ListIterator<GWTQueryParams> it = result.listIterator(); it
-                    .hasNext();) {
-                final GWTQueryParams params = it.next();
-                final String key = "" + params.getId();
+            for (ListIterator<GWTQueryParams> it = result.listIterator(); it.hasNext();) {
+                GWTQueryParams params = it.next();
+                String key = "" + params.getId();
                 if (!keyMap.keySet().contains(key)) {
                     keyMap.put(key, params);
-                    final DashboardWidget dashboardWidget = new DashboardWidget(
-                            key, params.getQueryName(), "img/icon/news.gif",
-                            true, "news_" + key);
-                    dashboardWidget
-                            .setWidgetToFire(Main.get().mainPanel.dashboard.newsDashboard);
+                    DashboardWidget dashboardWidget =
+                            new DashboardWidget(key, params.getQueryName(), "img/icon/news.gif", true, "news_" + key);
+                    dashboardWidget.setWidgetToFire(Main.get().mainPanel.dashboard.newsDashboard);
                     hWidgetSearch.put(key, dashboardWidget);
                     dashboardWidget.setWidth(columnWidth);
                     dashboardWidget.setHeaderResults(0);
 
                     // Distribute widgets left / rigth
-                    if (vPanelLeft.getWidgetCount() <= vPanelRight
-                            .getWidgetCount()) {
+                    if (vPanelLeft.getWidgetCount() <= vPanelRight.getWidgetCount()) {
                         vPanelLeft.add(dashboardWidget);
                     } else {
                         vPanelRight.add(dashboardWidget);
@@ -152,8 +138,7 @@ public class NewsDashboard extends WidgetToFire {
             }
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("getUserSearchs", caught);
         }
     };
@@ -162,10 +147,8 @@ public class NewsDashboard extends WidgetToFire {
      * Gets the find search callback
      */
     final AsyncCallback<List<GWTDashboardDocumentResult>> callbackFind = new AsyncCallback<List<GWTDashboardDocumentResult>>() {
-        @Override
-        public void onSuccess(final List<GWTDashboardDocumentResult> result) {
-            final DashboardWidget dashboardWidget = hWidgetSearch
-                    .get(actualRefreshingKey);
+        public void onSuccess(List<GWTDashboardDocumentResult> result) {
+            DashboardWidget dashboardWidget = hWidgetSearch.get(actualRefreshingKey);
             dashboardWidget.setDocuments(result);
             dashboardWidget.setHeaderResults(result.size());
             newsDocuments += dashboardWidget.getNotViewed();
@@ -173,8 +156,7 @@ public class NewsDashboard extends WidgetToFire {
             dashboardWidget.unsetRefreshing();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("find", caught);
             hWidgetSearch.get(actualRefreshingKey).unsetRefreshing();
         }
@@ -183,14 +165,14 @@ public class NewsDashboard extends WidgetToFire {
     /**
      * setWidth
      */
-    public void setWidth(final int width) {
-        columnWidth = width / NUMBER_OF_COLUMNS;
+    public void setWidth(int width) {
+        this.columnWidth = width / NUMBER_OF_COLUMNS;
     }
 
     /**
      * getAllSearchs
      */
-    public void getUserSearchs(final boolean refreshFind) {
+    public void getUserSearchs(boolean refreshFind) {
         this.refreshFind = refreshFind;
         dashboardService.getUserSearchs(callbackGetUserSearchs);
     }
@@ -198,18 +180,16 @@ public class NewsDashboard extends WidgetToFire {
     /**
      * refreshAllSearchs
      */
-    private void find(final int value) {
+    private void find(int value) {
         if (keyMap.keySet().size() > value) {
-            final List<String> keySet = new ArrayList<String>(keyMap.keySet());
+            List<String> keySet = new ArrayList<String>(keyMap.keySet());
             actualRefreshingKey = keySet.get(value);
             if (!showStatus) {
                 hWidgetSearch.get(actualRefreshingKey).setRefreshing();
             }
-            dashboardService.find(Integer.parseInt(actualRefreshingKey),
-                    callbackFind);
+            dashboardService.find(Integer.parseInt(actualRefreshingKey), callbackFind);
         } else {
-            Main.get().mainPanel.bottomPanel.userInfo
-                    .setNewsDocuments(newsDocuments);
+            Main.get().mainPanel.bottomPanel.userInfo.setNewsDocuments(newsDocuments);
         }
     }
 
@@ -217,27 +197,26 @@ public class NewsDashboard extends WidgetToFire {
      * Refreshing all searchs
      */
     public void refreshAll() {
-        showStatus = Main.get().mainPanel.topPanel.tabWorkspace
-                .getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD
-                && Main.get().mainPanel.dashboard.getActualView() == UIDashboardConstants.DASHBOARD_NEWS;
+        showStatus =
+                ((Main.get().mainPanel.topPanel.tabWorkspace.getSelectedWorkspace() == UIDockPanelConstants.DASHBOARD) && (Main.get().mainPanel.dashboard
+                        .getActualView() == UIDashboardConstants.DASHBOARD_NEWS));
         newsDocuments = 0;
         actualSearchRefreshing = 0;
         find(actualSearchRefreshing++);
     }
 
     @Override
-    public void decrementNewDocuments(final int value) {
+    public void decrementNewDocuments(int value) {
         newsDocuments -= value;
-        Main.get().mainPanel.bottomPanel.userInfo
-                .setNewsDocuments(newsDocuments);
+        Main.get().mainPanel.bottomPanel.userInfo.setNewsDocuments(newsDocuments);
     }
 
     /**
      * Refreshing language
      */
     public void langRefresh() {
-        for (final String key : keyMap.keySet()) {
-            final DashboardWidget dashboardWidget = hWidgetSearch.get(key);
+        for (String key : keyMap.keySet()) {
+            DashboardWidget dashboardWidget = hWidgetSearch.get(key);
             dashboardWidget.langRefresh();
         }
     }

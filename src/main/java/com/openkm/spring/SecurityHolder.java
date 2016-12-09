@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -26,7 +26,7 @@ import org.springframework.security.core.Authentication;
 public class SecurityHolder {
     private static final ThreadLocal<Authentication> tl = new ThreadLocal<Authentication>();
 
-    public static void set(final Authentication auth) {
+    public static void set(Authentication auth) {
         tl.set(auth);
     }
 

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,9 +32,7 @@ import com.openkm.core.Config;
 
 public class SystemAuthentication implements Authentication {
     private static final long serialVersionUID = 1L;
-
     private boolean authenticated = true;
-
     private Authentication previous = null;
 
     /**
@@ -84,8 +82,7 @@ public class SystemAuthentication implements Authentication {
     }
 
     @Override
-    public void setAuthenticated(final boolean authenticated)
-            throws IllegalArgumentException {
+    public void setAuthenticated(boolean authenticated) throws IllegalArgumentException {
         this.authenticated = authenticated;
     }
 }

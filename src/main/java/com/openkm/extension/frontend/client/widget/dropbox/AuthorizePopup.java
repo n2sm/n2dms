@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.extension.frontend.client.bean.GWTDropboxAccount;
@@ -23,21 +23,14 @@ import com.openkm.frontend.client.extension.comunicator.UtilComunicator;
  * 
  */
 public class AuthorizePopup extends DialogBox {
-    private final OKMDropboxServiceAsync dropboxService = (OKMDropboxServiceAsync) GWT
-            .create(OKMDropboxService.class);
+    private final OKMDropboxServiceAsync dropboxService = (OKMDropboxServiceAsync) GWT.create(OKMDropboxService.class);
 
     private VerticalPanel vPanel;
-
     private HTML allow;
-
     private Button cancelButton;
-
     private Button nextButton;
-
     private Button continueButton;
-
     private HTML operationResult;
-
     private HTML message;
 
     /**
@@ -53,62 +46,55 @@ public class AuthorizePopup extends DialogBox {
 
         message = new HTML("&nbsp;");
         // Allow
-        allow = new HTML(
-                GeneralComunicator.i18nExtension("dropbox.authorize.allow"));
+        allow = new HTML(GeneralComunicator.i18nExtension("dropbox.authorize.allow"));
 
         cancelButton = new Button(GeneralComunicator.i18n("button.cancel"));
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
         cancelButton.setStyleName("okm-NoButton");
 
-        nextButton = new Button(
-                GeneralComunicator.i18nExtension("dropbox.authorize.next"));
+        nextButton = new Button(GeneralComunicator.i18nExtension("dropbox.authorize.next"));
         nextButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 access();
             }
         });
         nextButton.setStyleName("okm-YesButton");
 
-        continueButton = new Button(
-                GeneralComunicator.i18nExtension("button.continue"));
+        continueButton = new Button(GeneralComunicator.i18nExtension("button.continue"));
         continueButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
                 Dropbox.get().subMenuDropbox.execute();
             }
         });
         continueButton.setStyleName("okm-YesButton");
 
-        final HorizontalPanel hPanel = new HorizontalPanel();
+        HorizontalPanel hPanel = new HorizontalPanel();
         hPanel.add(cancelButton);
-        hPanel.add(UtilComunicator.hSpace("5"));
+        hPanel.add(UtilComunicator.hSpace("10px"));
         hPanel.add(nextButton);
-        hPanel.add(UtilComunicator.hSpace("5"));
+        hPanel.add(UtilComunicator.hSpace("10px"));
         hPanel.add(continueButton);
 
         vPanel.add(operationResult);
         vPanel.add(message);
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
         vPanel.add(allow);
-        vPanel.add(UtilComunicator.vSpace("5"));
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
+        vPanel.add(UtilComunicator.vSpace("10px"));
         vPanel.add(hPanel);
-        vPanel.add(UtilComunicator.vSpace("5"));
-        vPanel.setCellHorizontalAlignment(message,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(allow,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(operationResult,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(hPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.add(UtilComunicator.vSpace("10px"));
+        vPanel.setCellHorizontalAlignment(message, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(allow, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(operationResult, HasAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(hPanel, HasAlignment.ALIGN_CENTER);
         vPanel.setWidth("100%");
         setWidget(vPanel);
     }
@@ -119,26 +105,24 @@ public class AuthorizePopup extends DialogBox {
     public void access() {
         dropboxService.access(new AsyncCallback<GWTDropboxAccount>() {
             @Override
-            public void onSuccess(final GWTDropboxAccount result) {
+            public void onSuccess(GWTDropboxAccount result) {
                 operationResult.setVisible(true);
                 if (result != null) {
                     message.setVisible(true);
                     allow.setVisible(false);
                     continueButton.setVisible(true);
                     nextButton.setVisible(false);
-                    operationResult.setHTML(GeneralComunicator
-                            .i18nExtension("dropbox.authorize.ok"));
+                    operationResult.setHTML(GeneralComunicator.i18nExtension("dropbox.authorize.ok"));
                     operationResult.setStyleName("okm-Input-Ok");
                     message.setHTML(result.getDisplayName());
                 } else {
-                    operationResult.setHTML(GeneralComunicator
-                            .i18nExtension("dropbox.authorize.error"));
+                    operationResult.setHTML(GeneralComunicator.i18nExtension("dropbox.authorize.error"));
                     operationResult.setStyleName("okm-Input-Error");
                 }
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 GeneralComunicator.showError("access", caught);
             }
         });
@@ -160,12 +144,9 @@ public class AuthorizePopup extends DialogBox {
      */
     public void langRefresh() {
         setText(GeneralComunicator.i18nExtension("dropbox.authorize.title"));
-        allow.setHTML(GeneralComunicator
-                .i18nExtension("dropbox.authorize.allow"));
+        allow.setHTML(GeneralComunicator.i18nExtension("dropbox.authorize.allow"));
         cancelButton.setHTML(GeneralComunicator.i18n("button.cancel"));
-        nextButton.setHTML(GeneralComunicator
-                .i18nExtension("dropbox.authorize.next"));
-        continueButton.setHTML(GeneralComunicator
-                .i18nExtension("button.continue"));
+        nextButton.setHTML(GeneralComunicator.i18nExtension("dropbox.authorize.next"));
+        continueButton.setHTML(GeneralComunicator.i18nExtension("button.continue"));
     }
 }

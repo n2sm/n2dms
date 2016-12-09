@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,13 +39,12 @@ public class MapFieldBridge implements FieldBridge {
     private static Logger log = LoggerFactory.getLogger(MapFieldBridge.class);
 
     @Override
-    public void set(String name, final Object value, final Document document,
-            final LuceneOptions luceneOptions) {
+    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value instanceof Map<?, ?>) {
             @SuppressWarnings("unchecked")
-            final Map<String, Integer> map = (Map<String, Integer>) value;
+            Map<String, Integer> map = (Map<String, Integer>) value;
 
-            for (final Entry<String, Integer> elto : map.entrySet()) {
+            for (Entry<String, Integer> elto : map.entrySet()) {
                 if ((Permission.READ & elto.getValue()) != 0) {
                     if ("userPermissions".equals(name)) {
                         name = "userPermission";
@@ -53,16 +52,13 @@ public class MapFieldBridge implements FieldBridge {
                         name = "rolePermission";
                     }
 
-                    log.debug("Added field '{}' with value '{}'", name,
-                            elto.getKey());
-                    luceneOptions.addFieldToDocument(name, elto.getKey(),
-                            document);
+                    log.debug("Added field '{}' with value '{}'", name, elto.getKey());
+                    luceneOptions.addFieldToDocument(name, elto.getKey(), document);
                 }
             }
         } else {
             log.warn("IllegalArgumentException: Support only Map<String, Integer>");
-            throw new IllegalArgumentException(
-                    "Support only Map<String, Integer>");
+            throw new IllegalArgumentException("Support only Map<String, Integer>");
         }
     }
 }

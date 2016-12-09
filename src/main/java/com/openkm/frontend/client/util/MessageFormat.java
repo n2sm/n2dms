@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -29,23 +29,21 @@ package com.openkm.frontend.client.util;
  */
 public class MessageFormat extends Format {
     private static final long serialVersionUID = 1L;
-
     private String pattern;
 
-    public MessageFormat(final String pattern) {
+    public MessageFormat(String pattern) {
         applyPattern(pattern);
     }
 
-    public void applyPattern(final String pattern) {
+    public void applyPattern(String pattern) {
         this.pattern = pattern;
     }
 
-    public static String format(final String pattern, final Object... arguments) {
+    public static String format(String pattern, Object... arguments) {
         return doFormat(pattern, arguments);
     }
 
-    @Override
-    public final String format(final Object obj) {
+    public final String format(Object obj) {
         if (obj instanceof Object[]) {
             return doFormat(pattern, (Object[]) obj);
         }
@@ -53,12 +51,12 @@ public class MessageFormat extends Format {
         return doFormat(pattern, new Object[] { obj });
     }
 
-    private static String doFormat(String s, final Object[] arguments) {
+    private static String doFormat(String s, Object[] arguments) {
         // A very simple implementation of format
         int i = 0;
 
         while (i < arguments.length) {
-            final String delimiter = "{" + i + "}";
+            String delimiter = "{" + i + "}";
 
             while (s.contains(delimiter)) {
                 s = s.replace(delimiter, String.valueOf(arguments[i]));

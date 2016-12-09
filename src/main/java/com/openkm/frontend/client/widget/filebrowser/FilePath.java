@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,7 +25,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTFolder;
@@ -41,13 +40,9 @@ import com.openkm.frontend.client.service.OKMRepositoryServiceAsync;
 public class FilePath extends Composite {
 
     private VerticalPanel panel;
-
     private HTML path;
-
     private String valuePath;
-
-    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
+    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
 
     /**
      * FilePath
@@ -56,9 +51,9 @@ public class FilePath extends Composite {
         panel = new VerticalPanel();
         path = new HTML(Main.i18n("filebrowser.path") + ": ", false);
         panel.setStyleName("okm-FilePath-Title");
-        panel.setSize("100%", "22");
+        panel.setSize("100%", "22px");
         panel.add(path);
-        panel.setCellVerticalAlignment(path, HasVerticalAlignment.ALIGN_MIDDLE);
+        panel.setCellVerticalAlignment(path, VerticalPanel.ALIGN_MIDDLE);
         initWidget(panel);
 
         // Only executes first time when object is created to initalize values
@@ -77,25 +72,22 @@ public class FilePath extends Composite {
      * 
      * @param path The directory path
      */
-    public void setPath(final String path) {
+    public void setPath(String path) {
         valuePath = path;
         // Always add / at path ends
-        this.path.setHTML(Main.i18n("filebrowser.path") + " : " + valuePath
-                + "/");
+        this.path.setHTML(Main.i18n("filebrowser.path") + " : " + valuePath + "/");
     }
 
     /**
      * Gets ayncronous root node
      */
     final AsyncCallback<GWTFolder> callbackGetRootFolder = new AsyncCallback<GWTFolder>() {
-        @Override
-        public void onSuccess(final GWTFolder result) {
+        public void onSuccess(GWTFolder result) {
             //Only executes on initalization to get root path node
             setPath(result.getPath());
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
+        public void onFailure(Throwable caught) {
             Main.get().showError("GetRootFolder", caught);
         }
     };

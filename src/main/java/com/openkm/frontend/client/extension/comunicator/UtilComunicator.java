@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,6 +21,7 @@
 
 package com.openkm.frontend.client.extension.comunicator;
 
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.HTML;
 import com.openkm.frontend.client.util.Util;
 
@@ -38,7 +39,7 @@ public class UtilComunicator {
      * @param size
      * @return
      */
-    public static String formatSize(final double size) {
+    public static String formatSize(double size) {
         return Util.formatSize(size);
     }
 
@@ -49,8 +50,7 @@ public class UtilComunicator {
      * @param caption
      * @return
      */
-    public static String createHeaderHTML(final String imageURL,
-            final String caption) {
+    public static String createHeaderHTML(String imageURL, String caption) {
         return Util.createHeaderHTML(imageURL, caption);
     }
 
@@ -62,8 +62,7 @@ public class UtilComunicator {
      * @param align
      * @return
      */
-    public static String imageItemHTML(final String imageUrl,
-            final String title, final String align) {
+    public static String imageItemHTML(String imageUrl, String title, String align) {
         return Util.imageItemHTML(imageUrl, title, align);
     }
 
@@ -74,7 +73,7 @@ public class UtilComunicator {
      * @param text
      * @return
      */
-    public static String menuHTML(final String imageUrl, final String text) {
+    public static String menuHTML(String imageUrl, String text) {
         return Util.menuHTML(imageUrl, text);
     }
 
@@ -84,7 +83,7 @@ public class UtilComunicator {
      * @param imageUrl
      * @return
      */
-    public static String imageItemHTML(final String imageUrl) {
+    public static String imageItemHTML(String imageUrl) {
         return Util.imageHTML(imageUrl);
     }
 
@@ -95,7 +94,7 @@ public class UtilComunicator {
      * @param mark
      * @return
      */
-    public static String getTextAsBoldHTML(final String text, final boolean mark) {
+    public static String getTextAsBoldHTML(String text, boolean mark) {
         return Util.getTextAsBoldHTML(text, mark);
     }
 
@@ -114,7 +113,7 @@ public class UtilComunicator {
      * @param path The complete item path.
      * @return The name of the item.
      */
-    public static String getName(final String path) {
+    public static String getName(String path) {
         return Util.getName(path);
     }
 
@@ -124,7 +123,7 @@ public class UtilComunicator {
      * @param path
      * @return
      */
-    public static String getParent(final String path) {
+    public static String getParent(String path) {
         return Util.getParent(path);
     }
 
@@ -134,7 +133,7 @@ public class UtilComunicator {
      * @param mime The document mime-type
      * @return the html image of mime-type file
      */
-    public static String mimeImageHTML(final String mime) {
+    public static String mimeImageHTML(String mime) {
         return Util.mimeImageHTML(mime);
     }
 
@@ -153,7 +152,7 @@ public class UtilComunicator {
      * @param width
      * @return
      */
-    public static HTML hSpace(final String width) {
+    public static HTML hSpace(String width) {
         return Util.hSpace(width);
     }
 
@@ -163,7 +162,21 @@ public class UtilComunicator {
      * @param height
      * @return
      */
-    public static HTML vSpace(final String height) {
+    public static HTML vSpace(String height) {
         return Util.vSpace(height);
+    }
+
+    /**
+     * isSearchableKey
+     * 
+     * @param event
+     * @return
+     */
+    public static boolean isSearchableKey(KeyUpEvent event) {
+        if (event != null) {
+            return Util.isSearchableKey(event);
+        } else {
+            return true;
+        }
     }
 }

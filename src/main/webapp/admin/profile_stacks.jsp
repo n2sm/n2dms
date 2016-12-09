@@ -81,6 +81,19 @@
       </td>
     </tr>
     <tr>
+      <td>Metadata</td>
+      <td>
+        <c:choose>
+          <c:when test="${prf.prfStack.metadataVisible}">
+            <input name="prf_stack_metadata_visible" type="checkbox" checked="checked"/>
+          </c:when>
+          <c:otherwise>
+            <input name="prf_stack_metadata_visible" type="checkbox"/>
+          </c:otherwise>
+        </c:choose>
+      </td>
+    </tr>
+    <tr>
       <td>Trash</td>
       <td>
         <c:choose>

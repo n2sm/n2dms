@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -26,21 +26,22 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+
 import com.openkm.frontend.client.OKMException;
 import com.openkm.frontend.client.bean.GWTDocument;
+import com.openkm.frontend.client.bean.GWTExtendedAttributes;
 import com.openkm.frontend.client.bean.GWTVersion;
 import com.openkm.frontend.client.bean.form.GWTFormElement;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 
 /**
  * @author jllort
- *
  */
 @RemoteServiceRelativePath("Document")
 public interface OKMDocumentService extends RemoteService {
-    public List<GWTDocument> getChilds(String fldId) throws OKMException;
+    public List<GWTDocument> getChilds(String fldId, Map<String, GWTFilter> mapFilter) throws OKMException;
 
-    public List<GWTVersion> getVersionHistory(String docPath)
-            throws OKMException;
+    public List<GWTVersion> getVersionHistory(String docPath) throws OKMException;
 
     public void delete(String docPath) throws OKMException;
 
@@ -52,15 +53,13 @@ public interface OKMDocumentService extends RemoteService {
 
     public void unlock(String docPath) throws OKMException;
 
-    public GWTDocument rename(String docPath, String newName)
-            throws OKMException;
+    public GWTDocument rename(String docPath, String newName) throws OKMException;
 
     public void move(String docPath, String destPath) throws OKMException;
 
     public void purge(String docPath) throws OKMException;
 
-    public void restoreVersion(String docPath, String versionId)
-            throws OKMException;
+    public void restoreVersion(String docPath, String versionId) throws OKMException;
 
     public GWTDocument get(String docPath) throws OKMException;
 
@@ -76,20 +75,17 @@ public interface OKMDocumentService extends RemoteService {
 
     public void forceCancelCheckout(String docPath) throws OKMException;
 
-    public GWTDocument createFromTemplate(String docPath,
-            String destinationPath, List<GWTFormElement> formProperties,
-            Map<String, List<Map<String, String>>> tableProperties)
-            throws OKMException;
+    public GWTDocument createFromTemplate(String docPath, String destinationPath, List<GWTFormElement> formProperties,
+            Map<String, List<Map<String, String>>> tableProperties) throws OKMException;
 
-    public String updateFromTemplate(String docPath, String destinationPath,
-            List<GWTFormElement> formProperties,
-            Map<String, List<Map<String, String>>> tableProperties)
-            throws OKMException;
+    public String updateFromTemplate(String docPath, String destinationPath, List<GWTFormElement> formProperties,
+            Map<String, List<Map<String, String>>> tableProperties) throws OKMException;
 
     public String convertToPdf(String docPath) throws OKMException;
 
+    public void mergePdf(String docName, List<String> paths) throws OKMException;
+
     public List<GWTDocument> getAllTemplates() throws OKMException;
 
-    public GWTDocument createFromTemplate(String tplPath, String fldPath,
-            String newName) throws OKMException;
+    public void createFromTemplate(String docPath, String fldPath, String name, GWTExtendedAttributes attributes) throws OKMException;
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,46 +33,44 @@ import com.openkm.frontend.client.util.ISO8601;
 public class DatabaseMetadataMap {
     // Metadata virtual column name mapping
     public static final String MV_NAME_TABLE = "table";
-
     public static final String MV_NAME_ID = "id";
 
     // Boolean values mapping
     public static final String BOOLEAN_TRUE = "T";
-
     public static final String BOOLEAN_FALSE = "F";
 
     /**
      * getDoubleValue
      */
-    public static Double getDoubleValue(final String value) {
-        return value != null ? new Double(value) : null;
+    public static Double getDoubleValue(String value) {
+        return (value != null) ? new Double(value) : null;
     }
 
     /**
      * mapDoubleValue
      */
-    public static String mapDoubleValue(final Double value) {
-        return value != null ? String.valueOf(value) : null;
+    public static String mapDoubleValue(Double value) {
+        return (value != null) ? String.valueOf(value) : null;
     }
 
     /**
      * getIntValue
      */
-    public static Integer getIntegerValue(final String value) {
-        return value != null ? new Integer(value) : null;
+    public static Integer getIntegerValue(String value) {
+        return (value != null) ? new Integer(value) : null;
     }
 
     /**
      * mapIntValue
      */
-    public static String mapIntegerValue(final Integer value) {
-        return value != null ? String.valueOf(value) : null;
+    public static String mapIntegerValue(Integer value) {
+        return (value != null) ? String.valueOf(value) : null;
     }
 
     /**
      * getBooleanValue
      */
-    public static Boolean getBooleanValue(final String value) {
+    public static Boolean getBooleanValue(String value) {
         if (value == null) {
             return null;
         } else {
@@ -87,7 +85,7 @@ public class DatabaseMetadataMap {
     /**
      * mapBooleanValue
      */
-    public static String mapBooleanValue(final Boolean value) {
+    public static String mapBooleanValue(Boolean value) {
         if (value == null) {
             return null;
         } else {
@@ -102,14 +100,14 @@ public class DatabaseMetadataMap {
     /**
      * getDateValue
      */
-    public static Date getDateValue(final String value) {
+    public static Date getDateValue(String value) {
         return ISO8601.parseBasic(value);
     }
 
     /**
      * mapDateValue
      */
-    public static String mapDateValue(final Date value) {
+    public static String mapDateValue(Date value) {
         return ISO8601.formatBasic(value);
     }
 }

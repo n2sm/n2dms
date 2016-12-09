@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,8 +22,7 @@
 package com.openkm.frontend.client.widget.findfolder;
 
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -39,13 +38,9 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class Status extends PopupPanel {
 
     private HorizontalPanel hPanel;
-
     private HTML msg;
-
     private HTML space;
-
     private Image image;
-
     private boolean flag_getChilds = false;
 
     /**
@@ -62,11 +57,9 @@ public class Status extends PopupPanel {
         hPanel.add(msg);
         hPanel.add(space);
 
-        hPanel.setCellVerticalAlignment(image,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellVerticalAlignment(msg, HasVerticalAlignment.ALIGN_MIDDLE);
-        hPanel.setCellHorizontalAlignment(image,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        hPanel.setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellVerticalAlignment(msg, HasAlignment.ALIGN_MIDDLE);
+        hPanel.setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
         hPanel.setCellWidth(image, "30px");
         hPanel.setCellWidth(space, "7px");
 
@@ -83,18 +76,14 @@ public class Status extends PopupPanel {
      */
     public void refresh() {
         if (flag_getChilds) {
-            final int left = (Main.get().findFolderSelectPopup.getOffsetWidth() - 200)
-                    / 2 + Main.get().findFolderSelectPopup.getAbsoluteLeft();
-            final int top = (Main.get().findFolderSelectPopup.getOffsetHeight() - 40)
-                    / 2 + Main.get().findFolderSelectPopup.getAbsoluteTop();
+            int left = ((Main.get().findFolderSelectPopup.getOffsetWidth() - 200) / 2) + Main.get().findFolderSelectPopup.getAbsoluteLeft();
+            int top = ((Main.get().findFolderSelectPopup.getOffsetHeight() - 40) / 2) + Main.get().findFolderSelectPopup.getAbsoluteTop();
             setPopupPosition(left, top);
-            Main.get().findFolderSelectPopup.scrollFolderPanel
-                    .addStyleName("okm-PanelRefreshing");
+            Main.get().findFolderSelectPopup.scrollFolderPanel.addStyleName("okm-PanelRefreshing");
             super.show();
         } else {
             super.hide();
-            Main.get().findFolderSelectPopup.scrollFolderPanel
-                    .removeStyleName("okm-PanelRefreshing");
+            Main.get().findFolderSelectPopup.scrollFolderPanel.removeStyleName("okm-PanelRefreshing");
         }
     }
 

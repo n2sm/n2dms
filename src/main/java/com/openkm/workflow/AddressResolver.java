@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,17 +29,15 @@ import com.openkm.principal.PrincipalAdapterException;
 
 public class AddressResolver implements org.jbpm.mail.AddressResolver {
     private static Logger log = LoggerFactory.getLogger(AddressResolver.class);
-
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public Object resolveAddress(final String actorId) {
+    public Object resolveAddress(String actorId) {
         log.debug("resolveAddress({})", actorId);
         String mail = null;
 
         try {
             mail = ModuleManager.getAuthModule().getMail(null, actorId);
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.warn(e.getMessage());
         }
 

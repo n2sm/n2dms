@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -48,7 +48,7 @@ public interface HasNavigatorEvent {
          * 
          * @param type
          */
-        private NavigatorEventConstant(final int type) {
+        private NavigatorEventConstant(int type) {
             this.type = type;
         }
 
@@ -57,8 +57,7 @@ public interface HasNavigatorEvent {
         }
     }
 
-    NavigatorEventConstant STACK_CHANGED = new NavigatorEventConstant(
-            NavigatorEventConstant.EVENT_STACK_CHANGED);
+    NavigatorEventConstant STACK_CHANGED = new NavigatorEventConstant(NavigatorEventConstant.EVENT_STACK_CHANGED);
 
     /**
      * @param event

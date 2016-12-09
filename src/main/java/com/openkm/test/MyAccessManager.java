@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MyAccessManager implements AccessManager {
     private static Logger log = LoggerFactory.getLogger(MyAccessManager.class);
-
     private AMContext context;
-
     ThreadLocal<Boolean> alreadyInsideAccessManager = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
@@ -36,19 +34,15 @@ public class MyAccessManager implements AccessManager {
     };
 
     @Override
-    public void init(final AMContext context) throws AccessDeniedException,
-            Exception {
+    public void init(AMContext context) throws AccessDeniedException, Exception {
         log.debug("init(" + context + ")");
         this.context = context;
     }
 
     @Override
-    public void init(final AMContext context,
-            final AccessControlProvider acProvider,
-            final WorkspaceAccessManager wspAccessMgr)
+    public void init(AMContext context, AccessControlProvider acProvider, WorkspaceAccessManager wspAccessMgr)
             throws AccessDeniedException, Exception {
-        log.debug("init(" + context + ", " + acProvider + ", " + wspAccessMgr
-                + ")");
+        log.debug("init(" + context + ", " + acProvider + ", " + wspAccessMgr + ")");
         init(context);
     }
 
@@ -58,23 +52,20 @@ public class MyAccessManager implements AccessManager {
     }
 
     @Override
-    public boolean canAccess(final String workspaceName)
-            throws NoSuchWorkspaceException, RepositoryException {
+    public boolean canAccess(String workspaceName) throws NoSuchWorkspaceException, RepositoryException {
         log.info("canAccess(" + workspaceName + ")");
         return true;
     }
 
     @Override
-    public boolean canRead(final Path itemPath) throws RepositoryException {
+    public boolean canRead(Path itemPath) throws RepositoryException {
         log.info("canRead(" + itemPath + ")");
         return isGranted(itemPath, Permission.READ);
     }
 
     @Override
     // This method is deprecated in Jackrabbit 1.5.0
-    public void checkPermission(final ItemId id, final int permissions)
-            throws AccessDeniedException, ItemNotFoundException,
-            RepositoryException {
+    public void checkPermission(ItemId id, int permissions) throws AccessDeniedException, ItemNotFoundException, RepositoryException {
         log.debug("checkPermission(" + id + ", " + permissions + ")");
         if (isGranted(id, permissions)) {
             return;
@@ -84,16 +75,14 @@ public class MyAccessManager implements AccessManager {
 
     @Override
     // This method is deprecated in Jackrabbit 1.5.0
-    public boolean isGranted(final ItemId id, final int permissions)
-            throws ItemNotFoundException, RepositoryException {
+    public boolean isGranted(ItemId id, int permissions) throws ItemNotFoundException, RepositoryException {
         log.info("isGranted(" + id + ", " + permissions + ")");
-        final Path path = context.getHierarchyManager().getPath(id);
+        Path path = context.getHierarchyManager().getPath(id);
         return isGranted(path, deprecatedActionsToNewApi(permissions));
     }
 
     @Override
-    public boolean isGranted(final Path absPath, final int permissions)
-            throws RepositoryException {
+    public boolean isGranted(Path absPath, int permissions) throws RepositoryException {
         log.info("isGranted(" + absPath + ", " + permissions + ")");
 
         if (alreadyInsideAccessManager.get()) {
@@ -109,12 +98,9 @@ public class MyAccessManager implements AccessManager {
     }
 
     @Override
-    public boolean isGranted(final Path parentPath, final Name childName,
-            final int permissions) throws RepositoryException {
-        log.info("isGranted(" + parentPath + ", " + childName + ", "
-                + permissions + ")");
-        final Path p = PathFactoryImpl.getInstance().create(parentPath,
-                childName, true);
+    public boolean isGranted(Path parentPath, Name childName, int permissions) throws RepositoryException {
+        log.info("isGranted(" + parentPath + ", " + childName + ", " + permissions + ")");
+        Path p = PathFactoryImpl.getInstance().create(parentPath, childName, true);
         return isGranted(p, permissions);
     }
 
@@ -122,10 +108,10 @@ public class MyAccessManager implements AccessManager {
      * 
      */
     @SuppressWarnings("deprecation")
-    private int deprecatedActionsToNewApi(final int actions) {
-        final boolean read = (actions & READ) != 0;
-        final boolean write = (actions & WRITE) != 0;
-        final boolean remove = (actions & REMOVE) != 0;
+    private int deprecatedActionsToNewApi(int actions) {
+        boolean read = (actions & READ) != 0;
+        boolean write = (actions & WRITE) != 0;
+        boolean remove = (actions & REMOVE) != 0;
         int result = 0;
 
         if (read) {
@@ -145,10 +131,39 @@ public class MyAccessManager implements AccessManager {
         return result;
     }
 
+    /**
+     * 
+     */
+    @SuppressWarnings("unused")
+    private String actionsToString(int actions) {
+        StringBuilder sb = new StringBuilder();
+
+        if (!(actions == Permission.NONE)) {
+            //if ((actions & Permission.ALL) != 0) {
+            //sb.append("all ");
+            //}
+            if ((actions & Permission.ADD_NODE) != 0) {
+                sb.append("add_node ");
+            }
+            if ((actions & Permission.READ) != 0) {
+                sb.append("read ");
+            }
+            if ((actions & Permission.REMOVE_NODE) != 0) {
+                sb.append("remove_node ");
+            }
+            if ((actions & Permission.REMOVE_PROPERTY) != 0) {
+                sb.append("remove_property ");
+            }
+            if ((actions & Permission.SET_PROPERTY) != 0) {
+                sb.append("set_property ");
+            }
+        }
+
+        return sb.toString();
+    }
+
     // @Override
     // TODO Enable when using jackrabbit 1.6
-    @Override
-    public void checkPermission(final Path arg0, final int arg1)
-            throws AccessDeniedException, RepositoryException {
+    public void checkPermission(Path arg0, int arg1) throws AccessDeniedException, RepositoryException {
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -47,47 +47,43 @@ import com.openkm.util.WebUtils;
  */
 public class CssServlet extends HttpServlet {
     private static Logger log = LoggerFactory.getLogger(CssServlet.class);
-
     private static final long serialVersionUID = 1L;
 
     /**
      * 
      */
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String path = request.getPathInfo();
-        final OutputStream os = null;
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String path = request.getPathInfo();
+        OutputStream os = null;
 
         try {
             if (path.length() > 1) {
-                final String[] foo = path.substring(1).split("/");
+                String[] foo = path.substring(1).split("/");
 
                 if (foo.length > 1) {
-                    final String context = foo[0];
-                    final String name = foo[1];
-                    final Css css = CssDAO.getInstance().findByContextAndName(
-                            context, name);
+                    String context = foo[0];
+                    String name = foo[1];
+                    Css css = CssDAO.getInstance().findByContextAndName(context, name);
 
                     if (css == null) {
-                        final InputStream is = null;
+                        InputStream is = null;
 
                         try {
                             if (Css.CONTEXT_FRONTEND.equals(context)) {
 
                             } else if (Css.CONTEXT_EXTENSION.equals(context)) {
+                                if ("htmlEditor".equals(name)) {
+                                    is = getServletContext().getResourceAsStream("/css/tiny_mce/content.css");
+                                }
+                            }
 
-                            }
-                            /*
                             if (is != null) {
-                            	css = new Css();
-                            	css.setContent(IOUtils.toString(is));
-                            	css.setContext(context);
-                            	css.setName(name);
-                            	css.setActive(true);
+                                css = new Css();
+                                css.setContent(IOUtils.toString(is));
+                                css.setContext(context);
+                                css.setName(name);
+                                css.setActive(true);
                             }
-                            */
                         } finally {
                             IOUtils.closeQuietly(is);
                         }
@@ -95,19 +91,14 @@ public class CssServlet extends HttpServlet {
 
                     if (css != null) {
                         // Prepare file headers
-                        WebUtils.prepareSendFile(request, response,
-                                css.getName() + ".css",
-                                MimeTypeConfig.MIME_CSS, false);
-                        final PrintWriter out = new PrintWriter(
-                                new OutputStreamWriter(
-                                        response.getOutputStream(), "UTF8"),
-                                true);
+                        WebUtils.prepareSendFile(request, response, css.getName() + ".css", MimeTypeConfig.MIME_CSS, false);
+                        PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF8"), true);
                         out.append(css.getContent());
                         out.flush();
                     }
                 }
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
         } finally {
             IOUtils.closeQuietly(os);

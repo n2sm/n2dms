@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,19 +35,12 @@ import com.openkm.frontend.client.extension.widget.menu.MenuItemExtension;
 public class MainMenuExample {
 
     private MenuItemExtension exampleMenu;
-
     private MenuBarExtension subMenuExample;
-
     private MenuBarExtension subMenuExample2;
-
     private MenuItemExtension subMenuItem;
-
     private MenuItemExtension option1;
-
     private MenuItemExtension option2;
-
     private MenuItemExtension option3;
-
     private MenuItemExtension option4;
 
     /**
@@ -55,21 +48,16 @@ public class MainMenuExample {
      */
     public MainMenuExample() {
         // All menu items
-        option1 = new MenuItemExtension("img/box.png", "Option 1",
-                option1Action);
-        option2 = new MenuItemExtension("img/box.png", "Option 2",
-                option2Action);
-        option3 = new MenuItemExtension("img/box.png", "Option 3",
-                option3Action);
-        option4 = new MenuItemExtension("img/box.png", "Option 4",
-                option4Action);
+        option1 = new MenuItemExtension("img/box.png", "Option 1", option1Action);
+        option2 = new MenuItemExtension("img/box.png", "Option 2", option2Action);
+        option3 = new MenuItemExtension("img/box.png", "Option 3", option3Action);
+        option4 = new MenuItemExtension("img/box.png", "Option 4", option4Action);
 
         // Secondary submenu
         subMenuExample2 = new MenuBarExtension();
         subMenuExample2.addItem(option3);
         subMenuExample2.addItem(option4);
-        subMenuItem = new MenuItemExtension("img/box.png", "Sub menu",
-                subMenuExample2); // is a secondary submenu
+        subMenuItem = new MenuItemExtension("img/box.png", "Sub menu", subMenuExample2); // is a secondary submenu
 
         // Principal submenu
         subMenuExample = new MenuBarExtension();
@@ -89,7 +77,6 @@ public class MainMenuExample {
      * option1Action
      */
     Command option1Action = new Command() {
-        @Override
         public void execute() {
             Window.alert("option1 action");
         }
@@ -99,7 +86,6 @@ public class MainMenuExample {
      * option2Action
      */
     Command option2Action = new Command() {
-        @Override
         public void execute() {
             Window.alert("option2 action");
         }
@@ -109,7 +95,6 @@ public class MainMenuExample {
      * option3Action
      */
     Command option3Action = new Command() {
-        @Override
         public void execute() {
             Window.alert("option3 action");
         }
@@ -119,7 +104,6 @@ public class MainMenuExample {
      * option4Action
      */
     Command option4Action = new Command() {
-        @Override
         public void execute() {
             Window.alert("option4 action");
         }

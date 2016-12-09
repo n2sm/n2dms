@@ -14,20 +14,15 @@ import org.apache.log4j.PropertyConfigurator;
  * @author pavila
  */
 public class LoggerWatchdog extends TimerTask {
-    private static Logger log = Logger
-            .getLogger(LoggerWatchdog.class.getName());
-
+    private static Logger log = Logger.getLogger(LoggerWatchdog.class.getName());
     private static volatile boolean running = false;
-
     private long lastModified = 0;
-
     private File file = null;
 
-    public LoggerWatchdog(final String file) {
+    public LoggerWatchdog(String file) {
         this.file = new File(file);
     }
 
-    @Override
     public void run() {
         if (running) {
             log.warning("*** LoggerWatchdog already running ***");
@@ -37,7 +32,7 @@ public class LoggerWatchdog extends TimerTask {
 
             try {
                 if (file.exists() && file.canRead()) {
-                    final long l = file.lastModified();
+                    long l = file.lastModified();
 
                     if (l > lastModified) {
                         lastModified = l;
@@ -52,7 +47,6 @@ public class LoggerWatchdog extends TimerTask {
 
     private void doOnChange() {
         log.info("*** Log4j configuration file changed ***");
-        new PropertyConfigurator().doConfigure(file.getPath(),
-                LogManager.getLoggerRepository());
+        new PropertyConfigurator().doConfigure(file.getPath(), LogManager.getLoggerRepository());
     }
 }

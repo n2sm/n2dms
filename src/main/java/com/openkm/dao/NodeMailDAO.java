@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -45,11 +45,11 @@ import com.openkm.dao.bean.NodeFolder;
 import com.openkm.dao.bean.NodeMail;
 import com.openkm.module.db.stuff.SecurityHelper;
 import com.openkm.spring.PrincipalUtils;
+import com.openkm.util.FormatUtil;
 import com.openkm.util.UserActivity;
 
 public class NodeMailDAO {
     private static Logger log = LoggerFactory.getLogger(NodeMailDAO.class);
-
     private static NodeMailDAO single = new NodeMailDAO();
 
     private NodeMailDAO() {
@@ -62,8 +62,8 @@ public class NodeMailDAO {
     /**
      * Create node
      */
-    public void create(final NodeMail nMail) throws PathNotFoundException,
-            AccessDeniedException, ItemExistsException, DatabaseException {
+    public synchronized void create(NodeMail nMail) throws PathNotFoundException, AccessDeniedException, ItemExistsException,
+            DatabaseException {
         log.debug("create({})", nMail);
         Session session = null;
         Transaction tx = null;
@@ -73,31 +73,35 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                    nMail.getParent());
+            NodeBase parentNode = (NodeBase) session.load(NodeBase.class, nMail.getParent());
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
 
             // Check for same mail name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session,
-                    nMail.getParent(), nMail.getName());
+            NodeBaseDAO.getInstance().checkItemExistence(session, nMail.getParent(), nMail.getName());
+
+            // Need to replace 0x00 because PostgreSQL does not accept string containing 0x00
+            nMail.setContent(FormatUtil.fixUTF8(nMail.getContent()));
+
+            // Need to remove Unicode surrogate because of MySQL => SQL Error: 1366, SQLState: HY000
+            nMail.setContent(FormatUtil.trimUnicodeSurrogates(nMail.getContent()));
 
             session.save(nMail);
             HibernateUtil.commit(tx);
             log.debug("create: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -109,42 +113,43 @@ public class NodeMailDAO {
      * Find by parent
      */
     @SuppressWarnings("unchecked")
-    public List<NodeMail> findByParent(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    public List<NodeMail> findByParent(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByParent({})", parentUuid);
-        final String qs = "from NodeMail nm where nm.parent=:parent order by nm.name";
+        String qs = "from NodeMail nm where nm.parent=:parent order by nm.name";
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
             // Security Check
             if (!Config.ROOT_NODE_UUID.equals(parentUuid)) {
-                final NodeBase parentNode = (NodeBase) session.load(
-                        NodeBase.class, parentUuid);
+                NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
                 SecurityHelper.checkRead(parentNode);
             }
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("parent", parentUuid);
-            final List<NodeMail> ret = q.list();
+            List<NodeMail> ret = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(ret);
 
             initialize(ret);
             HibernateUtil.commit(tx);
+
+            log.trace("findByParent.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByParent: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -155,17 +160,16 @@ public class NodeMailDAO {
     /**
      * Find by path
      */
-    public NodeMail findByPk(final String uuid) throws PathNotFoundException,
-            DatabaseException {
+    public NodeMail findByPk(String uuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByPk({})", uuid);
-        final String qs = "from NodeMail nm where nm.uuid=:uuid";
+        String qs = "from NodeMail nm where nm.uuid=:uuid";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("uuid", uuid);
-            final NodeMail nMail = (NodeMail) q.setMaxResults(1).uniqueResult();
+            NodeMail nMail = (NodeMail) q.setMaxResults(1).uniqueResult();
 
             if (nMail == null) {
                 throw new PathNotFoundException(uuid);
@@ -177,7 +181,7 @@ public class NodeMailDAO {
             initialize(nMail);
             log.debug("findByPk: {}", nMail);
             return nMail;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -189,10 +193,9 @@ public class NodeMailDAO {
      * 
      * Used in SearchDAO, and should exposed in other method should make Security Check
      */
-    public boolean isMail(final FullTextSession ftSession, final String uuid)
-            throws HibernateException {
+    public boolean isMail(FullTextSession ftSession, String uuid) throws HibernateException {
         log.debug("isMail({}, {})", ftSession, uuid);
-        final boolean ret = ftSession.get(NodeMail.class, uuid) instanceof NodeMail;
+        boolean ret = ftSession.get(NodeMail.class, uuid) instanceof NodeMail;
         log.debug("isMail: {}", ret);
         return ret;
     }
@@ -201,10 +204,12 @@ public class NodeMailDAO {
      * Search nodes by category
      */
     @SuppressWarnings("unchecked")
-    public List<NodeMail> findByCategory(final String catUuid)
-            throws PathNotFoundException, DatabaseException {
+    public List<NodeMail> findByCategory(String catUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByCategory({})", catUuid);
+        long begin = System.currentTimeMillis();
         final String qs = "from NodeMail nm where :category in elements(nm.categories) order by nm.name";
+        final String sql =
+                "select NBS_UUID from OKM_NODE_CATEGORY, OKM_NODE_MAIL " + "where NCT_CATEGORY = :catUuid and NCT_NODE = NBS_UUID";
         List<NodeMail> ret = new ArrayList<NodeMail>();
         Session session = null;
         Transaction tx = null;
@@ -214,11 +219,10 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase catNode = (NodeBase) session.load(NodeBase.class,
-                    catUuid);
+            NodeBase catNode = (NodeBase) session.load(NodeBase.class, catUuid);
             SecurityHelper.checkRead(catNode);
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("category", catUuid);
             ret = q.list();
 
@@ -227,15 +231,16 @@ public class NodeMailDAO {
 
             initialize(ret);
             HibernateUtil.commit(tx);
+            log.trace("findByCategory.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByCategory: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -247,10 +252,10 @@ public class NodeMailDAO {
      * Search nodes by keyword
      */
     @SuppressWarnings("unchecked")
-    public List<NodeMail> findByKeyword(final String keyword)
-            throws DatabaseException {
+    public List<NodeMail> findByKeyword(String keyword) throws DatabaseException {
         log.debug("findByKeyword({})", keyword);
         final String qs = "from NodeMail nm where :keyword in elements(nm.keywords) order by nm.name";
+        final String sql = "select NBS_UUID from OKM_NODE_KEYWORD, OKM_NODE_MAIL " + "where NKW_KEYWORD = :keyword and NKW_NODE = NBS_UUID";
         List<NodeMail> ret = new ArrayList<NodeMail>();
         Session session = null;
         Transaction tx = null;
@@ -259,7 +264,7 @@ public class NodeMailDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("keyword", keyword);
             ret = q.list();
 
@@ -270,10 +275,10 @@ public class NodeMailDAO {
             HibernateUtil.commit(tx);
             log.debug("findByKeyword: {}", ret);
             return ret;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -285,10 +290,10 @@ public class NodeMailDAO {
      * Search nodes by property value
      */
     @SuppressWarnings("unchecked")
-    public List<NodeMail> findByPropertyValue(final String group,
-            final String property, final String value) throws DatabaseException {
+    public List<NodeMail> findByPropertyValue(String group, String property, String value) throws DatabaseException {
         log.debug("findByPropertyValue({}, {}, {})", property, value);
-        final String qs = "select nb from NodeMail nb join nb.properties nbp where nbp.group=:group and nbp.name=:property and nbp.value like :value";
+        String qs =
+                "select nb from NodeMail nb join nb.properties nbp where nbp.group=:group and nbp.name=:property and nbp.value like :value";
         Session session = null;
         Transaction tx = null;
 
@@ -296,11 +301,11 @@ public class NodeMailDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("group", group);
             q.setString("property", property);
             q.setString("value", "%" + value + "%");
-            final List<NodeMail> ret = q.list();
+            List<NodeMail> ret = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(ret);
@@ -309,10 +314,10 @@ public class NodeMailDAO {
             HibernateUtil.commit(tx);
             log.debug("findByPropertyValue: {}", ret);
             return ret;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -324,10 +329,9 @@ public class NodeMailDAO {
      * Check if folder has childs
      */
     @SuppressWarnings("unchecked")
-    public boolean hasChildren(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    public boolean hasChildren(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("hasChildren({})", parentUuid);
-        final String qs = "from NodeMail nm where nm.parent=:parent";
+        String qs = "from NodeMail nm where nm.parent=:parent";
         Session session = null;
         Transaction tx = null;
 
@@ -337,29 +341,28 @@ public class NodeMailDAO {
 
             // Security Check
             if (!Config.ROOT_NODE_UUID.equals(parentUuid)) {
-                final NodeBase parentNode = (NodeBase) session.load(
-                        NodeBase.class, parentUuid);
+                NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
                 SecurityHelper.checkRead(parentNode);
             }
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("parent", parentUuid);
-            final List<NodeFolder> nodeList = q.list();
+            List<NodeFolder> nodeList = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(nodeList);
 
-            final boolean ret = !nodeList.isEmpty();
+            boolean ret = !nodeList.isEmpty();
             HibernateUtil.commit(tx);
             log.debug("hasChildren: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -370,8 +373,7 @@ public class NodeMailDAO {
     /**
      * Rename mail
      */
-    public NodeMail rename(final String uuid, final String newName)
-            throws PathNotFoundException, AccessDeniedException,
+    public synchronized NodeMail rename(String uuid, String newName) throws PathNotFoundException, AccessDeniedException,
             ItemExistsException, DatabaseException {
         log.debug("rename({}, {})", uuid, newName);
         Session session = null;
@@ -382,38 +384,40 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = NodeBaseDAO.getInstance()
-                    .getParentNode(session, uuid);
+            NodeBase parentNode = NodeBaseDAO.getInstance().getParentNode(session, uuid);
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
-            final NodeMail nMail = (NodeMail) session
-                    .load(NodeMail.class, uuid);
+            NodeMail nMail = (NodeMail) session.load(NodeMail.class, uuid);
             SecurityHelper.checkRead(nMail);
             SecurityHelper.checkWrite(nMail);
 
             // Check for same folder name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session,
-                    nMail.getParent(), newName);
+            NodeBaseDAO.getInstance().checkItemExistence(session, nMail.getParent(), newName);
 
             nMail.setName(newName);
+
+            if (Config.STORE_NODE_PATH) {
+                nMail.setPath(parentNode.getPath() + "/" + newName);
+            }
+
             session.update(nMail);
             initialize(nMail);
             HibernateUtil.commit(tx);
             log.debug("rename: {}", nMail);
             return nMail;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -424,10 +428,10 @@ public class NodeMailDAO {
     /**
      * Move mail
      */
-    public void move(final String uuid, final String dstUuid)
-            throws PathNotFoundException, AccessDeniedException,
-            ItemExistsException, DatabaseException {
+    public synchronized void move(String uuid, String dstUuid) throws PathNotFoundException, AccessDeniedException, ItemExistsException,
+            DatabaseException {
         log.debug("move({}, {})", uuid, dstUuid);
+        long begin = System.currentTimeMillis();
         Session session = null;
         Transaction tx = null;
 
@@ -436,18 +440,15 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeFolder nDstFld = (NodeFolder) session.load(
-                    NodeFolder.class, dstUuid);
+            NodeFolder nDstFld = (NodeFolder) session.load(NodeFolder.class, dstUuid);
             SecurityHelper.checkRead(nDstFld);
             SecurityHelper.checkWrite(nDstFld);
-            final NodeMail nMail = (NodeMail) session
-                    .load(NodeMail.class, uuid);
+            NodeMail nMail = (NodeMail) session.load(NodeMail.class, uuid);
             SecurityHelper.checkRead(nMail);
             SecurityHelper.checkWrite(nMail);
 
             // Check for same folder name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session, dstUuid,
-                    nMail.getName());
+            NodeBaseDAO.getInstance().checkItemExistence(session, dstUuid, nMail.getName());
 
             // Check if context changes
             if (!nDstFld.getContext().equals(nMail.getContext())) {
@@ -458,22 +459,28 @@ public class NodeMailDAO {
             }
 
             nMail.setParent(dstUuid);
+
+            if (Config.STORE_NODE_PATH) {
+                nMail.setPath(nDstFld.getPath() + "/" + nMail.getName());
+            }
+
             session.update(nMail);
             HibernateUtil.commit(tx);
+            log.trace("move.Time: {}", System.currentTimeMillis() - begin);
             log.debug("move: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -484,10 +491,9 @@ public class NodeMailDAO {
     /**
      * Delete mail
      */
-    public void delete(final String name, final String uuid,
-            final String trashUuid) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
+    public void delete(String name, String uuid, String trashUuid) throws PathNotFoundException, AccessDeniedException, DatabaseException {
         log.debug("delete({}, {}, {})", new Object[] { name, uuid, trashUuid });
+        long begin = System.currentTimeMillis();
         Session session = null;
         Transaction tx = null;
 
@@ -496,20 +502,18 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeFolder nTrashFld = (NodeFolder) session.load(
-                    NodeFolder.class, trashUuid);
+            NodeFolder nTrashFld = (NodeFolder) session.load(NodeFolder.class, trashUuid);
             SecurityHelper.checkRead(nTrashFld);
             SecurityHelper.checkWrite(nTrashFld);
-            final NodeMail nMail = (NodeMail) session
-                    .load(NodeMail.class, uuid);
+            NodeMail nMail = (NodeMail) session.load(NodeMail.class, uuid);
             SecurityHelper.checkRead(nMail);
             SecurityHelper.checkWrite(nMail);
+            SecurityHelper.checkDelete(nMail);
 
             // Test if already exists a mail with the same name in the trash
             String testName = name;
 
-            for (int i = 1; NodeBaseDAO.getInstance().testItemExistence(
-                    session, trashUuid, testName); i++) {
+            for (int i = 1; NodeBaseDAO.getInstance().testItemExistence(session, trashUuid, testName); i++) {
                 // log.info("Trying with: {}", testName);
                 testName = name + " (" + i + ")";
             }
@@ -520,19 +524,25 @@ public class NodeMailDAO {
             nMail.setContext(nTrashFld.getContext());
             nMail.setParent(trashUuid);
             nMail.setName(testName);
+
+            if (Config.STORE_NODE_PATH) {
+                nMail.setPath(nTrashFld.getPath() + "/" + testName);
+            }
+
             session.update(nMail);
             HibernateUtil.commit(tx);
+            log.trace("delete.Time: {}", System.currentTimeMillis() - begin);
             log.debug("delete: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -541,13 +551,12 @@ public class NodeMailDAO {
     }
 
     @SuppressWarnings("unchecked")
-    private void moveHelper(final Session session, final String parentUuid,
-            final String newContext) throws HibernateException {
-        final String qs = "from NodeBase nf where nf.parent=:parent";
-        final Query q = session.createQuery(qs);
+    private void moveHelper(Session session, String parentUuid, String newContext) throws HibernateException {
+        String qs = "from NodeBase nf where nf.parent=:parent";
+        Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
 
-        for (final NodeBase nBase : (List<NodeBase>) q.list()) {
+        for (NodeBase nBase : (List<NodeBase>) q.list()) {
             nBase.setContext(newContext);
         }
     }
@@ -555,9 +564,7 @@ public class NodeMailDAO {
     /**
      * Purge in depth
      */
-    public void purge(final String uuid) throws PathNotFoundException,
-            AccessDeniedException, LockException, DatabaseException,
-            IOException {
+    public void purge(String uuid) throws PathNotFoundException, AccessDeniedException, LockException, DatabaseException, IOException {
         log.debug("purge({})", uuid);
         Session session = null;
         Transaction tx = null;
@@ -567,27 +574,26 @@ public class NodeMailDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeMail nMail = (NodeMail) session
-                    .load(NodeMail.class, uuid);
+            NodeMail nMail = (NodeMail) session.load(NodeMail.class, uuid);
             SecurityHelper.checkRead(nMail);
             SecurityHelper.checkDelete(nMail);
 
             purgeHelper(session, nMail);
             HibernateUtil.commit(tx);
             log.debug("purge: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -597,32 +603,32 @@ public class NodeMailDAO {
 
     /**
      * Purge in depth helper
+     * 
+     * @see com.openkm.dao.NodeFolderDAO.purgeHelper(Session, NodeFolder, boolean)
      */
     @SuppressWarnings("unchecked")
-    public void purgeHelper(final Session session, final String parentUuid)
-            throws PathNotFoundException, AccessDeniedException, LockException,
+    public void purgeHelper(Session session, String parentUuid) throws PathNotFoundException, AccessDeniedException, LockException,
             IOException, DatabaseException, HibernateException {
-        final String qs = "from NodeMail nm where nm.parent=:parent";
-        final Query q = session.createQuery(qs);
+        String qs = "from NodeMail nm where nm.parent=:parent";
+        long begin = System.currentTimeMillis();
+        Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
-        final List<NodeMail> listMails = q.list();
+        List<NodeMail> listMails = q.list();
 
-        for (final NodeMail nMail : listMails) {
+        for (NodeMail nMail : listMails) {
             purgeHelper(session, nMail);
         }
+
+        log.trace("purgeHelper.Time: {}", System.currentTimeMillis() - begin);
     }
 
     /**
      * Purge in depth helper
-     * 
-     * @see com.openkm.dao.NodeFolderDAO.purgeHelper(Session, NodeFolder, boolean)
      */
-    private void purgeHelper(final Session session, final NodeMail nMail)
-            throws PathNotFoundException, AccessDeniedException, LockException,
+    private void purgeHelper(Session session, NodeMail nMail) throws PathNotFoundException, AccessDeniedException, LockException,
             IOException, DatabaseException, HibernateException {
-        final String path = NodeBaseDAO.getInstance().getPathFromUuid(session,
-                nMail.getUuid());
-        final String user = PrincipalUtils.getUser();
+        String path = NodeBaseDAO.getInstance().getPathFromUuid(session, nMail.getUuid());
+        String user = PrincipalUtils.getUser();
 
         // Security Check
         SecurityHelper.checkRead(nMail);
@@ -645,9 +651,21 @@ public class NodeMailDAO {
     }
 
     /**
+     * Check for a valid mail node.
+     */
+    public boolean isValid(String uuid) throws DatabaseException {
+        try {
+            findByPk(uuid);
+            return true;
+        } catch (PathNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * Force initialization of a proxy
      */
-    public void initialize(final NodeMail nMail) {
+    public void initialize(NodeMail nMail) {
         if (nMail != null) {
             Hibernate.initialize(nMail);
             Hibernate.initialize(nMail.getTo());
@@ -665,8 +683,8 @@ public class NodeMailDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final List<NodeMail> nMailList) {
-        for (final NodeMail nMail : nMailList) {
+    private void initialize(List<NodeMail> nMailList) {
+        for (NodeMail nMail : nMailList) {
             initialize(nMail);
         }
     }

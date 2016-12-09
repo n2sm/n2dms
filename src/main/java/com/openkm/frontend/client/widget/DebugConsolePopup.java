@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,8 +28,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
 import com.openkm.frontend.client.Main;
 
 /**
@@ -41,9 +41,7 @@ import com.openkm.frontend.client.Main;
 public class DebugConsolePopup extends DialogBox implements ClickHandler {
 
     private VerticalPanel vPanel;
-
     private Button button;
-
     private HTML text;
 
     /**
@@ -65,8 +63,7 @@ public class DebugConsolePopup extends DialogBox implements ClickHandler {
         vPanel.add(button);
         vPanel.add(new HTML("<br>"));
 
-        vPanel.setCellHorizontalAlignment(button,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(button, VerticalPanel.ALIGN_CENTER);
 
         button.setStyleName("okm-YesButton");
 
@@ -78,8 +75,7 @@ public class DebugConsolePopup extends DialogBox implements ClickHandler {
     /* (non-Javadoc)
      * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
      */
-    @Override
-    public void onClick(final ClickEvent event) {
+    public void onClick(ClickEvent event) {
         super.hide();
     }
 

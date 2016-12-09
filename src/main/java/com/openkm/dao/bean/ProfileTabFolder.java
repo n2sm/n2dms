@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,18 +25,15 @@ import java.io.Serializable;
 
 public class ProfileTabFolder implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean propertiesVisible;
-
     private boolean securityVisible;
-
     private boolean notesVisible;
 
     public boolean isPropertiesVisible() {
         return propertiesVisible;
     }
 
-    public void setPropertiesVisible(final boolean propertiesVisible) {
+    public void setPropertiesVisible(boolean propertiesVisible) {
         this.propertiesVisible = propertiesVisible;
     }
 
@@ -44,7 +41,7 @@ public class ProfileTabFolder implements Serializable {
         return securityVisible;
     }
 
-    public void setSecurityVisible(final boolean securityVisible) {
+    public void setSecurityVisible(boolean securityVisible) {
         this.securityVisible = securityVisible;
     }
 
@@ -52,13 +49,12 @@ public class ProfileTabFolder implements Serializable {
         return notesVisible;
     }
 
-    public void setNotesVisible(final boolean notesVisible) {
+    public void setNotesVisible(boolean notesVisible) {
         this.notesVisible = notesVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("propertiesVisible=");
         sb.append(propertiesVisible);

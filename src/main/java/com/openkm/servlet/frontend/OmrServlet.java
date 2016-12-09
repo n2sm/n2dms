@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -52,122 +52,84 @@ import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMOmrService;
 import com.openkm.omr.OMRHelper;
 import com.openkm.util.GWTUtil;
-import com.openkm.util.OMRException;
+import com.openkm.omr.OMRException;
 
 /**
  * OMR service
  */
-public class OmrServlet extends OKMRemoteServiceServlet implements
-        OKMOmrService {
+public class OmrServlet extends OKMRemoteServiceServlet implements OKMOmrService {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(OmrServlet.class);
 
     @Override
     public List<GWTOmr> getAllOmr() throws OKMException {
-        final List<GWTOmr> omrList = new ArrayList<GWTOmr>();
+        List<GWTOmr> omrList = new ArrayList<GWTOmr>();
         try {
-            for (final Omr omr : OmrDAO.getInstance().findAllActive()) {
+            for (Omr omr : OmrDAO.getInstance().findAllActive()) {
                 omrList.add(GWTUtil.copy(omr));
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Database),
-                    e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Database), e.getMessage());
         }
         return omrList;
     }
 
     @Override
-    public void process(final long omId, final String uuid) throws OKMException {
+    public void process(long omId, String uuid) throws OKMException {
         try {
             OMRHelper.processAndStoreMetadata(omId, uuid);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_IO),
-                    e.getMessage());
-        } catch (final PathNotFoundException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_IO), e.getMessage());
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService,
-                    ErrorCode.CAUSE_PathNotFound), e.getMessage());
-        } catch (final AccessDeniedException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_PathNotFound), e.getMessage());
+        } catch (AccessDeniedException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService,
-                    ErrorCode.CAUSE_AccessDenied), e.getMessage());
-        } catch (final RepositoryException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_AccessDenied), e.getMessage());
+        } catch (RepositoryException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService,
-                            ErrorCode.CAUSE_Repository), e.getMessage());
-        } catch (final DatabaseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Repository), e.getMessage());
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Database),
-                    e.getMessage());
-        } catch (final OMRException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Database), e.getMessage());
+        } catch (OMRException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
-        } catch (final NoSuchGroupException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
+        } catch (NoSuchGroupException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService,
-                            ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
-        } catch (final LockException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_NoSuchGroup), e.getMessage());
+        } catch (LockException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Lock),
-                    e.getMessage());
-        } catch (final ExtensionException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Lock), e.getMessage());
+        } catch (ExtensionException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Extension),
-                    e.getMessage());
-        } catch (final ParseException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Extension), e.getMessage());
+        } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Parse),
-                    e.getMessage());
-        } catch (final NoSuchPropertyException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Parse), e.getMessage());
+        } catch (NoSuchPropertyException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService,
-                    ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
-        } catch (final AutomationException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_NoSuchProperty), e.getMessage());
+        } catch (AutomationException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(
-                    ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService,
-                            ErrorCode.CAUSE_Automation), e.getMessage());
-        } catch (final InvalidFileStructureException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Automation), e.getMessage());
+        } catch (InvalidFileStructureException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
-        } catch (final InvalidImageIndexException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
+        } catch (InvalidImageIndexException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
-        } catch (final UnsupportedTypeException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
+        } catch (UnsupportedTypeException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
-        } catch (final MissingParameterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
+        } catch (MissingParameterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
-        } catch (final WrongParameterException e) {
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
+        } catch (WrongParameterException e) {
             log.error(e.getMessage(), e);
-            throw new OKMException(ErrorCode.get(
-                    ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr),
-                    e.getMessage());
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMOmrService, ErrorCode.CAUSE_Omr), e.getMessage());
         }
     }
 }

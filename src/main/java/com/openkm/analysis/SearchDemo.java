@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -53,29 +53,22 @@ import com.openkm.core.Config;
  */
 public class SearchDemo {
     private static final String DOC_FIELD = "content";
-
     private static final int NUM_HITS = 10;
-
     private static final String SEARCH_TERM = "专项信息*";
 
-    private static String[] strings = { "专项信息管理.doc", "Lucene in Action",
-            "Lucene for Dummies", "Managing Gigabytes",
+    private static String[] strings = { "专项信息管理.doc", "Lucene in Action", "Lucene for Dummies", "Managing Gigabytes",
             "The Art of Computer Science" };
 
-    private static Analyzer[] analyzers = {
-            new SimpleAnalyzer(Config.LUCENE_VERSION),
-            new StandardAnalyzer(Config.LUCENE_VERSION),
-            new CJKAnalyzer(Config.LUCENE_VERSION),
-            new SmartChineseAnalyzer(Config.LUCENE_VERSION),
+    private static Analyzer[] analyzers = { new SimpleAnalyzer(Config.LUCENE_VERSION), new StandardAnalyzer(Config.LUCENE_VERSION),
+            new CJKAnalyzer(Config.LUCENE_VERSION), new SmartChineseAnalyzer(Config.LUCENE_VERSION),
             new WhitespaceAnalyzer(Config.LUCENE_VERSION) };
 
-    public static void main(final String args[]) throws Exception {
-        for (final Analyzer analyzer : analyzers) {
-            System.out.println("** Analyzer: " + analyzer.getClass().getName()
-                    + " **");
-            final Directory index = new RAMDirectory();
+    public static void main(String args[]) throws Exception {
+        for (Analyzer analyzer : analyzers) {
+            System.out.println("** Analyzer: " + analyzer.getClass().getName() + " **");
+            Directory index = new RAMDirectory();
 
-            for (final String str : strings) {
+            for (String str : strings) {
                 add(index, analyzer, str);
             }
 
@@ -87,12 +80,10 @@ public class SearchDemo {
     /**
      * Add documents
      */
-    private static void add(final Directory index, final Analyzer analyzer,
-            final String str) throws IOException, ParseException {
-        final IndexWriterConfig config = new IndexWriterConfig(
-                Config.LUCENE_VERSION, analyzer);
-        final IndexWriter w = new IndexWriter(index, config);
-        final Document doc = new Document();
+    private static void add(Directory index, Analyzer analyzer, String str) throws IOException, ParseException {
+        IndexWriterConfig config = new IndexWriterConfig(Config.LUCENE_VERSION, analyzer);
+        IndexWriter w = new IndexWriter(index, config);
+        Document doc = new Document();
         doc.add(new Field(DOC_FIELD, str, Field.Store.YES, Field.Index.ANALYZED));
         w.addDocument(doc);
         w.close();
@@ -101,26 +92,23 @@ public class SearchDemo {
     /**
      * Search in documents
      */
-    private static void search(final Directory index, final Analyzer analyzer,
-            final String str) throws ParseException, CorruptIndexException,
-            IOException {
-        final IndexReader reader = IndexReader.open(index);
-        final IndexSearcher searcher = new IndexSearcher(reader);
-        final TopScoreDocCollector collector = TopScoreDocCollector.create(
-                NUM_HITS, true);
+    private static void search(Directory index, Analyzer analyzer, String str) throws ParseException, CorruptIndexException, IOException {
+        IndexReader reader = IndexReader.open(index);
+        IndexSearcher searcher = new IndexSearcher(reader);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(NUM_HITS, true);
         //Query q = new QueryParser(Config.LUCENE_VERSION, DOC_FIELD, analyzer).parse(str);
-        final Query q = new WildcardQuery(new Term(DOC_FIELD, str));
+        Query q = new WildcardQuery(new Term(DOC_FIELD, str));
         System.out.println("Query: " + q);
 
         searcher.search(q, collector);
-        final ScoreDoc[] hits = collector.topDocs().scoreDocs;
+        ScoreDoc[] hits = collector.topDocs().scoreDocs;
 
         System.out.println("Found " + hits.length + " hits.");
 
         for (int i = 0; i < hits.length; ++i) {
-            final int docId = hits[i].doc;
-            final Document d = searcher.doc(docId);
-            System.out.println(i + 1 + ". " + d.get(DOC_FIELD));
+            int docId = hits[i].doc;
+            Document d = searcher.doc(docId);
+            System.out.println((i + 1) + ". " + d.get(DOC_FIELD));
         }
 
         searcher.close();

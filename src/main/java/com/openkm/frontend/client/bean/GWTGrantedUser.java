@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,14 +31,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTGrantedUser implements IsSerializable {
     private Integer permissions = 0;
-
     private GWTUser user;
 
     public Integer getPermissions() {
         return permissions;
     }
 
-    public void setPermisions(final Integer permissions) {
+    public void setPermisions(Integer permissions) {
         this.permissions = permissions;
     }
 
@@ -46,7 +45,7 @@ public class GWTGrantedUser implements IsSerializable {
         return user;
     }
 
-    public void setUser(final GWTUser user) {
+    public void setUser(GWTUser user) {
         this.user = user;
     }
 }

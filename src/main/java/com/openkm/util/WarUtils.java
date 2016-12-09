@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -38,7 +38,6 @@ import com.openkm.bean.AppVersion;
 
 public class WarUtils {
     private static Logger log = LoggerFactory.getLogger(WarUtils.class);
-
     private static AppVersion appVersion = new AppVersion();
 
     /**
@@ -51,31 +50,30 @@ public class WarUtils {
     /**
      * 
      */
-    public static synchronized void setAppVersion(final AppVersion newAppVersion) {
+    public static synchronized void setAppVersion(AppVersion newAppVersion) {
         appVersion = newAppVersion;
     }
 
     /**
      * 
      */
-    public static synchronized void readAppVersion(final ServletContext sc) {
-        final String appServerHome = sc.getRealPath("/");
-        final File manifestFile = new File(appServerHome,
-                "META-INF/MANIFEST.MF");
+    public static synchronized void readAppVersion(ServletContext sc) {
+        String appServerHome = sc.getRealPath("/");
+        File manifestFile = new File(appServerHome, "META-INF/MANIFEST.MF");
         FileInputStream fis = null;
 
         try {
             fis = new FileInputStream(manifestFile);
-            final Manifest mf = new Manifest();
+            Manifest mf = new Manifest();
             mf.read(fis);
-            final Attributes atts = mf.getMainAttributes();
-            final String impVersion = atts.getValue("Implementation-Version");
-            final String impBuild = atts.getValue("Implementation-Build");
+            Attributes atts = mf.getMainAttributes();
+            String impVersion = atts.getValue("Implementation-Version");
+            String impBuild = atts.getValue("Implementation-Build");
             log.info("Implementation-Version: " + impVersion);
             log.info("Implementation-Build: " + impBuild);
 
             if (impVersion != null) {
-                final String[] version = impVersion.split("\\.");
+                String[] version = impVersion.split("\\.");
 
                 if (version.length > 0 && version[0] != null) {
                     appVersion.setMajor(version[0]);
@@ -85,8 +83,7 @@ public class WarUtils {
                     appVersion.setMinor(version[1]);
                 }
 
-                if (version.length > 2 && version[2] != null
-                        && !version[2].equals("")) {
+                if (version.length > 2 && version[2] != null && !version[2].equals("")) {
                     appVersion.setMaintenance(version[2]);
                 }
             }
@@ -94,9 +91,9 @@ public class WarUtils {
             if (impBuild != null) {
                 appVersion.setBuild(impBuild);
             }
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeQuietly(fis);

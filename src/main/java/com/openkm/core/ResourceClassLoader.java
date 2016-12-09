@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,18 +29,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ResourceClassLoader extends ClassLoader {
-    private static Logger log = LoggerFactory
-            .getLogger(ResourceClassLoader.class);
+    private static Logger log = LoggerFactory.getLogger(ResourceClassLoader.class);
 
-    @Override
-    public URL findResource(final String name) {
+    public URL findResource(String name) {
         log.debug("findResource(" + name + ")");
         URL ret = null;
 
         try {
-            final File d = new File(Config.HOME_DIR + "/" + name);
+            File d = new File(Config.HOME_DIR + "/" + name);
             ret = d.toURI().toURL();
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 

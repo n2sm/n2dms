@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -40,13 +40,9 @@ public interface HasPropertyGroupEvent {
     public static class PropertyGroupEventConstant {
 
         static final int EVENT_PROPERTYGROUP_CHANGED = 1;
-
         static final int EVENT_PROPERTYGROUP_GET_PROPERTIES = 2;
-
         static final int EVENT_PROPERTYGROUP_REMOVED = 3;
-
         static final int EVENT_PROPERTYGROUP_EDIT = 4;
-
         static final int EVENT_PROPERTYGROUP_CANCEL_EDIT = 5;
 
         private int type = 0;
@@ -56,7 +52,7 @@ public interface HasPropertyGroupEvent {
          * 
          * @param type
          */
-        private PropertyGroupEventConstant(final int type) {
+        private PropertyGroupEventConstant(int type) {
             this.type = type;
         }
 
@@ -67,16 +63,11 @@ public interface HasPropertyGroupEvent {
 
     PropertyGroupEventConstant PROPERTYGROUP_CHANGED = new PropertyGroupEventConstant(
             PropertyGroupEventConstant.EVENT_PROPERTYGROUP_CHANGED);
-
     PropertyGroupEventConstant PROPERTYGROUP_GET_PROPERTIES = new PropertyGroupEventConstant(
             PropertyGroupEventConstant.EVENT_PROPERTYGROUP_GET_PROPERTIES);
-
     PropertyGroupEventConstant PROPERTYGROUP_REMOVED = new PropertyGroupEventConstant(
             PropertyGroupEventConstant.EVENT_PROPERTYGROUP_REMOVED);
-
-    PropertyGroupEventConstant PROPERTYGROUP_EDIT = new PropertyGroupEventConstant(
-            PropertyGroupEventConstant.EVENT_PROPERTYGROUP_EDIT);
-
+    PropertyGroupEventConstant PROPERTYGROUP_EDIT = new PropertyGroupEventConstant(PropertyGroupEventConstant.EVENT_PROPERTYGROUP_EDIT);
     PropertyGroupEventConstant PROPERTYGROUP_CANCEL_EDIT = new PropertyGroupEventConstant(
             PropertyGroupEventConstant.EVENT_PROPERTYGROUP_CANCEL_EDIT);
 

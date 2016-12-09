@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -56,14 +56,12 @@ import com.openkm.bean.Notification;
 import com.openkm.bean.Permission;
 import com.openkm.bean.Property;
 import com.openkm.bean.Version;
-import com.openkm.cache.UserItemsManager;
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
 import com.openkm.core.UserQuotaExceededException;
 import com.openkm.dao.UserConfigDAO;
 import com.openkm.dao.bean.ProfileMisc;
 import com.openkm.dao.bean.UserConfig;
-import com.openkm.dao.bean.cache.UserItems;
 import com.openkm.extractor.RegisteredExtractors;
 import com.openkm.module.common.CommonGeneralModule;
 import com.openkm.module.jcr.stuff.JCRUtils;
@@ -71,89 +69,58 @@ import com.openkm.util.DocConverter;
 import com.openkm.util.UserActivity;
 
 public class BaseDocumentModule {
-    private static Logger log = LoggerFactory
-            .getLogger(BaseDocumentModule.class);
+    private static Logger log = LoggerFactory.getLogger(BaseDocumentModule.class);
 
     /**
      * Create a new document
      * 
      * TODO Parameter title to be used in OpenKM 6
      */
-    public static Node create(final Session session, final Node parentNode,
-            final String name, final String title, final String mimeType,
-            final String[] keywords, final InputStream is)
-            throws javax.jcr.ItemExistsException,
-            javax.jcr.PathNotFoundException, javax.jcr.AccessDeniedException,
-            javax.jcr.RepositoryException, IOException, DatabaseException,
-            UserQuotaExceededException {
-        log.debug("create({}, {}, {}, {}, {}, {}, {})", new Object[] { session,
-                parentNode, name, title, mimeType, keywords, is });
-        final long size = is.available();
+    public static Node create(Session session, Node parentNode, String name, String title, String mimeType, String[] keywords,
+            InputStream is) throws javax.jcr.ItemExistsException, javax.jcr.PathNotFoundException, javax.jcr.AccessDeniedException,
+            javax.jcr.RepositoryException, IOException, DatabaseException, UserQuotaExceededException {
+        log.debug("create({}, {}, {}, {}, {}, {}, {})", new Object[] { session, parentNode, name, title, mimeType, keywords, is });
+        long size = is.available();
 
         // Check user quota
-        final UserConfig uc = UserConfigDAO.findByPk(session,
-                session.getUserID());
-        final ProfileMisc pm = uc.getProfile().getPrfMisc();
+        UserConfig uc = UserConfigDAO.findByPk(session, session.getUserID());
+        ProfileMisc pm = uc.getProfile().getPrfMisc();
 
         // System user don't care quotas
-        if (!Config.SYSTEM_USER.equals(session.getUserID())
-                && pm.getUserQuota() > 0) {
-            long currentQuota = 0;
-
-            if (Config.USER_ITEM_CACHE) {
-                final UserItems ui = UserItemsManager.get(session.getUserID());
-                currentQuota = ui.getSize();
-            } else {
-                currentQuota = JCRUtils.calculateQuota(session);
-            }
+        if (!Config.SYSTEM_USER.equals(session.getUserID()) && pm.getUserQuota() > 0) {
+            long currentQuota = JCRUtils.calculateQuota(session);
 
             if (currentQuota + size > pm.getUserQuota() * 1024 * 1024) {
-                throw new UserQuotaExceededException(Long.toString(currentQuota
-                        + size));
+                throw new UserQuotaExceededException(Long.toString(currentQuota + size));
             }
         }
 
         // Create and add a new file node
-        final Node documentNode = parentNode.addNode(name, Document.TYPE);
+        Node documentNode = parentNode.addNode(name, Document.TYPE);
         documentNode.setProperty(Property.KEYWORDS, keywords);
-        documentNode.setProperty(Property.CATEGORIES, new String[] {},
-                PropertyType.REFERENCE);
+        documentNode.setProperty(Property.CATEGORIES, new String[] {}, PropertyType.REFERENCE);
         documentNode.setProperty(Document.AUTHOR, session.getUserID());
         documentNode.setProperty(Document.NAME, name);
         documentNode.setProperty(Document.TITLE, title);
 
         // Get parent node auth info
-        final Value[] usersReadParent = parentNode.getProperty(
-                Permission.USERS_READ).getValues();
-        final String[] usersRead = JCRUtils.usrValue2String(usersReadParent,
-                session.getUserID());
-        final Value[] usersWriteParent = parentNode.getProperty(
-                Permission.USERS_WRITE).getValues();
-        final String[] usersWrite = JCRUtils.usrValue2String(usersWriteParent,
-                session.getUserID());
-        final Value[] usersDeleteParent = parentNode.getProperty(
-                Permission.USERS_DELETE).getValues();
-        final String[] usersDelete = JCRUtils.usrValue2String(
-                usersDeleteParent, session.getUserID());
-        final Value[] usersSecurityParent = parentNode.getProperty(
-                Permission.USERS_SECURITY).getValues();
-        final String[] usersSecurity = JCRUtils.usrValue2String(
-                usersSecurityParent, session.getUserID());
+        Value[] usersReadParent = parentNode.getProperty(Permission.USERS_READ).getValues();
+        String[] usersRead = JCRUtils.usrValue2String(usersReadParent, session.getUserID());
+        Value[] usersWriteParent = parentNode.getProperty(Permission.USERS_WRITE).getValues();
+        String[] usersWrite = JCRUtils.usrValue2String(usersWriteParent, session.getUserID());
+        Value[] usersDeleteParent = parentNode.getProperty(Permission.USERS_DELETE).getValues();
+        String[] usersDelete = JCRUtils.usrValue2String(usersDeleteParent, session.getUserID());
+        Value[] usersSecurityParent = parentNode.getProperty(Permission.USERS_SECURITY).getValues();
+        String[] usersSecurity = JCRUtils.usrValue2String(usersSecurityParent, session.getUserID());
 
-        final Value[] rolesReadParent = parentNode.getProperty(
-                Permission.ROLES_READ).getValues();
-        final String[] rolesRead = JCRUtils.rolValue2String(rolesReadParent);
-        final Value[] rolesWriteParent = parentNode.getProperty(
-                Permission.ROLES_WRITE).getValues();
-        final String[] rolesWrite = JCRUtils.rolValue2String(rolesWriteParent);
-        final Value[] rolesDeleteParent = parentNode.getProperty(
-                Permission.ROLES_DELETE).getValues();
-        final String[] rolesDelete = JCRUtils
-                .rolValue2String(rolesDeleteParent);
-        final Value[] rolesSecurityParent = parentNode.getProperty(
-                Permission.ROLES_SECURITY).getValues();
-        final String[] rolesSecurity = JCRUtils
-                .rolValue2String(rolesSecurityParent);
+        Value[] rolesReadParent = parentNode.getProperty(Permission.ROLES_READ).getValues();
+        String[] rolesRead = JCRUtils.rolValue2String(rolesReadParent);
+        Value[] rolesWriteParent = parentNode.getProperty(Permission.ROLES_WRITE).getValues();
+        String[] rolesWrite = JCRUtils.rolValue2String(rolesWriteParent);
+        Value[] rolesDeleteParent = parentNode.getProperty(Permission.ROLES_DELETE).getValues();
+        String[] rolesDelete = JCRUtils.rolValue2String(rolesDeleteParent);
+        Value[] rolesSecurityParent = parentNode.getProperty(Permission.ROLES_SECURITY).getValues();
+        String[] rolesSecurity = JCRUtils.rolValue2String(rolesSecurityParent);
 
         // Set auth info
         documentNode.setProperty(Permission.USERS_READ, usersRead);
@@ -165,8 +132,7 @@ public class BaseDocumentModule {
         documentNode.setProperty(Permission.ROLES_DELETE, rolesDelete);
         documentNode.setProperty(Permission.ROLES_SECURITY, rolesSecurity);
 
-        final Node contentNode = documentNode.addNode(Document.CONTENT,
-                Document.CONTENT_TYPE);
+        Node contentNode = documentNode.addNode(Document.CONTENT, Document.CONTENT_TYPE);
         contentNode.setProperty(Document.SIZE, size);
         contentNode.setProperty(Document.AUTHOR, session.getUserID());
         contentNode.setProperty(Document.VERSION_COMMENT, "");
@@ -182,19 +148,12 @@ public class BaseDocumentModule {
             RegisteredExtractors.index(documentNode, contentNode, mimeType);
         }
 
-        contentNode.setProperty(JcrConstants.JCR_LASTMODIFIED,
-                Calendar.getInstance());
+        contentNode.setProperty(JcrConstants.JCR_LASTMODIFIED, Calendar.getInstance());
         parentNode.save();
 
         // Esta línea vale millones!! Resuelve la incidencia del isCkechedOut.
         // Por lo visto un nuevo nodo se añade con el isCheckedOut a true :/
         contentNode.checkin();
-
-        // Update user items size
-        if (Config.USER_ITEM_CACHE) {
-            UserItemsManager.incSize(session.getUserID(), size);
-            UserItemsManager.incDocuments(session.getUserID(), 1);
-        }
 
         return documentNode;
     }
@@ -202,12 +161,11 @@ public class BaseDocumentModule {
     /**
      * Get document properties using a given Session.
      */
-    public static Document getProperties(final Session session,
-            final Node docNode) throws javax.jcr.PathNotFoundException,
+    public static Document getProperties(Session session, Node docNode) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException {
         log.debug("getProperties({}, {})", session, docNode);
-        final Document doc = new Document();
-        final Node contentNode = docNode.getNode(Document.CONTENT);
+        Document doc = new Document();
+        Node contentNode = docNode.getNode(Document.CONTENT);
 
         // Properties
         doc.setAuthor(docNode.getProperty(Document.AUTHOR).getString());
@@ -221,10 +179,8 @@ public class BaseDocumentModule {
         doc.setLocked(docNode.isLocked());
         doc.setUuid(docNode.getUUID());
         doc.setCheckedOut(contentNode.isCheckedOut());
-        doc.setMimeType(contentNode.getProperty(JcrConstants.JCR_MIMETYPE)
-                .getString());
-        doc.setLastModified(contentNode.getProperty(
-                JcrConstants.JCR_LASTMODIFIED).getDate());
+        doc.setMimeType(contentNode.getProperty(JcrConstants.JCR_MIMETYPE).getString());
+        doc.setLastModified(contentNode.getProperty(JcrConstants.JCR_LASTMODIFIED).getDate());
 
         if (doc.isLocked()) {
             doc.setLockInfo(getLockInfo(session, docNode.getPath()));
@@ -234,13 +190,11 @@ public class BaseDocumentModule {
 
         // Get current version
         if (docNode.isNodeType(Document.TYPE)) {
-            final javax.jcr.version.Version ver = contentNode.getBaseVersion();
-            final Version version = new Version();
-            version.setAuthor(contentNode.getProperty(Document.AUTHOR)
-                    .getString());
+            javax.jcr.version.Version ver = contentNode.getBaseVersion();
+            Version version = new Version();
+            version.setAuthor(contentNode.getProperty(Document.AUTHOR).getString());
             version.setSize(contentNode.getProperty(Document.SIZE).getLong());
-            version.setComment(contentNode
-                    .getProperty(Document.VERSION_COMMENT).getString());
+            version.setComment(contentNode.getProperty(Document.VERSION_COMMENT).getString());
             version.setName(ver.getName());
             version.setCreated(ver.getCreated());
             version.setActual(true);
@@ -250,63 +204,52 @@ public class BaseDocumentModule {
         // If this is a frozen node, we must get create property from
         // the original referenced node.
         if (docNode.isNodeType(JcrConstants.NT_FROZENNODE)) {
-            final Node node = docNode.getProperty(JcrConstants.JCR_FROZENUUID)
-                    .getNode();
+            Node node = docNode.getProperty(JcrConstants.JCR_FROZENUUID).getNode();
             doc.setCreated(node.getProperty(JcrConstants.JCR_CREATED).getDate());
         } else {
-            doc.setCreated(docNode.getProperty(JcrConstants.JCR_CREATED)
-                    .getDate());
+            doc.setCreated(docNode.getProperty(JcrConstants.JCR_CREATED).getDate());
         }
 
         // Get permissions
         if (Config.SYSTEM_READONLY) {
             doc.setPermissions(Permission.NONE);
         } else {
-            final AccessManager am = ((SessionImpl) session).getAccessManager();
-            final Path path = ((NodeImpl) docNode).getPrimaryPath();
+            AccessManager am = ((SessionImpl) session).getAccessManager();
+            Path path = ((NodeImpl) docNode).getPrimaryPath();
             //Path path = ((SessionImpl)session).getHierarchyManager().getPath(((NodeImpl)folderNode).getId());
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.READ)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.READ)) {
                 doc.setPermissions(Permission.READ);
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.ADD_NODE)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.ADD_NODE)) {
                 doc.setPermissions((byte) (doc.getPermissions() | Permission.WRITE));
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.REMOVE_NODE)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.REMOVE_NODE)) {
                 doc.setPermissions((byte) (doc.getPermissions() | Permission.DELETE));
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.MODIFY_AC)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.MODIFY_AC)) {
                 doc.setPermissions((byte) (doc.getPermissions() | Permission.SECURITY));
             }
         }
 
         // Document conversion capabilities
-        final DocConverter convert = DocConverter.getInstance();
+        DocConverter convert = DocConverter.getInstance();
         doc.setConvertibleToPdf(convert.convertibleToPdf(doc.getMimeType()));
         doc.setConvertibleToSwf(convert.convertibleToSwf(doc.getMimeType()));
 
         // Get user subscription
-        final Set<String> subscriptorSet = new HashSet<String>();
+        Set<String> subscriptorSet = new HashSet<String>();
 
         if (docNode.isNodeType(Notification.TYPE)) {
-            final Value[] subscriptors = docNode.getProperty(
-                    Notification.SUBSCRIPTORS).getValues();
+            Value[] subscriptors = docNode.getProperty(Notification.SUBSCRIPTORS).getValues();
 
-            for (final Value subscriptor : subscriptors) {
-                subscriptorSet.add(subscriptor.getString());
+            for (int i = 0; i < subscriptors.length; i++) {
+                subscriptorSet.add(subscriptors[i].getString());
 
-                if (session.getUserID().equals(subscriptor.getString())) {
+                if (session.getUserID().equals(subscriptors[i].getString())) {
                     doc.setSubscribed(true);
                 }
             }
@@ -315,23 +258,21 @@ public class BaseDocumentModule {
         doc.setSubscriptors(subscriptorSet);
 
         // Get document keywords
-        final Set<String> keywordsSet = new HashSet<String>();
-        final Value[] keywords = docNode.getProperty(Property.KEYWORDS)
-                .getValues();
+        Set<String> keywordsSet = new HashSet<String>();
+        Value[] keywords = docNode.getProperty(Property.KEYWORDS).getValues();
 
-        for (final Value keyword : keywords) {
-            keywordsSet.add(keyword.getString());
+        for (int i = 0; i < keywords.length; i++) {
+            keywordsSet.add(keywords[i].getString());
         }
 
         doc.setKeywords(keywordsSet);
 
         // Get document categories
-        final Set<Folder> categoriesSet = new HashSet<Folder>();
-        final Value[] categories = docNode.getProperty(Property.CATEGORIES)
-                .getValues();
+        Set<Folder> categoriesSet = new HashSet<Folder>();
+        Value[] categories = docNode.getProperty(Property.CATEGORIES).getValues();
 
-        for (final Value categorie : categories) {
-            final Node node = session.getNodeByUUID(categorie.getString());
+        for (int i = 0; i < categories.length; i++) {
+            Node node = session.getNodeByUUID(categories[i].getString());
             categoriesSet.add(BaseFolderModule.getProperties(session, node));
         }
 
@@ -339,12 +280,12 @@ public class BaseDocumentModule {
 
         // Get notes
         if (docNode.isNodeType(Note.MIX_TYPE)) {
-            final List<Note> notes = new ArrayList<Note>();
-            final Node notesNode = docNode.getNode(Note.LIST);
+            List<Note> notes = new ArrayList<Note>();
+            Node notesNode = docNode.getNode(Note.LIST);
 
-            for (final NodeIterator nit = notesNode.getNodes(); nit.hasNext();) {
-                final Node noteNode = nit.nextNode();
-                final Note note = new Note();
+            for (NodeIterator nit = notesNode.getNodes(); nit.hasNext();) {
+                Node noteNode = nit.nextNode();
+                Note note = new Note();
                 note.setDate(noteNode.getProperty(Note.DATE).getDate());
                 note.setAuthor(noteNode.getProperty(Note.USER).getString());
                 note.setText(noteNode.getProperty(Note.TEXT).getString());
@@ -363,16 +304,12 @@ public class BaseDocumentModule {
     /**
      * Retrieve lock info from a document path
      */
-    public static LockInfo getLockInfo(final Session session,
-            final String docPath)
-            throws UnsupportedRepositoryOperationException,
-            javax.jcr.lock.LockException, javax.jcr.AccessDeniedException,
-            javax.jcr.RepositoryException {
+    public static LockInfo getLockInfo(Session session, String docPath) throws UnsupportedRepositoryOperationException,
+            javax.jcr.lock.LockException, javax.jcr.AccessDeniedException, javax.jcr.RepositoryException {
         log.debug("getLock({}, {})", session, docPath);
-        final LockInfo lock = new LockInfo();
-        final Node documentNode = session.getRootNode().getNode(
-                docPath.substring(1));
-        final javax.jcr.lock.Lock lck = documentNode.getLock();
+        LockInfo lock = new LockInfo();
+        Node documentNode = session.getRootNode().getNode(docPath.substring(1));
+        javax.jcr.lock.Lock lck = documentNode.getLock();
         lock.setOwner(lck.getLockOwner());
         lock.setNodePath(lck.getNode().getPath());
         lock.setToken(lck.getLockToken());
@@ -383,19 +320,14 @@ public class BaseDocumentModule {
     /**
      * Retrieve the content input stream from a document path
      */
-    public static InputStream getContent(final Session session,
-            final String docPath, final boolean checkout)
-            throws javax.jcr.PathNotFoundException,
+    public static InputStream getContent(Session session, String docPath, boolean checkout) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException, IOException {
-        final Node documentNode = session.getRootNode().getNode(
-                docPath.substring(1));
-        final InputStream is = getContent(session, documentNode);
+        Node documentNode = session.getRootNode().getNode(docPath.substring(1));
+        InputStream is = getContent(session, documentNode);
 
         // Activity log
-        UserActivity.log(session.getUserID(),
-                checkout ? "GET_DOCUMENT_CONTENT_CHECKOUT"
-                        : "GET_DOCUMENT_CONTENT", documentNode.getUUID(),
-                docPath, Integer.toString(is.available()));
+        UserActivity.log(session.getUserID(), (checkout ? "GET_DOCUMENT_CONTENT_CHECKOUT" : "GET_DOCUMENT_CONTENT"),
+                documentNode.getUUID(), docPath, Integer.toString(is.available()));
 
         return is;
     }
@@ -403,14 +335,12 @@ public class BaseDocumentModule {
     /**
      * Retrieve the content InputStream from a given Node. 
      */
-    public static InputStream getContent(final Session session,
-            final Node docNode) throws javax.jcr.PathNotFoundException,
+    public static InputStream getContent(Session session, Node docNode) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException, IOException {
         log.debug("getContent({}, {})", session, docNode);
 
-        final Node contentNode = docNode.getNode(Document.CONTENT);
-        final InputStream is = contentNode.getProperty(JcrConstants.JCR_DATA)
-                .getStream();
+        Node contentNode = docNode.getNode(Document.CONTENT);
+        InputStream is = contentNode.getProperty(JcrConstants.JCR_DATA).getStream();
 
         log.debug("getContent: {}", is);
         return is;
@@ -420,17 +350,13 @@ public class BaseDocumentModule {
      * Remove version history, compute free space and remove obsolete files from
      * PDF and previsualization cache.
      */
-    public static void purge(final Session session, final Node parentNode,
-            final Node docNode) throws javax.jcr.PathNotFoundException,
+    public static void purge(Session session, Node parentNode, Node docNode) throws javax.jcr.PathNotFoundException,
             javax.jcr.RepositoryException {
-        log.debug(
-                "purge({}, {}, {})",
-                new Object[] { session, parentNode.getPath(), docNode.getPath() });
-        final Node contentNode = docNode.getNode(Document.CONTENT);
-        final long size = contentNode.getProperty(Document.SIZE).getLong();
-        final String author = contentNode.getProperty(Document.AUTHOR)
-                .getString();
-        final VersionHistory vh = contentNode.getVersionHistory();
+        log.debug("purge({}, {}, {})", new Object[] { session, parentNode.getPath(), docNode.getPath() });
+        Node contentNode = docNode.getNode(Document.CONTENT);
+        long size = contentNode.getProperty(Document.SIZE).getLong();
+        String author = contentNode.getProperty(Document.AUTHOR).getString();
+        VersionHistory vh = contentNode.getVersionHistory();
         log.debug("VersionHistory UUID: {}", vh.getUUID());
 
         // Remove pdf & preview from cache
@@ -447,9 +373,9 @@ public class BaseDocumentModule {
         // http://markmail.org/message/nhbwe7o3c7pd4sga
         //
         // ********** THIS IS ACCORDING WITH JCR-134
-        for (final VersionIterator vi = vh.getAllVersions(); vi.hasNext();) {
-            final javax.jcr.version.Version ver = vi.nextVersion();
-            final String versionName = ver.getName();
+        for (VersionIterator vi = vh.getAllVersions(); vi.hasNext();) {
+            javax.jcr.version.Version ver = vi.nextVersion();
+            String versionName = ver.getName();
             log.debug("Version: {}", versionName);
 
             // The rootVersion is not a "real" version node.
@@ -461,38 +387,25 @@ public class BaseDocumentModule {
                 vh.removeVersion(versionName);
             }
         }
-
-        // Update user items size
-        if (Config.USER_ITEM_CACHE) {
-            UserItemsManager.decSize(author, size);
-            UserItemsManager.decDocuments(author, 1);
-        }
     }
 
     /**
      * Is invoked from JcrDocumentNode and JcrFolderNode.
      */
-    public static Node copy(final Session session, final Node srcDocumentNode,
-            final Node dstFolderNode) throws ValueFormatException,
-            javax.jcr.PathNotFoundException, javax.jcr.RepositoryException,
-            IOException, DatabaseException, UserQuotaExceededException {
-        log.debug("copy({}, {}, {})", new Object[] { session, srcDocumentNode,
-                dstFolderNode });
+    public static Node copy(Session session, Node srcDocumentNode, Node dstFolderNode) throws ValueFormatException,
+            javax.jcr.PathNotFoundException, javax.jcr.RepositoryException, IOException, DatabaseException, UserQuotaExceededException {
+        log.debug("copy({}, {}, {})", new Object[] { session, srcDocumentNode, dstFolderNode });
         InputStream is = null;
         Node newDocument = null;
 
         try {
-            final Node srcDocumentContentNode = srcDocumentNode
-                    .getNode(Document.CONTENT);
-            final String mimeType = srcDocumentContentNode.getProperty(
-                    "jcr:mimeType").getString();
-            final String title = srcDocumentContentNode.getProperty(
-                    Document.TITLE).getString();
+            Node srcDocumentContentNode = srcDocumentNode.getNode(Document.CONTENT);
+            String mimeType = srcDocumentContentNode.getProperty("jcr:mimeType").getString();
+            String title = srcDocumentContentNode.getProperty(Document.TITLE).getString();
 
             is = srcDocumentContentNode.getProperty("jcr:data").getStream();
-            newDocument = BaseDocumentModule.create(session, dstFolderNode,
-                    srcDocumentNode.getName(), title, mimeType,
-                    new String[] {}, is);
+            newDocument =
+                    BaseDocumentModule.create(session, dstFolderNode, srcDocumentNode.getName(), title, mimeType, new String[] {}, is);
         } finally {
             IOUtils.closeQuietly(is);
         }

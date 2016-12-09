@@ -15,11 +15,10 @@ public class Test {
     /**
      * Only for testing purposes
      */
-    public static void main(final String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         log.info("Generate database schema & initial data");
-        HibernateUtil
-                .generateDatabase("org.hibernate.dialect.Oracle10gDialect");
-        final Configuration cfg = new Configuration();
+        HibernateUtil.generateDatabase("org.hibernate.dialect.Oracle10gDialect");
+        Configuration cfg = new Configuration();
 
         // Add annotated beans
         cfg.addAnnotatedClass(NodeFolder.class);
@@ -28,7 +27,7 @@ public class Test {
         cfg.setProperty("hibernate.dialect", Config.HIBERNATE_DIALECT);
         cfg.setProperty("hibernate.hbm2ddl.auto", "create");
 
-        final SchemaExport se = new SchemaExport(cfg);
+        SchemaExport se = new SchemaExport(cfg);
         se.setOutputFile("/home/pavila/export.sql");
         se.setDelimiter(";");
         se.setFormat(false);

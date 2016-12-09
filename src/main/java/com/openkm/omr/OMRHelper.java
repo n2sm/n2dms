@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -64,7 +64,6 @@ import com.openkm.dao.OmrDAO;
 import com.openkm.dao.bean.Omr;
 import com.openkm.extension.core.ExtensionException;
 import com.openkm.util.FileUtils;
-import com.openkm.util.OMRException;
 
 /**
  * OMRHelper
@@ -73,31 +72,27 @@ import com.openkm.util.OMRException;
  */
 public class OMRHelper {
     public static final String ASC_FILE = "ASC_FILE";
-
     public static final String CONFIG_FILE = "CONFIG_FILE";
 
     /**
      * isValid
      */
-    public static boolean isValid(final Document doc) {
+    public static boolean isValid(Document doc) {
         return doc.getMimeType().equals(MimeTypeConfig.MIME_PNG);
     }
 
     /**
      * trainingTemplate
      */
-    public static Map<String, File> trainingTemplate(final File template)
-            throws IOException, InvalidFileStructureException,
-            InvalidImageIndexException, UnsupportedTypeException,
-            MissingParameterException, WrongParameterException {
-        final Map<String, File> fileMap = new HashMap<String, File>();
-        final Gray8Image grayimage = ImageUtil.readImage(template
-                .getCanonicalPath());
-        final ImageManipulation image = new ImageManipulation(grayimage);
+    public static Map<String, File> trainingTemplate(File template) throws IOException, InvalidFileStructureException,
+            InvalidImageIndexException, UnsupportedTypeException, MissingParameterException, WrongParameterException {
+        Map<String, File> fileMap = new HashMap<String, File>();
+        Gray8Image grayimage = ImageUtil.readImage(template.getCanonicalPath());
+        ImageManipulation image = new ImageManipulation(grayimage);
         image.locateConcentricCircles();
         image.locateMarks();
-        final File ascFile = FileUtils.createTempFile();
-        final File configFile = FileUtils.createTempFile();
+        File ascFile = FileUtils.createTempFile();
+        File configFile = FileUtils.createTempFile();
         image.writeAscTemplate(ascFile.getCanonicalPath());
         image.writeConfig(configFile.getCanonicalPath());
         fileMap.put(ASC_FILE, ascFile);
@@ -108,45 +103,35 @@ public class OMRHelper {
     /**
      * process
      */
-    public static Map<String, String> process(final File fileToProcess,
-            final long omId) throws IOException, OMRException,
-            DatabaseException, InvalidFileStructureException,
-            InvalidImageIndexException, UnsupportedTypeException,
-            MissingParameterException, WrongParameterException {
-        final Map<String, String> values = new HashMap<String, String>();
-        final Omr omr = OmrDAO.getInstance().findByPk(omId);
-        final InputStream asc = new ByteArrayInputStream(
-                omr.getAscFileContent());
-        final InputStream config = new ByteArrayInputStream(
-                omr.getConfigFileContent());
-        final InputStream fields = new ByteArrayInputStream(
-                omr.getFieldsFileContent());
+    public static Map<String, String> process(File fileToProcess, long omId) throws IOException, OMRException, DatabaseException,
+            InvalidFileStructureException, InvalidImageIndexException, UnsupportedTypeException, MissingParameterException,
+            WrongParameterException {
+        Map<String, String> values = new HashMap<String, String>();
+        Omr omr = OmrDAO.getInstance().findByPk(omId);
+        InputStream asc = new ByteArrayInputStream(omr.getAscFileContent());
+        InputStream config = new ByteArrayInputStream(omr.getConfigFileContent());
+        InputStream fields = new ByteArrayInputStream(omr.getFieldsFileContent());
 
-        if (asc != null && asc.available() > 0 && config != null
-                && config.available() > 0 && fields != null
-                && fields.available() > 0) {
-            final Gray8Image grayimage = ImageUtil.readImage(fileToProcess
-                    .getCanonicalPath());
+        if (asc != null && asc.available() > 0 && config != null && config.available() > 0 && fields != null && fields.available() > 0) {
+            Gray8Image grayimage = ImageUtil.readImage(fileToProcess.getCanonicalPath());
             if (grayimage == null) {
-                throw new OMRException(
-                        "Not able to process the image as gray image");
+                throw new OMRException("Not able to process the image as gray image");
             }
 
-            final ImageManipulation image = new ImageManipulation(grayimage);
+            ImageManipulation image = new ImageManipulation(grayimage);
             image.locateConcentricCircles();
             image.readConfig(config);
             image.readFields(fields);
             image.readAscTemplate(asc);
             image.searchMarks();
-            final File dataFile = FileUtils.createTempFile();
+            File dataFile = FileUtils.createTempFile();
             image.saveData(dataFile.getCanonicalPath());
 
             // Parse data file
 
-            final FileInputStream dfStream = new FileInputStream(dataFile);
-            final DataInputStream in = new DataInputStream(dfStream);
-            final BufferedReader br = new BufferedReader(new InputStreamReader(
-                    in));
+            FileInputStream dfStream = new FileInputStream(dataFile);
+            DataInputStream in = new DataInputStream(dfStream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String strLine;
 
             while ((strLine = br.readLine()) != null) {
@@ -186,23 +171,19 @@ public class OMRHelper {
             FileUtils.deleteQuietly(dataFile);
             return values;
         } else {
-            throw new OMRException(
-                    "Error asc, config or fields files not found");
+            throw new OMRException("Error asc, config or fields files not found");
         }
     }
 
     /**
      * storeMetadata
      */
-    public static void storeMetadata(final Map<String, String> results,
-            final String docPath) throws IOException, ParseException,
-            PathNotFoundException, RepositoryException, DatabaseException,
-            NoSuchGroupException, LockException, AccessDeniedException,
-            ExtensionException, AutomationException, NoSuchPropertyException,
-            OMRException {
-        final List<String> groups = new ArrayList<String>();
+    public static void storeMetadata(Map<String, String> results, String docPath) throws IOException, ParseException,
+            PathNotFoundException, RepositoryException, DatabaseException, NoSuchGroupException, LockException, AccessDeniedException,
+            ExtensionException, AutomationException, NoSuchPropertyException, OMRException {
+        List<String> groups = new ArrayList<String>();
 
-        for (final String key : results.keySet()) {
+        for (String key : results.keySet()) {
             if (key.contains(":")) {
                 String grpName = key.substring(0, key.indexOf("."));
 
@@ -215,33 +196,28 @@ public class OMRHelper {
         }
 
         // Add missing groups
-        for (final PropertyGroup registeredGroup : OKMPropertyGroup
-                .getInstance().getGroups(null, docPath)) {
+        for (PropertyGroup registeredGroup : OKMPropertyGroup.getInstance().getGroups(null, docPath)) {
             if (groups.contains(registeredGroup.getName())) {
                 groups.remove(registeredGroup.getName());
             }
         }
         // Add properties
-        for (final String grpName : groups) {
+        for (String grpName : groups) {
             OKMPropertyGroup.getInstance().addGroup(null, docPath, grpName);
 
             // convert okg to okp ( property format )
-            final String propertyBeginning = grpName.replace("okg", "okp");
-            final Map<String, String> properties = new HashMap<String, String>();
+            String propertyBeginning = grpName.replace("okg", "okp");
+            Map<String, String> properties = new HashMap<String, String>();
 
-            for (final String key : results.keySet()) {
+            for (String key : results.keySet()) {
                 if (key.startsWith(propertyBeginning)) {
                     String value = results.get(key);
 
                     // Evaluate select multiple otherside throw exception
                     if (value.contains(" ")) {
-                        for (final FormElement formElement : OKMPropertyGroup
-                                .getInstance().getPropertyGroupForm(null,
-                                        grpName)) {
-                            if (formElement.getName().equals(key)
-                                    && formElement instanceof Select) {
-                                if (!((Select) formElement).getType().equals(
-                                        Select.TYPE_MULTIPLE)) {
+                        for (FormElement formElement : OKMPropertyGroup.getInstance().getPropertyGroupForm(null, grpName)) {
+                            if (formElement.getName().equals(key) && formElement instanceof Select) {
+                                if (!((Select) formElement).getType().equals(Select.TYPE_MULTIPLE)) {
                                     throw new OMRException(
                                             "Found multiple value in a non multiple select. White space indicates multiple value");
                                 } else {
@@ -257,28 +233,22 @@ public class OMRHelper {
                 }
             }
 
-            OKMPropertyGroup.getInstance().setPropertiesSimple(null, docPath,
-                    grpName, properties);
+            OKMPropertyGroup.getInstance().setPropertiesSimple(null, docPath, grpName, properties);
         }
     }
 
     /**
      * processAndStoreMetadata
      */
-    public static void processAndStoreMetadata(final long omId,
-            final String uuid) throws IOException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            OMRException, NoSuchGroupException, LockException,
-            ExtensionException, ParseException, NoSuchPropertyException,
-            AutomationException, InvalidFileStructureException,
-            InvalidImageIndexException, UnsupportedTypeException,
-            MissingParameterException, WrongParameterException {
+    public static void processAndStoreMetadata(long omId, String uuid) throws IOException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException, OMRException, NoSuchGroupException, LockException, ExtensionException, ParseException,
+            NoSuchPropertyException, AutomationException, InvalidFileStructureException, InvalidImageIndexException,
+            UnsupportedTypeException, MissingParameterException, WrongParameterException {
         InputStream is = null;
         File fileToProcess = null;
 
         try {
-            final String docPath = OKMRepository.getInstance().getNodePath(
-                    null, uuid);
+            String docPath = OKMRepository.getInstance().getNodePath(null, uuid);
 
             // create tmp content file
             fileToProcess = FileUtils.createTempFile();
@@ -287,42 +257,41 @@ public class OMRHelper {
             is.close();
 
             // process
-            final Map<String, String> results = OMRHelper.process(
-                    fileToProcess, omId);
+            Map<String, String> results = OMRHelper.process(fileToProcess, omId);
             OMRHelper.storeMetadata(results, docPath);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             throw e;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             throw e;
-        } catch (final RepositoryException e) {
+        } catch (RepositoryException e) {
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
-        } catch (final OMRException e) {
+        } catch (OMRException e) {
             throw e;
-        } catch (final NoSuchGroupException e) {
+        } catch (NoSuchGroupException e) {
             throw e;
-        } catch (final LockException e) {
+        } catch (LockException e) {
             throw e;
-        } catch (final ExtensionException e) {
+        } catch (ExtensionException e) {
             throw e;
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             throw e;
-        } catch (final NoSuchPropertyException e) {
+        } catch (NoSuchPropertyException e) {
             throw e;
-        } catch (final AutomationException e) {
+        } catch (AutomationException e) {
             throw e;
-        } catch (final InvalidFileStructureException e) {
+        } catch (InvalidFileStructureException e) {
             throw e;
-        } catch (final InvalidImageIndexException e) {
+        } catch (InvalidImageIndexException e) {
             throw e;
-        } catch (final UnsupportedTypeException e) {
+        } catch (UnsupportedTypeException e) {
             throw e;
-        } catch (final MissingParameterException e) {
+        } catch (MissingParameterException e) {
             throw e;
-        } catch (final WrongParameterException e) {
+        } catch (WrongParameterException e) {
             throw e;
         } finally {
             FileUtils.deleteQuietly(fileToProcess);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,6 +22,7 @@
 package com.openkm.frontend.client;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ import com.google.gwt.user.client.Window.ClosingHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.InvocationException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTUserConfig;
 import com.openkm.frontend.client.bean.RepositoryContext;
@@ -64,7 +65,7 @@ import com.openkm.frontend.client.util.WorkspaceUserProperties;
 import com.openkm.frontend.client.widget.AboutPopup;
 import com.openkm.frontend.client.widget.ConfirmPopup;
 import com.openkm.frontend.client.widget.DebugConsolePopup;
-import com.openkm.frontend.client.widget.Dragable;
+import com.openkm.frontend.client.widget.Draggable;
 import com.openkm.frontend.client.widget.ErrorPopup;
 import com.openkm.frontend.client.widget.ExternalURLPopup;
 import com.openkm.frontend.client.widget.LogoutPopup;
@@ -76,13 +77,16 @@ import com.openkm.frontend.client.widget.WorkflowPopup;
 import com.openkm.frontend.client.widget.chat.OnlineUsersPopup;
 import com.openkm.frontend.client.widget.finddocument.FindDocumentSelectPopup;
 import com.openkm.frontend.client.widget.findfolder.FindFolderSelectPopup;
+import com.openkm.frontend.client.widget.findsimilar.FindSimilarDocumentSelectPopup;
 import com.openkm.frontend.client.widget.foldertree.FolderTree;
+import com.openkm.frontend.client.widget.massive.CategoriesPopup;
+import com.openkm.frontend.client.widget.massive.ConvertPopup;
+import com.openkm.frontend.client.widget.massive.KeywordsPopup;
+import com.openkm.frontend.client.widget.massive.NotesPopup;
+import com.openkm.frontend.client.widget.massive.PdfMergePopup;
+import com.openkm.frontend.client.widget.massive.PropertyGroupPopup;
+import com.openkm.frontend.client.widget.massive.UpdatePropertyGroupPopup;
 import com.openkm.frontend.client.widget.notify.NotifyPopup;
-import com.openkm.frontend.client.widget.popup.CategoriesPopup;
-import com.openkm.frontend.client.widget.popup.KeywordsPopup;
-import com.openkm.frontend.client.widget.popup.NotesPopup;
-import com.openkm.frontend.client.widget.popup.OmrPopup;
-import com.openkm.frontend.client.widget.popup.PropertyGroupPopup;
 import com.openkm.frontend.client.widget.security.SecurityPopup;
 import com.openkm.frontend.client.widget.startup.StartUp;
 import com.openkm.frontend.client.widget.startup.StartUpPopup;
@@ -96,27 +100,14 @@ import com.openkm.frontend.client.widget.wizard.WizardPopup;
  * 
  * @author jllort
  */
-public final class Main implements EntryPoint, HasLanguageHandlerExtension,
-        HasLanguageEvent {
+public final class Main implements EntryPoint, HasLanguageHandlerExtension, HasLanguageEvent {
     public static String CONTEXT = "/OpenKM";
-
     private static Main singleton;
-
-    private final OKMLanguageServiceAsync languageService = (OKMLanguageServiceAsync) GWT
-            .create(OKMLanguageService.class);
-
-    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
-
-    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT
-            .create(OKMFolderService.class);
-
-    private final OKMDocumentServiceAsync documentService = (OKMDocumentServiceAsync) GWT
-            .create(OKMDocumentService.class);
-
-    private static final OKMMailServiceAsync mailService = (OKMMailServiceAsync) GWT
-            .create(OKMMailService.class);
-
+    private final OKMLanguageServiceAsync languageService = (OKMLanguageServiceAsync) GWT.create(OKMLanguageService.class);
+    private final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
+    private final OKMFolderServiceAsync folderService = (OKMFolderServiceAsync) GWT.create(OKMFolderService.class);
+    private final OKMDocumentServiceAsync documentService = (OKMDocumentServiceAsync) GWT.create(OKMDocumentService.class);
+    private static final OKMMailServiceAsync mailService = (OKMMailServiceAsync) GWT.create(OKMMailService.class);
     private List<String> extensionUuidList = new ArrayList<String>();
 
     /**
@@ -131,103 +122,67 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
 
     // Other panel declaration
     public StartUpPopup startUpPopup;
-
     public FileUploadPopup fileUpload;
-
     public ErrorPopup errorPopup;
-
     public ErrorPopup errorPopupLogout;
-
     public MsgPopup msgPopup;
-
     public ExternalURLPopup externalURLPopup;
-
     public LogoutPopup logoutPopup;
-
     public SecurityPopup securityPopup;
-
     public AboutPopup aboutPopup;
-
     public UserPopup userPopup;
-
     public ConfirmPopup confirmPopup;
-
-    public Dragable dragable;
-
+    public Draggable draggable;
     public PropertyGroupPopup propertyGroupPopup;
-
     public WorkflowPopup workflowPopup;
-
     public NotifyPopup notifyPopup;
-
     public DebugConsolePopup debugConsolePopup;
-
     public FindFolderSelectPopup findFolderSelectPopup;
-
     public FindDocumentSelectPopup findDocumentSelectPopup;
-
+    public FindSimilarDocumentSelectPopup findSimilarDocumentSelectPopup;
     public WizardPopup wizardPopup;
-
     public ReportPopup reportPopup;
-
     public TemplateWizardPopup templateWizardPopup;
-
     public OnlineUsersPopup onlineUsersPopup;
-
     public TestPopup testPopup;
-
     public NotesPopup notesPopup;
-
     public CategoriesPopup categoriesPopup;
-
     public KeywordsPopup keywordsPopup;
-
+    public PdfMergePopup pdfMergePopup;
     public TemplatePopup templatePopup;
-
     public ConversionStatus conversionStatus;
-
-    public OmrPopup omrPopup;
+    public UpdatePropertyGroupPopup updatePropertyGroupPopup;
+    public ConvertPopup convertPopup;
 
     // User workspace properties
     public WorkspaceUserProperties workspaceUserProperties;
 
     // Language declarations
     private String lang;
-
     private Map<String, String> hI18n;
-
     public Map<String, String> hPropertyGroupI18n;
 
     // The nodePath parameter
     public String fldPath = ""; // Used for folderTree because docPath is set to null by filebroeser on this case the
                                 // refreshing
                                 // panels are not sincronized ( loading )
-
     public String docPath = ""; // Used for folderTree because docPath is set to null by filebroeser on this case the
                                 // refreshing
                                 // panels are not sincronized ( loading )
 
     private String uuid = "";
-
     public String taskInstanceId = ""; // Used for workflowDashboard for set pending user task
 
     // Main root folders and user home general values for all app
     public GWTFolder taxonomyRootFolder;
-
     public GWTFolder categoriesRootFolder;
-
+    public GWTFolder metadataRootFolder;
     public GWTFolder thesaurusRootFolder;
-
     public GWTFolder personalRootFolder;
-
     public GWTFolder templatesRootFolder;
-
     public GWTFolder mailRootFolder;
-
     public GWTFolder trashRootFolder;
-
     public GWTUserConfig userHome;
-
     public FolderTree activeFolderTree; // The active folder
 
     // The satartUp sequence
@@ -249,10 +204,10 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * (non-Javadoc)
      * @see com.google.gwt.core.client.EntryPoint#onModuleLoad()
      */
-    @Override
     public void onModuleLoad() {
         Log.getLogger(DivLogger.class).getWidget().setVisible(false);
         Log.setUncaughtExceptionHandler();
+
         if (GWT.isProdMode()) {
             Log.setCurrentLogLevel(Log.LOG_LEVEL_OFF);
         } else {
@@ -271,34 +226,30 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         loc = WindowUtils.getLocation();
 
         // Capture web application context
-        if (Cookies.getCookie("ctx") != null
-                && !Cookies.getCookie("ctx").equals("")) {
+        if (Cookies.getCookie("ctx") != null && !Cookies.getCookie("ctx").equals("")) {
             CONTEXT = Cookies.getCookie("ctx");
         } else {
             // Otherwise we try to guess
             CONTEXT = loc.getContext();
         }
-        if (loc.getParameter("uuid") != null
-                && !loc.getParameter("uuid").equals("")) {
+
+        if (loc.getParameter("uuid") != null && !loc.getParameter("uuid").equals("")) {
             uuid = loc.getParameter("uuid");
-        } else if (loc.getParameter("docPath") != null
-                && !loc.getParameter("docPath").equals("")) {
+        } else if (loc.getParameter("docPath") != null && !loc.getParameter("docPath").equals("")) {
             docPath = loc.getParameter("docPath");
             fldPath = Util.getParent(docPath);
-        } else if (loc.getParameter("fldPath") != null
-                && !loc.getParameter("fldPath").equals("")) {
+        } else if (loc.getParameter("fldPath") != null && !loc.getParameter("fldPath").equals("")) {
             fldPath = loc.getParameter("fldPath");
-        } else if (loc.getParameter("taskInstanceId") != null
-                && !loc.getParameter("taskInstanceId").equals("")) {
+        } else if (loc.getParameter("mailPath") != null && !loc.getParameter("mailPath").equals("")) {
+            fldPath = Util.getParent(loc.getParameter("mailPath"));
+        } else if (loc.getParameter("taskInstanceId") != null && !loc.getParameter("taskInstanceId").equals("")) {
             taskInstanceId = loc.getParameter("taskInstanceId");
         }
 
         // Try to capture lang parameter
-        if (loc.getParameter("lang") != null
-                && !loc.getParameter("lang").equals("")) {
+        if (loc.getParameter("lang") != null && !loc.getParameter("lang").equals("")) {
             lang = loc.getParameter("lang");
-        } else if (Cookies.getCookie("lang") != null
-                && !Cookies.getCookie("lang").equals("")) {
+        } else if (Cookies.getCookie("lang") != null && !Cookies.getCookie("lang").equals("")) {
             lang = Cookies.getCookie("lang");
         } else {
             // First we initialize language values
@@ -308,71 +259,60 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         if (!uuid.equals("")) {
             repositoryService.getPathByUUID(uuid, new AsyncCallback<String>() {
                 @Override
-                public void onSuccess(final String result) {
+                public void onSuccess(String result) {
                     final String path = result;
                     folderService.isValid(path, new AsyncCallback<Boolean>() {
                         @Override
-                        public void onSuccess(final Boolean result) {
+                        public void onSuccess(Boolean result) {
                             if (result.booleanValue()) {
                                 fldPath = path;
                                 loadTranslations();
                             } else {
-                                documentService.isValid(path,
-                                        new AsyncCallback<Boolean>() {
-                                            @Override
-                                            public void onSuccess(
-                                                    final Boolean result) {
-                                                if (result.booleanValue()) {
-                                                    docPath = path;
-                                                    fldPath = Util
-                                                            .getParent(path);
-                                                    loadTranslations();
-                                                } else {
-                                                    mailService
-                                                            .isValid(
-                                                                    path,
-                                                                    new AsyncCallback<Boolean>() {
-                                                                        @Override
-                                                                        public void onSuccess(
-                                                                                final Boolean result) {
-                                                                            if (result
-                                                                                    .booleanValue()) {
-                                                                                docPath = path;
-                                                                                fldPath = Util
-                                                                                        .getParent(path);
-                                                                                loadTranslations();
-                                                                            } else {
-                                                                                loadTranslations(); // Should never arrive here
-                                                                            }
-                                                                        }
-
-                                                                        @Override
-                                                                        public void onFailure(
-                                                                                final Throwable caught) {
-                                                                            loadTranslations();
-                                                                        }
-                                                                    });
+                                documentService.isValid(path, new AsyncCallback<Boolean>() {
+                                    @Override
+                                    public void onSuccess(Boolean result) {
+                                        if (result.booleanValue()) {
+                                            docPath = path;
+                                            fldPath = Util.getParent(path);
+                                            loadTranslations();
+                                        } else {
+                                            mailService.isValid(path, new AsyncCallback<Boolean>() {
+                                                @Override
+                                                public void onSuccess(Boolean result) {
+                                                    if (result.booleanValue()) {
+                                                        docPath = path;
+                                                        fldPath = Util.getParent(path);
+                                                        loadTranslations();
+                                                    } else {
+                                                        loadTranslations(); // Should never arrive here
+                                                    }
                                                 }
-                                            }
 
-                                            @Override
-                                            public void onFailure(
-                                                    final Throwable caught) {
-                                                loadTranslations();
-                                            }
-                                        });
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    loadTranslations();
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        loadTranslations();
+                                    }
+                                });
                             }
                         }
 
                         @Override
-                        public void onFailure(final Throwable caught) {
+                        public void onFailure(Throwable caught) {
                             loadTranslations();
                         }
                     });
                 }
 
                 @Override
-                public void onFailure(final Throwable caught) {
+                public void onFailure(Throwable caught) {
                     loadTranslations();
                 }
             });
@@ -386,20 +326,18 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      */
     public void loadTranslations() {
         // Getting language
-        languageService.getFrontEndTranslations(Main.get().getLang(),
-                new AsyncCallback<Map<String, String>>() {
-                    @Override
-                    public void onSuccess(final Map<String, String> result) {
-                        hI18n = result;
-                        onModuleLoad2(); // continues normal loading
-                    }
+        languageService.getFrontEndTranslations(Main.get().getLang(), new AsyncCallback<Map<String, String>>() {
+            @Override
+            public void onSuccess(Map<String, String> result) {
+                hI18n = result;
+                onModuleLoad2(); // continues normal loading
+            }
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        Window.alert("Error getting translations: "
-                                + caught.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Error getting translations: " + caught.getMessage());
+            }
+        });
     }
 
     /**
@@ -435,18 +373,18 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         errorPopupLogout.setHeight("205px");
         msgPopup = new MsgPopup();
         msgPopup.setStyleName("okm-Popup");
-        msgPopup.setWidth("300px");
-        msgPopup.setHeight("205px");
+        msgPopup.setWidth("550px");
+        msgPopup.setHeight("290px");
         externalURLPopup = new ExternalURLPopup();
         externalURLPopup.setStyleName("okm-Popup");
         logoutPopup = new LogoutPopup();
-        logoutPopup.setWidth("250");
-        logoutPopup.setHeight("110");
+        logoutPopup.setWidth("250px");
+        logoutPopup.setHeight("110px");
         logoutPopup.setStyleName("okm-Popup");
         logoutPopup.addStyleName("okm-DisableSelect");
         securityPopup = new SecurityPopup();
-        securityPopup.setWidth("600");
-        securityPopup.setHeight("400");
+        securityPopup.setWidth("600px");
+        securityPopup.setHeight("400px");
         securityPopup.setStyleName("okm-Popup");
         securityPopup.addStyleName("okm-DisableSelect");
         aboutPopup = new AboutPopup();
@@ -464,7 +402,7 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         confirmPopup.setHeight("125px");
         confirmPopup.setStyleName("okm-Popup");
         confirmPopup.addStyleName("okm-DisableSelect");
-        dragable = new Dragable();
+        draggable = new Draggable();
         propertyGroupPopup = new PropertyGroupPopup();
         propertyGroupPopup.setWidth("300px");
         propertyGroupPopup.setHeight("50px");
@@ -494,6 +432,11 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         findDocumentSelectPopup.setHeight("390px");
         findDocumentSelectPopup.setStyleName("okm-Popup");
         findDocumentSelectPopup.addStyleName("okm-DisableSelect");
+        findSimilarDocumentSelectPopup = new FindSimilarDocumentSelectPopup();
+        findSimilarDocumentSelectPopup.setWidth("700px");
+        findSimilarDocumentSelectPopup.setHeight("390px");
+        findSimilarDocumentSelectPopup.setStyleName("okm-Popup");
+        findSimilarDocumentSelectPopup.addStyleName("okm-DisableSelect");
         wizardPopup = new WizardPopup();
         wizardPopup.setWidth("400px");
         wizardPopup.setHeight("40px");
@@ -530,34 +473,38 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
         keywordsPopup.setWidth("470px");
         keywordsPopup.setHeight("100px");
         keywordsPopup.setStyleName("okm-Popup");
+        pdfMergePopup = new PdfMergePopup();
+        pdfMergePopup.setWidth("400px");
+        pdfMergePopup.setHeight("75px");
+        pdfMergePopup.setStyleName("okm-Popup");
         templatePopup = new TemplatePopup();
         templatePopup.setWidth("350px");
         templatePopup.setHeight("75px");
         templatePopup.setStyleName("okm-Popup");
         conversionStatus = new ConversionStatus();
-        omrPopup = new OmrPopup();
-        omrPopup.setWidth("150px");
-        omrPopup.setHeight("75px");
-        omrPopup.setStyleName("okm-Popup");
+        updatePropertyGroupPopup = new UpdatePropertyGroupPopup();
+        updatePropertyGroupPopup.setWidth("250px");
+        updatePropertyGroupPopup.setHeight("50px");
+        updatePropertyGroupPopup.setStyleName("okm-Popup");
+        convertPopup = new ConvertPopup();
+        convertPopup.setWidth("150px");
+        convertPopup.setHeight("50px");
+        convertPopup.setStyleName("okm-Popup");
 
         // Get grid of scrollbars, and clear out the window's built-in margin,
         // because we want to take advantage of the entire client area.
         Window.enableScrolling(false);
         Window.setMargin("0px");
 
-        //RootPanel.get().add(new Test());
-        //RootPanel.get().add(new Test2());
-        //RootPanel.get().add(new Test3());
-        RootPanel.get().add(mainPanel);
-        RootPanel.get().add(dragable);
+        RootLayoutPanel.get().add(draggable);
+        RootLayoutPanel.get().add(mainPanel);
 
         Window.addWindowClosingHandler(new ClosingHandler() {
             @Override
-            public void onWindowClosing(final ClosingEvent event) {
+            public void onWindowClosing(ClosingEvent event) {
                 Main.get().windowClosing = true;
                 startUp.keepAlive.cancel();
-                if (Main.get().mainPanel.bottomPanel.userInfo
-                        .isConnectedToChat()) {
+                if (Main.get().mainPanel.bottomPanel.userInfo.isConnectedToChat()) {
                     Main.get().mainPanel.bottomPanel.userInfo.logoutChat();
                 }
             }
@@ -574,13 +521,12 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
 
         // Auto-publish the method into JS when the GWT module loads.
         initJavaScriptApi();
-        mainPanel.topPanel.toolBar
-                .initJavaScriptApi(mainPanel.topPanel.toolBar);
+        mainPanel.topPanel.toolBar.initJavaScriptApi(mainPanel.topPanel.toolBar);
         fileUpload.initJavaScriptApi();
         new NavigatorComunicator().initJavaScriptApi();
 
         // Initialize commonUI public js api
-        final CommonUI commonUI = new CommonUI();
+        CommonUI commonUI = new CommonUI();
         commonUI.initJavaScriptApi(commonUI);
     }
 
@@ -589,70 +535,70 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * 
      * @param lang The language code
      */
-    public void refreshLang(final String lang) {
+    public void refreshLang(String lang) {
         this.lang = lang;
 
-        languageService.getFrontEndTranslations(lang,
-                new AsyncCallback<Map<String, String>>() {
-                    @Override
-                    public void onSuccess(final Map<String, String> result) {
-                        hI18n = result;
-                        fireEvent(HasLanguageEvent.LANGUAGE_CHANGED);
-                        mainPanel.desktop.navigator.langRefresh();
-                        mainPanel.topPanel.langRefresh();
-                        mainPanel.desktop.browser.langRefresh();
-                        mainPanel.search.historySearch.langRefresh();
-                        mainPanel.search.searchBrowser.langRefresh();
-                        mainPanel.bottomPanel.langRefresh();
-                        mainPanel.dashboard.langRefresh();
-                        fileUpload.langRefresh();
-                        logoutPopup.langRefresh();
-                        securityPopup.langRefresh();
-                        aboutPopup.langRefresh();
-                        userPopup.langRefresh();
-                        confirmPopup.langRefresh();
-                        msgPopup.langRefresh();
-                        errorPopup.langRefresh();
-                        errorPopupLogout.langRefresh();
-                        externalURLPopup.langRefresh();
-                        propertyGroupPopup.langRefresh();
-                        workflowPopup.langRefresh();
-                        notifyPopup.langRefresh();
-                        debugConsolePopup.langRefresh();
-                        findFolderSelectPopup.langRefresh();
-                        wizardPopup.langRefresh();
-                        reportPopup.langRefresh();
-                        templateWizardPopup.langRefresh();
-                        onlineUsersPopup.langRefresh();
-                        notesPopup.langRefresh();
-                        categoriesPopup.langRefresh();
-                        keywordsPopup.langRefresh();
-                        templatePopup.langRefresh();
-                        omrPopup.langRefresh();
-                        // Refreshing all menus on tabs not only the active
-                        mainPanel.desktop.navigator.taxonomyTree.langRefresh();
-                        mainPanel.desktop.navigator.thesaurusTree.langRefresh();
-                        mainPanel.desktop.navigator.personalTree.langRefresh();
-                        mainPanel.desktop.navigator.templateTree.langRefresh();
-                        mainPanel.desktop.navigator.trashTree.langRefresh();
-                        mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup
-                                .langRefresh();
+        languageService.getFrontEndTranslations(lang, new AsyncCallback<Map<String, String>>() {
+            @Override
+            public void onSuccess(Map<String, String> result) {
+                hI18n = result;
+                fireEvent(HasLanguageEvent.LANGUAGE_CHANGED);
+                mainPanel.desktop.navigator.langRefresh();
+                mainPanel.topPanel.langRefresh();
+                mainPanel.desktop.browser.langRefresh();
+                mainPanel.search.historySearch.langRefresh();
+                mainPanel.search.searchBrowser.langRefresh();
+                mainPanel.bottomPanel.langRefresh();
+                mainPanel.dashboard.langRefresh();
+                fileUpload.langRefresh();
+                logoutPopup.langRefresh();
+                securityPopup.langRefresh();
+                aboutPopup.langRefresh();
+                userPopup.langRefresh();
+                confirmPopup.langRefresh();
+                msgPopup.langRefresh();
+                errorPopup.langRefresh();
+                errorPopupLogout.langRefresh();
+                externalURLPopup.langRefresh();
+                propertyGroupPopup.langRefresh();
+                workflowPopup.langRefresh();
+                notifyPopup.langRefresh();
+                debugConsolePopup.langRefresh();
+                findFolderSelectPopup.langRefresh();
+                wizardPopup.langRefresh();
+                reportPopup.langRefresh();
+                templateWizardPopup.langRefresh();
+                onlineUsersPopup.langRefresh();
+                notesPopup.langRefresh();
+                categoriesPopup.langRefresh();
+                keywordsPopup.langRefresh();
+                pdfMergePopup.langRefresh();
+                templatePopup.langRefresh();
+                updatePropertyGroupPopup.langRefresh();
+                convertPopup.langRefresh();
+                // Refreshing all menus on tabs not only the active
+                mainPanel.desktop.navigator.taxonomyTree.langRefresh();
+                mainPanel.desktop.navigator.thesaurusTree.langRefresh();
+                mainPanel.desktop.navigator.personalTree.langRefresh();
+                mainPanel.desktop.navigator.templateTree.langRefresh();
+                mainPanel.desktop.navigator.trashTree.langRefresh();
+                mainPanel.desktop.navigator.thesaurusTree.thesaurusSelectPopup.langRefresh();
 
-                        // execute refresh when changing language ( need reordering folders, documents, etc. by active lang )
-                        mainPanel.topPanel.toolBar.executeRefresh();
-                    }
+                // execute refresh when changing language ( need reordering folders, documents, etc. by active lang )
+                mainPanel.topPanel.toolBar.executeRefresh();
+            }
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        Window.alert("Error getFrontEndTranslations");
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Error getFrontEndTranslations");
+            }
+        });
     }
 
     /**
      * Sets the lang map values
      */
-    public void setLangMap(final Map<String, String> hI18n) {
+    public void setLangMap(Map<String, String> hI18n) {
         this.hI18n = hI18n;
     }
 
@@ -670,31 +616,35 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * 
      * @param okme The exception error
      */
-    public void showError(final String callback, final Throwable caught) {
+    public void showError(Class<?> clazz, String callback, Throwable caught) {
+        showError(clazz + "." + callback, caught);
+    }
+
+    /**
+     * Shows popup error message ( unique entry point for error on all application )
+     * 
+     * @param okm The exception error
+     */
+    public void showError(String callback, Throwable caught) {
         startUp.recoverFromError();
 
         if (caught instanceof OKMException) {
-            final OKMException okme = (OKMException) caught;
+            OKMException okme = (OKMException) caught;
             Log.error("OKMException(" + callback + "): " + okme.getCode());
-            errorPopup.show(okme.getCode() + "(" + callback + "): "
-                    + i18n(okme.getCode()) + "<br><br>" + okme.getMessage());
+            errorPopup.show(okme.getCode() + "(" + callback + "): " + i18n(okme.getCode()) + "<br><br>" + okme.getMessage());
         } else if (caught instanceof InvocationException) {
-            final InvocationException ie = (InvocationException) caught;
+            InvocationException ie = (InvocationException) caught;
             Log.error("InvocationException(" + callback + "): " + ie);
 
             if (!Main.get().windowClosing) {
-                errorPopup.show(Main.i18n("error.invocation") + " (" + callback
-                        + ")");
+                errorPopup.show(Main.i18n("error.invocation") + " (" + callback + ")");
             }
         } else if (caught instanceof StatusCodeException) {
-            final StatusCodeException ie = (StatusCodeException) caught;
-            Log.error("StatusCodeException(" + callback + "): " + ie
-                    + "<br/>HTTP status code error:" + ie.getStatusCode());
-            mainPanel.bottomPanel.setStatus("status.network.error.detected",
-                    true, ie.getStatusCode());
+            StatusCodeException ie = (StatusCodeException) caught;
+            Log.error("StatusCodeException(" + callback + "): " + ie + "<br/>HTTP status code error:" + ie.getStatusCode());
+            mainPanel.bottomPanel.setStatus("status.network.error.detected", true, ie.getStatusCode());
         } else {
-            Log.error("UnknownException(" + callback + "): "
-                    + caught.getMessage());
+            Log.error("UnknownException(" + callback + "): " + caught.getMessage());
             errorPopup.show(callback + ": " + caught.getMessage());
         }
     }
@@ -705,9 +655,9 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * @param properties The propetie code locator
      * @return The translated value
      */
-    public static String i18n(final String property) {
+    public static String i18n(String property) {
         // All frontend properties starts with frontend.
-        String ret = Main.get().hI18n.get("frontend." + property);
+        String ret = (String) Main.get().hI18n.get("frontend." + property);
 
         if (ret == null) {
             ret = property;
@@ -722,9 +672,9 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * @param properties The propetier code locator
      * @return The translated value
      */
-    public String i18nExtension(final String property) {
+    public String i18nExtension(String property) {
         // All extension properties starts with extension.
-        String ret = Main.get().hI18n.get("extension." + property);
+        String ret = (String) Main.get().hI18n.get("extension." + property);
 
         if (ret == null) {
             ret = property;
@@ -747,20 +697,19 @@ public final class Main implements EntryPoint, HasLanguageHandlerExtension,
      * 
      * @param extensionUuidList
      */
-    public void setExtensionUuidList(final List<String> extensionUuidList) {
+    public void setExtensionUuidList(List<String> extensionUuidList) {
         this.extensionUuidList = extensionUuidList;
     }
 
     @Override
-    public void addLanguageHandlerExtension(
-            final LanguageHandlerExtension handlerExtension) {
+    public void addLanguageHandlerExtension(LanguageHandlerExtension handlerExtension) {
         langHandlerExtensionList.add(handlerExtension);
     }
 
     @Override
-    public void fireEvent(final LanguageEventConstant event) {
-        for (final LanguageHandlerExtension languageHandlerExtension : langHandlerExtensionList) {
-            languageHandlerExtension.onChange(event);
+    public void fireEvent(LanguageEventConstant event) {
+        for (Iterator<LanguageHandlerExtension> it = langHandlerExtensionList.iterator(); it.hasNext();) {
+            it.next().onChange(event);
         }
     }
 

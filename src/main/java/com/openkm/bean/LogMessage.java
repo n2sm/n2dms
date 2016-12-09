@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,16 +25,14 @@ import java.io.Serializable;
 
 public class LogMessage implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private int line;
-
     private String message = "";
 
     public int getLine() {
         return line;
     }
 
-    public void setLine(final int line) {
+    public void setLine(int line) {
         this.line = line;
     }
 
@@ -42,13 +40,12 @@ public class LogMessage implements Serializable {
         return message;
     }
 
-    public void setMessage(final String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("line=");
         sb.append(line);

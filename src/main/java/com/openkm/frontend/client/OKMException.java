@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,16 +32,14 @@ public class OKMException extends Exception {
      * 
      */
     private static final long serialVersionUID = -4496726716603093472L;
-
     private String code;
-
     private String msg;
 
     // Necessary to define de default contructor
     public OKMException() {
     }
 
-    public OKMException(final String code, final String msg) {
+    public OKMException(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -50,7 +48,6 @@ public class OKMException extends Exception {
         return code;
     }
 
-    @Override
     public String getMessage() {
         return msg;
     }

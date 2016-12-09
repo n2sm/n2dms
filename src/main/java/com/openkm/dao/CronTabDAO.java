@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -43,7 +43,7 @@ public class CronTabDAO {
     /**
      * Create
      */
-    public static long create(final CronTab ct) throws DatabaseException {
+    public static long create(CronTab ct) throws DatabaseException {
         log.debug("create({})", ct);
         Session session = null;
         Transaction tx = null;
@@ -51,11 +51,11 @@ public class CronTabDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Long id = (Long) session.save(ct);
+            Long id = (Long) session.save(ct);
             HibernateUtil.commit(tx);
             log.debug("create: {}", id);
             return id;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -66,9 +66,9 @@ public class CronTabDAO {
     /**
      * Update
      */
-    public static void update(final CronTab ct) throws DatabaseException {
+    public static void update(CronTab ct) throws DatabaseException {
         log.debug("update({})", ct);
-        final String qs = "select ct.fileContent, ct.fileName, ct.fileMime, ct.lastBegin, ct.lastEnd from CronTab ct where ct.id=:id";
+        String qs = "select ct.fileContent, ct.fileName, ct.fileMime, ct.lastBegin, ct.lastEnd from CronTab ct where ct.id=:id";
         Session session = null;
         Transaction tx = null;
 
@@ -76,12 +76,10 @@ public class CronTabDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            if (ct.getFileContent() == null
-                    || ct.getFileContent().length() == 0) {
-                final Query q = session.createQuery(qs);
+            if (ct.getFileContent() == null || ct.getFileContent().length() == 0) {
+                Query q = session.createQuery(qs);
                 q.setParameter("id", ct.getId());
-                final Object[] data = (Object[]) q.setMaxResults(1)
-                        .uniqueResult();
+                Object[] data = (Object[]) q.setMaxResults(1).uniqueResult();
                 ct.setFileContent((String) data[0]);
                 ct.setFileName((String) data[1]);
                 ct.setFileMime((String) data[2]);
@@ -91,7 +89,7 @@ public class CronTabDAO {
 
             session.update(ct);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -104,7 +102,7 @@ public class CronTabDAO {
     /**
      * Delete
      */
-    public static void delete(final long ctId) throws DatabaseException {
+    public static void delete(long ctId) throws DatabaseException {
         log.debug("delete({})", ctId);
         Session session = null;
         Transaction tx = null;
@@ -112,10 +110,10 @@ public class CronTabDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final CronTab ct = (CronTab) session.load(CronTab.class, ctId);
+            CronTab ct = (CronTab) session.load(CronTab.class, ctId);
             session.delete(ct);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -128,19 +126,19 @@ public class CronTabDAO {
     /**
      * Find by pk
      */
-    public static CronTab findByPk(final long ctId) throws DatabaseException {
+    public static CronTab findByPk(long ctId) throws DatabaseException {
         log.debug("findByPk({})", ctId);
-        final String qs = "from CronTab ct where ct.id=:id";
+        String qs = "from CronTab ct where ct.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setLong("id", ctId);
-            final CronTab ret = (CronTab) q.setMaxResults(1).uniqueResult();
+            CronTab ret = (CronTab) q.setMaxResults(1).uniqueResult();
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -150,20 +148,19 @@ public class CronTabDAO {
     /**
      * Find by filename
      */
-    public static CronTab findByName(final String name)
-            throws DatabaseException {
+    public static CronTab findByName(String name) throws DatabaseException {
         log.debug("findByName({})", name);
-        final String qs = "from CronTab ct where ct.name=:name";
+        String qs = "from CronTab ct where ct.name=:name";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("name", name);
-            final CronTab ret = (CronTab) q.setMaxResults(1).uniqueResult();
+            CronTab ret = (CronTab) q.setMaxResults(1).uniqueResult();
             log.debug("findByName: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -176,16 +173,16 @@ public class CronTabDAO {
     @SuppressWarnings("unchecked")
     public static List<CronTab> findAll() throws DatabaseException {
         log.debug("findAll()");
-        final String qs = "from CronTab ct order by ct.id";
+        String qs = "from CronTab ct order by ct.id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
-            final List<CronTab> ret = q.list();
+            Query q = session.createQuery(qs);
+            List<CronTab> ret = q.list();
             log.debug("findAll: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -195,7 +192,7 @@ public class CronTabDAO {
     /**
      * Set begin time
      */
-    public static void setLastBegin(final long ctId) throws DatabaseException {
+    public static void setLastBegin(long ctId) throws DatabaseException {
         log.debug("setLastBegin({})", ctId);
         Session session = null;
         Transaction tx = null;
@@ -203,11 +200,11 @@ public class CronTabDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final CronTab ct = (CronTab) session.load(CronTab.class, ctId);
+            CronTab ct = (CronTab) session.load(CronTab.class, ctId);
             ct.setLastBegin(Calendar.getInstance());
             session.update(ct);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -220,7 +217,7 @@ public class CronTabDAO {
     /**
      * Set end time
      */
-    public static void setLastEnd(final long ctId) throws DatabaseException {
+    public static void setLastEnd(long ctId) throws DatabaseException {
         log.debug("setLastEnd({})", ctId);
         Session session = null;
         Transaction tx = null;
@@ -228,11 +225,11 @@ public class CronTabDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final CronTab ct = (CronTab) session.load(CronTab.class, ctId);
+            CronTab ct = (CronTab) session.load(CronTab.class, ctId);
             ct.setLastEnd(Calendar.getInstance());
             session.update(ct);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

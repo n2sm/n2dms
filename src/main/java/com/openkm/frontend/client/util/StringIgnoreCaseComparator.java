@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,8 +31,7 @@ import java.util.Comparator;
  */
 public class StringIgnoreCaseComparator implements Comparator<String> {
 
-    @Override
-    public int compare(final String arg0, final String arg1) {
+    public int compare(String arg0, String arg1) {
         // Only compares initial terms
         int length = 0;
         if (arg0.length() > arg1.length()) {
@@ -40,7 +39,6 @@ public class StringIgnoreCaseComparator implements Comparator<String> {
         } else {
             length = arg0.length();
         }
-        return arg0.substring(0, length).toLowerCase()
-                .compareTo(arg1.substring(0, length).toLowerCase());
+        return arg0.substring(0, length).toLowerCase().compareTo(arg1.substring(0, length).toLowerCase());
     }
 }

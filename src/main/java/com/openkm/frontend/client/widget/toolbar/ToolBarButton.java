@@ -1,5 +1,5 @@
 /**
-*  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+*  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,8 +39,7 @@ import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 
@@ -50,21 +49,19 @@ import com.google.gwt.user.client.ui.Image;
  * @author jllort
  *
  */
-public class ToolBarButton extends HorizontalPanel implements
-        HasAllMouseHandlers, HasClickHandlers {
+public class ToolBarButton extends HorizontalPanel implements HasAllMouseHandlers, HasClickHandlers {
 
     private Image image;
 
-    public ToolBarButton(final Image image, final String title,
-            final ClickHandler handler) {
+    public ToolBarButton(Image image, String title, ClickHandler handler) {
         super();
         this.image = image;
         this.image.setTitle(title);
         addClickHandler(handler); // Adding clickhandler to widget
 
         add(image);
-        setCellHorizontalAlignment(image, HasHorizontalAlignment.ALIGN_CENTER);
-        setCellVerticalAlignment(image, HasVerticalAlignment.ALIGN_MIDDLE);
+        setCellHorizontalAlignment(image, HasAlignment.ALIGN_CENTER);
+        setCellVerticalAlignment(image, HasAlignment.ALIGN_MIDDLE);
         setSize("24", "24");
         setCellHeight(image, "24");
         setCellWidth(image, "24");
@@ -75,8 +72,7 @@ public class ToolBarButton extends HorizontalPanel implements
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.ui.UIObject#setTitle(java.lang.String)
      */
-    @Override
-    public void setTitle(final String title) {
+    public void setTitle(String title) {
         image.setTitle(title);
     }
 
@@ -85,46 +81,42 @@ public class ToolBarButton extends HorizontalPanel implements
      * 
      * @param resource
      */
-    public void setResource(final ImageResource resource) {
+    public void setResource(ImageResource resource) {
         image.setResource(resource);
     }
 
     @Override
-    public HandlerRegistration addClickHandler(final ClickHandler handler) {
+    public HandlerRegistration addClickHandler(ClickHandler handler) {
         return addHandler(handler, ClickEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseMoveHandler(
-            final MouseMoveHandler handler) {
+    public HandlerRegistration addMouseMoveHandler(MouseMoveHandler handler) {
         return addDomHandler(handler, MouseMoveEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseOutHandler(final MouseOutHandler handler) {
+    public HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
         return addDomHandler(handler, MouseOutEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseOverHandler(
-            final MouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(MouseOverHandler handler) {
         return addDomHandler(handler, MouseOverEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseUpHandler(final MouseUpHandler handler) {
+    public HandlerRegistration addMouseUpHandler(MouseUpHandler handler) {
         return addDomHandler(handler, MouseUpEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseWheelHandler(
-            final MouseWheelHandler handler) {
+    public HandlerRegistration addMouseWheelHandler(MouseWheelHandler handler) {
         return addDomHandler(handler, MouseWheelEvent.getType());
     }
 
     @Override
-    public HandlerRegistration addMouseDownHandler(
-            final MouseDownHandler handler) {
+    public HandlerRegistration addMouseDownHandler(MouseDownHandler handler) {
         return addDomHandler(handler, MouseDownEvent.getType());
     }
 }

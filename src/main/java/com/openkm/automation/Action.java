@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,7 +25,6 @@ import java.util.HashMap;
 
 public interface Action {
     public static final String METHOD_PRE = "executePre";
-
     public static final String METHOD_POST = "executePost";
 
     public void executePre(HashMap<String, Object> env, Object... params);

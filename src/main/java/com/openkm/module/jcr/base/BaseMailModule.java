@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -63,22 +63,15 @@ public class BaseMailModule {
     /**
      * Create a new mail
      */
-    public static Node create(final Session session, final Node parentNode,
-            final String name, final long size, final String from,
-            final String[] reply, final String[] to, final String[] cc,
-            final String[] bcc, final Calendar sentDate,
-            final Calendar receivedDate, final String subject,
-            final String content, final String mimeType, final String userId)
-            throws javax.jcr.ItemExistsException,
-            javax.jcr.PathNotFoundException, NoSuchNodeTypeException,
-            javax.jcr.lock.LockException, VersionException,
-            ConstraintViolationException, javax.jcr.RepositoryException,
-            IOException, DatabaseException, UserQuotaExceededException {
+    public static Node create(Session session, Node parentNode, String name, long size, String from, String[] reply, String[] to,
+            String[] cc, String[] bcc, Calendar sentDate, Calendar receivedDate, String subject, String content, String mimeType,
+            String userId) throws javax.jcr.ItemExistsException, javax.jcr.PathNotFoundException, NoSuchNodeTypeException,
+            javax.jcr.lock.LockException, VersionException, ConstraintViolationException, javax.jcr.RepositoryException, IOException,
+            DatabaseException, UserQuotaExceededException {
         // Create and add a new mail node
-        final Node mailNode = parentNode.addNode(name, Mail.TYPE);
+        Node mailNode = parentNode.addNode(name, Mail.TYPE);
         mailNode.setProperty(Property.KEYWORDS, new String[] {});
-        mailNode.setProperty(Property.CATEGORIES, new String[] {},
-                PropertyType.REFERENCE);
+        mailNode.setProperty(Property.CATEGORIES, new String[] {}, PropertyType.REFERENCE);
         mailNode.setProperty(Mail.SIZE, size);
         mailNode.setProperty(Mail.FROM, from);
         mailNode.setProperty(Mail.REPLY, reply);
@@ -93,37 +86,23 @@ public class BaseMailModule {
         mailNode.setProperty(Mail.AUTHOR, userId);
 
         // Get parent node auth info
-        final Value[] usersReadParent = parentNode.getProperty(
-                Permission.USERS_READ).getValues();
-        final String[] usersRead = JCRUtils.usrValue2String(usersReadParent,
-                session.getUserID());
-        final Value[] usersWriteParent = parentNode.getProperty(
-                Permission.USERS_WRITE).getValues();
-        final String[] usersWrite = JCRUtils.usrValue2String(usersWriteParent,
-                session.getUserID());
-        final Value[] usersDeleteParent = parentNode.getProperty(
-                Permission.USERS_DELETE).getValues();
-        final String[] usersDelete = JCRUtils.usrValue2String(
-                usersDeleteParent, session.getUserID());
-        final Value[] usersSecurityParent = parentNode.getProperty(
-                Permission.USERS_SECURITY).getValues();
-        final String[] usersSecurity = JCRUtils.usrValue2String(
-                usersSecurityParent, session.getUserID());
+        Value[] usersReadParent = parentNode.getProperty(Permission.USERS_READ).getValues();
+        String[] usersRead = JCRUtils.usrValue2String(usersReadParent, session.getUserID());
+        Value[] usersWriteParent = parentNode.getProperty(Permission.USERS_WRITE).getValues();
+        String[] usersWrite = JCRUtils.usrValue2String(usersWriteParent, session.getUserID());
+        Value[] usersDeleteParent = parentNode.getProperty(Permission.USERS_DELETE).getValues();
+        String[] usersDelete = JCRUtils.usrValue2String(usersDeleteParent, session.getUserID());
+        Value[] usersSecurityParent = parentNode.getProperty(Permission.USERS_SECURITY).getValues();
+        String[] usersSecurity = JCRUtils.usrValue2String(usersSecurityParent, session.getUserID());
 
-        final Value[] rolesReadParent = parentNode.getProperty(
-                Permission.ROLES_READ).getValues();
-        final String[] rolesRead = JCRUtils.rolValue2String(rolesReadParent);
-        final Value[] rolesWriteParent = parentNode.getProperty(
-                Permission.ROLES_WRITE).getValues();
-        final String[] rolesWrite = JCRUtils.rolValue2String(rolesWriteParent);
-        final Value[] rolesDeleteParent = parentNode.getProperty(
-                Permission.ROLES_DELETE).getValues();
-        final String[] rolesDelete = JCRUtils
-                .rolValue2String(rolesDeleteParent);
-        final Value[] rolesSecurityParent = parentNode.getProperty(
-                Permission.ROLES_SECURITY).getValues();
-        final String[] rolesSecurity = JCRUtils
-                .rolValue2String(rolesSecurityParent);
+        Value[] rolesReadParent = parentNode.getProperty(Permission.ROLES_READ).getValues();
+        String[] rolesRead = JCRUtils.rolValue2String(rolesReadParent);
+        Value[] rolesWriteParent = parentNode.getProperty(Permission.ROLES_WRITE).getValues();
+        String[] rolesWrite = JCRUtils.rolValue2String(rolesWriteParent);
+        Value[] rolesDeleteParent = parentNode.getProperty(Permission.ROLES_DELETE).getValues();
+        String[] rolesDelete = JCRUtils.rolValue2String(rolesDeleteParent);
+        Value[] rolesSecurityParent = parentNode.getProperty(Permission.ROLES_SECURITY).getValues();
+        String[] rolesSecurity = JCRUtils.rolValue2String(rolesSecurityParent);
 
         // Set auth info
         mailNode.setProperty(Permission.USERS_READ, usersRead);
@@ -143,22 +122,19 @@ public class BaseMailModule {
     /**
      * Get mail properties
      */
-    public static Mail getProperties(final Session session, final Node mailNode)
-            throws javax.jcr.PathNotFoundException,
-            javax.jcr.RepositoryException {
+    public static Mail getProperties(Session session, Node mailNode) throws javax.jcr.PathNotFoundException, javax.jcr.RepositoryException {
         log.debug("getProperties({}, {})", session, mailNode);
-        final Mail mail = new Mail();
+        Mail mail = new Mail();
 
         // Properties
-        final Value[] replyValues = mailNode.getProperty(Mail.REPLY)
-                .getValues();
-        final String[] reply = JCRUtils.value2String(replyValues);
-        final Value[] toValues = mailNode.getProperty(Mail.TO).getValues();
-        final String[] to = JCRUtils.value2String(toValues);
-        final Value[] ccValues = mailNode.getProperty(Mail.CC).getValues();
-        final String[] cc = JCRUtils.value2String(ccValues);
-        final Value[] bccValues = mailNode.getProperty(Mail.BCC).getValues();
-        final String[] bcc = JCRUtils.value2String(bccValues);
+        Value[] replyValues = mailNode.getProperty(Mail.REPLY).getValues();
+        String[] reply = JCRUtils.value2String(replyValues);
+        Value[] toValues = mailNode.getProperty(Mail.TO).getValues();
+        String[] to = JCRUtils.value2String(toValues);
+        Value[] ccValues = mailNode.getProperty(Mail.CC).getValues();
+        String[] cc = JCRUtils.value2String(ccValues);
+        Value[] bccValues = mailNode.getProperty(Mail.BCC).getValues();
+        String[] bcc = JCRUtils.value2String(bccValues);
 
         mail.setPath(mailNode.getPath());
         mail.setUuid(mailNode.getUUID());
@@ -174,18 +150,16 @@ public class BaseMailModule {
         mail.setContent(mailNode.getProperty(Mail.CONTENT).getString());
         mail.setMimeType(mailNode.getProperty(Mail.MIME_TYPE).getString());
         mail.setAuthor(mailNode.getProperty(Mail.AUTHOR).getString());
-        mail.setCreated(mailNode.getProperty(JcrConstants.JCR_CREATED)
-                .getDate());
+        mail.setCreated(mailNode.getProperty(JcrConstants.JCR_CREATED).getDate());
 
         // Get attachments
-        final ArrayList<Document> attachments = new ArrayList<Document>();
+        ArrayList<Document> attachments = new ArrayList<Document>();
 
-        for (final NodeIterator nit = mailNode.getNodes(); nit.hasNext();) {
-            final Node node = nit.nextNode();
+        for (NodeIterator nit = mailNode.getNodes(); nit.hasNext();) {
+            Node node = nit.nextNode();
 
             if (node.isNodeType(Document.TYPE)) {
-                final Document attachment = BaseDocumentModule.getProperties(
-                        session, node);
+                Document attachment = BaseDocumentModule.getProperties(session, node);
                 attachments.add(attachment);
             }
         }
@@ -196,53 +170,43 @@ public class BaseMailModule {
         if (Config.SYSTEM_READONLY) {
             mail.setPermissions(Permission.NONE);
         } else {
-            final AccessManager am = ((SessionImpl) session).getAccessManager();
-            final Path path = ((NodeImpl) mailNode).getPrimaryPath();
+            AccessManager am = ((SessionImpl) session).getAccessManager();
+            Path path = ((NodeImpl) mailNode).getPrimaryPath();
             //Path path = ((SessionImpl)session).getHierarchyManager().getPath(((NodeImpl)folderNode).getId());
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.READ)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.READ)) {
                 mail.setPermissions(Permission.READ);
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.ADD_NODE)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.ADD_NODE)) {
                 mail.setPermissions((byte) (mail.getPermissions() | Permission.WRITE));
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.REMOVE_NODE)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.REMOVE_NODE)) {
                 mail.setPermissions((byte) (mail.getPermissions() | Permission.DELETE));
             }
 
-            if (am.isGranted(
-                    path,
-                    org.apache.jackrabbit.core.security.authorization.Permission.MODIFY_AC)) {
+            if (am.isGranted(path, org.apache.jackrabbit.core.security.authorization.Permission.MODIFY_AC)) {
                 mail.setPermissions((byte) (mail.getPermissions() | Permission.SECURITY));
             }
         }
 
         // Get mail keywords
-        final Set<String> keywordsSet = new HashSet<String>();
-        final Value[] keywords = mailNode.getProperty(Property.KEYWORDS)
-                .getValues();
+        Set<String> keywordsSet = new HashSet<String>();
+        Value[] keywords = mailNode.getProperty(Property.KEYWORDS).getValues();
 
-        for (final Value keyword : keywords) {
-            keywordsSet.add(keyword.getString());
+        for (int i = 0; i < keywords.length; i++) {
+            keywordsSet.add(keywords[i].getString());
         }
 
         mail.setKeywords(keywordsSet);
 
         // Get mail categories
-        final Set<Folder> categoriesSet = new HashSet<Folder>();
-        final Value[] categories = mailNode.getProperty(Property.CATEGORIES)
-                .getValues();
+        Set<Folder> categoriesSet = new HashSet<Folder>();
+        Value[] categories = mailNode.getProperty(Property.CATEGORIES).getValues();
 
-        for (final Value categorie : categories) {
-            final Node node = session.getNodeByUUID(categorie.getString());
+        for (int i = 0; i < categories.length; i++) {
+            Node node = session.getNodeByUUID(categories[i].getString());
             categoriesSet.add(BaseFolderModule.getProperties(session, node));
         }
 
@@ -250,12 +214,12 @@ public class BaseMailModule {
 
         // Get notes
         if (mailNode.isNodeType(Note.MIX_TYPE)) {
-            final List<Note> notes = new ArrayList<Note>();
-            final Node notesNode = mailNode.getNode(Note.LIST);
+            List<Note> notes = new ArrayList<Note>();
+            Node notesNode = mailNode.getNode(Note.LIST);
 
-            for (final NodeIterator nit = notesNode.getNodes(); nit.hasNext();) {
-                final Node noteNode = nit.nextNode();
-                final Note note = new Note();
+            for (NodeIterator nit = notesNode.getNodes(); nit.hasNext();) {
+                Node noteNode = nit.nextNode();
+                Note note = new Note();
                 note.setDate(noteNode.getProperty(Note.DATE).getDate());
                 note.setAuthor(noteNode.getProperty(Note.USER).getString());
                 note.setText(noteNode.getProperty(Note.TEXT).getString());
@@ -266,8 +230,7 @@ public class BaseMailModule {
             mail.setNotes(notes);
         }
 
-        log.debug("Permisos: {} => {}", mailNode.getPath(),
-                mail.getPermissions());
+        log.debug("Permisos: {} => {}", mailNode.getPath(), mail.getPermissions());
         log.debug("getProperties[session]: {}", mail);
         return mail;
     }
@@ -275,43 +238,31 @@ public class BaseMailModule {
     /**
      * Copy recursively
      */
-    public static void copy(final Session session, final Node srcMailNode,
-            final Node dstFolderNode) throws ValueFormatException,
-            javax.jcr.PathNotFoundException, javax.jcr.RepositoryException,
-            IOException, DatabaseException, UserQuotaExceededException {
-        log.debug("copy({}, {}, {})", new Object[] { session, srcMailNode,
-                dstFolderNode });
+    public static void copy(Session session, Node srcMailNode, Node dstFolderNode) throws ValueFormatException,
+            javax.jcr.PathNotFoundException, javax.jcr.RepositoryException, IOException, DatabaseException, UserQuotaExceededException {
+        log.debug("copy({}, {}, {})", new Object[] { session, srcMailNode, dstFolderNode });
 
-        final String name = srcMailNode.getName();
-        final long size = srcMailNode.getProperty(Mail.SIZE).getLong();
-        final String from = srcMailNode.getProperty(Mail.FROM).getString();
-        final String[] reply = JCRUtils.value2String(srcMailNode.getProperty(
-                Mail.REPLY).getValues());
-        final String[] to = JCRUtils.value2String(srcMailNode.getProperty(
-                Mail.TO).getValues());
-        final String[] cc = JCRUtils.value2String(srcMailNode.getProperty(
-                Mail.CC).getValues());
-        final String[] bcc = JCRUtils.value2String(srcMailNode.getProperty(
-                Mail.BCC).getValues());
-        final Calendar sentDate = srcMailNode.getProperty(Mail.SENT_DATE)
-                .getDate();
-        final Calendar receivedDate = srcMailNode.getProperty(
-                Mail.RECEIVED_DATE).getDate();
-        final String subject = srcMailNode.getProperty(Mail.SUBJECT)
-                .getString();
-        final String content = srcMailNode.getProperty(Mail.CONTENT)
-                .getString();
-        final String mimeType = srcMailNode.getProperty(Mail.MIME_TYPE)
-                .getString();
-        final String author = srcMailNode.getProperty(Mail.AUTHOR).getString();
+        String name = srcMailNode.getName();
+        long size = srcMailNode.getProperty(Mail.SIZE).getLong();
+        String from = srcMailNode.getProperty(Mail.FROM).getString();
+        String[] reply = JCRUtils.value2String(srcMailNode.getProperty(Mail.REPLY).getValues());
+        String[] to = JCRUtils.value2String(srcMailNode.getProperty(Mail.TO).getValues());
+        String[] cc = JCRUtils.value2String(srcMailNode.getProperty(Mail.CC).getValues());
+        String[] bcc = JCRUtils.value2String(srcMailNode.getProperty(Mail.BCC).getValues());
+        Calendar sentDate = srcMailNode.getProperty(Mail.SENT_DATE).getDate();
+        Calendar receivedDate = srcMailNode.getProperty(Mail.RECEIVED_DATE).getDate();
+        String subject = srcMailNode.getProperty(Mail.SUBJECT).getString();
+        String content = srcMailNode.getProperty(Mail.CONTENT).getString();
+        String mimeType = srcMailNode.getProperty(Mail.MIME_TYPE).getString();
+        String author = srcMailNode.getProperty(Mail.AUTHOR).getString();
 
-        final Node mNode = BaseMailModule.create(session, dstFolderNode, name,
-                size, from, reply, to, cc, bcc, sentDate, receivedDate,
-                subject, content, mimeType, author);
+        Node mNode =
+                BaseMailModule.create(session, dstFolderNode, name, size, from, reply, to, cc, bcc, sentDate, receivedDate, subject,
+                        content, mimeType, author);
 
         // Get attachments
-        for (final NodeIterator nit = srcMailNode.getNodes(); nit.hasNext();) {
-            final Node node = nit.nextNode();
+        for (NodeIterator nit = srcMailNode.getNodes(); nit.hasNext();) {
+            Node node = nit.nextNode();
 
             if (node.isNodeType(Document.TYPE)) {
                 BaseDocumentModule.copy(session, node, mNode);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,24 +25,18 @@ import java.io.Serializable;
 
 public class QueryResult implements Serializable {
     private static final long serialVersionUID = -6397099389620834328L;
-
     private Document document;
-
     private Folder folder;
-
     private Mail mail;
-
     private Document attachment;
-
     private String excerpt;
-
     private long score;
 
     public Document getDocument() {
         return document;
     }
 
-    public void setDocument(final Document document) {
+    public void setDocument(Document document) {
         this.document = document;
     }
 
@@ -50,7 +44,7 @@ public class QueryResult implements Serializable {
         return folder;
     }
 
-    public void setFolder(final Folder folder) {
+    public void setFolder(Folder folder) {
         this.folder = folder;
     }
 
@@ -58,7 +52,7 @@ public class QueryResult implements Serializable {
         return mail;
     }
 
-    public void setMail(final Mail mail) {
+    public void setMail(Mail mail) {
         this.mail = mail;
     }
 
@@ -66,7 +60,7 @@ public class QueryResult implements Serializable {
         return attachment;
     }
 
-    public void setAttachment(final Document attachment) {
+    public void setAttachment(Document attachment) {
         this.attachment = attachment;
     }
 
@@ -74,7 +68,7 @@ public class QueryResult implements Serializable {
         return excerpt;
     }
 
-    public void setExcerpt(final String excerpt) {
+    public void setExcerpt(String excerpt) {
         this.excerpt = excerpt;
     }
 
@@ -82,13 +76,12 @@ public class QueryResult implements Serializable {
         return score;
     }
 
-    public void setScore(final long score) {
+    public void setScore(long score) {
         this.score = score;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("document=");
         sb.append(document);

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -28,19 +28,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EnvironmentDetector {
-    private static Logger log = LoggerFactory
-            .getLogger(EnvironmentDetector.class);
+    private static Logger log = LoggerFactory.getLogger(EnvironmentDetector.class);
 
     private static final String JBOSS_PROPERTY = "jboss.home.dir";
-
     private static final String TOMCAT_PROPERTY = "catalina.home";
-
     private static final String CUSTOM_HOME_PROPERTY = "openkm.custom.home";
 
     private static final String OS_LINUX = "linux";
-
     private static final String OS_WINDOWS = "windows";
-
     private static final String OS_MAC = "mac os";
 
     /**
@@ -116,20 +111,19 @@ public class EnvironmentDetector {
      * Guess JNDI base
      */
     public static String getServerJndiBase() {
-        if (isServerJBoss()) {
+        if (isServerJBoss())
             return "java:/";
-        } else if (isServerTomcat()) {
+        else if (isServerTomcat())
             return "java:/comp/env/";
-        } else {
+        else
             return "";
-        }
     }
 
     /**
      * Guess the system wide temporary directory
      */
     public static String getTempDir() {
-        final String dir = System.getProperty("java.io.tmpdir");
+        String dir = System.getProperty("java.io.tmpdir");
 
         if (dir != null) {
             return dir;
@@ -142,7 +136,7 @@ public class EnvironmentDetector {
      * Guess the system null device
      */
     public static String getNullDevice() {
-        final String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains(OS_LINUX) || os.contains(OS_MAC)) {
             return "/dev/null";
@@ -156,24 +150,21 @@ public class EnvironmentDetector {
     /**
      * Execute application launcher
      */
-    public static void executeLauncher(final String file) throws IOException {
-        final String os = System.getProperty("os.name").toLowerCase();
+    public static void executeLauncher(String file) throws IOException {
+        String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains(OS_LINUX)) {
             if (new File("/usr/bin/xdg-open").canExecute()) {
-                Runtime.getRuntime().exec(
-                        new String[] { "/usr/bin/xdg-open", file });
+                Runtime.getRuntime().exec(new String[] { "/usr/bin/xdg-open", file });
             } else if (new File("/usr/bin/kde-open").canExecute()) {
-                Runtime.getRuntime().exec(
-                        new String[] { "/usr/bin/kde-open", file });
+                Runtime.getRuntime().exec(new String[] { "/usr/bin/kde-open", file });
             } else {
                 throw new IOException("Linux flavour not supported");
             }
         } else if (os.contains(OS_MAC)) {
             Runtime.getRuntime().exec(new String[] { "open", file });
         } else if (os.contains(OS_WINDOWS)) {
-            Runtime.getRuntime().exec(
-                    "rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + file + "\"");
+            Runtime.getRuntime().exec("rundll32 SHELL32.DLL,ShellExec_RunDLL \"" + file + "\"");
         } else {
             throw new IOException("Environment not supported");
         }
@@ -183,7 +174,7 @@ public class EnvironmentDetector {
      * Guess if running in Windows
      */
     public static boolean isWindows() {
-        final String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase();
         return os.contains(OS_WINDOWS);
     }
 
@@ -191,7 +182,7 @@ public class EnvironmentDetector {
      * Guess if running in Linux
      */
     public static boolean isLinux() {
-        final String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase();
         return os.contains(OS_LINUX);
     }
 
@@ -199,7 +190,7 @@ public class EnvironmentDetector {
      * Guess if running in Mac
      */
     public static boolean isMac() {
-        final String os = System.getProperty("os.name").toLowerCase();
+        String os = System.getProperty("os.name").toLowerCase();
         return os.contains(OS_MAC);
     }
 
@@ -220,24 +211,158 @@ public class EnvironmentDetector {
     /**
      * Guess OpenOffice / LibreOffice directory
      */
-    public static String getOpenOfficeDir() {
-        // Try OpenOffice
-        File dir = new File("/usr/lib/openoffice");
+    public static String detectOpenOfficePath() {
+        if (isLinux()) {
+            // Try LibreOffice
+            File dir = new File("/usr/lib/libreoffice");
 
-        if (dir.exists() && dir.isDirectory()) {
-            log.info("Using OpenOffice from: " + dir);
-            return dir.getAbsolutePath();
+            if (dir.exists() && dir.isDirectory()) {
+                log.info("Using LibreOffice from: " + dir);
+                return dir.getAbsolutePath();
+            }
+
+            // Try LibreOffice (CentOS 64 bits)
+            dir = new File("/usr/lib64/libreoffice");
+
+            if (dir.exists() && dir.isDirectory()) {
+                log.info("Using LibreOffice from: " + dir);
+                return dir.getAbsolutePath();
+            }
+
+            // Try OpenOffice
+            dir = new File("/usr/lib/openoffice");
+
+            if (dir.exists() && dir.isDirectory()) {
+                log.info("Using OpenOffice from: " + dir);
+                return dir.getAbsolutePath();
+            }
+
+            // Try OpenOffice (CentOS 64 bits)
+            dir = new File("/usr/lib64/openoffice");
+
+            if (dir.exists() && dir.isDirectory()) {
+                log.info("Using OpenOffice from: " + dir);
+                return dir.getAbsolutePath();
+            }
+
+            // Otherwise none
+            return "";
+        } else {
+            return "";
         }
+    }
 
-        // Try LibreOffice
-        dir = new File("/usr/lib/libreoffice");
+    /**
+     * Guess convert application
+     */
+    public static String detectImagemagickConvert() {
+        if (isLinux()) {
+            File app = new File("/usr/bin/convert");
 
-        if (dir.exists() && dir.isDirectory()) {
-            log.info("Using LibreOffice from: " + dir);
-            return dir.getAbsolutePath();
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath();
+            } else {
+                return "";
+            }
         }
+        if (isWindows()) {
+            File app = new File(getServerHomeDir() + "\\bin\\convert.exe");
 
-        // Otherwise none
-        return "";
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath();
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Guess pdfimages application
+     */
+    public static String detectPdfImages() {
+        final String params = "-j -f ${firstPage} -l ${lastPage} ${fileIn} ${imageRoot}";
+
+        if (isLinux()) {
+            File app = new File("/usr/bin/pdfimages");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath() + " " + params;
+            } else {
+                app = new File(getServerHomeDir() + "/bin/pdfimages");
+
+                if (app.exists() && app.isFile()) {
+                    return app.getAbsolutePath() + " " + params;
+                } else {
+                    return "";
+                }
+            }
+        }
+        if (isWindows()) {
+            File app = new File(getServerHomeDir() + "\\bin\\pdfimages.exe");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath() + " " + params;
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Guess pdf2swf application
+     */
+    public static String detectSwftoolsPdf2Swf() {
+        final String params = "-f -T 9 -t -s storeallcharacters ${fileIn} -o ${fileOut}";
+
+        if (isLinux()) {
+            File app = new File(getServerHomeDir() + "/bin/pdf2swf");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath() + " " + params;
+            } else {
+                return "";
+            }
+        }
+        if (isWindows()) {
+            File app = new File(getServerHomeDir() + "\\bin\\pdf2swf.exe");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath() + " " + params;
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Guess gs application
+     */
+    public static String detectGhostscript() {
+        if (isLinux()) {
+            File app = new File("/usr/bin/gs");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath();
+            } else {
+                return "";
+            }
+        }
+        if (isWindows()) {
+            File app = new File(getServerHomeDir() + "\\bin\\gswin32c.exe");
+
+            if (app.exists() && app.isFile()) {
+                return app.getAbsolutePath();
+            } else {
+                return "";
+            }
+        } else {
+            return "";
+        }
     }
 }

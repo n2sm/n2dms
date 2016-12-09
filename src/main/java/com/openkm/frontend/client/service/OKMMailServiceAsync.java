@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -22,16 +22,18 @@
 package com.openkm.frontend.client.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.openkm.frontend.client.bean.GWTMail;
+import com.openkm.frontend.client.widget.filebrowser.GWTFilter;
 
 /**
  * @author jllort
  *
  */
 public interface OKMMailServiceAsync {
-    public void getChilds(String fldPath, AsyncCallback<List<GWTMail>> callback);
+    public void getChilds(String fldPath, Map<String, GWTFilter> mapFilter, AsyncCallback<List<GWTMail>> callback);
 
     public void delete(String mailPath, AsyncCallback<?> callback);
 
@@ -43,8 +45,9 @@ public interface OKMMailServiceAsync {
 
     public void getProperties(String mailPath, AsyncCallback<GWTMail> callback);
 
-    public void rename(String mailId, String newName,
-            AsyncCallback<GWTMail> callback);
+    public void rename(String mailId, String newName, AsyncCallback<GWTMail> callback);
 
     public void isValid(String mailPath, AsyncCallback<Boolean> callback);
+
+    public void forwardMail(String mailPath, String mails, String users, String roles, String message, AsyncCallback<?> callback);
 }

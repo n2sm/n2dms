@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -23,6 +23,7 @@ package com.openkm.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.openkm.bean.Permission;
-import com.openkm.cache.UserItemsManager;
 import com.openkm.core.AccessDeniedException;
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
@@ -53,7 +53,6 @@ import com.openkm.util.UserActivity;
 
 public class NodeFolderDAO {
     private static Logger log = LoggerFactory.getLogger(NodeFolderDAO.class);
-
     private static NodeFolderDAO single = new NodeFolderDAO();
 
     private NodeFolderDAO() {
@@ -66,7 +65,7 @@ public class NodeFolderDAO {
     /**
      * Create base node
      */
-    public void createBase(final NodeFolder nFolder) throws DatabaseException {
+    public void createBase(NodeFolder nFolder) throws DatabaseException {
         log.debug("createBase({})", nFolder);
         Session session = null;
         Transaction tx = null;
@@ -78,7 +77,7 @@ public class NodeFolderDAO {
             session.save(nFolder);
             HibernateUtil.commit(tx);
             log.debug("createBase: void");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -89,8 +88,8 @@ public class NodeFolderDAO {
     /**
      * Create node
      */
-    public void create(final NodeFolder nFolder) throws PathNotFoundException,
-            AccessDeniedException, ItemExistsException, DatabaseException {
+    public synchronized void create(NodeFolder nFolder) throws PathNotFoundException, AccessDeniedException, ItemExistsException,
+            DatabaseException {
         log.debug("create({})", nFolder);
         Session session = null;
         Transaction tx = null;
@@ -100,31 +99,29 @@ public class NodeFolderDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = (NodeBase) session.load(NodeBase.class,
-                    nFolder.getParent());
+            NodeBase parentNode = (NodeBase) session.load(NodeBase.class, nFolder.getParent());
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
 
             // Check for same folder name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session,
-                    nFolder.getParent(), nFolder.getName());
+            NodeBaseDAO.getInstance().checkItemExistence(session, nFolder.getParent(), nFolder.getName());
 
             session.save(nFolder);
             HibernateUtil.commit(tx);
             log.debug("create: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -136,42 +133,43 @@ public class NodeFolderDAO {
      * Find by parent
      */
     @SuppressWarnings("unchecked")
-    public List<NodeFolder> findByParent(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    public List<NodeFolder> findByParent(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByParent({})", parentUuid);
-        final String qs = "from NodeFolder nf where nf.parent=:parent order by nf.name";
+        String qs = "from NodeFolder nf where nf.parent=:parent order by nf.name";
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
             // Security Check
             if (!Config.ROOT_NODE_UUID.equals(parentUuid)) {
-                final NodeBase parentNode = (NodeBase) session.load(
-                        NodeBase.class, parentUuid);
+                NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
                 SecurityHelper.checkRead(parentNode);
             }
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("parent", parentUuid);
-            final List<NodeFolder> ret = q.list();
+            List<NodeFolder> ret = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(ret);
 
             initialize(ret);
             HibernateUtil.commit(tx);
+
+            log.trace("findByParent.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByParent: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -182,18 +180,25 @@ public class NodeFolderDAO {
     /**
      * Find by pk
      */
-    public NodeFolder findByPk(final String uuid) throws PathNotFoundException,
-            DatabaseException {
+    public NodeFolder findByPk(String uuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByPk({})", uuid);
-        final String qs = "from NodeFolder nf where nf.uuid=:uuid";
+        String qs = "from NodeFolder nf where nf.uuid=:uuid";
         Session session = null;
+
+        if (Config.ROOT_NODE_UUID.equals(uuid)) {
+            NodeFolder nFld = new NodeFolder();
+            nFld.setCreated(Calendar.getInstance());
+            nFld.setUuid(Config.ROOT_NODE_UUID);
+            nFld.setAuthor(Config.SYSTEM_USER);
+            nFld.setName("");
+            return nFld;
+        }
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("uuid", uuid);
-            final NodeFolder nFld = (NodeFolder) q.setMaxResults(1)
-                    .uniqueResult();
+            NodeFolder nFld = (NodeFolder) q.setMaxResults(1).uniqueResult();
 
             if (nFld == null) {
                 throw new PathNotFoundException(uuid);
@@ -205,7 +210,7 @@ public class NodeFolderDAO {
             initialize(nFld);
             log.debug("findByPk: {}", nFld);
             return nFld;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -216,10 +221,12 @@ public class NodeFolderDAO {
      * Search nodes by category
      */
     @SuppressWarnings("unchecked")
-    public List<NodeFolder> findByCategory(final String catUuid)
-            throws PathNotFoundException, DatabaseException {
+    public List<NodeFolder> findByCategory(String catUuid) throws PathNotFoundException, DatabaseException {
         log.debug("findByCategory({})", catUuid);
+        long begin = System.currentTimeMillis();
         final String qs = "from NodeFolder nf where :category in elements(nf.categories) order by nf.name";
+        final String sql =
+                "select NBS_UUID from OKM_NODE_CATEGORY, OKM_NODE_FOLDER " + "where NCT_CATEGORY = :catUuid and NCT_NODE = NBS_UUID";
         List<NodeFolder> ret = new ArrayList<NodeFolder>();
         Session session = null;
         Transaction tx = null;
@@ -229,11 +236,10 @@ public class NodeFolderDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase catNode = (NodeBase) session.load(NodeBase.class,
-                    catUuid);
+            NodeBase catNode = (NodeBase) session.load(NodeBase.class, catUuid);
             SecurityHelper.checkRead(catNode);
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("category", catUuid);
             ret = q.list();
 
@@ -242,15 +248,16 @@ public class NodeFolderDAO {
 
             initialize(ret);
             HibernateUtil.commit(tx);
+            log.trace("findByCategory.Time: {}", System.currentTimeMillis() - begin);
             log.debug("findByCategory: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -262,10 +269,11 @@ public class NodeFolderDAO {
      * Search nodes by keyword
      */
     @SuppressWarnings("unchecked")
-    public List<NodeFolder> findByKeyword(final String keyword)
-            throws DatabaseException {
+    public List<NodeFolder> findByKeyword(String keyword) throws DatabaseException {
         log.debug("findByKeyword({})", keyword);
         final String qs = "from NodeFolder nf where :keyword in elements(nf.keywords) order by nf.name";
+        final String sql =
+                "select NBS_UUID from OKM_NODE_KEYWORD, OKM_NODE_FOLDER " + "where NKW_KEYWORD = :keyword and NKW_NODE = NBS_UUID";
         List<NodeFolder> ret = new ArrayList<NodeFolder>();
         Session session = null;
         Transaction tx = null;
@@ -274,7 +282,7 @@ public class NodeFolderDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("keyword", keyword);
             ret = q.list();
 
@@ -285,10 +293,10 @@ public class NodeFolderDAO {
             HibernateUtil.commit(tx);
             log.debug("findByKeyword: {}", ret);
             return ret;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -300,11 +308,10 @@ public class NodeFolderDAO {
      * Search nodes by property value
      */
     @SuppressWarnings("unchecked")
-    public List<NodeFolder> findByPropertyValue(final String group,
-            final String property, final String value) throws DatabaseException {
-        log.debug("findByPropertyValue({}, {}, {})", new Object[] { group,
-                property, value });
-        final String qs = "select nb from NodeFolder nb join nb.properties nbp where nbp.group=:group and nbp.name=:property and nbp.value like :value";
+    public List<NodeFolder> findByPropertyValue(String group, String property, String value) throws DatabaseException {
+        log.debug("findByPropertyValue({}, {}, {})", new Object[] { group, property, value });
+        String qs =
+                "select nb from NodeFolder nb join nb.properties nbp where nbp.group=:group and nbp.name=:property and nbp.value like :value";
         Session session = null;
         Transaction tx = null;
 
@@ -312,11 +319,11 @@ public class NodeFolderDAO {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("group", group);
             q.setString("property", property);
             q.setString("value", "%" + value + "%");
-            final List<NodeFolder> ret = q.list();
+            List<NodeFolder> ret = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(ret);
@@ -325,10 +332,10 @@ public class NodeFolderDAO {
             HibernateUtil.commit(tx);
             log.debug("findByPropertyValue: {}", ret);
             return ret;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -340,10 +347,9 @@ public class NodeFolderDAO {
      * Check if folder has childs
      */
     @SuppressWarnings("unchecked")
-    public boolean hasChildren(final String parentUuid)
-            throws PathNotFoundException, DatabaseException {
+    public boolean hasChildren(String parentUuid) throws PathNotFoundException, DatabaseException {
         log.debug("hasChildren({})", parentUuid);
-        final String qs = "from NodeFolder nf where nf.parent=:parent";
+        String qs = "from NodeFolder nf where nf.parent=:parent";
         Session session = null;
         Transaction tx = null;
 
@@ -353,29 +359,28 @@ public class NodeFolderDAO {
 
             // Security Check
             if (!Config.ROOT_NODE_UUID.equals(parentUuid)) {
-                final NodeBase parentNode = (NodeBase) session.load(
-                        NodeBase.class, parentUuid);
+                NodeBase parentNode = (NodeBase) session.load(NodeBase.class, parentUuid);
                 SecurityHelper.checkRead(parentNode);
             }
 
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("parent", parentUuid);
-            final List<NodeFolder> nodeList = q.list();
+            List<NodeFolder> nodeList = q.list();
 
             // Security Check
             SecurityHelper.pruneNodeList(nodeList);
 
-            final boolean ret = !nodeList.isEmpty();
+            boolean ret = !nodeList.isEmpty();
             HibernateUtil.commit(tx);
             log.debug("hasChildren: {}", ret);
             return ret;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -386,8 +391,7 @@ public class NodeFolderDAO {
     /**
      * Rename folder
      */
-    public NodeFolder rename(final String uuid, final String newName)
-            throws PathNotFoundException, AccessDeniedException,
+    public synchronized NodeFolder rename(String uuid, String newName) throws PathNotFoundException, AccessDeniedException,
             ItemExistsException, DatabaseException {
         log.debug("rename({}, {})", uuid, newName);
         Session session = null;
@@ -398,38 +402,40 @@ public class NodeFolderDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeBase parentNode = NodeBaseDAO.getInstance()
-                    .getParentNode(session, uuid);
+            NodeBase parentNode = NodeBaseDAO.getInstance().getParentNode(session, uuid);
             SecurityHelper.checkRead(parentNode);
             SecurityHelper.checkWrite(parentNode);
-            final NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class,
-                    uuid);
+            NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class, uuid);
             SecurityHelper.checkRead(nFld);
             SecurityHelper.checkWrite(nFld);
 
             // Check for same folder name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session,
-                    nFld.getParent(), newName);
+            NodeBaseDAO.getInstance().checkItemExistence(session, nFld.getParent(), newName);
 
             nFld.setName(newName);
+
+            if (Config.STORE_NODE_PATH) {
+                nFld.setPath(parentNode.getPath() + "/" + newName);
+            }
+
             session.update(nFld);
             initialize(nFld);
             HibernateUtil.commit(tx);
             log.debug("rename: {}", nFld);
             return nFld;
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -440,10 +446,10 @@ public class NodeFolderDAO {
     /**
      * Move folder
      */
-    public void move(final String uuid, final String dstUuid)
-            throws PathNotFoundException, AccessDeniedException,
-            ItemExistsException, DatabaseException {
+    public synchronized void move(String uuid, String dstUuid) throws PathNotFoundException, AccessDeniedException, ItemExistsException,
+            DatabaseException {
         log.debug("move({}, {})", uuid, dstUuid);
+        long begin = System.currentTimeMillis();
         Session session = null;
         Transaction tx = null;
 
@@ -452,25 +458,21 @@ public class NodeFolderDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeFolder nDstFld = (NodeFolder) session.load(
-                    NodeFolder.class, dstUuid);
+            NodeFolder nDstFld = (NodeFolder) session.load(NodeFolder.class, dstUuid);
             SecurityHelper.checkRead(nDstFld);
             SecurityHelper.checkWrite(nDstFld);
-            final NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class,
-                    uuid);
+            NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class, uuid);
             SecurityHelper.checkRead(nFld);
             SecurityHelper.checkWrite(nFld);
 
             // Check if move to itself
             if (uuid.equals(dstUuid)) {
-                final String dstPath = NodeBaseDAO.getInstance()
-                        .getPathFromUuid(dstUuid);
+                String dstPath = NodeBaseDAO.getInstance().getPathFromUuid(dstUuid);
                 throw new ItemExistsException(dstPath);
             }
 
             // Check for same folder name in same parent
-            NodeBaseDAO.getInstance().checkItemExistence(session, dstUuid,
-                    nFld.getName());
+            NodeBaseDAO.getInstance().checkItemExistence(session, dstUuid, nFld.getName());
 
             // Check if context changes
             if (!nDstFld.getContext().equals(nFld.getContext())) {
@@ -481,22 +483,28 @@ public class NodeFolderDAO {
             }
 
             nFld.setParent(dstUuid);
+
+            if (Config.STORE_NODE_PATH) {
+                nFld.setPath(nDstFld.getPath() + "/" + nFld.getName());
+            }
+
             session.update(nFld);
             HibernateUtil.commit(tx);
+            log.trace("move.Time: {}", System.currentTimeMillis() - begin);
             log.debug("move: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final ItemExistsException e) {
+        } catch (ItemExistsException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -507,10 +515,9 @@ public class NodeFolderDAO {
     /**
      * Delete folder
      */
-    public void delete(final String name, final String uuid,
-            final String trashUuid) throws PathNotFoundException,
-            AccessDeniedException, DatabaseException {
+    public void delete(String name, String uuid, String trashUuid) throws PathNotFoundException, AccessDeniedException, DatabaseException {
         log.debug("delete({}, {}, {})", new Object[] { name, uuid, trashUuid });
+        long begin = System.currentTimeMillis();
         Session session = null;
         Transaction tx = null;
 
@@ -519,20 +526,18 @@ public class NodeFolderDAO {
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeFolder nTrashFld = (NodeFolder) session.load(
-                    NodeFolder.class, trashUuid);
+            NodeFolder nTrashFld = (NodeFolder) session.load(NodeFolder.class, trashUuid);
             SecurityHelper.checkRead(nTrashFld);
             SecurityHelper.checkWrite(nTrashFld);
-            final NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class,
-                    uuid);
+            NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class, uuid);
             SecurityHelper.checkRead(nFld);
             SecurityHelper.checkWrite(nFld);
+            SecurityHelper.checkDelete(nFld);
 
             // Test if already exists a folder with the same name in the trash
             String testName = name;
 
-            for (int i = 1; NodeBaseDAO.getInstance().testItemExistence(
-                    session, trashUuid, testName); i++) {
+            for (int i = 1; NodeBaseDAO.getInstance().testItemExistence(session, trashUuid, testName); i++) {
                 // log.info("Trying with: {}", testName);
                 testName = name + " (" + i + ")";
             }
@@ -543,19 +548,25 @@ public class NodeFolderDAO {
             nFld.setContext(nTrashFld.getContext());
             nFld.setParent(trashUuid);
             nFld.setName(testName);
+
+            if (Config.STORE_NODE_PATH) {
+                nFld.setPath(nTrashFld.getPath() + "/" + testName);
+            }
+
             session.update(nFld);
             HibernateUtil.commit(tx);
+            log.trace("delete.Time: {}", System.currentTimeMillis() - begin);
             log.debug("delete: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -564,13 +575,12 @@ public class NodeFolderDAO {
     }
 
     @SuppressWarnings("unchecked")
-    private void moveHelper(final Session session, final String parentUuid,
-            final String newContext) throws HibernateException {
-        final String qs = "from NodeBase nf where nf.parent=:parent";
-        final Query q = session.createQuery(qs);
+    private void moveHelper(Session session, String parentUuid, String newContext) throws HibernateException {
+        String qs = "from NodeBase nf where nf.parent=:parent";
+        Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
 
-        for (final NodeBase nBase : (List<NodeBase>) q.list()) {
+        for (NodeBase nBase : (List<NodeBase>) q.list()) {
             nBase.setContext(newContext);
 
             if (nBase instanceof NodeFolder || nBase instanceof NodeMail) {
@@ -582,21 +592,19 @@ public class NodeFolderDAO {
     /**
      * Get categories from node
      */
-    public Set<NodeFolder> resolveCategories(final Set<String> categories)
-            throws DatabaseException {
+    public Set<NodeFolder> resolveCategories(Set<String> categories) throws DatabaseException {
         log.debug("resolveCategories({})", categories);
-        final Set<NodeFolder> ret = new HashSet<NodeFolder>();
+        Set<NodeFolder> ret = new HashSet<NodeFolder>();
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final DbAccessManager am = SecurityHelper.getAccessManager();
+            DbAccessManager am = SecurityHelper.getAccessManager();
 
-            for (final String catUuid : categories) {
-                final NodeFolder nFld = (NodeFolder) session.load(
-                        NodeFolder.class, catUuid);
+            for (String catUuid : categories) {
+                NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class, catUuid);
 
                 // Security Check
                 if (am.isGranted(nFld, Permission.READ)) {
@@ -607,10 +615,10 @@ public class NodeFolderDAO {
 
             log.debug("resolveCategories: {}", ret);
             return ret;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -623,39 +631,40 @@ public class NodeFolderDAO {
      * parameter is present because this "purge" method is called from NrRepositoryModule.purgeTrash(String token) and
      * NrFolderModule.purge(String token, String fldPath).
      */
-    public void purge(final String uuid, final boolean deleteBase)
-            throws PathNotFoundException, AccessDeniedException, LockException,
+    public void purge(String uuid, boolean deleteBase) throws PathNotFoundException, AccessDeniedException, LockException,
             DatabaseException, IOException {
         log.debug("purgue({}, {})", uuid, deleteBase);
         Session session = null;
         Transaction tx = null;
 
         try {
+            long begin = System.currentTimeMillis();
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
             // Security Check
-            final NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class,
-                    uuid);
+            NodeFolder nFld = (NodeFolder) session.load(NodeFolder.class, uuid);
             SecurityHelper.checkRead(nFld);
             SecurityHelper.checkDelete(nFld);
 
             purgeHelper(session, nFld, deleteBase);
             HibernateUtil.commit(tx);
+
+            log.trace("purgue.Time: {}", System.currentTimeMillis() - begin);
             log.debug("purgue: void");
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final AccessDeniedException e) {
+        } catch (AccessDeniedException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             HibernateUtil.rollback(tx);
             throw e;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -667,27 +676,27 @@ public class NodeFolderDAO {
      * Purge in depth helper.
      */
     @SuppressWarnings("unchecked")
-    private void purgeHelper(final Session session, final String parentUuid)
-            throws PathNotFoundException, AccessDeniedException, LockException,
+    private void purgeHelper(Session session, String parentUuid) throws PathNotFoundException, AccessDeniedException, LockException,
             IOException, DatabaseException, HibernateException {
-        final String qs = "from NodeFolder nf where nf.parent=:parent";
-        final Query q = session.createQuery(qs);
+        String qs = "from NodeFolder nf where nf.parent=:parent";
+        long begin = System.currentTimeMillis();
+        Query q = session.createQuery(qs);
         q.setString("parent", parentUuid);
-        final List<NodeFolder> listFolders = q.list();
+        List<NodeFolder> listFolders = q.list();
 
-        for (final NodeFolder nFld : listFolders) {
+        for (NodeFolder nFld : listFolders) {
             purgeHelper(session, nFld, true);
         }
+
+        log.trace("purgeHelper.Time: {}", System.currentTimeMillis() - begin);
     }
 
     /**
      * Purge in depth helper.
      */
-    private void purgeHelper(final Session session, final NodeFolder nFolder,
-            final boolean deleteBase) throws PathNotFoundException,
-            AccessDeniedException, LockException, IOException,
-            DatabaseException, HibernateException {
-        final String author = nFolder.getAuthor();
+    private void purgeHelper(Session session, NodeFolder nFolder, boolean deleteBase) throws PathNotFoundException, AccessDeniedException,
+            LockException, IOException, DatabaseException, HibernateException {
+        String author = nFolder.getAuthor();
 
         // Security Check
         SecurityHelper.checkRead(nFolder);
@@ -709,28 +718,33 @@ public class NodeFolderDAO {
         purgeHelper(session, nFolder.getUuid());
 
         if (deleteBase) {
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    session, nFolder.getUuid());
-            final String user = PrincipalUtils.getUser();
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(session, nFolder.getUuid());
+            String user = PrincipalUtils.getUser();
 
             // Delete the node itself
             session.delete(nFolder);
 
-            // Update user items size
-            if (Config.USER_ITEM_CACHE) {
-                UserItemsManager.decFolders(author, 1);
-            }
-
             // Activity log
-            UserActivity.log(user, "PURGE_FOLDER", nFolder.getUuid(), path,
-                    null);
+            UserActivity.log(user, "PURGE_FOLDER", nFolder.getUuid(), path, null);
+        }
+    }
+
+    /**
+     * Check for a valid folder node.
+     */
+    public boolean isValid(String uuid) throws DatabaseException {
+        try {
+            findByPk(uuid);
+            return true;
+        } catch (PathNotFoundException e) {
+            return false;
         }
     }
 
     /**
      * Force initialization of a proxy
      */
-    public void initialize(final NodeFolder nFolder) {
+    public void initialize(NodeFolder nFolder) {
         if (nFolder != null) {
             Hibernate.initialize(nFolder);
             Hibernate.initialize(nFolder.getKeywords());
@@ -744,8 +758,8 @@ public class NodeFolderDAO {
     /**
      * Force initialization of a proxy
      */
-    private void initialize(final List<NodeFolder> nFolderList) {
-        for (final NodeFolder nFolder : nFolderList) {
+    private void initialize(List<NodeFolder> nFolderList) {
+        for (NodeFolder nFolder : nFolderList) {
             initialize(nFolder);
         }
     }

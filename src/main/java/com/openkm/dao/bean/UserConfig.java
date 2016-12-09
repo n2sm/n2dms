@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,24 +27,18 @@ import java.util.Set;
 
 public class UserConfig implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String user;
-
     private String homePath;
-
     private String homeType;
-
     private String homeNode;
-
     private Profile profile;
-
     private Set<String> lockTokens = new HashSet<String>();
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(final String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -52,7 +46,7 @@ public class UserConfig implements Serializable {
         return homePath;
     }
 
-    public void setHomePath(final String homePath) {
+    public void setHomePath(String homePath) {
         this.homePath = homePath;
     }
 
@@ -60,7 +54,7 @@ public class UserConfig implements Serializable {
         return homeNode;
     }
 
-    public void setHomeNode(final String homeNode) {
+    public void setHomeNode(String homeNode) {
         this.homeNode = homeNode;
     }
 
@@ -68,7 +62,7 @@ public class UserConfig implements Serializable {
         return homeType;
     }
 
-    public void setHomeType(final String homeType) {
+    public void setHomeType(String homeType) {
         this.homeType = homeType;
     }
 
@@ -76,7 +70,7 @@ public class UserConfig implements Serializable {
         return profile;
     }
 
-    public void setProfile(final Profile profile) {
+    public void setProfile(Profile profile) {
         this.profile = profile;
     }
 
@@ -84,13 +78,12 @@ public class UserConfig implements Serializable {
         return lockTokens;
     }
 
-    public void setLockTokens(final Set<String> lockTokens) {
+    public void setLockTokens(Set<String> lockTokens) {
         this.lockTokens = lockTokens;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("user=");
         sb.append(user);

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -33,29 +33,24 @@ import com.openkm.dao.bean.Language;
 
 @SuppressWarnings("serial")
 public class MessageTag extends TagSupport {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private String module;
-
     private String key;
 
     @Override
     public int doStartTag() {
         try {
-            final Locale locale = pageContext.getRequest().getLocale();
-            final String lang = locale.getLanguage() + "-"
-                    + locale.getCountry();
+            Locale locale = pageContext.getRequest().getLocale();
+            String lang = locale.getLanguage() + "-" + locale.getCountry();
             String msg = LanguageDAO.getTranslation(lang, module, key);
+
             if (msg == null || msg.equals("")) {
                 msg = LanguageDAO.getTranslation(Language.DEFAULT, module, key);
             }
+
             pageContext.getOut().write(msg);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             e.printStackTrace();
-        } catch (final IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -69,7 +64,7 @@ public class MessageTag extends TagSupport {
         setKey("");
     }
 
-    public void setKey(final String key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
@@ -81,7 +76,7 @@ public class MessageTag extends TagSupport {
         return module;
     }
 
-    public void setModule(final String module) {
+    public void setModule(String module) {
         this.module = module;
     }
 }

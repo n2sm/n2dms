@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,16 +31,14 @@ public class StatsInfo implements Serializable {
     private static final long serialVersionUID = -6769199508952083208L;
 
     private double[] percents = new double[] {};
-
     private long[] sizes = new long[] {};
-
     private long total = 0;
 
     public double[] getPercents() {
         return percents;
     }
 
-    public void setPercents(final double[] percents) {
+    public void setPercents(double[] percents) {
         this.percents = percents;
     }
 
@@ -48,7 +46,7 @@ public class StatsInfo implements Serializable {
         return sizes;
     }
 
-    public void setSizes(final long[] sizes) {
+    public void setSizes(long[] sizes) {
         this.sizes = sizes;
     }
 
@@ -56,13 +54,12 @@ public class StatsInfo implements Serializable {
         return total;
     }
 
-    public void setTotal(final long total) {
+    public void setTotal(long total) {
         this.total = total;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("total=").append(total);
         sb.append(", sizes=[");

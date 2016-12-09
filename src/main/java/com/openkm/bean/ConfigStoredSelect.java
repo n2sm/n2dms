@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -27,20 +27,18 @@ import java.util.List;
 
 public class ConfigStoredSelect implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private List<ConfigStoredOption> options = new ArrayList<ConfigStoredOption>();
 
     public List<ConfigStoredOption> getOptions() {
         return options;
     }
 
-    public void setOptions(final List<ConfigStoredOption> options) {
+    public void setOptions(List<ConfigStoredOption> options) {
         this.options = options;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("options=").append(options);
         sb.append("}");

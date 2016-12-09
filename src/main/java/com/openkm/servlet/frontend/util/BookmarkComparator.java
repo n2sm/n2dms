@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,29 +31,27 @@ import com.openkm.frontend.client.bean.GWTBookmark;
  */
 public class BookmarkComparator extends CultureComparator<GWTBookmark> {
 
-    protected BookmarkComparator(final String locale) {
+    protected BookmarkComparator(String locale) {
         super(locale);
     }
 
-    public static BookmarkComparator getInstance(final String locale) {
+    public static BookmarkComparator getInstance(String locale) {
         try {
-            final BookmarkComparator comparator = (BookmarkComparator) CultureComparator
-                    .getInstance(BookmarkComparator.class, locale);
+            BookmarkComparator comparator = (BookmarkComparator) CultureComparator.getInstance(BookmarkComparator.class, locale);
             return comparator;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return new BookmarkComparator(locale);
         }
     }
 
     public static BookmarkComparator getInstance() {
-        final BookmarkComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
+        BookmarkComparator instance = getInstance(CultureComparator.DEFAULT_LOCALE);
         return instance;
     }
 
-    @Override
-    public int compare(final GWTBookmark arg0, final GWTBookmark arg1) {
-        final GWTBookmark first = arg0;
-        final GWTBookmark second = arg1;
+    public int compare(GWTBookmark arg0, GWTBookmark arg1) {
+        GWTBookmark first = arg0;
+        GWTBookmark second = arg1;
 
         // Compare first with type, and second for name
         if (!arg0.getType().equals(arg0.getType())) {

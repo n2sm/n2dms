@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,8 +32,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -49,33 +48,20 @@ import com.openkm.frontend.client.Main;
  */
 public class SecurityPanel extends Composite {
     private static final int TAB_HEIGHT = 20;
-
     private static final int TAB_USERS = 0;
-
     private static final int TAB_GROUPS = 1;
 
     public TabLayoutPanel tabPanel;
-
     private VerticalPanel vPanel;
-
     private HorizontalPanel filterPanel;
-
     private CheckBox checkBoxFilter;
-
     private TextBox filter;
-
     private HTML filterText;
-
     private String usersFilter = "";
-
     private String groupsFilter = "";
-
     public SecurityUser securityUser;
-
     public SecurityRole securityRole;
-
     private boolean filterView = false;
-
     private int width = 612;
 
     /**
@@ -89,12 +75,12 @@ public class SecurityPanel extends Composite {
         tabPanel.add(securityUser, Main.i18n("security.users"));
         tabPanel.add(securityRole, Main.i18n("security.roles"));
         tabPanel.selectTab(TAB_USERS);
-        tabPanel.setWidth(String.valueOf(width));
-        tabPanel.setHeight("385"); // 365 +20
+        tabPanel.setWidth(String.valueOf(width) + "px");
+        tabPanel.setHeight("385px"); // 365 +20
 
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
-            public void onSelection(final SelectionEvent<Integer> event) {
+            public void onSelection(SelectionEvent<Integer> event) {
                 Timer timer;
                 switch (event.getSelectedItem().intValue()) {
                 case TAB_USERS:
@@ -131,10 +117,10 @@ public class SecurityPanel extends Composite {
         checkBoxFilter.setValue(false);
         checkBoxFilter.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 securityUser.resetUnassigned();
                 securityRole.resetUnassigned();
-                final Widget sender = (Widget) event.getSource();
+                Widget sender = (Widget) event.getSource();
                 if (((CheckBox) sender).getValue()) {
                     filter.setText("");
                     filter.setEnabled(true);
@@ -156,18 +142,15 @@ public class SecurityPanel extends Composite {
         filterPanel.add(filter);
         filterPanel.add(new HTML("&nbsp;"));
 
-        filterPanel.setCellVerticalAlignment(checkBoxFilter,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        filterPanel.setCellVerticalAlignment(filterText,
-                HasVerticalAlignment.ALIGN_MIDDLE);
-        filterPanel.setCellVerticalAlignment(filter,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(checkBoxFilter, HasAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(filterText, HasAlignment.ALIGN_MIDDLE);
+        filterPanel.setCellVerticalAlignment(filter, HasAlignment.ALIGN_MIDDLE);
 
         filter.addKeyUpHandler(new KeyUpHandler() {
             @Override
-            public void onKeyUp(final KeyUpEvent event) {
+            public void onKeyUp(KeyUpEvent event) {
                 if (filter.getText().length() >= 3) {
-                    final int selected = tabPanel.getSelectedIndex();
+                    int selected = tabPanel.getSelectedIndex();
                     switch (selected) {
                     case TAB_USERS:
                         securityUser.getFilteredUngrantedUsers(filter.getText());
@@ -187,29 +170,38 @@ public class SecurityPanel extends Composite {
         vPanel.add(filterPanel);
         vPanel.add(tabPanel);
 
-        vPanel.setCellHorizontalAlignment(filterPanel,
-                HasHorizontalAlignment.ALIGN_RIGHT);
+        vPanel.setCellHorizontalAlignment(filterPanel, VerticalPanel.ALIGN_RIGHT);
 
         vPanel.addStyleName("okm-DisableSelect");
         tabPanel.addStyleName("okm-Border-Bottom");
         filter.setStyleName("okm-Input");
 
-        tabPanel.setWidth(String.valueOf(width));
-
         initWidget(vPanel);
+    }
+
+    /**
+     * initSecurity
+     * 
+     */
+    public void initSecurity() {
+        securityUser.initSecurity();
+        securityRole.initSecurity();
+        tabPanel.setWidth(String.valueOf(width));
     }
 
     /**
      * reset
      * 
-     * @param path
+     * @param uuid
      */
-    public void reset(final String path) {
-        securityUser.setPath(path);
-        securityRole.setPath(path);
+    public void reset(String uuid) {
+        securityUser.setUuid(uuid);
+        securityRole.setUuid(uuid);
         securityUser.reset();
         securityRole.reset();
         filter.setText("");
+        filter.setEnabled(true);
+        checkBoxFilter.setValue(true);
         usersFilter = "";
         groupsFilter = "";
         securityUser.getGrantedUsers();
@@ -249,7 +241,7 @@ public class SecurityPanel extends Composite {
      * langRefresh
      */
     public void langRefresh() {
-        final int selected = tabPanel.getSelectedIndex();
+        int selected = tabPanel.getSelectedIndex();
 
         while (tabPanel.getWidgetCount() > 0) {
             tabPanel.remove(0);
@@ -276,7 +268,6 @@ public class SecurityPanel extends Composite {
      * evaluateChangeButton
      */
     public void evaluateChangeButton() {
-        Main.get().securityPopup.enableChangeButton(securityUser.getNewGrants()
-                .size() > 0 || securityRole.getNewGrants().size() > 0);
+        Main.get().securityPopup.enableChangeButton(securityUser.hasChangedGrants() || securityRole.hasChangedGrants());
     }
 }

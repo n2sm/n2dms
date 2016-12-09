@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,52 +25,33 @@ import java.io.Serializable;
 
 public class ProfileMenuEdit implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean lockVisible;
-
     private boolean unlockVisible;
-
     private boolean deleteVisible;
-
     private boolean checkInVisible;
-
     private boolean checkOutVisible;
-
     private boolean cancelCheckOutVisible;
-
     private boolean renameVisible;
-
     private boolean copyVisible;
-
     private boolean moveVisible;
-
     private boolean addPropertyGroupVisible;
-
+    private boolean updatePropertyGroupVisible;
     private boolean removePropertyGroupVisible;
-
     private boolean addNoteVisible;
-
     private boolean removeNoteVisible;
-
     private boolean addCategoryVisible;
-
     private boolean removeCategoryVisible;
-
     private boolean addKeywordVisible;
-
     private boolean removeKeywordVisible;
-
     private boolean addSubscriptionVisible;
-
     private boolean removeSubscriptionVisible;
-
     private boolean mergePdfVisible;
 
     public boolean isLockVisible() {
         return lockVisible;
     }
 
-    public void setLockVisible(final boolean lockVisible) {
+    public void setLockVisible(boolean lockVisible) {
         this.lockVisible = lockVisible;
     }
 
@@ -78,7 +59,7 @@ public class ProfileMenuEdit implements Serializable {
         return unlockVisible;
     }
 
-    public void setUnlockVisible(final boolean unlockVisible) {
+    public void setUnlockVisible(boolean unlockVisible) {
         this.unlockVisible = unlockVisible;
     }
 
@@ -86,7 +67,7 @@ public class ProfileMenuEdit implements Serializable {
         return deleteVisible;
     }
 
-    public void setDeleteVisible(final boolean deleteVisible) {
+    public void setDeleteVisible(boolean deleteVisible) {
         this.deleteVisible = deleteVisible;
     }
 
@@ -94,7 +75,7 @@ public class ProfileMenuEdit implements Serializable {
         return checkInVisible;
     }
 
-    public void setCheckInVisible(final boolean checkInVisible) {
+    public void setCheckInVisible(boolean checkInVisible) {
         this.checkInVisible = checkInVisible;
     }
 
@@ -102,7 +83,7 @@ public class ProfileMenuEdit implements Serializable {
         return checkOutVisible;
     }
 
-    public void setCheckOutVisible(final boolean checkOutVisible) {
+    public void setCheckOutVisible(boolean checkOutVisible) {
         this.checkOutVisible = checkOutVisible;
     }
 
@@ -110,7 +91,7 @@ public class ProfileMenuEdit implements Serializable {
         return cancelCheckOutVisible;
     }
 
-    public void setCancelCheckOutVisible(final boolean cancelCheckOutVisible) {
+    public void setCancelCheckOutVisible(boolean cancelCheckOutVisible) {
         this.cancelCheckOutVisible = cancelCheckOutVisible;
     }
 
@@ -118,7 +99,7 @@ public class ProfileMenuEdit implements Serializable {
         return renameVisible;
     }
 
-    public void setRenameVisible(final boolean renameVisible) {
+    public void setRenameVisible(boolean renameVisible) {
         this.renameVisible = renameVisible;
     }
 
@@ -126,7 +107,7 @@ public class ProfileMenuEdit implements Serializable {
         return copyVisible;
     }
 
-    public void setCopyVisible(final boolean copyVisible) {
+    public void setCopyVisible(boolean copyVisible) {
         this.copyVisible = copyVisible;
     }
 
@@ -134,7 +115,7 @@ public class ProfileMenuEdit implements Serializable {
         return moveVisible;
     }
 
-    public void setMoveVisible(final boolean moveVisible) {
+    public void setMoveVisible(boolean moveVisible) {
         this.moveVisible = moveVisible;
     }
 
@@ -142,16 +123,23 @@ public class ProfileMenuEdit implements Serializable {
         return addPropertyGroupVisible;
     }
 
-    public void setAddPropertyGroupVisible(final boolean addPropertyGroupVisible) {
+    public void setAddPropertyGroupVisible(boolean addPropertyGroupVisible) {
         this.addPropertyGroupVisible = addPropertyGroupVisible;
+    }
+
+    public boolean isUpdatePropertyGroupVisible() {
+        return updatePropertyGroupVisible;
+    }
+
+    public void setUpdatePropertyGroupVisible(boolean updatePropertyGroupVisible) {
+        this.updatePropertyGroupVisible = updatePropertyGroupVisible;
     }
 
     public boolean isRemovePropertyGroupVisible() {
         return removePropertyGroupVisible;
     }
 
-    public void setRemovePropertyGroupVisible(
-            final boolean removePropertyGroupVisible) {
+    public void setRemovePropertyGroupVisible(boolean removePropertyGroupVisible) {
         this.removePropertyGroupVisible = removePropertyGroupVisible;
     }
 
@@ -159,7 +147,7 @@ public class ProfileMenuEdit implements Serializable {
         return addNoteVisible;
     }
 
-    public void setAddNoteVisible(final boolean addNoteVisible) {
+    public void setAddNoteVisible(boolean addNoteVisible) {
         this.addNoteVisible = addNoteVisible;
     }
 
@@ -167,7 +155,7 @@ public class ProfileMenuEdit implements Serializable {
         return removeNoteVisible;
     }
 
-    public void setRemoveNoteVisible(final boolean removeNoteVisible) {
+    public void setRemoveNoteVisible(boolean removeNoteVisible) {
         this.removeNoteVisible = removeNoteVisible;
     }
 
@@ -175,7 +163,7 @@ public class ProfileMenuEdit implements Serializable {
         return addCategoryVisible;
     }
 
-    public void setAddCategoryVisible(final boolean addCategoryVisible) {
+    public void setAddCategoryVisible(boolean addCategoryVisible) {
         this.addCategoryVisible = addCategoryVisible;
     }
 
@@ -183,7 +171,7 @@ public class ProfileMenuEdit implements Serializable {
         return removeCategoryVisible;
     }
 
-    public void setRemoveCategoryVisible(final boolean removeCategoryVisible) {
+    public void setRemoveCategoryVisible(boolean removeCategoryVisible) {
         this.removeCategoryVisible = removeCategoryVisible;
     }
 
@@ -191,7 +179,7 @@ public class ProfileMenuEdit implements Serializable {
         return addKeywordVisible;
     }
 
-    public void setAddKeywordVisible(final boolean addKeywordVisible) {
+    public void setAddKeywordVisible(boolean addKeywordVisible) {
         this.addKeywordVisible = addKeywordVisible;
     }
 
@@ -199,7 +187,7 @@ public class ProfileMenuEdit implements Serializable {
         return removeKeywordVisible;
     }
 
-    public void setRemoveKeywordVisible(final boolean removeKeywordVisible) {
+    public void setRemoveKeywordVisible(boolean removeKeywordVisible) {
         this.removeKeywordVisible = removeKeywordVisible;
     }
 
@@ -207,7 +195,7 @@ public class ProfileMenuEdit implements Serializable {
         return addSubscriptionVisible;
     }
 
-    public void setAddSubscriptionVisible(final boolean addSubscriptionVisible) {
+    public void setAddSubscriptionVisible(boolean addSubscriptionVisible) {
         this.addSubscriptionVisible = addSubscriptionVisible;
     }
 
@@ -215,8 +203,7 @@ public class ProfileMenuEdit implements Serializable {
         return removeSubscriptionVisible;
     }
 
-    public void setRemoveSubscriptionVisible(
-            final boolean removeSubscriptionVisible) {
+    public void setRemoveSubscriptionVisible(boolean removeSubscriptionVisible) {
         this.removeSubscriptionVisible = removeSubscriptionVisible;
     }
 
@@ -224,13 +211,12 @@ public class ProfileMenuEdit implements Serializable {
         return mergePdfVisible;
     }
 
-    public void setMergePdfVisible(final boolean mergePdfVisible) {
+    public void setMergePdfVisible(boolean mergePdfVisible) {
         this.mergePdfVisible = mergePdfVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("lockVisible=").append(lockVisible);
         sb.append(", unlockVisible=").append(unlockVisible);
@@ -242,8 +228,7 @@ public class ProfileMenuEdit implements Serializable {
         sb.append(", copyVisible=").append(copyVisible);
         sb.append(", moveVisible=").append(moveVisible);
         sb.append(", addPropertyGroupVisible=").append(addPropertyGroupVisible);
-        sb.append(", removePropertyGroupVisible=").append(
-                removePropertyGroupVisible);
+        sb.append(", removePropertyGroupVisible=").append(removePropertyGroupVisible);
         sb.append(", addNoteVisible=").append(addNoteVisible);
         sb.append(", removeNoteVisible=").append(removeNoteVisible);
         sb.append(", addCategoryVisible=").append(addCategoryVisible);
@@ -251,8 +236,7 @@ public class ProfileMenuEdit implements Serializable {
         sb.append(", addKeywordVisible=").append(addKeywordVisible);
         sb.append(", removeKeywordVisible=").append(removeKeywordVisible);
         sb.append(", addSubscriptionVisible=").append(addSubscriptionVisible);
-        sb.append(", removeSubscriptionVisible=").append(
-                removeSubscriptionVisible);
+        sb.append(", removeSubscriptionVisible=").append(removeSubscriptionVisible);
         sb.append(", mergePdfVisible=").append(mergePdfVisible);
         sb.append("}");
         return sb.toString();

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -52,21 +52,19 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(CuneiformTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(CuneiformTextExtractor.class);
 
     /**
      * Creates a new <code>TextExtractor</code> instance.
      */
     public CuneiformTextExtractor() {
-        super(new String[] { "image/tiff", "image/gif", "image/jpg",
-                "image/jpeg", "image/png" });
+        super(new String[] { "image/tiff", "image/gif", "image/jpg", "image/jpeg", "image/png" });
     }
 
     /**
      * Use in AbbyTextExtractor subclass
      */
-    public CuneiformTextExtractor(final String[] contentTypes) {
+    public CuneiformTextExtractor(String[] contentTypes) {
         super(contentTypes);
     }
 
@@ -75,34 +73,30 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         File tmpFileIn = null;
 
         if (!Config.SYSTEM_OCR.equals("")) {
             try {
                 // Create temp file
                 tmpFileIn = FileUtils.createTempFileFromMime(type);
-                final FileOutputStream fos = new FileOutputStream(tmpFileIn);
+                FileOutputStream fos = new FileOutputStream(tmpFileIn);
                 IOUtils.copy(stream, fos);
                 fos.close();
 
                 // Perform OCR
-                final StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 String text = doOcr(tmpFileIn);
                 sb.append(text);
 
                 if (!Config.SYSTEM_OCR_ROTATE.equals("")) {
-                    final String[] angles = Config.SYSTEM_OCR_ROTATE
-                            .split(Config.LIST_SEPARATOR);
+                    String[] angles = Config.SYSTEM_OCR_ROTATE.split(Config.LIST_SEPARATOR);
 
-                    for (final String angle : angles) {
+                    for (String angle : angles) {
                         // Rotate
                         log.debug("Rotate image {} degrees", angle);
-                        final double degree = Double.parseDouble(angle);
-                        DocConverter.getInstance().rotateImage(tmpFileIn,
-                                tmpFileIn, degree);
+                        double degree = Double.parseDouble(angle);
+                        DocConverter.getInstance().rotateImage(tmpFileIn, tmpFileIn, degree);
                         text = doOcr(tmpFileIn);
                         sb.append("\n-----------------------------\n");
                         sb.append(text);
@@ -110,7 +104,7 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
                 }
 
                 return new StringReader(sb.toString());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 log.warn("Failed to extract OCR text", e);
                 return new StringReader("");
             } finally {
@@ -126,8 +120,8 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
     /**
      * Performs OCR on image file
      */
-    public String doOcr(final File tmpFileIn) throws Exception {
-        final BufferedReader stdout = null;
+    public String doOcr(File tmpFileIn) throws Exception {
+        BufferedReader stdout = null;
         FileInputStream fis = null;
         File tmpFileOut = null;
         String cmd = null;
@@ -138,11 +132,10 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
                 tmpFileOut = File.createTempFile("okm", ".txt");
 
                 // Performs OCR
-                final HashMap<String, Object> hm = new HashMap<String, Object>();
+                HashMap<String, Object> hm = new HashMap<String, Object>();
                 hm.put("fileIn", tmpFileIn.getPath());
                 hm.put("fileOut", tmpFileOut.getPath());
-                cmd = TemplateUtils
-                        .replace("SYSTEM_OCR", Config.SYSTEM_OCR, hm);
+                cmd = TemplateUtils.replace("SYSTEM_OCR", Config.SYSTEM_OCR, hm);
                 ExecutionUtils.runCmd(cmd);
 
                 // Read result
@@ -158,16 +151,16 @@ public class CuneiformTextExtractor extends AbstractTextExtractor {
                     log.debug("TEXT: {}", text);
                     return text;
                 }
-            } catch (final SecurityException e) {
+            } catch (SecurityException e) {
                 log.warn("Security exception executing command: " + cmd, e);
                 return "";
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 log.warn("IO exception executing command: " + cmd, e);
                 return "";
-            } catch (final InterruptedException e) {
+            } catch (InterruptedException e) {
                 log.warn("Interrupted exception executing command: " + cmd, e);
                 return "";
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 log.warn("Failed to extract OCR text", e);
                 return "";
             } finally {

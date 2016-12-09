@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,8 +30,8 @@ import com.openkm.dao.bean.NodeDocumentVersion;
 /**
  * @author pavila
  */
-public class MajorMinorVersionNumerationAdapter implements
-        VersionNumerationAdapter {
+public class MajorMinorVersionNumerationAdapter implements VersionNumerationAdapter {
+    public static final int MAJOR = 1;
 
     @Override
     public String getInitialVersionNumber() {
@@ -39,17 +39,22 @@ public class MajorMinorVersionNumerationAdapter implements
     }
 
     @Override
-    public String getNextVersionNumber(final Session session,
-            final NodeDocument nDoc, final NodeDocumentVersion nDocVer) {
-        final String versionNumber = nDocVer.getName();
-        final String ver[] = versionNumber.split("\\.");
-        final int major = Integer.parseInt(ver[0]);
+    public String getNextVersionNumber(Session session, NodeDocument nDoc, NodeDocumentVersion nDocVer, int increment) {
+        String versionNumber = nDocVer.getName();
+        String ver[] = versionNumber.split("\\.");
+        int major = Integer.parseInt(ver[0]);
         int minor = Integer.parseInt(ver[1]);
-        final Query q = session.createQuery(qs);
+        Query q = session.createQuery(qs);
         NodeDocumentVersion ndv = null;
 
         do {
-            minor++;
+            if (increment == MAJOR) {
+                major++;
+                minor = 0;
+            } else {
+                minor++;
+            }
+
             q.setString("parent", nDoc.getUuid());
             q.setString("name", major + "." + minor);
             ndv = (NodeDocumentVersion) q.setMaxResults(1).uniqueResult();

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,43 +31,31 @@ public class Permission implements Serializable {
     private static final long serialVersionUID = -6594786775079108975L;
 
     public static final String USERS_READ = "okm:authUsersRead";
-
     public static final String USERS_WRITE = "okm:authUsersWrite";
-
     public static final String USERS_DELETE = "okm:authUsersDelete";
-
     public static final String USERS_SECURITY = "okm:authUsersSecurity";
-
     public static final String ROLES_READ = "okm:authRolesRead";
-
     public static final String ROLES_WRITE = "okm:authRolesWrite";
-
     public static final String ROLES_DELETE = "okm:authRolesDelete";
-
     public static final String ROLES_SECURITY = "okm:authRolesSecurity";
 
-    public static final int NONE = 0;
-
-    public static final int READ = 1;
-
-    public static final int WRITE = 2;
-
-    public static final int DELETE = 4;
-
-    public static final int SECURITY = 8;
+    public static final int NONE = 0; // 0000
+    public static final int READ = 1; // 0001
+    public static final int WRITE = 2; // 0010
+    public static final int DELETE = 4; // 0100
+    public static final int SECURITY = 8; // 1000
 
     // All grants
     public static final int ALL_GRANTS = READ | WRITE | DELETE | SECURITY;
 
     private String item;
-
     private int permissions;
 
     public String getItem() {
         return item;
     }
 
-    public void setItem(final String item) {
+    public void setItem(String item) {
         this.item = item;
     }
 
@@ -75,13 +63,12 @@ public class Permission implements Serializable {
         return permissions;
     }
 
-    public void setPermissions(final int permissions) {
+    public void setPermissions(int permissions) {
         this.permissions = permissions;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("item=").append(item);
         sb.append(", permissions=").append(permissions);

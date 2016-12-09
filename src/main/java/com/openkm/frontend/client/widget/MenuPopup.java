@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,10 +33,9 @@ import com.openkm.frontend.client.bean.ToolBarOption;
  */
 public class MenuPopup extends PopupPanel {
     public VerticalPanel panel;
-
     public MenuBase menu;
 
-    public MenuPopup(final MenuBase menu) {
+    public MenuPopup(MenuBase menu) {
         // Establishes auto-close when click outside
         super(true, true);
 
@@ -58,7 +57,7 @@ public class MenuPopup extends PopupPanel {
      * 
      * @param toolBarOption
      */
-    public void setOptions(final ToolBarOption toolBarOption) {
+    public void setOptions(ToolBarOption toolBarOption) {
         menu.setOptions(toolBarOption);
     }
 
@@ -81,5 +80,19 @@ public class MenuPopup extends PopupPanel {
      */
     public void disableAddPropertyGroup() {
         menu.disableAddPropertyGroup();
+    }
+
+    /**
+     * enablePdfMerge
+     */
+    public void enablePdfMerge() {
+        menu.enablePdfMerge();
+    }
+
+    /**
+     * disablePdfMerge
+     */
+    public void disablePdfMerge() {
+        menu.disablePdfMerge();
     }
 }

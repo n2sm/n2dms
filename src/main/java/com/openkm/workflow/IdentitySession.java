@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -38,20 +38,19 @@ public class IdentitySession implements ExpressionSession {
      * retrieves a group from the user datastore including the membership relations.
      */
     @Override
-    public Group getGroupByName(final String name) {
+    public Group getGroupByName(String name) {
         log.debug("getGroupByName({})", name);
         Group group = null;
 
         try {
             group = new Group(name);
 
-            for (final String user : CommonAuthModule
-                    .getUsersByRole(null, name)) {
-                final Membership membership = new Membership();
+            for (String user : CommonAuthModule.getUsersByRole(name)) {
+                Membership membership = new Membership();
                 membership.setUser(new User(user));
                 group.addMembership(membership);
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -63,21 +62,20 @@ public class IdentitySession implements ExpressionSession {
      * retrieves a user from the user datastore including the membership relations.
      */
     @Override
-    public User getUserByName(final String userName) {
+    public User getUserByName(String userName) {
         log.debug("getUserByName({})", userName);
         User user = null;
 
         try {
             user = new User(userName);
-            user.setEmail(CommonAuthModule.getMail(null, userName));
+            user.setEmail(CommonAuthModule.getMail(userName));
 
-            for (final String role : CommonAuthModule.getRolesByUser(null,
-                    userName)) {
-                final Membership membership = new Membership();
+            for (String role : CommonAuthModule.getRolesByUser(userName)) {
+                Membership membership = new Membership();
                 membership.setGroup(new Group(role));
                 user.addMembership(membership);
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -89,22 +87,21 @@ public class IdentitySession implements ExpressionSession {
      * retrieves a user from the user datastore including the membership relations.
      */
     @Override
-    public User getUserByGroupAndRole(final String group, final String role) {
+    public User getUserByGroupAndRole(String group, String role) {
         log.debug("getUserByGroupAndRole({}, {})", group, role);
         User user = null;
 
         try {
-            for (final String userId : CommonAuthModule.getUsersByRole(null,
-                    group)) {
+            for (String userId : CommonAuthModule.getUsersByRole(group)) {
                 user = new User(userId);
-                user.setEmail(CommonAuthModule.getMail(null, userId));
-                final Membership membership = new Membership();
+                user.setEmail(CommonAuthModule.getMail(userId));
+                Membership membership = new Membership();
                 membership.setGroup(new Group(group));
                 membership.setRole(role);
                 user.addMembership(membership);
                 break;
             }
-        } catch (final PrincipalAdapterException e) {
+        } catch (PrincipalAdapterException e) {
             log.error(e.getMessage(), e);
         }
 

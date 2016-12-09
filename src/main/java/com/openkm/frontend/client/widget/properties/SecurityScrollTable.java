@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.frontend.client.widget.properties;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +41,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTGrantedUser;
@@ -50,6 +50,7 @@ import com.openkm.frontend.client.bean.GWTUser;
 import com.openkm.frontend.client.service.OKMAuthService;
 import com.openkm.frontend.client.service.OKMAuthServiceAsync;
 import com.openkm.frontend.client.util.RoleComparator;
+import com.openkm.frontend.client.util.ScrollTableHelper;
 import com.openkm.frontend.client.util.Util;
 
 /**
@@ -59,89 +60,67 @@ import com.openkm.frontend.client.util.Util;
  *
  */
 public class SecurityScrollTable extends Composite implements ClickHandler {
-    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT
-            .create(OKMAuthService.class);
+    private final OKMAuthServiceAsync authService = (OKMAuthServiceAsync) GWT.create(OKMAuthService.class);
 
     // Number of columns
-    private String path;
-
+    private String uuid;
     private ScrollTable table;
-
     private FixedWidthFlexTable headerTable;
-
     private FixedWidthGrid dataTable;
-
     private Button button;
-
     private String withPermission = "img/icon/security/yes.gif";
-
     private String withoutPermission = "img/icon/security/no.gif";
-
     private int userRow = 0;
-
     private int rolRow = 0;
-
     private int numberOfColumns = 0;
 
     /**
      * SecurityScrollTable
      */
     public SecurityScrollTable() {
-        final ScrollTableImages scrollTableImages = new ScrollTableImages() {
-            @Override
+        ScrollTableImages scrollTableImages = new ScrollTableImages() {
             public AbstractImagePrototype scrollTableAscending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_asc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_asc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_asc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableDescending() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/sort_desc.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/sort_desc.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/sort_desc.gif\"/>";
                     }
                 };
             }
 
-            @Override
             public AbstractImagePrototype scrollTableFillWidth() {
                 return new AbstractImagePrototype() {
-                    @Override
-                    public void applyTo(final Image image) {
+                    public void applyTo(Image image) {
                         image.setUrl("img/fill_width.gif");
                     }
 
-                    @Override
                     public Image createImage() {
                         return new Image("img/fill_width.gif");
                     }
 
-                    @Override
                     public String getHTML() {
                         return "<img border=\"0\" src=\"img/fill_width.gif\"/>";
                     }
@@ -155,70 +134,61 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
         table = new ScrollTable(dataTable, headerTable, scrollTableImages);
         table.setCellSpacing(0);
         table.setCellPadding(2);
-        table.setSize("540", "140");
+        table.setSize("540px", "140px");
 
         button = new Button(Main.i18n("button.update"), this);
         button.setStyleName("okm-ChangeButton");
-
-        initSecurity();
 
         initWidget(table);
     }
 
     /**
      * initSecurity
+     * 
+     * @param extendedSecurity
      */
     public void initSecurity() {
         int col = 0;
-        table.setColumnWidth(col, 110);
-        table.setPreferredColumnWidth(col++, 110);
-        table.setColumnWidth(col, 90);
-        table.setPreferredColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
-
-        table.setColumnWidth(col, 80);
+        ScrollTableHelper.setColumnWidth(table, col, 110, ScrollTableHelper.GREAT, true, false);
+        col++;
+        // Four security properties
+        for (int i = 0; i < 4; i++) {
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
+        }
+        // Button
+        ScrollTableHelper.setColumnWidth(table, col, 100, ScrollTableHelper.FIXED);
         table.setColumnSortable(col++, false);
-        table.setColumnWidth(col, 110);
-        table.setPreferredColumnWidth(col++, 110);
-        table.setColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
-        table.setColumnWidth(col++, 90);
+        ScrollTableHelper.setColumnWidth(table, col, 110, ScrollTableHelper.GREAT, true, false);
+        col++;
+        // Four security properties
+        for (int i = 0; i < 4; i++) {
+            ScrollTableHelper.setColumnWidth(table, col, 90, ScrollTableHelper.MEDIUM, false, true);
+            col++;
+        }
 
         // Level 1 headers		
         col = 0;
         headerTable.setHTML(0, col++, Main.i18n("security.role.name"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.read"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.write"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.delete"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.security"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.read"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.write"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.delete"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.security"));
 
         headerTable.setWidget(0, col, button);
-        headerTable.getCellFormatter().setHorizontalAlignment(0, col,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        headerTable.getCellFormatter().setVerticalAlignment(0, col++,
-                HasVerticalAlignment.ALIGN_MIDDLE);
+        headerTable.getCellFormatter().setHorizontalAlignment(0, col, HasAlignment.ALIGN_CENTER);
+        headerTable.getCellFormatter().setVerticalAlignment(0, col++, HasAlignment.ALIGN_MIDDLE);
         headerTable.setHTML(0, col++, Main.i18n("security.user.name"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.read"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.write"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.delete"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.security"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.read"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.write"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.delete"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.security"));
 
         numberOfColumns = col; // Setting the number of columns
 
         // Table data
         dataTable.setSelectionPolicy(SelectionGrid.SelectionPolicy.ONE_ROW);
-        table.setResizePolicy(ResizePolicy.UNCONSTRAINED);
+        table.setResizePolicy(ResizePolicy.FILL_WIDTH);
         table.setScrollPolicy(ScrollPolicy.BOTH);
 
         headerTable.addStyleName("okm-DisableSelect");
@@ -226,12 +196,12 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
     }
 
     /**
-     * Sets the document or folder ID
+     * Sets the uuid
      * 
-     * @param path The document or folder ID
+     * @param uuid The uuid
      */
-    public void setPath(final String path) {
-        this.path = path;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     /**
@@ -240,26 +210,17 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
     public void langRefresh() {
         int col = 0;
         headerTable.setHTML(0, col++, Main.i18n("security.role.name"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.read"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.write"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.delete"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.role.permission.security"));
-
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.read"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.write"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.delete"));
+        headerTable.setHTML(0, col++, Main.i18n("security.role.permission.security"));
         button.setText(Main.i18n("button.update"));
         col++; // Button column
         headerTable.setHTML(0, col++, Main.i18n("security.user.name"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.read"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.write"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.delete"));
-        headerTable.setHTML(0, col++,
-                Main.i18n("security.user.permission.security"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.read"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.write"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.delete"));
+        headerTable.setHTML(0, col++, Main.i18n("security.user.permission.security"));
     }
 
     /**
@@ -281,56 +242,43 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
      * @param userName The user name value
      * @param permission The permission value
      */
-    private void addUserRow(final GWTUser user, final Integer permission) {
-        final int rows = userRow++;
+    private void addUserRow(GWTUser user, Integer permission) {
+        int rows = userRow++;
 
         if (dataTable.getRowCount() <= rows) {
             dataTable.insertRow(rows);
         }
 
         int col = 6;
-
         dataTable.setHTML(rows, col++, user.getUsername());
 
         if ((permission & GWTPermission.READ) == GWTPermission.READ) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.WRITE) == GWTPermission.WRITE) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.DELETE) == GWTPermission.DELETE) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
     }
 
     /**
@@ -339,8 +287,8 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
      * @param groupName The group value name
      * @param permission The permission value
      */
-    private void addRolRow(final String groupName, final Integer permission) {
-        final int rows = rolRow++;
+    private void addRolRow(String groupName, Integer permission) {
+        int rows = rolRow++;
 
         if (dataTable.getRowCount() <= rows) {
             dataTable.insertRow(rows);
@@ -350,74 +298,59 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
         dataTable.setHTML(rows, col++, groupName);
 
         if ((permission & GWTPermission.READ) == GWTPermission.READ) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
             dataTable.setHTML(rows, col, "O");
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.WRITE) == GWTPermission.WRITE) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.DELETE) == GWTPermission.DELETE) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
 
         if ((permission & GWTPermission.SECURITY) == GWTPermission.SECURITY) {
-            dataTable
-                    .setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withPermission, ""));
         } else {
-            dataTable.setHTML(rows, col,
-                    Util.imageItemHTML(withoutPermission, ""));
+            dataTable.setHTML(rows, col, Util.imageItemHTML(withoutPermission, ""));
         }
-        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        dataTable.getCellFormatter().setHorizontalAlignment(rows, col++, HasAlignment.ALIGN_CENTER);
     }
 
     /**
      * Call back get granted roles
      */
     final AsyncCallback<Map<String, Integer>> callbackGetGrantedRoles = new AsyncCallback<Map<String, Integer>>() {
-        @Override
-        public void onSuccess(final Map<String, Integer> result) {
-            final List<String> rolesList = new ArrayList<String>();
+        public void onSuccess(Map<String, Integer> result) {
+            List<String> rolesList = new ArrayList<String>();
 
             // Ordering grant roles to list
-            for (final String string : result.keySet()) {
-                rolesList.add(string);
+            for (Iterator<String> it = result.keySet().iterator(); it.hasNext();) {
+                rolesList.add(it.next());
             }
             Collections.sort(rolesList, RoleComparator.getInstance());
 
-            for (final String groupName : rolesList) {
-                final Integer permission = result.get(groupName);
+            for (Iterator<String> it = rolesList.iterator(); it.hasNext();) {
+                String groupName = it.next();
+                Integer permission = (Integer) result.get(groupName);
                 addRolRow(groupName, permission);
             }
 
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetRoleSecurity();
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetRoleSecurity();
         }
 
-        @Override
-        public void onFailure(final Throwable caught) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .unsetRoleSecurity();
+        public void onFailure(Throwable caught) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetRoleSecurity();
             Main.get().showError("GetGrantedRoles", caught);
         }
     };
@@ -426,28 +359,24 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
      * Gets the granted users
      */
     private void getGrantedUsers() {
-        if (path != null) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setUserSecurity();
-            authService.getGrantedUsers(path,
-                    new AsyncCallback<List<GWTGrantedUser>>() {
-                        @Override
-                        public void onSuccess(final List<GWTGrantedUser> result) {
-                            for (final GWTGrantedUser gu : result) {
-                                addUserRow(gu.getUser(), gu.getPermissions());
-                            }
+        if (uuid != null) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setUserSecurity();
+            authService.getGrantedUsers(uuid, new AsyncCallback<List<GWTGrantedUser>>() {
+                @Override
+                public void onSuccess(List<GWTGrantedUser> result) {
+                    for (GWTGrantedUser gu : result) {
+                        addUserRow(gu.getUser(), gu.getPermissions());
+                    }
 
-                            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                                    .unsetUserSecurity();
-                        }
+                    Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetUserSecurity();
+                }
 
-                        @Override
-                        public void onFailure(final Throwable caught) {
-                            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                                    .unsetUserSecurity();
-                            Main.get().showError("GetGrantedUsers", caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().mainPanel.desktop.browser.tabMultiple.status.unsetUserSecurity();
+                    Main.get().showError("GetGrantedUsers", caught);
+                }
+            });
         }
     }
 
@@ -457,10 +386,9 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
     private void getGrantedRoles() {
         removeAllRows();
 
-        if (path != null) {
-            Main.get().mainPanel.desktop.browser.tabMultiple.status
-                    .setRoleSecurity();
-            authService.getGrantedRoles(path, callbackGetGrantedRoles);
+        if (uuid != null) {
+            Main.get().mainPanel.desktop.browser.tabMultiple.status.setRoleSecurity();
+            authService.getGrantedRoles(uuid, callbackGetGrantedRoles);
         }
     }
 
@@ -469,16 +397,13 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
      * 
      * @param visible The visible value
      */
-    public void setVisibleButtons(final boolean visible) {
+    public void setVisibleButtons(boolean visible) {
         button.setVisible(visible);
     }
 
-    /* (non-Javadoc)
-     * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
-     */
     @Override
-    public void onClick(final ClickEvent event) {
-        Main.get().securityPopup.show(path);
+    public void onClick(ClickEvent event) {
+        Main.get().securityPopup.show(uuid);
     }
 
     /**
@@ -486,7 +411,7 @@ public class SecurityScrollTable extends Composite implements ClickHandler {
      * 
      * @param permission The permission value
      */
-    public void setChangePermision(final boolean permission) {
+    public void setChangePermision(boolean permission) {
         button.setEnabled(permission);
     }
 

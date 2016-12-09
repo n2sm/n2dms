@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -21,8 +21,10 @@
 
 package com.openkm.servlet.admin;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,16 +60,13 @@ import com.openkm.util.WebUtils;
  */
 public class CronTabServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
     private static Logger log = LoggerFactory.getLogger(CronTabServlet.class);
 
     @Override
-    public void service(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String method = request.getMethod();
+    public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String method = request.getMethod();
 
-        if (isAdmin(request)) {
+        if (checkMultipleInstancesAccess(request, response)) {
             if (method.equals(METHOD_GET)) {
                 doGet(request, response);
             } else if (method.equals(METHOD_POST)) {
@@ -77,55 +76,52 @@ public class CronTabServlet extends BaseServlet {
     }
 
     @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doGet({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
-        final String action = WebUtils.getString(request, "action");
+        String action = WebUtils.getString(request, "action");
         updateSessionManager(request);
 
         try {
-            final Map<String, String> types = new LinkedHashMap<String, String>();
-            types.put(CronTab.BSH, "BSH");
-            types.put(CronTab.JAR, "JAR");
+            Map<String, String> types = new LinkedHashMap<String, String>();
+            types.put(MimeTypeConfig.MIME_BSH, "BSH");
+            types.put(MimeTypeConfig.MIME_JAR, "JAR");
 
             if (action.equals("create")) {
-                final ServletContext sc = getServletContext();
-                final CronTab ct = new CronTab();
+                ServletContext sc = getServletContext();
+                CronTab ct = new CronTab();
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("ct", ct);
-                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(request, response);
             } else if (action.equals("edit")) {
-                final ServletContext sc = getServletContext();
-                final int ctId = WebUtils.getInt(request, "ct_id");
-                final CronTab ct = CronTabDAO.findByPk(ctId);
+                ServletContext sc = getServletContext();
+                int ctId = WebUtils.getInt(request, "ct_id");
+                CronTab ct = CronTabDAO.findByPk(ctId);
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("ct", ct);
-                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(request, response);
             } else if (action.equals("delete")) {
-                final ServletContext sc = getServletContext();
-                final int ctId = WebUtils.getInt(request, "ct_id");
-                final CronTab ct = CronTabDAO.findByPk(ctId);
+                ServletContext sc = getServletContext();
+                int ctId = WebUtils.getInt(request, "ct_id");
+                CronTab ct = CronTabDAO.findByPk(ctId);
                 sc.setAttribute("action", action);
                 sc.setAttribute("types", types);
                 sc.setAttribute("ct", ct);
-                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(
-                        request, response);
+                sc.getRequestDispatcher("/admin/crontab_edit.jsp").forward(request, response);
             } else if (action.equals("execute")) {
                 execute(request, response);
                 list(request, response);
+            } else if (action.equals("download")) {
+                download(request, response);
             } else {
                 list(request, response);
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final EvalError e) {
+        } catch (EvalError e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -133,24 +129,24 @@ public class CronTabServlet extends BaseServlet {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void doPost(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         log.debug("doPost({}, {})", request, response);
         request.setCharacterEncoding("UTF-8");
         String action = "";
-        final String userId = request.getRemoteUser();
+        String userId = request.getRemoteUser();
         updateSessionManager(request);
 
         try {
             if (ServletFileUpload.isMultipartContent(request)) {
                 InputStream is = null;
-                final FileItemFactory factory = new DiskFileItemFactory();
-                final ServletFileUpload upload = new ServletFileUpload(factory);
-                final List<FileItem> items = upload.parseRequest(request);
-                final CronTab ct = new CronTab();
+                FileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                List<FileItem> items = upload.parseRequest(request);
+                CronTab ct = new CronTab();
 
-                for (final FileItem item : items) {
+                for (Iterator<FileItem> it = items.iterator(); it.hasNext();) {
+                    FileItem item = it.next();
+
                     if (item.isFormField()) {
                         if (item.getFieldName().equals("action")) {
                             action = item.getString("UTF-8");
@@ -168,10 +164,8 @@ public class CronTabServlet extends BaseServlet {
                     } else {
                         is = item.getInputStream();
                         ct.setFileName(FilenameUtils.getName(item.getName()));
-                        ct.setFileContent(SecureStore.b64Encode(IOUtils
-                                .toByteArray(is)));
-                        ct.setFileMime(MimeTypeConfig.mimeTypes
-                                .getContentType(item.getName()));
+                        ct.setFileContent(SecureStore.b64Encode(IOUtils.toByteArray(is)));
+                        ct.setFileMime(MimeTypeConfig.mimeTypes.getContentType(item.getName()));
                         is.close();
                     }
                 }
@@ -180,29 +174,26 @@ public class CronTabServlet extends BaseServlet {
                     CronTabDAO.create(ct);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CRONTAB_CREATE", null,
-                            null, ct.toString());
+                    UserActivity.log(userId, "ADMIN_CRONTAB_CREATE", null, null, ct.toString());
                     list(request, response);
                 } else if (action.equals("edit")) {
                     CronTabDAO.update(ct);
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CRONTAB_EDIT",
-                            Long.toString(ct.getId()), null, ct.toString());
+                    UserActivity.log(userId, "ADMIN_CRONTAB_EDIT", Long.toString(ct.getId()), null, ct.toString());
                     list(request, response);
                 } else if (action.equals("delete")) {
                     CronTabDAO.delete(ct.getId());
 
                     // Activity log
-                    UserActivity.log(userId, "ADMIN_CRONTAB_DELETE",
-                            Long.toString(ct.getId()), null, null);
+                    UserActivity.log(userId, "ADMIN_CRONTAB_DELETE", Long.toString(ct.getId()), null, null);
                     list(request, response);
                 }
             }
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
-        } catch (final FileUploadException e) {
+        } catch (FileUploadException e) {
             log.error(e.getMessage(), e);
             sendErrorRedirect(request, response, e);
         }
@@ -211,43 +202,56 @@ public class CronTabServlet extends BaseServlet {
     /**
      * List registered reports
      */
-    private void list(final HttpServletRequest request,
-            final HttpServletResponse response) throws ServletException,
-            IOException, DatabaseException {
+    private void list(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, DatabaseException {
         log.debug("list({}, {})", new Object[] { request, response });
-        final ServletContext sc = getServletContext();
-        final List<CronTab> list = CronTabDAO.findAll();
+        ServletContext sc = getServletContext();
+        List<CronTab> list = CronTabDAO.findAll();
         sc.setAttribute("crontabs", list);
-        sc.getRequestDispatcher("/admin/crontab_list.jsp").forward(request,
-                response);
+        sc.getRequestDispatcher("/admin/crontab_list.jsp").forward(request, response);
         log.debug("list: void");
     }
 
     /**
      * Execute report
      */
-    private void execute(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            DatabaseException, EvalError {
+    private void execute(HttpServletRequest request, HttpServletResponse response) throws IOException, DatabaseException, EvalError {
         log.debug("execute({}, {})", new Object[] { request, response });
-        final int ctId = WebUtils.getInt(request, "ct_id");
-        final CronTab ct = CronTabDAO.findByPk(ctId);
+        int ctId = WebUtils.getInt(request, "ct_id");
+        CronTab ct = CronTabDAO.findByPk(ctId);
 
-        if (CronTab.BSH.equals(ct.getFileMime())) {
-            final Cron.RunnerBsh runner = new Cron.RunnerBsh(ct.getId(),
-                    ct.getName(), ct.getMail(), new String(
-                            SecureStore.b64Decode(ct.getFileContent())));
+        if (MimeTypeConfig.MIME_BSH.equals(ct.getFileMime())) {
+            Cron.RunnerBsh runner =
+                    new Cron.RunnerBsh(ct.getId(), ct.getName(), ct.getMail(), new String(SecureStore.b64Decode(ct.getFileContent())));
             runner.run();
-        } else if (CronTab.JAR.equals(ct.getFileMime())) {
-            final Cron.RunnerJar runner = new Cron.RunnerJar(ct.getId(),
-                    ct.getName(), ct.getMail(), SecureStore.b64Decode(ct
-                            .getFileContent()));
+        } else if (MimeTypeConfig.MIME_JAR.equals(ct.getFileMime())) {
+            Cron.RunnerJar runner = new Cron.RunnerJar(ct.getId(), ct.getName(), ct.getMail(), SecureStore.b64Decode(ct.getFileContent()));
             runner.run();
         }
 
         // Activity log
-        UserActivity.log(request.getRemoteUser(), "ADMIN_CRONTAB_EXECUTE",
-                Integer.toString(ctId), null, ct.toString());
+        UserActivity.log(request.getRemoteUser(), "ADMIN_CRONTAB_EXECUTE", Integer.toString(ctId), null, ct.toString());
         log.debug("execute: void");
+    }
+
+    /**
+     * Download script or jar
+     */
+    private void download(HttpServletRequest request, HttpServletResponse response) throws IOException, DatabaseException {
+        log.debug("download({}, {})", new Object[] { request, response });
+        int ctId = WebUtils.getInt(request, "ct_id");
+        CronTab ct = CronTabDAO.findByPk(ctId);
+        ByteArrayInputStream bais = null;
+
+        try {
+            byte[] content = SecureStore.b64Decode(ct.getFileContent());
+            bais = new ByteArrayInputStream(content);
+            WebUtils.sendFile(request, response, ct.getFileName(), ct.getFileMime(), false, bais);
+        } finally {
+            IOUtils.closeQuietly(bais);
+        }
+
+        // Activity log
+        UserActivity.log(request.getRemoteUser(), "ADMIN_CRONTAB_DOWNLOAD", Integer.toString(ctId), null, ct.toString());
+        log.debug("download: void");
     }
 }

@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -62,7 +62,7 @@ public class NodeNote implements Serializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -70,7 +70,7 @@ public class NodeNote implements Serializable {
         return parent;
     }
 
-    public void setParent(final String parent) {
+    public void setParent(String parent) {
         this.parent = parent;
     }
 
@@ -78,7 +78,7 @@ public class NodeNote implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -86,7 +86,7 @@ public class NodeNote implements Serializable {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -94,19 +94,17 @@ public class NodeNote implements Serializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", parent=").append(parent);
         sb.append(", author=").append(author);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
         sb.append(", text=").append(text);
         sb.append("}");
         return sb.toString();

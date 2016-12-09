@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -32,10 +32,9 @@ import com.openkm.bean.kea.Term;
  * 
  */
 public class TermComparator implements Comparator<Term> {
-    @Override
-    public int compare(final Term term1, final Term term2) {
-        final String first = term1.getText().toUpperCase();
-        final String second = term2.getText().toUpperCase();
+    public int compare(Term term1, Term term2) {
+        String first = term1.getText().toUpperCase();
+        String second = term2.getText().toUpperCase();
         return first.compareTo(second);
     }
 }

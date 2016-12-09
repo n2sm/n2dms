@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,21 +35,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTTaskInstance implements IsSerializable {
 
     private double id;
-
     private String name;
-
     private String description;
-
     private String actorId;
-
     private Date create;
-
     private Date start;
-
     private Date dueDate;
-
     private List<GWTComment> comments;
-
     private GWTProcessInstance processInstance;
 
     /**
@@ -62,7 +54,7 @@ public class GWTTaskInstance implements IsSerializable {
         return id;
     }
 
-    public void setId(final double id) {
+    public void setId(double id) {
         this.id = id;
     }
 
@@ -70,7 +62,7 @@ public class GWTTaskInstance implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -78,7 +70,7 @@ public class GWTTaskInstance implements IsSerializable {
         return actorId;
     }
 
-    public void setActorId(final String actorId) {
+    public void setActorId(String actorId) {
         this.actorId = actorId;
     }
 
@@ -86,7 +78,7 @@ public class GWTTaskInstance implements IsSerializable {
         return create;
     }
 
-    public void setCreate(final Date create) {
+    public void setCreate(Date create) {
         this.create = create;
     }
 
@@ -94,7 +86,7 @@ public class GWTTaskInstance implements IsSerializable {
         return processInstance;
     }
 
-    public void setProcessInstance(final GWTProcessInstance processInstance) {
+    public void setProcessInstance(GWTProcessInstance processInstance) {
         this.processInstance = processInstance;
     }
 
@@ -102,7 +94,7 @@ public class GWTTaskInstance implements IsSerializable {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -110,7 +102,7 @@ public class GWTTaskInstance implements IsSerializable {
         return start;
     }
 
-    public void setStart(final Date start) {
+    public void setStart(Date start) {
         this.start = start;
     }
 
@@ -118,7 +110,7 @@ public class GWTTaskInstance implements IsSerializable {
         return dueDate;
     }
 
-    public void setDueDate(final Date dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
 
@@ -126,7 +118,7 @@ public class GWTTaskInstance implements IsSerializable {
         return comments;
     }
 
-    public void setComments(final List<GWTComment> comments) {
+    public void setComments(List<GWTComment> comments) {
         this.comments = comments;
     }
 }

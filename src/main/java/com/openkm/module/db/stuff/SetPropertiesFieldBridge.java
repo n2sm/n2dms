@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -46,58 +46,44 @@ import com.openkm.util.FormUtils;
  * @author pavila
  */
 public class SetPropertiesFieldBridge implements FieldBridge {
-    private static Logger log = LoggerFactory
-            .getLogger(SetPropertiesFieldBridge.class);
+    private static Logger log = LoggerFactory.getLogger(SetPropertiesFieldBridge.class);
 
     @Override
-    public void set(final String name, final Object value,
-            final Document document, final LuceneOptions luceneOptions) {
+    public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value instanceof Set<?>) {
             @SuppressWarnings("unchecked")
-            final Set<NodeProperty> properties = (Set<NodeProperty>) value;
+            Set<NodeProperty> properties = (Set<NodeProperty>) value;
 
             try {
-                final Map<PropertyGroup, List<FormElement>> formsElements = FormUtils
-                        .parsePropertyGroupsForms(Config.PROPERTY_GROUPS_XML);
-                final Gson gson = new Gson();
+                Map<PropertyGroup, List<FormElement>> formsElements = FormUtils.parsePropertyGroupsForms(Config.PROPERTY_GROUPS_XML);
+                Gson gson = new Gson();
 
-                for (final NodeProperty nodProp : properties) {
+                for (NodeProperty nodProp : properties) {
                     String propValue = nodProp.getValue();
 
                     if (propValue != null && !propValue.equals("")) {
-                        final FormElement fe = FormUtils.getFormElement(
-                                formsElements, nodProp.getName());
+                        FormElement fe = FormUtils.getFormElement(formsElements, nodProp.getName());
 
-                        if (fe instanceof Input
-                                && ((Input) fe).getType().equals(
-                                        Input.TYPE_DATE)) {
+                        if (fe instanceof Input && ((Input) fe).getType().equals(Input.TYPE_DATE)) {
                             propValue = propValue.substring(0, 8);
-                            log.info("Added date field '{}' with value '{}'",
-                                    nodProp.getName(), propValue);
-                            luceneOptions.addFieldToDocument(nodProp.getName(),
-                                    propValue, document);
+                            log.debug("Added date field '{}' with value '{}'", nodProp.getName(), propValue);
+                            luceneOptions.addFieldToDocument(nodProp.getName(), propValue, document);
                         } else if (fe instanceof Select) {
-                            final String[] propValues = gson.fromJson(
-                                    propValue, String[].class);
+                            String[] propValues = gson.fromJson(propValue, String[].class);
 
-                            for (final String optValue : propValues) {
-                                log.info(
-                                        "Added list field '{}' with value '{}'",
-                                        nodProp.getName(), optValue);
-                                luceneOptions.addFieldToDocument(
-                                        nodProp.getName(), optValue, document);
+                            for (String optValue : propValues) {
+                                log.debug("Added list field '{}' with value '{}'", nodProp.getName(), optValue);
+                                luceneOptions.addFieldToDocument(nodProp.getName(), optValue, document);
                             }
                         } else {
-                            log.info("Added field '{}' with value '{}'",
-                                    nodProp.getName(), propValue);
-                            luceneOptions.addFieldToDocument(nodProp.getName(),
-                                    propValue, document);
+                            log.debug("Added field '{}' with value '{}'", nodProp.getName(), propValue);
+                            luceneOptions.addFieldToDocument(nodProp.getName(), propValue, document);
                         }
                     }
                 }
-            } catch (final ParseException e) {
+            } catch (ParseException e) {
                 log.error("Property Groups parse error: {}", e.getMessage(), e);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 log.error("Property Groups IO error: {}", e.getMessage(), e);
             }
         } else {

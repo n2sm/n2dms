@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -28,9 +28,9 @@ import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -60,36 +60,25 @@ public class ExtendedDockPanel extends Composite {
 
     // Panels size
     public static final int VERTICAL_BORDER_PANEL_WIDTH = 10;
-
     public DockLayoutPanel dockPanel;
-
     public TopPanel topPanel;
-
     public VerticalBorderPanel leftBorderPanel;
-
     public VerticalBorderPanel rightBorderPanel;
-
     public BottomPanel bottomPanel;
 
     // PANELS
     public Desktop desktop;
-
     public Search search;
-
     public Dashboard dashboard;
-
     public Administration administration;
 
     private int actualView = -1;
 
     private HandlerRegistration handlerRegistration = null;
-
     private FolderSelectPopup folderSelectPopup;
 
     int centerWidth = 0;
-
     int centerHeight = 0;
-
     int usableHeight = 0;
 
     /**
@@ -119,7 +108,7 @@ public class ExtendedDockPanel extends Composite {
         administration = new Administration();
 
         // set inner component's size
-        SetWidgetsSize();
+        setWidgetsSize();
 
         actualView = UIDockPanelConstants.DESKTOP;
 
@@ -132,8 +121,9 @@ public class ExtendedDockPanel extends Composite {
 
         Window.addResizeHandler(new ResizeHandler() {
             @Override
-            public void onResize(final ResizeEvent event) {
-                SetWidgetsSize();
+            public void onResize(ResizeEvent event) {
+                setWidgetsSize();
+                Main.get().mainPanel.topPanel.toolBar.windowResized(); // splitter changes
             }
         });
 
@@ -143,39 +133,33 @@ public class ExtendedDockPanel extends Composite {
     /**
      * setView
      */
-    public void setView(final int workspace) {
+    public void setView(int workspace) {
         disableView();
 
         switch (workspace) {
         case UIDockPanelConstants.DESKTOP:
-            final int navigatorView = Main.get().mainPanel.desktop.navigator
-                    .getStackIndex();
-            Main.get().mainPanel.topPanel.toolBar.changeView(navigatorView,
-                    UIDockPanelConstants.DESKTOP);
+            int navigatorView = Main.get().mainPanel.desktop.navigator.getStackIndex();
+            Main.get().mainPanel.topPanel.toolBar.changeView(navigatorView, UIDockPanelConstants.DESKTOP);
             actualView = workspace;
             break;
 
         case UIDockPanelConstants.SEARCH:
-            Main.get().mainPanel.topPanel.toolBar.changeView(0,
-                    UIDockPanelConstants.SEARCH);
+            Main.get().mainPanel.topPanel.toolBar.changeView(0, UIDockPanelConstants.SEARCH);
             actualView = workspace;
             break;
 
         case UIDockPanelConstants.DASHBOARD:
-            Main.get().mainPanel.topPanel.toolBar.changeView(0,
-                    UIDockPanelConstants.DASHBOARD);
+            Main.get().mainPanel.topPanel.toolBar.changeView(0, UIDockPanelConstants.DASHBOARD);
             actualView = workspace;
             break;
 
         case UIDockPanelConstants.ADMINISTRATION:
-            Main.get().mainPanel.topPanel.toolBar.changeView(0,
-                    UIDockPanelConstants.ADMINISTRATION);
+            Main.get().mainPanel.topPanel.toolBar.changeView(0, UIDockPanelConstants.ADMINISTRATION);
             actualView = workspace;
             break;
 
         default:
-            Main.get().mainPanel.topPanel.toolBar.changeView(0,
-                    UIDockPanelConstants.EXTENSIONS);
+            Main.get().mainPanel.topPanel.toolBar.changeView(0, UIDockPanelConstants.EXTENSIONS);
             actualView = workspace;
         }
 
@@ -201,8 +185,7 @@ public class ExtendedDockPanel extends Composite {
             break;
 
         default:
-            dockPanel.remove(topPanel.tabWorkspace
-                    .getWidgetExtensionByIndex(actualView));
+            dockPanel.remove(topPanel.tabWorkspace.getWidgetExtensionByIndex(actualView));
             break;
         }
     }
@@ -228,8 +211,7 @@ public class ExtendedDockPanel extends Composite {
             break;
 
         default:
-            dockPanel.add(topPanel.tabWorkspace
-                    .getWidgetExtensionByIndex(actualView));
+            dockPanel.add(topPanel.tabWorkspace.getWidgetExtensionByIndex(actualView));
             break;
         }
     }
@@ -247,375 +229,268 @@ public class ExtendedDockPanel extends Composite {
     public void enableKeyShorcuts() {
         // Log.debug("ExtendedDockPanel enableKeyShortcuts");
         dockPanel.sinkEvents(Event.KEYEVENTS);
-        handlerRegistration = Event
-                .addNativePreviewHandler(new NativePreviewHandler() {
-                    @Override
-                    public void onPreviewNativeEvent(
-                            final NativePreviewEvent event) {
-                        boolean propagate = true;
-                        final int type = event.getTypeInt();
-                        if (type == Event.ONKEYDOWN) {
-                            final int keyCode = event.getNativeEvent()
-                                    .getKeyCode();
-                            switch (keyCode) {
-                            case Keyboard.KEY_F2:
-                                if (actualView == UIDockPanelConstants.DESKTOP
-                                        && Main.get().activeFolderTree
-                                                .isPanelSelected()
-                                        && Main.get().mainPanel.topPanel.toolBar
-                                                .getToolBarOption().renameOption
-                                        && (Main.get().mainPanel.desktop.navigator
-                                                .getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
-                                                || Main.get().mainPanel.desktop.navigator
-                                                        .getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
-                                                || Main.get().mainPanel.desktop.navigator
-                                                        .getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES
-                                                || Main.get().mainPanel.desktop.navigator
-                                                        .getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES || Main
-                                                .get().mainPanel.desktop.navigator
-                                                .getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
+        handlerRegistration = Event.addNativePreviewHandler(new NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(NativePreviewEvent event) {
+                boolean propagate = true;
+                int type = event.getTypeInt();
+                if (type == Event.ONKEYDOWN) {
+                    int keyCode = event.getNativeEvent().getKeyCode();
+                    switch (keyCode) {
+                    case Keyboard.KEY_F2:
+                        if (actualView == UIDockPanelConstants.DESKTOP
+                                && Main.get().activeFolderTree.isPanelSelected()
+                                && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().renameOption
+                                && (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
+                                        || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
+                                        || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES
+                                        || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_CATEGORIES || Main
+                                        .get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
 
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeRename();
-                                    propagate = false;
-                                } else if (Main.get().mainPanel.topPanel.toolBar
-                                        .getToolBarOption().renameOption
-                                        && (Main.get().mainPanel.desktop.browser.fileBrowser
-                                                .isDocumentSelected()
-                                                || Main.get().mainPanel.desktop.browser.fileBrowser
-                                                        .isFolderSelected() || Main
-                                                    .get().mainPanel.desktop.browser.fileBrowser
-                                                .isMailSelected())) {
+                            Main.get().mainPanel.topPanel.toolBar.executeRename();
+                            propagate = false;
+                        } else if (Main.get().mainPanel.topPanel.toolBar.getToolBarOption().renameOption
+                                && (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()
+                                        || Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected() || Main.get().mainPanel.desktop.browser.fileBrowser
+                                        .isMailSelected())) {
 
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeRename();
-                                    propagate = false;
+                            Main.get().mainPanel.topPanel.toolBar.executeRename();
+                            propagate = false;
+                        }
+                        break;
+
+                    // case Keyboard.KEY_SUPR:
+                    // if (actualView == UIDockPanelConstants.DESKTOP &&
+                    // Main.get().activeFolderTree.isPanelSelected() &&
+                    // Main.get().mainPanel.topPanel.toolBar.getToolBarOption().deleteOption &&
+                    // (Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_TAXONOMY
+                    // ||
+                    // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_CATEGORIES
+                    // ||
+                    // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_PERSONAL
+                    // ||
+                    // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_TEMPLATES
+                    // ||
+                    // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_MAIL)) {
+                    //
+                    // Main.get().mainPanel.topPanel.toolBar.executeDelete();
+                    // propagate = false;
+                    // } else if (Main.get().mainPanel.topPanel.toolBar.getToolBarOption().deleteOption && (
+                    // Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected() ||
+                    // Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected() ||
+                    // Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected())) {
+                    //
+                    // Main.get().mainPanel.topPanel.toolBar.executeDelete();
+                    // propagate = false;
+                    // }
+                    // break;
+
+                    case Keyboard.KEY_C:
+                    case Keyboard.KEY_X:
+                        // Case CTRL + SHIFT + C
+                        if (event.getNativeEvent().getCtrlKey() && event.getNativeEvent().getShiftKey()) {
+                            if (actualView == UIDockPanelConstants.DESKTOP
+                                    && Main.get().activeFolderTree.isPanelSelected()
+                                    && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().copyOption
+                                    && (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
+                                            || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
+                                            || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES || Main
+                                            .get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
+
+                                // Saves folder to be copied
+                                GWTFolder folder = Main.get().activeFolderTree.getFolder();
+                                folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_KEYBOARD);
+                                switch (keyCode) {
+                                case Keyboard.KEY_C:
+                                    folderSelectPopup.setToCopy(folder);
+                                    Main.get().mainPanel.bottomPanel.setStatus("status.folder.copied", false);
+                                    break;
+                                case Keyboard.KEY_X:
+                                    Main.get().mainPanel.bottomPanel.setStatus("status.folder.cut", false);
+                                    // Sets the origin panel an treitem to be removed after move
+                                    folderSelectPopup.setOriginPanel(Main.get().mainPanel.desktop.navigator.getStackIndex());
+                                    TreeItem actualItem = Main.get().activeFolderTree.getActualItem();
+                                    folderSelectPopup.setTreeItemToBeDeleted(actualItem);
+                                    folderSelectPopup.setToMove(folder);
+
+                                    break;
                                 }
-                                break;
-
-                            // case Keyboard.KEY_SUPR:
-                            // if (actualView == UIDockPanelConstants.DESKTOP &&
-                            // Main.get().activeFolderTree.isPanelSelected() &&
-                            // Main.get().mainPanel.topPanel.toolBar.getToolBarOption().deleteOption &&
-                            // (Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_TAXONOMY
-                            // ||
-                            // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_CATEGORIES
-                            // ||
-                            // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_PERSONAL
-                            // ||
-                            // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_TEMPLATES
-                            // ||
-                            // Main.get().mainPanel.desktop.navigator.getStackIndex()==UIDesktopConstants.NAVIGATOR_MAIL)) {
-                            //
-                            // Main.get().mainPanel.topPanel.toolBar.executeDelete();
-                            // propagate = false;
-                            // } else if (Main.get().mainPanel.topPanel.toolBar.getToolBarOption().deleteOption && (
-                            // Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected() ||
-                            // Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected() ||
-                            // Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected())) {
-                            //
-                            // Main.get().mainPanel.topPanel.toolBar.executeDelete();
-                            // propagate = false;
-                            // }
-                            // break;
-
-                            case Keyboard.KEY_C:
-                            case Keyboard.KEY_X:
-                                // Case CTRL + C
-                                if (event.getNativeEvent().getCtrlKey()) {
-                                    if (actualView == UIDockPanelConstants.DESKTOP
-                                            && Main.get().activeFolderTree
-                                                    .isPanelSelected()
-                                            && Main.get().mainPanel.topPanel.toolBar
-                                                    .getToolBarOption().copyOption
-                                            && (Main.get().mainPanel.desktop.navigator
-                                                    .getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
-                                                    || Main.get().mainPanel.desktop.navigator
-                                                            .getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
-                                                    || Main.get().mainPanel.desktop.navigator
-                                                            .getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES || Main
-                                                    .get().mainPanel.desktop.navigator
-                                                    .getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
-
-                                        // Saves folder to be copied
-                                        final GWTFolder folder = Main.get().activeFolderTree
-                                                .getFolder();
-                                        folderSelectPopup
-                                                .setEntryPoint(FolderSelectPopup.ENTRYPOINT_KEYBOARD);
-                                        switch (keyCode) {
-                                        case Keyboard.KEY_C:
-                                            folderSelectPopup.setToCopy(folder);
-                                            Main.get().mainPanel.bottomPanel
-                                                    .setStatus(
-                                                            "status.folder.copied",
-                                                            false);
-                                            break;
-                                        case Keyboard.KEY_X:
-                                            Main.get().mainPanel.bottomPanel
-                                                    .setStatus(
-                                                            "status.folder.cut",
-                                                            false);
-                                            // Sets the origin panel an treitem to be removed after move
-                                            folderSelectPopup
-                                                    .setOriginPanel(Main.get().mainPanel.desktop.navigator
-                                                            .getStackIndex());
-                                            final TreeItem actualItem = Main
-                                                    .get().activeFolderTree
-                                                    .getActualItem();
-                                            folderSelectPopup
-                                                    .setTreeItemToBeDeleted(actualItem);
-                                            folderSelectPopup.setToMove(folder);
-
-                                            break;
-                                        }
-                                        propagate = false;
-
-                                    } else if (Main.get().mainPanel.topPanel.toolBar
-                                            .getToolBarOption().copyOption
-                                            && (Main.get().mainPanel.desktop.browser.fileBrowser
-                                                    .isDocumentSelected()
-                                                    || Main.get().mainPanel.desktop.browser.fileBrowser
-                                                            .isFolderSelected() || Main
-                                                        .get().mainPanel.desktop.browser.fileBrowser
-                                                    .isMailSelected())) {
-
-                                        // Saves the document or folder to be copied
-                                        folderSelectPopup
-                                                .setEntryPoint(FolderSelectPopup.ENTRYPOINT_KEYBOARD);
-                                        if (Main.get().mainPanel.desktop.browser.fileBrowser
-                                                .isDocumentSelected()) {
-                                            final GWTDocument document = Main
-                                                    .get().mainPanel.desktop.browser.fileBrowser
-                                                    .getDocument();
-                                            switch (keyCode) {
-                                            case Keyboard.KEY_C:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.document.copied",
-                                                                false);
-                                                folderSelectPopup
-                                                        .setToCopy(document);
-                                                break;
-                                            case Keyboard.KEY_X:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.document.cut",
-                                                                false);
-                                                folderSelectPopup
-                                                        .setToMove(document);
-                                                break;
-                                            }
-                                        } else if (Main.get().mainPanel.desktop.browser.fileBrowser
-                                                .isMailSelected()) {
-                                            final GWTMail mail = Main.get().mainPanel.desktop.browser.fileBrowser
-                                                    .getMail();
-                                            switch (keyCode) {
-                                            case Keyboard.KEY_C:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.document.copied",
-                                                                false);
-                                                folderSelectPopup
-                                                        .setToCopy(mail);
-                                                break;
-                                            case Keyboard.KEY_X:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.document.cut",
-                                                                false);
-                                                folderSelectPopup
-                                                        .setToMove(mail);
-                                                break;
-                                            }
-                                        } else {
-                                            final GWTFolder folder = Main.get().mainPanel.desktop.browser.fileBrowser
-                                                    .getFolder();
-                                            switch (keyCode) {
-                                            case Keyboard.KEY_C:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.folder.copied",
-                                                                false);
-                                                folderSelectPopup
-                                                        .setToCopy(folder);
-                                                break;
-                                            case Keyboard.KEY_X:
-                                                Main.get().mainPanel.bottomPanel
-                                                        .setStatus(
-                                                                "status.folder.cut",
-                                                                false);
-                                                // Sets the origin panel and treeitem to be removed after move
-                                                folderSelectPopup.setOriginPanel(Main
-                                                        .get().mainPanel.desktop.navigator
-                                                        .getStackIndex());
-                                                final TreeItem actualItem = Main
-                                                        .get().activeFolderTree
-                                                        .getChildFolder(folder
-                                                                .getPath());
-                                                folderSelectPopup
-                                                        .setTreeItemToBeDeleted(actualItem);
-                                                folderSelectPopup
-                                                        .setToMove(folder);
-                                                break;
-                                            }
-                                        }
-                                        propagate = false;
-                                    }
-                                }
-                                break;
-
-                            case Keyboard.KEY_V:
-                                // Case CTRL + V
-                                if (event.getNativeEvent().getCtrlKey()
-                                        && (folderSelectPopup.getAction() == FolderSelectPopup.ACTION_COPY || folderSelectPopup
-                                                .getAction() == FolderSelectPopup.ACTION_MOVE)) {
-
-                                    // Destination folder is always selected by tree
-                                    if (actualView == UIDockPanelConstants.DESKTOP
-                                            && Main.get().activeFolderTree
-                                                    .isPanelSelected()
-                                            && (Main.get().mainPanel.desktop.navigator
-                                                    .getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
-                                                    || Main.get().mainPanel.desktop.navigator
-                                                            .getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
-                                                    || Main.get().mainPanel.desktop.navigator
-                                                            .getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES || Main
-                                                    .get().mainPanel.desktop.navigator
-                                                    .getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
-
-                                        // Evaluates destination folder grant to copy
-                                        final GWTFolder folder = Main.get().activeFolderTree
-                                                .getFolder();
-                                        if (folderSelectPopup
-                                                .evaluateActionSecurity(folder)) {
-                                            Main.get().mainPanel.bottomPanel
-                                                    .resetStatus();
-                                            folderSelectPopup.executeAction(
-                                                    folder.getPath(), true);
-                                        }
-                                    }
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_D:
-                                // Case CTRL + D
-                                if (event.getNativeEvent().getCtrlKey()
-                                        && actualView == UIDockPanelConstants.DESKTOP
-                                        && Main.get().mainPanel.topPanel.toolBar
-                                                .getToolBarOption().downloadOption) {
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeDownload();
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_T:
-                                // Case CTRL+T
-                                if (event.getNativeEvent().getCtrlKey()) {
-                                    Main.get().testPopup.center();
-                                }
-                                break;
-
-                            case Keyboard.KEY_Z:
-                                // Case CTRL+Z
-                                if (event.getNativeEvent().getCtrlKey()) {
-                                    if (Log.getCurrentLogLevel() == Log.LOG_LEVEL_DEBUG) {
-                                        Log.setCurrentLogLevel(Log.LOG_LEVEL_OFF);
-                                        Main.get().mainPanel.bottomPanel
-                                                .setStatus(
-                                                        "status.debug.disabled",
-                                                        false);
-                                    } else {
-                                        Log.setCurrentLogLevel(Log.LOG_LEVEL_DEBUG);
-                                        Main.get().mainPanel.bottomPanel
-                                                .setStatus(
-                                                        "status.debug.enabled",
-                                                        false);
-                                    }
-
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_N:
-                                // Case CTRL + N
-                                if (event.getNativeEvent().getCtrlKey()
-                                        && actualView == UIDockPanelConstants.DESKTOP
-                                        && Main.get().mainPanel.topPanel.toolBar
-                                                .getToolBarOption().createFolderOption) {
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeFolderDirectory();
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_F5:
-                                if (actualView == UIDockPanelConstants.DESKTOP
-                                        && Main.get().mainPanel.topPanel.toolBar
-                                                .getToolBarOption().refreshOption) {
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeRefresh();
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_INSERT:
-                                if (actualView == UIDockPanelConstants.DESKTOP
-                                        && Main.get().mainPanel.topPanel.toolBar
-                                                .getToolBarOption().addDocumentOption) {
-                                    Main.get().mainPanel.topPanel.toolBar
-                                            .executeAddDocument();
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_B:
-                                // Case ALT + B
-                                if (event.getNativeEvent().getAltKey()
-                                        && Main.get().mainPanel.topPanel.mainMenu
-                                                .getToolBarOption().homeOption) {
-                                    Main.get().mainPanel.topPanel.mainMenu.manageBookmarkPopup
-                                            .showPopup();
-                                    propagate = false;
-                                }
-                                break;
-
-                            case Keyboard.KEY_F1:
-                                Window.open(MainMenu.URI_DOCUMENTATION,
-                                        "_blank", "");
                                 propagate = false;
-                                break;
 
-                            case Keyboard.KEY_Q:
-                                // Case CTRL + ALT + Q
-                                if (event.getNativeEvent().getCtrlKey()
-                                        && event.getNativeEvent().getAltKey()) {
-                                    Main.get().logoutPopup.logout();
+                            } else if (Main.get().mainPanel.topPanel.toolBar.getToolBarOption().copyOption
+                                    && (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()
+                                            || Main.get().mainPanel.desktop.browser.fileBrowser.isFolderSelected() || Main.get().mainPanel.desktop.browser.fileBrowser
+                                            .isMailSelected())) {
+
+                                // Saves the document or folder to be copied
+                                folderSelectPopup.setEntryPoint(FolderSelectPopup.ENTRYPOINT_KEYBOARD);
+                                if (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()) {
+                                    GWTDocument document = Main.get().mainPanel.desktop.browser.fileBrowser.getDocument();
+                                    switch (keyCode) {
+                                    case Keyboard.KEY_C:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.document.copied", false);
+                                        folderSelectPopup.setToCopy(document);
+                                        break;
+                                    case Keyboard.KEY_X:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.document.cut", false);
+                                        folderSelectPopup.setToMove(document);
+                                        break;
+                                    }
+                                } else if (Main.get().mainPanel.desktop.browser.fileBrowser.isMailSelected()) {
+                                    GWTMail mail = Main.get().mainPanel.desktop.browser.fileBrowser.getMail();
+                                    switch (keyCode) {
+                                    case Keyboard.KEY_C:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.document.copied", false);
+                                        folderSelectPopup.setToCopy(mail);
+                                        break;
+                                    case Keyboard.KEY_X:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.document.cut", false);
+                                        folderSelectPopup.setToMove(mail);
+                                        break;
+                                    }
+                                } else {
+                                    GWTFolder folder = Main.get().mainPanel.desktop.browser.fileBrowser.getFolder();
+                                    switch (keyCode) {
+                                    case Keyboard.KEY_C:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.folder.copied", false);
+                                        folderSelectPopup.setToCopy(folder);
+                                        break;
+                                    case Keyboard.KEY_X:
+                                        Main.get().mainPanel.bottomPanel.setStatus("status.folder.cut", false);
+                                        // Sets the origin panel and treeitem to be removed after move
+                                        folderSelectPopup.setOriginPanel(Main.get().mainPanel.desktop.navigator.getStackIndex());
+                                        TreeItem actualItem = Main.get().activeFolderTree.getChildFolder(folder.getPath());
+                                        folderSelectPopup.setTreeItemToBeDeleted(actualItem);
+                                        folderSelectPopup.setToMove(folder);
+                                        break;
+                                    }
                                 }
-                                break;
-
-                            //						case Keyboard.KEY_DOWN:
-                            //							if (isFilebrowserKeyEnabled()) {
-                            //								 Main.get().mainPanel.desktop.browser.fileBrowser.table.selectDown();
-                            //							}
-                            //							break;
-                            //						
-                            //						case Keyboard.KEY_UP:
-                            //							if (isFilebrowserKeyEnabled()) {
-                            //								 Main.get().mainPanel.desktop.browser.fileBrowser.table.selectUp();
-                            //							}
-                            //							break;
+                                propagate = false;
                             }
                         }
+                        break;
 
-                        // Not propagates event to the browser
-                        if (!propagate) {
-                            DOM.eventPreventDefault((Event) event
-                                    .getNativeEvent());
+                    case Keyboard.KEY_V:
+                        // Case CTRL + SHIFT + V
+                        if (event.getNativeEvent().getCtrlKey()
+                                && event.getNativeEvent().getShiftKey()
+                                && (folderSelectPopup.getAction() == FolderSelectPopup.ACTION_COPY || folderSelectPopup.getAction() == FolderSelectPopup.ACTION_MOVE)) {
+
+                            // Destination folder is always selected by tree
+                            if (actualView == UIDockPanelConstants.DESKTOP
+                                    && Main.get().activeFolderTree.isPanelSelected()
+                                    && (Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TAXONOMY
+                                            || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_PERSONAL
+                                            || Main.get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_TEMPLATES || Main
+                                            .get().mainPanel.desktop.navigator.getStackIndex() == UIDesktopConstants.NAVIGATOR_MAIL)) {
+
+                                // Evaluates destination folder grant to copy
+                                GWTFolder folder = Main.get().activeFolderTree.getFolder();
+                                if (folderSelectPopup.evaluateActionSecurity(folder)) {
+                                    Main.get().mainPanel.bottomPanel.resetStatus();
+                                    folderSelectPopup.executeAction(folder.getPath(), true);
+                                }
+                            }
+                            propagate = false;
                         }
+                        break;
+
+                    case Keyboard.KEY_D:
+                        // Case CTRL + D
+                        if (event.getNativeEvent().getCtrlKey() && actualView == UIDockPanelConstants.DESKTOP
+                                && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().downloadOption) {
+                            Main.get().mainPanel.topPanel.toolBar.executeDownload();
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_T:
+                        // Case CTRL+T
+                        if (event.getNativeEvent().getCtrlKey()) {
+                            Main.get().testPopup.center();
+                        }
+                        break;
+
+                    case Keyboard.KEY_Z:
+                        // Case CTRL+Z
+                        if (event.getNativeEvent().getCtrlKey()) {
+                            if (Log.getCurrentLogLevel() == Log.LOG_LEVEL_DEBUG) {
+                                Log.setCurrentLogLevel(Log.LOG_LEVEL_OFF);
+                                Main.get().mainPanel.bottomPanel.setStatus("status.debug.disabled", false);
+                            } else {
+                                Log.setCurrentLogLevel(Log.LOG_LEVEL_DEBUG);
+                                Main.get().mainPanel.bottomPanel.setStatus("status.debug.enabled", false);
+                            }
+
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_N:
+                        // Case CTRL + N
+                        if (event.getNativeEvent().getCtrlKey() && actualView == UIDockPanelConstants.DESKTOP
+                                && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().createFolderOption) {
+                            Main.get().mainPanel.topPanel.toolBar.executeFolderDirectory();
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_F5:
+                        if (actualView == UIDockPanelConstants.DESKTOP
+                                && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().refreshOption) {
+                            Main.get().mainPanel.topPanel.toolBar.executeRefresh();
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_INSERT:
+                        if (actualView == UIDockPanelConstants.DESKTOP
+                                && Main.get().mainPanel.topPanel.toolBar.getToolBarOption().addDocumentOption) {
+                            Main.get().mainPanel.topPanel.toolBar.executeAddDocument();
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_B:
+                        // Case ALT + B
+                        if (event.getNativeEvent().getAltKey() && Main.get().mainPanel.topPanel.mainMenu.getToolBarOption().homeOption) {
+                            Main.get().mainPanel.topPanel.mainMenu.manageBookmarkPopup.showPopup();
+                            propagate = false;
+                        }
+                        break;
+
+                    case Keyboard.KEY_F1:
+                        Window.open(MainMenu.URI_DOCUMENTATION, "_blank", "");
+                        propagate = false;
+                        break;
+
+                    case Keyboard.KEY_Q:
+                        // Case CTRL + ALT + Q
+                        if (event.getNativeEvent().getCtrlKey() && event.getNativeEvent().getAltKey()) {
+                            Main.get().logoutPopup.logout();
+                        }
+                        break;
+
+                    //						case Keyboard.KEY_DOWN:
+                    //							if (isFilebrowserKeyEnabled()) {
+                    //								 Main.get().mainPanel.desktop.browser.fileBrowser.table.selectDown();
+                    //							}
+                    //							break;
+                    //						
+                    //						case Keyboard.KEY_UP:
+                    //							if (isFilebrowserKeyEnabled()) {
+                    //								 Main.get().mainPanel.desktop.browser.fileBrowser.table.selectUp();
+                    //							}
+                    //							break;
                     }
-                });
+                }
+
+                // Not propagates event to the browser
+                if (!propagate) {
+                    DOM.eventPreventDefault((Event) event.getNativeEvent());
+                }
+            }
+        });
     }
 
     /**
@@ -662,24 +537,21 @@ public class ExtendedDockPanel extends Composite {
     /**
      * SetWidgetsSize
      */
-    private void SetWidgetsSize() {
+    private void setWidgetsSize() {
         // Calculating real height
         usableHeight = Window.getClientHeight();
 
         // Initialize dockPanel size
-        dockPanel.setSize("" + Window.getClientWidth(), "" + usableHeight);
+        dockPanel.setSize("" + Window.getClientWidth() + "px", "" + usableHeight + "px");
 
         // The active panel must be the last on initalization because establishes coordenates
-        leftBorderPanel.setSize(VERTICAL_BORDER_PANEL_WIDTH, usableHeight
-                - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT));
-        rightBorderPanel.setSize(VERTICAL_BORDER_PANEL_WIDTH, usableHeight
-                - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT));
+        leftBorderPanel.setSize(VERTICAL_BORDER_PANEL_WIDTH, usableHeight - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT));
+        rightBorderPanel.setSize(VERTICAL_BORDER_PANEL_WIDTH, usableHeight - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT));
 
-        centerWidth = Window.getClientWidth() - 2 * VERTICAL_BORDER_PANEL_WIDTH;
-        centerHeight = usableHeight
-                - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT);
+        centerWidth = Window.getClientWidth() - (2 * VERTICAL_BORDER_PANEL_WIDTH);
+        centerHeight = usableHeight - (TopPanel.PANEL_HEIGHT + BottomPanel.PANEL_HEIGHT);
 
-        topPanel.setWidth("" + Window.getClientWidth());
+        topPanel.setWidth("" + Window.getClientWidth() + "px");
         desktop.setSize(centerWidth, centerHeight);
         search.setSize(centerWidth, centerHeight);
         dashboard.setSize(centerWidth, centerHeight);
@@ -690,6 +562,6 @@ public class ExtendedDockPanel extends Composite {
      * stylesChanged
      */
     public void stylesChanged() {
-        SetWidgetsSize();
+        setWidgetsSize();
     }
 }

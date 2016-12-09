@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,14 +27,13 @@ import java.util.List;
 public class PropertyGroupMetadata {
     // mix:property_group
     private String name;
-
     private List<PropertyMetadata> properties = new ArrayList<PropertyMetadata>();
 
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -42,13 +41,12 @@ public class PropertyGroupMetadata {
         return properties;
     }
 
-    public void setProperties(final List<PropertyMetadata> properties) {
+    public void setProperties(List<PropertyMetadata> properties) {
         this.properties = properties;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("name=");
         sb.append(name);

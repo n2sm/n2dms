@@ -42,8 +42,24 @@
             username="openkm" password="openkm" driverClassName="com.mysql.jdbc.Driver"
             url="jdbc:mysql://localhost:3306/okm_app?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF8"/>
   -->
+  <!--
+  <Resource name="jdbc/OpenKMDS" auth="Container" type="javax.sql.DataSource"
+            maxActive="100" maxIdle="30" maxWait="10000"
+            username="okm60" password="okm60" driverClassName="oracle.jdbc.driver.OracleDriver"
+            url="jdbc:oracle:thin:@localhost:1521:XE"/>
+  -->
   <!--      
   <Resource name="mail/OpenKM" auth="Container" type="javax.mail.Session"
             mail.smtp.host="localhost" mail.from="testing@openkm.com"/>
+  -->
+  <!--
+  <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+         resourceName="UserDatabase"/>
+  -->
+  <!--
+  <Realm className="org.apache.catalina.realm.JAASRealm" 
+         appName="OpenKM" 
+         userClassNames="com.openkm.jaas.User" 
+         roleClassNames="com.openkm.jaas.Role" debug="true" />
   -->
 </Context>

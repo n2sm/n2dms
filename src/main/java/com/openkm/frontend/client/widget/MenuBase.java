@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -47,12 +47,16 @@ public abstract class MenuBase extends Composite {
 
     public abstract void enableAddPropertyGroup();
 
+    public abstract void disablePdfMerge();
+
+    public abstract void enablePdfMerge();
+
     /**
      * Enables menu item
      * 
      * @param menuItem The menu item
      */
-    public void enable(final MenuItem menuItem) {
+    public void enable(MenuItem menuItem) {
         menuItem.addStyleName("okm-MenuItem");
         menuItem.removeStyleName("okm-MenuItem-strike");
     }
@@ -62,7 +66,7 @@ public abstract class MenuBase extends Composite {
      * 
      * @param menuItem The menu item
      */
-    public void disable(final MenuItem menuItem) {
+    public void disable(MenuItem menuItem) {
         menuItem.removeStyleName("okm-MenuItem");
         menuItem.addStyleName("okm-MenuItem-strike");
     }

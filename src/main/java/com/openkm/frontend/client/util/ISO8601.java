@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,17 +33,16 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
  *
  */
 public class ISO8601 {
-    private static final String BASIC_PATTER = "yyyyMMddHHmmss";
+    public static final String BASIC_PATTER = "yyyyMMddHHmmss";
 
     /**
      * Parse string date in format "YYYY-MM-DDThh:mm:ss.SSSTZD"
      */
-    public static Date parseExtended(final String value) {
+    public static Date parseExtended(String value) {
         if (value == null) {
             return null;
         } else {
-            final DateTimeFormat dtf = DateTimeFormat
-                    .getFormat(PredefinedFormat.ISO_8601);
+            DateTimeFormat dtf = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
             return dtf.parse(value);
         }
     }
@@ -51,12 +50,11 @@ public class ISO8601 {
     /**
      * Format date with format "YYYY-MM-DDThh:mm:ss.SSSTZD"
      */
-    public static String formatExtended(final Date value) {
+    public static String formatExtended(Date value) {
         if (value == null) {
             return null;
         } else {
-            final DateTimeFormat dtf = DateTimeFormat
-                    .getFormat(PredefinedFormat.ISO_8601);
+            DateTimeFormat dtf = DateTimeFormat.getFormat(PredefinedFormat.ISO_8601);
             return dtf.format(value);
         }
     }
@@ -64,11 +62,11 @@ public class ISO8601 {
     /**
      * Parse string date in format "yyyyMMddHHmmss"
      */
-    public static Date parseBasic(final String value) {
+    public static Date parseBasic(String value) {
         if (value == null) {
             return null;
         } else {
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(BASIC_PATTER);
+            DateTimeFormat dtf = DateTimeFormat.getFormat(BASIC_PATTER);
             return dtf.parse(value);
         }
     }
@@ -76,11 +74,11 @@ public class ISO8601 {
     /**
      * Format date with format "yyyyMMddHHmmss"
      */
-    public static String formatBasic(final Date value) {
+    public static String formatBasic(Date value) {
         if (value == null) {
             return null;
         } else {
-            final DateTimeFormat dtf = DateTimeFormat.getFormat(BASIC_PATTER);
+            DateTimeFormat dtf = DateTimeFormat.getFormat(BASIC_PATTER);
             return dtf.format(value);
         }
     }

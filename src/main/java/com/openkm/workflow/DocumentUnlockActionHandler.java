@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,9 +35,7 @@ import com.openkm.core.PathNotFoundException;
  * 
  */
 public class DocumentUnlockActionHandler implements ActionHandler {
-    private static Logger log = LoggerFactory
-            .getLogger(DocumentUnlockActionHandler.class);
-
+    private static Logger log = LoggerFactory.getLogger(DocumentUnlockActionHandler.class);
     private static final long serialVersionUID = -4813518815259981308L;
 
     /**
@@ -47,16 +45,15 @@ public class DocumentUnlockActionHandler implements ActionHandler {
     }
 
     @Override
-    public void execute(final ExecutionContext ctx) throws Exception {
-        final String path = (String) ctx.getContextInstance().getVariable(
-                "path");
+    public void execute(ExecutionContext ctx) throws Exception {
+        String path = (String) ctx.getContextInstance().getVariable("path");
         log.info("Path: " + path);
 
         try {
             OKMDocument.getInstance().unlock(null, path);
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error(e.getMessage());
-        } catch (final LockException e) {
+        } catch (LockException e) {
             log.error(e.getMessage());
         }
     }

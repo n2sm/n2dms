@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -39,15 +39,13 @@ public class SourceCodeTextExtractor extends AbstractTextExtractor {
     /**
      * Logger instance.
      */
-    private static final Logger log = LoggerFactory
-            .getLogger(SourceCodeTextExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceCodeTextExtractor.class);
 
     /**
      * Creates a new <code>AudioTextExtractor</code> instance.
      */
     public SourceCodeTextExtractor() {
-        super(new String[] { "text/x-java", "text/css", "text/x-csrc",
-                "text/x-sql", "application/x-php", "application/javascript" });
+        super(new String[] { "text/x-java", "text/css", "text/x-csrc", "text/x-sql", "application/x-php", "application/javascript" });
     }
 
     // -------------------------------------------------------< TextExtractor >
@@ -55,16 +53,13 @@ public class SourceCodeTextExtractor extends AbstractTextExtractor {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Reader extractText(final InputStream stream, final String type,
-            final String encoding) throws IOException {
+    public Reader extractText(InputStream stream, String type, String encoding) throws IOException {
         try {
             if (encoding != null) {
                 return new InputStreamReader(stream, encoding);
             }
-        } catch (final UnsupportedEncodingException e) {
-            log.warn("Unsupported encoding '{}', using default ({}) instead.",
-                    encoding, System.getProperty("file.encoding"));
+        } catch (UnsupportedEncodingException e) {
+            log.warn("Unsupported encoding '{}', using default ({}) instead.", encoding, System.getProperty("file.encoding"));
         }
         return new InputStreamReader(stream);
     }

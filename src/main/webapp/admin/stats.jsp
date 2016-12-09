@@ -31,7 +31,16 @@
           <a href="stats.jsp">Statistics</a>
         </li>
         <li class="action">
-          <a href="text_extraction_queue.jsp">Text extraction queue</a>
+          <a href="TextExtractionQueue">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            Text extraction queue
+          </a>
+        </li>
+        <li class="action">
+          <a href="PendingTaskQueue">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            Pending task queue
+          </a>
         </li>
         <li class="action">
           <a href="StatsGraph?action=refresh">

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -46,11 +46,8 @@ import com.openkm.module.jcr.JcrRepositoryModule;
 /**
  * @author pavila
  */
-public class DataStoreGarbageCollector extends TimerTask implements
-        ScanEventListener {
-    private static Logger log = LoggerFactory
-            .getLogger(DataStoreGarbageCollector.class);
-
+public class DataStoreGarbageCollector extends TimerTask implements ScanEventListener {
+    private static Logger log = LoggerFactory.getLogger(DataStoreGarbageCollector.class);
     private static volatile boolean running = false;
 
     @SuppressWarnings("unchecked")
@@ -67,10 +64,10 @@ public class DataStoreGarbageCollector extends TimerTask implements
 
             try {
                 // See http://wiki.apache.org/jackrabbit/DataStore
-                final Repository rep = JcrRepositoryModule.getRepository();
-                final RepositoryConfig rc = ((RepositoryImpl) rep).getConfig();
-                final String name = rc.getDefaultWorkspaceName();
-                final WorkspaceConfig wc = rc.getWorkspaceConfig(name);
+                Repository rep = JcrRepositoryModule.getRepository();
+                RepositoryConfig rc = ((RepositoryImpl) rep).getConfig();
+                String name = rc.getDefaultWorkspaceName();
+                WorkspaceConfig wc = rc.getWorkspaceConfig(name);
                 tmp = SystemSession.create((RepositoryImpl) rep, wc);
 
                 // Force system garbage collection a few times before running the data store garbage collection
@@ -84,8 +81,7 @@ public class DataStoreGarbageCollector extends TimerTask implements
                 gc.setScanEventListener(this);
                 gc.scan();
 
-                final Iterator<DataIdentifier> it = gc.getDataStore()
-                        .getAllIdentifiers();
+                Iterator<DataIdentifier> it = gc.getDataStore().getAllIdentifiers();
                 while (it.hasNext()) {
                     log.info("DataIdent: {}", it.next());
                 }
@@ -93,27 +89,25 @@ public class DataStoreGarbageCollector extends TimerTask implements
                 gc.stopScan();
 
                 // delete old data
-                final int deleted = gc.deleteUnused();
+                int deleted = gc.deleteUnused();
                 log.info("Deleted garbage documents: {}", deleted);
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 log.error(e.getMessage(), e);
-            } catch (final IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 log.error(e.getMessage(), e);
-            } catch (final ItemStateException e) {
+            } catch (ItemStateException e) {
                 log.error(e.getMessage(), e);
-            } catch (final RepositoryException e) {
+            } catch (RepositoryException e) {
                 log.error(e.getMessage(), e);
             } finally {
                 log.info("Clean temporal session and close DSGC");
 
                 try {
-                    if (gc != null) {
+                    if (gc != null)
                         gc.close();
-                    }
-                    if (tmp != null) {
+                    if (tmp != null)
                         tmp.logout();
-                    }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
 
@@ -125,12 +119,12 @@ public class DataStoreGarbageCollector extends TimerTask implements
     }
 
     @Override
-    public void afterScanning(final Node node) throws RepositoryException {
+    public void afterScanning(Node node) throws RepositoryException {
         //log.info("ScanEventListener - afterScanning: "+node);
     }
 
     @Override
-    public void beforeScanning(final Node node) throws RepositoryException {
+    public void beforeScanning(Node node) throws RepositoryException {
         //log.info("ScanEventListener - beforeScanning: "+node);
     }
 

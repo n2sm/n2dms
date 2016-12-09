@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -27,24 +27,18 @@ import java.util.Set;
 
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private String id = "";
-
     private String name = "";
-
     private String password = "";
-
     private String email = "";
-
     private boolean active = false;
-
     private Set<Role> roles = new HashSet<Role>();
 
     public String getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -52,7 +46,7 @@ public class User implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -60,7 +54,7 @@ public class User implements Serializable {
         return password;
     }
 
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -68,7 +62,7 @@ public class User implements Serializable {
         return email;
     }
 
-    public void setEmail(final String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
@@ -76,7 +70,7 @@ public class User implements Serializable {
         return roles;
     }
 
-    public void setRoles(final Set<Role> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 
@@ -84,20 +78,20 @@ public class User implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         } else if (obj == this) {
             return true;
         } else if (this.getClass() == obj.getClass()) {
-            final User other = (User) obj;
+            User other = (User) obj;
 
-            if (getId().equals(other.getId())) {
+            if (this.getId().equals(other.getId())) {
                 return true;
             } else {
                 return false;
@@ -112,13 +106,12 @@ public class User implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (active ? 1231 : 1237);
-        result = prime * result + (id == null ? 0 : id.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", name=").append(name);

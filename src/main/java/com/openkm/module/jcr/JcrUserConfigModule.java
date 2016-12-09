@@ -18,13 +18,10 @@ import com.openkm.module.jcr.stuff.JcrSessionManager;
 import com.openkm.util.UserActivity;
 
 public class JcrUserConfigModule implements UserConfigModule {
-    private static Logger log = LoggerFactory
-            .getLogger(JcrUserConfigModule.class);
+    private static Logger log = LoggerFactory.getLogger(JcrUserConfigModule.class);
 
     @Override
-    public void setHome(final String token, final String nodePath)
-            throws AccessDeniedException, RepositoryException,
-            DatabaseException {
+    public void setHome(String token, String nodePath) throws AccessDeniedException, RepositoryException, DatabaseException {
         log.debug("setHome({}, {})", token, nodePath);
         Session session = null;
 
@@ -39,9 +36,9 @@ public class JcrUserConfigModule implements UserConfigModule {
                 session = JcrSessionManager.getInstance().get(token);
             }
 
-            final Node rootNode = session.getRootNode();
-            final Node node = rootNode.getNode(nodePath.substring(1));
-            final UserConfig uc = new UserConfig();
+            Node rootNode = session.getRootNode();
+            Node node = rootNode.getNode(nodePath.substring(1));
+            UserConfig uc = new UserConfig();
             uc.setHomePath(nodePath);
             uc.setHomeNode(node.getUUID());
             uc.setHomeType(JCRUtils.getNodeType(node));
@@ -49,11 +46,10 @@ public class JcrUserConfigModule implements UserConfigModule {
             UserConfigDAO.setHome(uc);
 
             // Activity log
-            UserActivity.log(session.getUserID(), "USER_CONFIG_SET_HOME",
-                    node.getUUID(), nodePath, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "USER_CONFIG_SET_HOME", node.getUUID(), nodePath, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
-        } catch (final DatabaseException e) {
+        } catch (DatabaseException e) {
             throw e;
         } finally {
             if (token == null) {
@@ -65,8 +61,7 @@ public class JcrUserConfigModule implements UserConfigModule {
     }
 
     @Override
-    public UserConfig getConfig(final String token) throws RepositoryException,
-            DatabaseException {
+    public UserConfig getConfig(String token) throws RepositoryException, DatabaseException {
         log.debug("getConfig({})", token);
         UserConfig ret = new UserConfig();
         Session session = null;
@@ -81,9 +76,8 @@ public class JcrUserConfigModule implements UserConfigModule {
             ret = UserConfigDAO.findByPk(session, session.getUserID());
 
             // Activity log
-            UserActivity.log(session.getUserID(), "USER_CONFIG_GET_CONFIG",
-                    null, null, null);
-        } catch (final javax.jcr.RepositoryException e) {
+            UserActivity.log(session.getUserID(), "USER_CONFIG_GET_CONFIG", null, null, null);
+        } catch (javax.jcr.RepositoryException e) {
             throw new RepositoryException(e.getMessage(), e);
         } finally {
             if (token == null) {

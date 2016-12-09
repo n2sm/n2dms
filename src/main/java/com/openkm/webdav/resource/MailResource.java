@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -58,15 +58,12 @@ import com.openkm.core.RepositoryException;
 import com.openkm.util.MailUtils;
 import com.openkm.util.PathUtils;
 
-public class MailResource implements CopyableResource, DeletableResource,
-        GetableResource, MoveableResource, PropFindableResource,
+public class MailResource implements CopyableResource, DeletableResource, GetableResource, MoveableResource, PropFindableResource,
         PropPatchableResource, QuotaResource {
-    private static final Logger log = LoggerFactory
-            .getLogger(MailResource.class);
-
+    private static final Logger log = LoggerFactory.getLogger(MailResource.class);
     private Mail mail;
 
-    public MailResource(final Mail mail) {
+    public MailResource(Mail mail) {
         this.mail = ResourceUtils.fixResourcePath(mail);
     }
 
@@ -81,14 +78,13 @@ public class MailResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public Object authenticate(final String user, final String password) {
+    public Object authenticate(String user, String password) {
         // log.debug("authenticate({}, {})", new Object[] { user, password });
         return "OpenKM";
     }
 
     @Override
-    public boolean authorise(final Request request, final Method method,
-            final Auth auth) {
+    public boolean authorise(Request request, Method method, Auth auth) {
         // log.debug("authorise({}, {}, {})", new Object[] { request.getAbsolutePath(), method.toString(),
         // auth.getUser() });
         return true;
@@ -110,17 +106,17 @@ public class MailResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public String checkRedirect(final Request request) {
+    public String checkRedirect(Request request) {
         return null;
     }
 
     @Override
-    public Long getMaxAgeSeconds(final Auth auth) {
+    public Long getMaxAgeSeconds(Auth auth) {
         return null;
     }
 
     @Override
-    public String getContentType(final String accepts) {
+    public String getContentType(String accepts) {
         if (mail.getAttachments().isEmpty()) {
             return mail.getMimeType();
         } else {
@@ -134,133 +130,107 @@ public class MailResource implements CopyableResource, DeletableResource,
     }
 
     @Override
-    public void sendContent(final OutputStream out, final Range range,
-            final Map<String, String> params, final String contentType)
-            throws IOException, NotAuthorizedException, BadRequestException {
+    public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException,
+            NotAuthorizedException, BadRequestException {
         log.debug("sendContent({}, {})", params, contentType);
 
         try {
-            final String fixedMailPath = ResourceUtils.fixRepositoryPath(mail
-                    .getPath());
-            final Mail mail = OKMMail.getInstance().getProperties(null,
-                    fixedMailPath);
+            String fixedMailPath = ResourceUtils.fixRepositoryPath(mail.getPath());
+            Mail mail = OKMMail.getInstance().getProperties(null, fixedMailPath);
 
             if (mail.getAttachments().isEmpty()) {
                 IOUtils.write(mail.getContent(), out);
             } else {
-                final MimeMessage m = MailUtils.create(null, mail);
+                MimeMessage m = MailUtils.create(null, mail);
                 m.writeTo(out);
                 out.flush();
             }
-        } catch (final PathNotFoundException e) {
+        } catch (PathNotFoundException e) {
             log.error("PathNotFoundException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + mail.getPath());
-        } catch (final AccessDeniedException e) {
+            throw new RuntimeException("Failed to update content: " + mail.getPath());
+        } catch (AccessDeniedException e) {
             log.error("AccessDeniedException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + mail.getPath());
-        } catch (final RepositoryException e) {
+            throw new RuntimeException("Failed to update content: " + mail.getPath());
+        } catch (RepositoryException e) {
             log.error("RepositoryException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + mail.getPath());
-        } catch (final DatabaseException e) {
+            throw new RuntimeException("Failed to update content: " + mail.getPath());
+        } catch (DatabaseException e) {
             log.error("DatabaseException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + mail.getPath());
-        } catch (final MessagingException e) {
+            throw new RuntimeException("Failed to update content: " + mail.getPath());
+        } catch (MessagingException e) {
             log.error("MessagingException: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to update content: "
-                    + mail.getPath());
+            throw new RuntimeException("Failed to update content: " + mail.getPath());
         }
     }
 
     @Override
-    public void delete() throws NotAuthorizedException, ConflictException,
-            BadRequestException {
+    public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
         log.debug("delete()");
 
         try {
-            final String fixedMailPath = ResourceUtils.fixRepositoryPath(mail
-                    .getPath());
+            String fixedMailPath = ResourceUtils.fixRepositoryPath(mail.getPath());
             OKMMail.getInstance().delete(null, fixedMailPath);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new ConflictException(this);
         }
     }
 
     @Override
-    public void setProperties(final Fields fields) {
+    public void setProperties(Fields fields) {
         // MIL-50: not implemented. Just to keep MS Office sweet
     }
 
     @Override
-    public void moveTo(final CollectionResource newParent, final String newName)
-            throws ConflictException, NotAuthorizedException,
-            BadRequestException {
+    public void moveTo(CollectionResource newParent, String newName) throws ConflictException, NotAuthorizedException, BadRequestException {
         log.debug("moveTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstFolder = newFldParent.getFolder().getPath();
-            final String srcFolder = PathUtils.getParent(mail.getPath());
-            final String fixedMailPath = ResourceUtils.fixRepositoryPath(mail
-                    .getPath());
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstFolder = newFldParent.getFolder().getPath();
+            String srcFolder = PathUtils.getParent(mail.getPath());
+            String fixedMailPath = ResourceUtils.fixRepositoryPath(mail.getPath());
 
             if (dstFolder.equals(srcFolder)) {
                 log.debug("moveTo - RENAME {} to {}", fixedMailPath, newName);
 
                 try {
-                    mail = OKMMail.getInstance().rename(null, fixedMailPath,
-                            newName);
-                } catch (final Exception e) {
-                    throw new RuntimeException("Failed to rename to: "
-                            + newName);
+                    mail = OKMMail.getInstance().rename(null, fixedMailPath, newName);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to rename to: " + newName);
                 }
             } else {
-                final String dstPath = newFldParent.getFolder().getPath();
-                final String fixedDstPath = ResourceUtils
-                        .fixRepositoryPath(dstPath);
-                log.debug("moveTo - MOVE from {} to {}", fixedMailPath,
-                        fixedDstPath);
+                String dstPath = newFldParent.getFolder().getPath();
+                String fixedDstPath = ResourceUtils.fixRepositoryPath(dstPath);
+                log.debug("moveTo - MOVE from {} to {}", fixedMailPath, fixedDstPath);
 
                 try {
-                    OKMMail.getInstance().move(null, fixedMailPath,
-                            fixedDstPath);
+                    OKMMail.getInstance().move(null, fixedMailPath, fixedDstPath);
                     mail.setPath(dstPath);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Failed to move to: " + dstPath);
                 }
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FsDirectoryResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FsDirectoryResource, is a: " + newParent.getClass());
         }
     }
 
     @Override
-    public void copyTo(final CollectionResource newParent, final String newName)
-            throws NotAuthorizedException, BadRequestException,
-            ConflictException {
+    public void copyTo(CollectionResource newParent, String newName) throws NotAuthorizedException, BadRequestException, ConflictException {
         log.debug("copyTo({}, {})", newParent, newName);
 
         if (newParent instanceof FolderResource) {
-            final FolderResource newFldParent = (FolderResource) newParent;
-            final String dstPath = newFldParent.getFolder().getPath() + "/"
-                    + newName;
+            FolderResource newFldParent = (FolderResource) newParent;
+            String dstPath = newFldParent.getFolder().getPath() + "/" + newName;
 
             try {
-                final String fixedMailPath = ResourceUtils
-                        .fixRepositoryPath(mail.getPath());
+                String fixedMailPath = ResourceUtils.fixRepositoryPath(mail.getPath());
                 OKMMail.getInstance().copy(null, fixedMailPath, dstPath);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to copy to:" + dstPath, e);
             }
         } else {
-            throw new RuntimeException(
-                    "Destination is an unknown type. Must be a FolderResource, is a: "
-                            + newParent.getClass());
+            throw new RuntimeException("Destination is an unknown type. Must be a FolderResource, is a: " + newParent.getClass());
         }
     }
 
@@ -276,7 +246,7 @@ public class MailResource implements CopyableResource, DeletableResource,
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("mail=").append(mail);
         sb.append("}");

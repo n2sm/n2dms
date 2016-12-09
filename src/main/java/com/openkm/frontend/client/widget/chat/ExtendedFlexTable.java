@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -49,7 +49,7 @@ public class ExtendedFlexTable extends FlexTable {
         sinkEvents(Event.ONDBLCLICK);
         addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 // Mark selected row or orders rows if header row (0) is clicked 
                 // And row must be other than the selected one
                 markSelectedRow(getCellForEvent(event).getRowIndex());
@@ -61,17 +61,15 @@ public class ExtendedFlexTable extends FlexTable {
     /* (non-Javadoc)
      * @see com.google.gwt.user.client.EventListener#onBrowserEvent(com.google.gwt.user.client.Event)
      */
-    @Override
-    public void onBrowserEvent(final Event event) {
+    public void onBrowserEvent(Event event) {
         int selectedRow = 0;
 
         if (DOM.eventGetType(event) == Event.ONDBLCLICK) {
-            final Element td = getMouseEventTargetCell(event);
-            if (td == null) {
+            Element td = getMouseEventTargetCell(event);
+            if (td == null)
                 return;
-            }
-            final Element tr = DOM.getParent(td);
-            final Element body = DOM.getParent(tr);
+            Element tr = DOM.getParent(td);
+            Element body = DOM.getParent(tr);
             selectedRow = DOM.getChildIndex(body, tr);
             if (selectedRow >= 0) {
                 markSelectedRow(selectedRow);
@@ -88,20 +86,19 @@ public class ExtendedFlexTable extends FlexTable {
      * Method originally copied from HTMLTable superclass where it was defined private
      * Now implemented differently to only return target cell if it'spart of 'this' table
      */
-    private Element getMouseEventTargetCell(final Event event) {
+    private Element getMouseEventTargetCell(Event event) {
         Element td = DOM.eventGetTarget(event);
         //locate enclosing td element
         while (!DOM.getElementProperty(td, "tagName").equalsIgnoreCase("td")) {
             // If we run out of elements, or run into the table itself, then give up.
-            if (td == null || td == getElement()) {
+            if ((td == null) || td == getElement())
                 return null;
-            }
             td = DOM.getParent(td);
         }
         //test if the td is actually from this table
-        final Element tr = DOM.getParent(td);
-        final Element body = DOM.getParent(tr);
-        if (body == getBodyElement()) {
+        Element tr = DOM.getParent(td);
+        Element body = DOM.getParent(tr);
+        if (body == this.getBodyElement()) {
             return td;
         }
         //Didn't find appropriate cell
@@ -113,7 +110,7 @@ public class ExtendedFlexTable extends FlexTable {
      * 
      * @param row
      */
-    private void markSelectedRow(final int row) {
+    private void markSelectedRow(int row) {
         if (row != selectedRow) {
             styleRow(selectedRow, false);
             styleRow(row, true);
@@ -127,14 +124,13 @@ public class ExtendedFlexTable extends FlexTable {
      * @param row The row afected
      * @param selected Indicates selected unselected row
      */
-    public void styleRow(final int row, final boolean selected) {
+    public void styleRow(int row, boolean selected) {
         // Ensures that header is never changed
         if (row >= 0) {
             if (selected) {
                 getRowFormatter().addStyleName(row, "okm-Security-SelectedRow");
             } else {
-                getRowFormatter().removeStyleName(row,
-                        "okm-Security-SelectedRow");
+                getRowFormatter().removeStyleName(row, "okm-Security-SelectedRow");
             }
         }
     }
@@ -142,7 +138,6 @@ public class ExtendedFlexTable extends FlexTable {
     /**
      * Removes all rows except the first
      */
-    @Override
     public void removeAllRows() {
         // Resets selected Rows and Col values
         selectedRow = -1;

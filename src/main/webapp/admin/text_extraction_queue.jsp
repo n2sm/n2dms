@@ -1,12 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Iterator" %>
-<%@ page import="com.openkm.util.WarUtils" %>
-<%@ page import="com.openkm.api.OKMRepository" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
-<%@ page import="com.openkm.extractor.TextExtractorWork" %>
-<%@ page import="com.openkm.extractor.TextExtractorWorker" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.openkm.com/tags/utils" prefix="u" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -30,13 +25,16 @@
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
         <li class="path">
-          <a href="text_extraction_queue.jsp">Text extraction queue</a>
+          <a href="TextExtractionQueue">Text extraction queue</a>
         </li>
         <li class="action">
-          <a href="stats.jsp">Statistics</a>
+          <a href="stats.jsp">
+            <img src="img/action/generic.png" alt="Generic" title="Generic" style="vertical-align: middle;"/>
+            Statistics
+          </a>
         </li>
         <li class="action">
-          <a href="text_extraction_queue.jsp">
+          <a href="TextExtractionQueue">
             <img src="img/action/refresh.png" alt="Refresh" title="Refresh" style="vertical-align: middle;"/>
             Refresh
           </a>
@@ -46,61 +44,68 @@
       <table id="treat" class="results" width="90%">
         <thead>
           <tr class="fuzzy">
-            <td colspan="4" style="text-align: center; font-weight: bold; font-size: 14px">Extractions In Progress</td>
+            <td colspan="4" style="text-align: center; font-weight: bold; font-size: 14px">
+              Extractions In Progress
+              <c:if test="${inProgress}">
+                <span style="text-align: center; font-weight: bold; font-size: 12px">
+                  (Running)
+                </span>
+              </c:if>
+            </td>
           </tr>
           <tr><th>#</th><th>UUID</th><th>Path</th><th>Date</th></tr>
         </thead>
         <tbody>
-        <%
-        int row = 0;
-        for (TextExtractorWork work : TextExtractorWorker.getInProgressWorks()) {
-        %>
-          <tr class="<%=(row++) % 2 == 0 ? "even" : "odd"%>">
-            <td><%=row%></td>
-            <td nowrap="nowrap"><%=work.getDocUuid()%></td>
-            <td><%=work.getDocPath()%></td>
-            <td nowrap="nowrap"><%=work.getDate().getTime()%></td>
-          </tr>
-        <%
-        }
-        %>  
+          <c:forEach var="work" items="${inProgressWorks}" varStatus="row">
+            <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
+              <td>${row.index + 1}</td>
+              <td nowrap="nowrap">${work.docUuid}</td>
+              <td>${work.docPath}</td>
+              <td nowrap="nowrap"><u:formatDate calendar="${work.date}"/></td>
+            </tr>
+          </c:forEach>
         </tbody>
       </table>
       <br/>
       <table id="trick" class="results" width="90%">
         <thead>
           <tr class="fuzzy">
-            <td colspan="4" style="text-align: center; font-weight: bold; font-size: 14px">Pending Extractions</td>
+            <td colspan="4" style="text-align: center; font-weight: bold; font-size: 14px">
+              Pending Extractions
+              <c:if test="${!inProgress}">
+                <span style="text-align: center; font-weight: bold; font-size: 12px">
+                  (Last execution:
+                  <c:choose>
+                    <c:when test="${lastExecution != null}">
+                      <u:formatDate calendar="${lastExecution}"/>
+                    </c:when>
+                    <c:otherwise>
+                      I don't know
+                    </c:otherwise>
+                  </c:choose>
+                  )
+                </span>
+              </c:if>
+            </td>
           </tr>
           <tr><th>#</th><th>UUID</th><th>Path</th><th>Date</th></tr>
         </thead>
         <tbody>
-        <%
-        row = 0;
-        final int MAX_RESULTS = 20;
-        List<TextExtractorWork> pending = TextExtractorWorker.getPendingWorks(MAX_RESULTS + 1);
-        Iterator<TextExtractorWork> it = pending.iterator();
-        
-        while (row < MAX_RESULTS && it.hasNext()) {
-        	TextExtractorWork work = it.next();
-        %>
-          <tr class="<%=(row++) % 2 == 0 ? "even" : "odd"%>">
-            <td><%=row%></td>
-            <td nowrap="nowrap"><%=work.getDocUuid()%></td>
-            <td><%=work.getDocPath()%></td>
-            <td nowrap="nowrap"><%=work.getDate().getTime()%></td>
-          </tr>
-        <%
-        }
-        
-        if (it.hasNext()) {
-        %>
-          <tr class="fuzzy">
-            <td colspan="4" style="text-align: center; font-weight: bold;">Total pending extractions: <%=TextExtractorWorker.getPendingSize() %></td>
-          </tr>
-        <%
-        }
-        %>
+          <c:forEach var="work" items="${pendingWorks}" varStatus="row">
+            <tr class="${row.index % 2 == 0 ? 'even' : 'odd'}">
+              <td>${row.index + 1}</td>
+              <td nowrap="nowrap">${work.docUuid}</td>
+              <td>${work.docPath}</td>
+              <td nowrap="nowrap"><u:formatDate calendar="${work.date}"/></td>
+            </tr>
+          </c:forEach>
+          <c:if test="${pendingSize > 0}">
+            <tr class="fuzzy">
+              <td colspan="4" style="text-align: center; font-weight: bold;">
+                Total pending extractions: ${pendingSize}
+              </td>
+            </tr>
+          </c:if>
         </tbody>
       </table>
     </c:when>

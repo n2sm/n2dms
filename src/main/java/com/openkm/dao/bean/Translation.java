@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,22 +30,18 @@ import java.io.Serializable;
  */
 public class Translation implements Serializable {
     private static final long serialVersionUID = 1L;
-
     public static final String MODULE_FRONTEND = "frontend";
-
     public static final String MODULE_EXTENSION = "extension";
-
     public static final String MODULE_ADMINISTRATION = "administration";
 
     private TranslationId translationId = new TranslationId();
-
     private String text = "";
 
     public TranslationId getTranslationId() {
         return translationId;
     }
 
-    public void setTranslationId(final TranslationId translationId) {
+    public void setTranslationId(TranslationId translationId) {
         this.translationId = translationId;
     }
 
@@ -53,13 +49,12 @@ public class Translation implements Serializable {
         return text;
     }
 
-    public void setText(final String text) {
+    public void setText(String text) {
         this.text = text;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("translationId=");
         sb.append(translationId);

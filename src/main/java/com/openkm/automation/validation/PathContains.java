@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -41,21 +41,18 @@ public class PathContains implements Validation {
     private static Logger log = LoggerFactory.getLogger(PathContains.class);
 
     @Override
-    public boolean isValid(final HashMap<String, Object> env,
-            final Object... params) {
-        final String uuid = AutomationUtils.getString(0, params);
-        final String parentPath = AutomationUtils.getParentPath(env);
-
+    public boolean isValid(HashMap<String, Object> env, Object... params) {
         try {
-            final String path = OKMRepository.getInstance().getNodePath(null,
-                    uuid);
+            String uuid = AutomationUtils.getString(0, params);
+            String parentPath = AutomationUtils.getParentPath(env);
+            String path = OKMRepository.getInstance().getNodePath(null, uuid);
 
             if (parentPath.startsWith(path)) {
                 return true;
             } else {
                 return false;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 

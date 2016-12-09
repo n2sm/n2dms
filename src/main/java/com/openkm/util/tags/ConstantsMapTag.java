@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,17 +31,16 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 public class ConstantsMapTag extends SimpleTagSupport {
     private String className;
-
     private String varName;
 
     //private String scopeName;
 
-    public void setClassName(final String value) {
-        className = value;
+    public void setClassName(String value) {
+        this.className = value;
     }
 
-    public void setVar(final String value) {
-        varName = value;
+    public void setVar(String value) {
+        this.varName = value;
     }
 
     //public void setScope( String value ) { this.scopeName = value; }
@@ -50,25 +49,23 @@ public class ConstantsMapTag extends SimpleTagSupport {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void doTag() throws JspException {
         try {
-            final Map constantsMap = new HashMap();
-            final Class declaringClass = Class.forName(className);
-            final Field[] fields = declaringClass.getFields();
+            Map constantsMap = new HashMap();
+            Class declaringClass = Class.forName(this.className);
+            Field[] fields = declaringClass.getFields();
 
-            for (final Field field : fields) {
-                if (Modifier.isPublic(field.getModifiers())
-                        && Modifier.isStatic(field.getModifiers()) /*&&
-                                                                   Modifier.isFinal( fields[n].getModifiers() )*/) {
-                    constantsMap.put(field.getName(), field.get(null));
+            for (int n = 0; n < fields.length; n++) {
+                if (Modifier.isPublic(fields[n].getModifiers()) && Modifier.isStatic(fields[n].getModifiers()) /*&&
+                                                                                                               Modifier.isFinal( fields[n].getModifiers() )*/) {
+                    constantsMap.put(fields[n].getName(), fields[n].get(null));
                 }
             }
 
             //ScopedContext scopedContext = (this.scopeName == null) ?
             //    ScopedContext.PAGE : ScopedContext.getInstance( this.scopeName );
             //getJspContext().setAttribute(this.varName, constantsMap, scopedContext.getValue());
-            getJspContext().setAttribute(varName, constantsMap);
-        } catch (final Exception e) {
-            throw new JspException("Exception setting constants map for "
-                    + className, e);
+            getJspContext().setAttribute(this.varName, constantsMap);
+        } catch (Exception e) {
+            throw new JspException("Exception setting constants map for " + this.className, e);
         }
     }
 }

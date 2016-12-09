@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -37,28 +37,27 @@ import org.slf4j.LoggerFactory;
 
 import com.openkm.core.Config;
 import com.openkm.core.DatabaseException;
+import com.openkm.core.PathNotFoundException;
+import com.openkm.core.RepositoryException;
 import com.openkm.dao.HibernateUtil;
+import com.openkm.dao.NodeDocumentVersionDAO;
 import com.openkm.dao.bean.NodeDocumentVersion;
 import com.openkm.util.SecureStore;
 
 public class FsDataStore {
     private static Logger log = LoggerFactory.getLogger(FsDataStore.class);
-
     public static final String DATASTORE_BACKEND_FS = "fs";
-
     public static final String DATASTORE_BACKEND_DB = "db";
-
     public static final String DATASTORE_DIRNAME = "datastore";
 
     /**
      * Write to data store 
      */
-    public static File save(final String uuid, final InputStream is)
-            throws IOException {
+    public static File save(String uuid, InputStream is) throws IOException {
         log.debug("save({}, {})", uuid, is);
-        final File fs = resolveFile(uuid);
+        File fs = resolveFile(uuid);
         fs.getParentFile().mkdirs();
-        final FileOutputStream fos = new FileOutputStream(fs);
+        FileOutputStream fos = new FileOutputStream(fs);
         IOUtils.copy(is, fos);
         IOUtils.closeQuietly(fos);
         return fs;
@@ -67,8 +66,7 @@ public class FsDataStore {
     /**
      * Read from data store
      */
-    public static InputStream read(final String uuid)
-            throws FileNotFoundException {
+    public static InputStream read(String uuid) throws FileNotFoundException {
         log.debug("read({})", uuid);
         return new FileInputStream(resolveFile(uuid));
     }
@@ -76,21 +74,23 @@ public class FsDataStore {
     /**
      * Purge data store file
      */
-    public static void delete(final String uuid) throws IOException {
+    public static void delete(String uuid) throws IOException {
         log.debug("delete({})", uuid);
-        final File fs = resolveFile(uuid);
+        File fs = resolveFile(uuid);
 
         if (!fs.delete()) {
-            throw new IOException("Could not delete file '" + fs.getParent()
-                    + "/" + uuid + "'");
+            if (fs.exists()) {
+                throw new IOException("Can't delete file (locked) '" + fs.getParent() + File.separator + uuid + "'");
+            } else {
+                throw new IOException("Cant' delete file (not exists) '" + fs.getParent() + File.separator + uuid + "'");
+            }
         }
     }
 
     /**
      * Copy a datastore file to another version
      */
-    public static void copy(final NodeDocumentVersion srcDocVer,
-            final NodeDocumentVersion dstDocVer) throws IOException {
+    public static void copy(NodeDocumentVersion srcDocVer, NodeDocumentVersion dstDocVer) throws IOException {
         FileInputStream fis = null;
 
         try {
@@ -104,37 +104,61 @@ public class FsDataStore {
     /**
      * Persis document file
      */
-    public static void persist(final NodeDocumentVersion nDocVer,
-            final InputStream is) throws IOException {
+    public static void persist(NodeDocumentVersion nDocVer, InputStream is) throws IOException {
         log.debug("persist({}, {})", nDocVer, is);
 
-        if (FsDataStore.DATASTORE_BACKEND_FS
-                .equals(Config.REPOSITORY_DATASTORE_BACKEND)) {
-            final File dsRaw = FsDataStore.save(nDocVer.getUuid(), is);
+        if (FsDataStore.DATASTORE_BACKEND_FS.equals(Config.REPOSITORY_DATASTORE_BACKEND)) {
+            File dsRaw = FsDataStore.save(nDocVer.getUuid(), is);
 
             if (Config.REPOSITORY_CONTENT_CHECKSUM) {
                 try {
-                    final String checkSum = SecureStore.md5Encode(dsRaw);
+                    String checkSum = SecureStore.md5Encode(dsRaw);
                     nDocVer.setChecksum(checkSum);
-                } catch (final NoSuchAlgorithmException e) {
+                } catch (NoSuchAlgorithmException e) {
                     log.warn(e.getMessage(), e);
                 }
             }
         } else {
-            final byte[] raw = IOUtils.toByteArray(is);
+            byte[] raw = IOUtils.toByteArray(is);
             nDocVer.setContent(raw);
 
             if (Config.REPOSITORY_CONTENT_CHECKSUM) {
                 try {
-                    final String checkSum = SecureStore.md5Encode(raw);
+                    String checkSum = SecureStore.md5Encode(raw);
                     nDocVer.setChecksum(checkSum);
-                } catch (final NoSuchAlgorithmException e) {
+                } catch (NoSuchAlgorithmException e) {
                     log.warn(e.getMessage(), e);
                 }
             }
         }
 
         log.debug("persist: void");
+    }
+
+    /**
+     * Verify checksum
+     */
+    public static void verifyChecksum(String docUuid, String verName, File fsRaw) throws RepositoryException, DatabaseException,
+            IOException {
+        log.debug("verifyChecksum({}, {}, {})", new Object[] { docUuid, verName, fsRaw });
+        Session session = null;
+
+        try {
+            String stChecksum = NodeDocumentVersionDAO.getInstance().getVersionContentChecksumByParent(docUuid, verName);
+            String clCheckSum = SecureStore.md5Encode(fsRaw);
+
+            if (!clCheckSum.equals(stChecksum)) {
+                throw new RepositoryException("Checksum failure for node '" + docUuid + "' and version '" + verName + "'");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            log.warn(e.getMessage(), e);
+        } catch (PathNotFoundException e) {
+            throw new RepositoryException("PathNotFound: " + docUuid);
+        } finally {
+            HibernateUtil.close(session);
+        }
+
+        log.debug("verifyChecksum: void");
     }
 
     /**
@@ -148,10 +172,9 @@ public class FsDataStore {
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            purgeOrphanFilesHelper(session, new File(
-                    Config.REPOSITORY_DATASTORE_HOME));
+            purgeOrphanFilesHelper(session, new File(Config.REPOSITORY_DATASTORE_HOME));
             log.debug("purgeOrphanFiles: void");
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -161,14 +184,12 @@ public class FsDataStore {
     /**
      * Purge orphan datastore files helper
      */
-    private static void purgeOrphanFilesHelper(final Session session,
-            final File dir) throws HibernateException, IOException {
-        for (final File child : dir.listFiles()) {
+    private static void purgeOrphanFilesHelper(Session session, File dir) throws HibernateException, IOException {
+        for (File child : dir.listFiles()) {
             if (child.isFile()) {
                 if (session.get(NodeDocumentVersion.class, child.getName()) == null) {
                     if (!child.delete()) {
-                        log.warn("Could not delete file '"
-                                + child.getCanonicalPath() + "'");
+                        log.warn("Could not delete file '" + child.getCanonicalPath() + "'");
                     }
                 }
             } else if (child.isDirectory()) {
@@ -180,9 +201,9 @@ public class FsDataStore {
     /**
      * Get file from uuid
      */
-    public static File resolveFile(final String uuid) {
-        final char[] seq = uuid.replaceAll("-", "").toCharArray();
-        final StringBuilder path = new StringBuilder();
+    public static File resolveFile(String uuid) {
+        char[] seq = uuid.replaceAll("-", "").toCharArray();
+        StringBuilder path = new StringBuilder();
 
         // For really big repositories maybe better: i < seq.length
         // But for most usual repositories a 4 depth level is enough 
@@ -190,8 +211,7 @@ public class FsDataStore {
             path.append(seq[i]).append(seq[i + 1]).append(File.separator);
         }
 
-        return new File(Config.REPOSITORY_DATASTORE_HOME + File.separator
-                + path.toString() + uuid);
+        return new File(Config.REPOSITORY_DATASTORE_HOME + File.separator + path.toString() + uuid);
     }
 
     /**
@@ -205,13 +225,12 @@ public class FsDataStore {
     /**
      * Purge empty datastore directories helper
      */
-    private static boolean purgeEmptyDirectoriesHelper(final File dir)
-            throws IOException {
+    private static boolean purgeEmptyDirectoriesHelper(File dir) throws IOException {
         boolean isEmpty = true;
-        final File[] children = dir.listFiles();
+        File[] children = dir.listFiles();
 
         if (children.length > 0) {
-            for (final File child : children) {
+            for (File child : children) {
                 if (child.isDirectory()) {
                     isEmpty = purgeEmptyDirectoriesHelper(child);
 

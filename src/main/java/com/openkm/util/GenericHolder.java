@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -24,7 +24,7 @@ package com.openkm.util;
 public class GenericHolder {
     private static final ThreadLocal<Object> tl = new ThreadLocal<Object>();
 
-    public static void set(final Object obj) {
+    public static void set(Object obj) {
         tl.set(obj);
     }
 

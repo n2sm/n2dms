@@ -1,16 +1,15 @@
-<%@ page import="java.io.FileNotFoundException"%>
-<%@ page import="java.io.IOException"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.io.FileNotFoundException" %>
+<%@ page import="java.io.IOException" %>
 <%@ page import="java.io.File" %>
 <%@ page import="com.openkm.core.Config" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ page import="com.openkm.bean.ContentInfo" %>
 <%@ page import="com.openkm.api.OKMFolder" %>
-<%@ page import="com.openkm.util.WebUtils"%>
-<%@ page import="com.openkm.util.FormatUtil" %>
+<%@ page import="com.openkm.util.WebUtils" %>
 <%@ page import="com.openkm.util.impexp.RepositoryExporter" %>
 <%@ page import="com.openkm.util.impexp.HTMLInfoDecorator" %>
-<%@ page import="com.openkm.util.impexp.ImpExpStats"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.openkm.util.impexp.ImpExpStats" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -22,7 +21,7 @@
   <title>Rebuild Indexes</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -33,11 +32,16 @@
       </ul>
       <br/>
       <form action="RebuildIndexes">
-        <table class="form" align="center">
+        <table class="form" align="center" width="175px">
           <tr><td>Text extractor</td><td><input name="action" value="textExtractor" type="radio"/></td></tr>
           <tr><td>Lucene indexes</td><td><input name="action" value="luceneIndexes" type="radio"/></td></tr>
           <tr><td>Optimize indexes</td><td><input name="action" value="optimizeIndexes" type="radio"/></td></tr>
-          <tr><td colspan="2" align="right"><input type="submit" value="Send"/></td></tr>
+          <tr>
+            <td colspan="2" align="right">
+              <input type="button" onclick="javascript:window.history.back()" value="Cancel" class="noButton"/>
+              <input type="submit" value="Execute" class="yesButton"/>
+            </td>
+          </tr>
         </table>
       </form>
     </c:when>

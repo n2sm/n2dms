@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -61,43 +61,30 @@ import com.openkm.util.WebUtils;
  */
 public class StatsGraphServlet extends BaseServlet {
     private static final long serialVersionUID = 1L;
-
-    private static Logger log = LoggerFactory
-            .getLogger(StatsGraphServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(StatsGraphServlet.class);
     private static final String DOCUMENTS = "0";
-
     private static final String DOCUMENTS_SIZE = "1";
-
     private static final String FOLDERS = "2";
-
     private static final String JVM_MEMORY = "3";
-
     private static final String DISK = "4";
-
     private static final String OS_MEMORY = "5";
 
-    @Override
-    public void doGet(final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException,
-            ServletException {
-        final String action = WebUtils.getString(request, "action", "graph");
-        final String type = WebUtils.getString(request, "t");
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String action = WebUtils.getString(request, "action", "graph");
+        String type = WebUtils.getString(request, "t");
         JFreeChart chart = null;
         updateSessionManager(request);
 
         try {
             if ("refresh".equals(action)) {
                 new RepositoryInfo().runAs(null);
-                final ServletContext sc = getServletContext();
-                sc.getRequestDispatcher("/admin/stats.jsp").forward(request,
-                        response);
+                ServletContext sc = getServletContext();
+                sc.getRequestDispatcher("/admin/stats.jsp").forward(request, response);
             } else {
                 response.setContentType("image/png");
-                final OutputStream out = response.getOutputStream();
+                OutputStream out = response.getOutputStream();
 
-                if (DOCUMENTS.equals(type) || DOCUMENTS_SIZE.equals(type)
-                        || FOLDERS.equals(type)) {
+                if (DOCUMENTS.equals(type) || DOCUMENTS_SIZE.equals(type) || FOLDERS.equals(type)) {
                     chart = repoStats(type);
                 } else if (DISK.equals(type)) {
                     chart = diskStats();
@@ -115,23 +102,21 @@ public class StatsGraphServlet extends BaseServlet {
                     chart.setBackgroundPaint(new Color(246, 246, 238));
 
                     // Customize no data
-                    final PiePlot plot = (PiePlot) chart.getPlot();
+                    PiePlot plot = (PiePlot) chart.getPlot();
                     plot.setNoDataMessage("No data to display");
 
                     // Customize labels
                     plot.setLabelGenerator(null);
 
                     // Customize legend
-                    final LegendTitle legend = new LegendTitle(plot,
-                            new ColumnArrangement(), new ColumnArrangement());
+                    LegendTitle legend = new LegendTitle(plot, new ColumnArrangement(), new ColumnArrangement());
                     legend.setPosition(RectangleEdge.BOTTOM);
                     legend.setFrame(BlockBorder.NONE);
                     legend.setItemFont(new Font("Tahoma", Font.PLAIN, 12));
                     chart.removeLegend();
                     chart.addLegend(legend);
 
-                    if (DISK.equals(type) || JVM_MEMORY.equals(type)
-                            || OS_MEMORY.equals(type)) {
+                    if (DISK.equals(type) || JVM_MEMORY.equals(type) || OS_MEMORY.equals(type)) {
                         ChartUtilities.writeChartAsPNG(out, chart, 225, 225);
                     } else {
                         ChartUtilities.writeChartAsPNG(out, chart, 250, 250);
@@ -141,7 +126,7 @@ public class StatsGraphServlet extends BaseServlet {
                 out.flush();
                 out.close();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -153,27 +138,25 @@ public class StatsGraphServlet extends BaseServlet {
         String repHome = null;
 
         // Allow absolute repository path
-        if (new File(Config.REPOSITORY_HOME).isAbsolute()) {
+        if ((new File(Config.REPOSITORY_HOME)).isAbsolute()) {
             repHome = Config.REPOSITORY_HOME;
         } else {
             repHome = Config.HOME_DIR + File.separator + Config.REPOSITORY_HOME;
         }
 
-        final File df = new File(repHome);
-        final long total = df.getTotalSpace();
-        final long usable = df.getUsableSpace();
-        final long used = total - usable;
-        final String title = "Disk: " + FormatUtil.formatSize(total);
+        File df = new File(repHome);
+        long total = df.getTotalSpace();
+        long usable = df.getUsableSpace();
+        long used = total - usable;
+        String title = "Disk: " + FormatUtil.formatSize(total);
 
         log.debug("Total space: {}", FormatUtil.formatSize(total));
         log.debug("Usable space: {}", FormatUtil.formatSize(usable));
         log.debug("Used space: {}", FormatUtil.formatSize(used));
 
-        final DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Available (" + FormatUtil.formatSize(usable) + ")",
-                usable * 100 / total);
-        dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used
-                * 100 / total);
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        dataset.setValue("Available (" + FormatUtil.formatSize(usable) + ")", usable * 100 / total);
+        dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used * 100 / total);
 
         return ChartFactory.createPieChart(title, dataset, true, false, false);
     }
@@ -183,13 +166,13 @@ public class StatsGraphServlet extends BaseServlet {
      * http://blog.codebeach.com/2008/02/determine-available-memory-in-java.html
      */
     public JFreeChart jvmMemStats() throws IOException, ServletException {
-        final Runtime runtime = Runtime.getRuntime();
-        final long max = runtime.maxMemory(); // maximum amount of memory that the JVM will attempt to use
-        final long available = runtime.totalMemory(); // total amount of memory in the JVM
-        final long free = runtime.freeMemory(); // amount of free memory in the JVM
-        final long used = max - available;
-        final long total = free + used;
-        final String title = "JVM memory: " + FormatUtil.formatSize(total);
+        Runtime runtime = Runtime.getRuntime();
+        long max = runtime.maxMemory(); // maximum amount of memory that the JVM will attempt to use
+        long available = runtime.totalMemory(); // total amount of memory in the JVM
+        long free = runtime.freeMemory(); // amount of free memory in the JVM
+        long used = max - available;
+        long total = free + used;
+        String title = "JVM memory: " + FormatUtil.formatSize(total);
 
         log.debug("JVM maximun memory: {}", FormatUtil.formatSize(max));
         log.debug("JVM available memory: {}", FormatUtil.formatSize(available));
@@ -197,11 +180,9 @@ public class StatsGraphServlet extends BaseServlet {
         log.debug("JVM used memory: {}", FormatUtil.formatSize(used));
         log.debug("JVM total memory: {}", FormatUtil.formatSize(total));
 
-        final DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Available (" + FormatUtil.formatSize(free) + ")",
-                free * 100 / total);
-        dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used
-                * 100 / total);
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        dataset.setValue("Available (" + FormatUtil.formatSize(free) + ")", free * 100 / total);
+        dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used * 100 / total);
 
         return ChartFactory.createPieChart(title, dataset, true, false, false);
     }
@@ -211,33 +192,30 @@ public class StatsGraphServlet extends BaseServlet {
      * http://casidiablo.net/capturar-informacion-sistema-operativo-java/
      */
     public JFreeChart osMemStats() throws IOException, ServletException {
-        final DefaultPieDataset dataset = new DefaultPieDataset();
-        final Sigar sigar = new Sigar();
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        Sigar sigar = new Sigar();
         String title = null;
 
         try {
-            final Mem mem = sigar.getMem();
-            final long max = mem.getRam();
-            final long available = mem.getFree();
-            final long total = mem.getTotal();
-            final long used = mem.getUsed();
-            final long free = mem.getFree();
+            Mem mem = sigar.getMem();
+            long max = mem.getRam();
+            long available = mem.getFree();
+            long total = mem.getTotal();
+            long used = mem.getUsed();
+            long free = mem.getFree();
             title = "OS memory: " + FormatUtil.formatSize(total);
 
             log.debug("OS maximun memory: {}", FormatUtil.formatSize(max));
-            log.debug("OS available memory: {}",
-                    FormatUtil.formatSize(available));
+            log.debug("OS available memory: {}", FormatUtil.formatSize(available));
             log.debug("OS free memory: {}", FormatUtil.formatSize(free));
             log.debug("OS used memory: {}", FormatUtil.formatSize(used));
             log.debug("OS total memory: {}", FormatUtil.formatSize(total));
 
-            dataset.setValue("Available (" + FormatUtil.formatSize(free) + ")",
-                    free * 100 / total);
-            dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used
-                    * 100 / total);
-        } catch (final SigarException se) {
+            dataset.setValue("Available (" + FormatUtil.formatSize(free) + ")", free * 100 / total);
+            dataset.setValue("Used (" + FormatUtil.formatSize(used) + ")", used * 100 / total);
+        } catch (SigarException se) {
             title = "OS memory: " + se.getMessage();
-        } catch (final UnsatisfiedLinkError ule) {
+        } catch (UnsatisfiedLinkError ule) {
             title = "OS memory: (missing native libraries)";
         }
 
@@ -247,39 +225,34 @@ public class StatsGraphServlet extends BaseServlet {
     /**
      * Generate repository statistics
      */
-    public JFreeChart repoStats(final String type) throws IOException,
-            ServletException {
+    public JFreeChart repoStats(String type) throws IOException, ServletException {
         String title = null;
         long[] sizes = null;
         double[] percents = null;
-        final DefaultPieDataset dataset = new DefaultPieDataset();
+        DefaultPieDataset dataset = new DefaultPieDataset();
 
         if (DOCUMENTS.equals(type)) {
-            final StatsInfo si = RepositoryInfo.getDocumentsByContext();
+            StatsInfo si = RepositoryInfo.getDocumentsByContext();
             percents = si.getPercents();
             sizes = si.getSizes();
             title = "Documents by context";
         } else if (DOCUMENTS_SIZE.equals(type)) {
-            final StatsInfo si = RepositoryInfo.getDocumentsSizeByContext();
+            StatsInfo si = RepositoryInfo.getDocumentsSizeByContext();
             percents = si.getPercents();
             sizes = si.getSizes();
             title = "Documents size by context";
         } else if (FOLDERS.equals(type)) {
-            final StatsInfo si = RepositoryInfo.getFoldersByContext();
+            StatsInfo si = RepositoryInfo.getFoldersByContext();
             percents = si.getPercents();
             sizes = si.getSizes();
             title = "Folders by context";
         }
 
         if (title != null && sizes.length > 0 && percents.length > 0) {
-            final String taxonomySize = DOCUMENTS_SIZE.equals(type) ? FormatUtil
-                    .formatSize(sizes[0]) : Long.toString(sizes[0]);
-            final String personalSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil
-                    .formatSize(sizes[1]) : Long.toString(sizes[1]);
-            final String templateSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil
-                    .formatSize(sizes[2]) : Long.toString(sizes[2]);
-            final String trashSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil
-                    .formatSize(sizes[3]) : Long.toString(sizes[3]);
+            String taxonomySize = DOCUMENTS_SIZE.equals(type) ? FormatUtil.formatSize(sizes[0]) : Long.toString(sizes[0]);
+            String personalSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil.formatSize(sizes[1]) : Long.toString(sizes[1]);
+            String templateSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil.formatSize(sizes[2]) : Long.toString(sizes[2]);
+            String trashSize = DOCUMENTS_SIZE.equals(type) ? FormatUtil.formatSize(sizes[3]) : Long.toString(sizes[3]);
 
             dataset.setValue("Taxonomy (" + taxonomySize + ")", percents[0]);
             dataset.setValue("Personal (" + personalSize + ")", percents[1]);
@@ -295,18 +268,15 @@ public class StatsGraphServlet extends BaseServlet {
      * 
      * @author puspendu.banerjee@gmail.com 
      */
-    public String repoStatsXML(final String title,
-            final DefaultPieDataset dataset) throws IOException,
-            ServletException {
-        final Document document = DocumentHelper.createDocument();
-        final Element root = document.addElement("RepoStats");
+    public String repoStatsXML(final String title, final DefaultPieDataset dataset) throws IOException, ServletException {
+        Document document = DocumentHelper.createDocument();
+        Element root = document.addElement("RepoStats");
         root.addElement("Title").addCDATA(title);
-        final Element dataSetElement = root.addElement("DataSet");
+        Element dataSetElement = root.addElement("DataSet");
 
         for (int i = 0; i < dataset.getItemCount(); i++) {
-            final Element itemElement = dataSetElement.addElement("Item");
-            itemElement.addElement("name").addCDATA(
-                    dataset.getKey(i).toString());
+            Element itemElement = dataSetElement.addElement("Item");
+            itemElement.addElement("name").addCDATA(dataset.getKey(i).toString());
             itemElement.addAttribute("percent", dataset.getValue(i).toString());
             dataSetElement.add(itemElement);
         }

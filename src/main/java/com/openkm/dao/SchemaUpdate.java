@@ -32,44 +32,36 @@ import org.slf4j.LoggerFactory;
  */
 public class SchemaUpdate {
     private static Logger log = LoggerFactory.getLogger(SchemaUpdate.class);
-
     private ConnectionProvider connectionProvider;
-
     private Configuration configuration;
-
     private Dialect dialect;
-
     private List<Exception> exceptions;
-
     private String outputFile;
 
-    public SchemaUpdate(final Configuration cfg) throws HibernateException {
+    public SchemaUpdate(Configuration cfg) throws HibernateException {
         this(cfg, cfg.getProperties());
     }
 
-    public SchemaUpdate(final Configuration cfg,
-            final Properties connectionProperties) throws HibernateException {
-        configuration = cfg;
+    public SchemaUpdate(Configuration cfg, Properties connectionProperties) throws HibernateException {
+        this.configuration = cfg;
         dialect = Dialect.getDialect(connectionProperties);
-        final Properties props = new Properties();
+        Properties props = new Properties();
         props.putAll(dialect.getDefaultProperties());
         props.putAll(connectionProperties);
-        connectionProvider = ConnectionProviderFactory
-                .newConnectionProvider(props);
+        connectionProvider = ConnectionProviderFactory.newConnectionProvider(props);
         exceptions = new ArrayList<Exception>();
     }
 
-    public SchemaUpdate(final Configuration cfg, final Settings settings)
-            throws HibernateException {
-        configuration = cfg;
+    public SchemaUpdate(Configuration cfg, Settings settings) throws HibernateException {
+        this.configuration = cfg;
         dialect = settings.getDialect();
         connectionProvider = settings.getConnectionProvider();
         exceptions = new ArrayList<Exception>();
     }
 
-    public static void main(final String[] args) {
+    public static void main(String[] args) {
         try {
-            final Configuration cfg = new Configuration();
+            Configuration cfg = new Configuration();
             String outFile = null;
 
             boolean script = true;
@@ -78,38 +70,36 @@ public class SchemaUpdate {
             boolean doUpdate = true;
             String propFile = null;
 
-            for (final String arg : args) {
-                if (arg.startsWith("--")) {
-                    if (arg.equals("--quiet")) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].startsWith("--")) {
+                    if (args[i].equals("--quiet")) {
                         script = false;
-                    } else if (arg.startsWith("--properties=")) {
-                        propFile = arg.substring(13);
-                    } else if (arg.startsWith("--config=")) {
-                        cfg.configure(arg.substring(9));
-                    } else if (arg.startsWith("--text")) {
+                    } else if (args[i].startsWith("--properties=")) {
+                        propFile = args[i].substring(13);
+                    } else if (args[i].startsWith("--config=")) {
+                        cfg.configure(args[i].substring(9));
+                    } else if (args[i].startsWith("--text")) {
                         doUpdate = false;
-                    } else if (arg.startsWith("--naming=")) {
-                        cfg.setNamingStrategy((NamingStrategy) ReflectHelper
-                                .classForName(arg.substring(9)).newInstance());
-                    } else if (arg.startsWith("--output=")) {
-                        outFile = arg.substring(9);
+                    } else if (args[i].startsWith("--naming=")) {
+                        cfg.setNamingStrategy((NamingStrategy) ReflectHelper.classForName(args[i].substring(9)).newInstance());
+                    } else if (args[i].startsWith("--output=")) {
+                        outFile = args[i].substring(9);
                     }
                 } else {
-                    cfg.addFile(arg);
+                    cfg.addFile(args[i]);
                 }
 
             }
 
             if (propFile != null) {
-                final Properties props = new Properties();
+                Properties props = new Properties();
                 props.putAll(cfg.getProperties());
                 props.load(new FileInputStream(propFile));
                 cfg.setProperties(props);
             }
 
-            new SchemaUpdate(cfg).setOutputFile(outFile).execute(script,
-                    doUpdate);
-        } catch (final Exception e) {
+            new SchemaUpdate(cfg).setOutputFile(outFile).execute(script, doUpdate);
+        } catch (Exception e) {
             log.error("Error running schema update", e);
             e.printStackTrace();
         }
@@ -119,7 +109,7 @@ public class SchemaUpdate {
      * Set an output filename. The generated script will be written to this
      * file.
      */
-    public SchemaUpdate setOutputFile(final String filename) {
+    public SchemaUpdate setOutputFile(String filename) {
         outputFile = filename;
         return this;
     }
@@ -130,7 +120,7 @@ public class SchemaUpdate {
      * @param script
      *            print all DDL to the console
      */
-    public void execute(final boolean script, final boolean doUpdate) {
+    public void execute(boolean script, boolean doUpdate) {
         log.info("Running hbm2ddl schema update");
         Connection connection = null;
         Statement stmt = null;
@@ -153,7 +143,7 @@ public class SchemaUpdate {
 
                 meta = new DatabaseMetadata(connection, dialect);
                 stmt = connection.createStatement();
-            } catch (final SQLException sqle) {
+            } catch (SQLException sqle) {
                 exceptions.add(sqle);
                 log.error("could not get database metadata", sqle);
                 throw sqle;
@@ -166,10 +156,11 @@ public class SchemaUpdate {
                 outputFileWriter = new FileWriter(outputFile);
             }
 
-            final String[] createSQL = configuration
-                    .generateSchemaUpdateScript(dialect, meta);
+            String[] createSQL = configuration.generateSchemaUpdateScript(dialect, meta);
 
-            for (final String sql : createSQL) {
+            for (int j = 0; j < createSQL.length; j++) {
+                final String sql = createSQL[j];
+
                 try {
                     if (script) {
                         log.info("writing generated schema to console: ");
@@ -184,7 +175,7 @@ public class SchemaUpdate {
                         log.debug(sql);
                         stmt.executeUpdate(sql);
                     }
-                } catch (final SQLException e) {
+                } catch (SQLException e) {
                     exceptions.add(e);
                     log.error("Unsuccessful: " + sql);
                     log.error(e.getMessage());
@@ -192,24 +183,20 @@ public class SchemaUpdate {
             }
 
             log.info("schema update complete");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             exceptions.add(e);
             log.error("could not complete schema update", e);
         } finally {
             try {
-                if (stmt != null) {
+                if (stmt != null)
                     stmt.close();
-                }
-                if (!autoCommitWasEnabled) {
+                if (!autoCommitWasEnabled)
                     connection.setAutoCommit(false);
-                }
-                if (connection != null) {
+                if (connection != null)
                     connection.close();
-                }
-                if (connectionProvider != null) {
+                if (connectionProvider != null)
                     connectionProvider.close();
-                }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exceptions.add(e);
                 log.error("Error closing connection", e);
             }
@@ -218,7 +205,7 @@ public class SchemaUpdate {
                 if (outputFileWriter != null) {
                     outputFileWriter.close();
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 exceptions.add(e);
                 log.error("Error closing connection", e);
             }

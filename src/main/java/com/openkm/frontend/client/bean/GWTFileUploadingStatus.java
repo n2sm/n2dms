@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,18 +30,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class GWTFileUploadingStatus implements IsSerializable {
     private long bytesRead = 0;
-
     private long contentLength = 0;
-
     private boolean started = false;
-
     private boolean uploadFinish = false;
 
     public long getBytesRead() {
         return bytesRead;
     }
 
-    public void setBytesRead(final long bytesRead) {
+    public void setBytesRead(long bytesRead) {
         this.bytesRead = bytesRead;
     }
 
@@ -49,7 +46,7 @@ public class GWTFileUploadingStatus implements IsSerializable {
         return contentLength;
     }
 
-    public void setContentLength(final long contentLength) {
+    public void setContentLength(long contentLength) {
         this.contentLength = contentLength;
     }
 
@@ -57,7 +54,7 @@ public class GWTFileUploadingStatus implements IsSerializable {
         return started;
     }
 
-    public void setStarted(final boolean started) {
+    public void setStarted(boolean started) {
         this.started = started;
     }
 
@@ -65,7 +62,7 @@ public class GWTFileUploadingStatus implements IsSerializable {
         return uploadFinish;
     }
 
-    public void setUploadFinish(final boolean uploadFinish) {
+    public void setUploadFinish(boolean uploadFinish) {
         this.uploadFinish = uploadFinish;
     }
 }

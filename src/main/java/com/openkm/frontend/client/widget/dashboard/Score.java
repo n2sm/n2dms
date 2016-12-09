@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -31,7 +31,6 @@ import com.google.gwt.user.client.ui.HTML;
  */
 public class Score extends HTML {
     HTML html;
-
     String img = "";
 
     /**
@@ -39,7 +38,7 @@ public class Score extends HTML {
      * 
      * @param score
      */
-    public Score(final long score) {
+    public Score(long score) {
         super();
 
         if (score < 100) {

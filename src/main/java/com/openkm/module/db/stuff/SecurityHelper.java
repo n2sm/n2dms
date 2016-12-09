@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -34,17 +34,22 @@ import com.openkm.core.DatabaseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.dao.NodeBaseDAO;
 import com.openkm.dao.bean.NodeBase;
+import com.openkm.principal.PrincipalAdapterException;
 
 public class SecurityHelper {
     private static Logger log = LoggerFactory.getLogger(SecurityHelper.class);
-
     private static DbAccessManager accessManager = null;
 
     static {
         if (DbSimpleAccessManager.NAME.equals(Config.SECURITY_ACCESS_MANAGER)) {
-            log.info("Configuring AccessManager with {}",
-                    DbSimpleAccessManager.class.getCanonicalName());
+            log.info("Configuring AccessManager with {}", DbSimpleAccessManager.class.getCanonicalName());
             accessManager = new DbSimpleAccessManager();
+        } else if (DbRecursiveAccessManager.NAME.equals(Config.SECURITY_ACCESS_MANAGER)) {
+            log.info("Configuring AccessManager with {}", DbRecursiveAccessManager.class.getCanonicalName());
+            accessManager = new DbRecursiveAccessManager();
+        } else if (DbReadRecursiveAccessManager.NAME.equals(Config.SECURITY_ACCESS_MANAGER)) {
+            log.info("Configuring AccessManager with {}", DbReadRecursiveAccessManager.class.getCanonicalName());
+            accessManager = new DbReadRecursiveAccessManager();
         }
     }
 
@@ -58,11 +63,9 @@ public class SecurityHelper {
     /**
      * Prune not accessible nodes
      */
-    public static void pruneNodeList(final List<? extends NodeBase> nodeList)
-            throws DatabaseException {
-        for (final Iterator<? extends NodeBase> it = nodeList.iterator(); it
-                .hasNext();) {
-            final NodeBase node = it.next();
+    public static void pruneNodeList(List<? extends NodeBase> nodeList) throws DatabaseException {
+        for (Iterator<? extends NodeBase> it = nodeList.iterator(); it.hasNext();) {
+            NodeBase node = it.next();
 
             if (!accessManager.isGranted(node, Permission.READ)) {
                 it.remove();
@@ -73,21 +76,25 @@ public class SecurityHelper {
     /**
      * Check for node permissions
      */
-    public static boolean isGranted(final NodeBase node, final int permission)
-            throws DatabaseException {
+    public static boolean isGranted(NodeBase node, int permission) throws DatabaseException {
         return accessManager.isGranted(node, permission);
+    }
+
+    /**
+     * Check for node permissions
+     */
+    public static boolean isGranted(NodeBase node, String user, int permission) throws PrincipalAdapterException, DatabaseException {
+        return accessManager.isGranted(node, user, permission);
     }
 
     /**
      * Check for node read access
      */
-    public static void checkRead(final NodeBase node)
-            throws PathNotFoundException, DatabaseException {
+    public static void checkRead(NodeBase node) throws PathNotFoundException, DatabaseException {
         log.debug("checkRead({})", node);
 
         if (!accessManager.isGranted(node, Permission.READ)) {
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    node.getUuid());
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(node.getUuid());
             throw new PathNotFoundException(node.getUuid() + " : " + path);
         }
     }
@@ -95,14 +102,11 @@ public class SecurityHelper {
     /**
      * Check for node write
      */
-    public static void checkWrite(final NodeBase node)
-            throws AccessDeniedException, PathNotFoundException,
-            DatabaseException {
+    public static void checkWrite(NodeBase node) throws AccessDeniedException, PathNotFoundException, DatabaseException {
         log.debug("checkWrite({})", node);
 
         if (!accessManager.isGranted(node, Permission.WRITE)) {
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    node.getUuid());
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(node.getUuid());
             throw new AccessDeniedException(node.getUuid() + " : " + path);
         }
     }
@@ -110,14 +114,11 @@ public class SecurityHelper {
     /**
      * Check for node delete
      */
-    public static void checkDelete(final NodeBase node)
-            throws AccessDeniedException, PathNotFoundException,
-            DatabaseException {
+    public static void checkDelete(NodeBase node) throws AccessDeniedException, PathNotFoundException, DatabaseException {
         log.debug("checkDelete({})", node);
 
         if (!accessManager.isGranted(node, Permission.DELETE)) {
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    node.getUuid());
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(node.getUuid());
             throw new AccessDeniedException(node.getUuid() + " : " + path);
         }
     }
@@ -125,14 +126,11 @@ public class SecurityHelper {
     /**
      * Check for node security
      */
-    public static void checkSecurity(final NodeBase node)
-            throws AccessDeniedException, PathNotFoundException,
-            DatabaseException {
+    public static void checkSecurity(NodeBase node) throws AccessDeniedException, PathNotFoundException, DatabaseException {
         log.debug("checkSecurity({})", node);
 
         if (!accessManager.isGranted(node, Permission.SECURITY)) {
-            final String path = NodeBaseDAO.getInstance().getPathFromUuid(
-                    node.getUuid());
+            String path = NodeBaseDAO.getInstance().getPathFromUuid(node.getUuid());
             throw new AccessDeniedException(node.getUuid() + " : " + path);
         }
     }

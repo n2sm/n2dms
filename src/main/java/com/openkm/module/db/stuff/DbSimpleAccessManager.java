@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -21,6 +21,8 @@
 
 package com.openkm.module.db.stuff;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +35,8 @@ import com.openkm.core.DatabaseException;
 import com.openkm.core.PathNotFoundException;
 import com.openkm.dao.NodeBaseDAO;
 import com.openkm.dao.bean.NodeBase;
+import com.openkm.module.common.CommonAuthModule;
+import com.openkm.principal.PrincipalAdapterException;
 import com.openkm.spring.PrincipalUtils;
 import com.openkm.util.StackTraceUtils;
 
@@ -40,23 +44,18 @@ import com.openkm.util.StackTraceUtils;
  * Check user permissions on documents and folders.
  * 
  * @author pavila
+ * @see com.openkm.module.db.stuff.DbRecursiveAccessManager
  */
 public class DbSimpleAccessManager implements DbAccessManager {
-    private static Logger log = LoggerFactory
-            .getLogger(DbSimpleAccessManager.class);
-
+    private static Logger log = LoggerFactory.getLogger(DbSimpleAccessManager.class);
     public static final String NAME = "simple";
 
     /**
      * Check for permissions.
      */
-    @Override
-    public void checkPermission(final NodeBase node, final int permissions)
-            throws AccessDeniedException, PathNotFoundException,
-            DatabaseException {
+    public void checkPermission(NodeBase node, int permissions) throws AccessDeniedException, PathNotFoundException, DatabaseException {
         if (!isGranted(node, permissions)) {
-            final String nodePath = NodeBaseDAO.getInstance().getPathFromUuid(
-                    node.getUuid());
+            String nodePath = NodeBaseDAO.getInstance().getPathFromUuid(node.getUuid());
             throw new AccessDeniedException(node.getUuid() + " : " + nodePath);
         }
     }
@@ -65,25 +64,36 @@ public class DbSimpleAccessManager implements DbAccessManager {
      * Check for permissions.
      */
     @Override
-    public boolean isGranted(final NodeBase node, final int permissions) {
+    public boolean isGranted(NodeBase node, int permissions) throws DatabaseException {
+        return isGranted(node, PrincipalUtils.getUser(), PrincipalUtils.getRoles(), permissions);
+    }
+
+    /**
+     * Check for permissions.
+     */
+    @Override
+    public boolean isGranted(NodeBase node, String user, int permissions) throws PrincipalAdapterException, DatabaseException {
+        List<String> roles = CommonAuthModule.getPrincipalAdapter().getRolesByUser(user);
+        return isGranted(node, user, new HashSet<String>(roles), permissions);
+    }
+
+    /**
+     * Check for permissions.
+     */
+    private boolean isGranted(NodeBase node, String user, Set<String> roles, int permissions) throws DatabaseException {
         log.debug("isGranted({}, {})", node.getUuid(), permissions);
         boolean access = false;
-        final String user = PrincipalUtils.getUser();
 
         if (user != null) {
-            if (Config.SYSTEM_USER.equals(user)
-                    || Config.ADMIN_USER.equals(user)) {
+            if (Config.SYSTEM_USER.equals(user) || Config.ADMIN_USER.equals(user)) {
                 // An okmAdmin user has total access
                 access = true;
             } else {
-                final Set<String> roles = PrincipalUtils.getRoles();
-
                 if (roles.contains(Config.DEFAULT_ADMIN_ROLE)) {
                     // An user with AdminRole has total access
                     access = true;
                 } else {
-                    access = checkProperties(node.getUserPermissions(),
-                            node.getRolePermissions(), user, roles, permissions);
+                    access = checkProperties(node.getUserPermissions(), node.getRolePermissions(), user, roles, permissions);
                 }
             }
         } else {
@@ -103,15 +113,13 @@ public class DbSimpleAccessManager implements DbAccessManager {
     /**
      * Check access properties
      */
-    private boolean checkProperties(final Map<String, Integer> usersPerms,
-            final Map<String, Integer> rolesPerms, final String user,
-            final Set<String> roles, final int perms) {
-        log.debug("checkProperties({}, {}, {}, {})", new Object[] { usersPerms,
-                rolesPerms, roles, perms });
-        final boolean access = false;
+    private boolean checkProperties(Map<String, Integer> usersPerms, Map<String, Integer> rolesPerms, String user, Set<String> roles,
+            int perms) {
+        log.debug("checkProperties({}, {}, {}, {})", new Object[] { usersPerms, rolesPerms, roles, perms });
+        boolean access = false;
 
         // Fist try with user permissions
-        final Integer userPerms = usersPerms.get(user);
+        Integer userPerms = usersPerms.get(user);
 
         if (userPerms != null && (perms & userPerms) != 0) {
             log.debug("checkProperties: {}", true);
@@ -119,8 +127,8 @@ public class DbSimpleAccessManager implements DbAccessManager {
         }
 
         // If there is no user specific access, try with roles permissions
-        for (final String role : roles) {
-            final Integer rolePerms = rolesPerms.get(role);
+        for (String role : roles) {
+            Integer rolePerms = rolesPerms.get(role);
 
             if (rolePerms != null && (perms & rolePerms) != 0) {
                 log.debug("checkProperties: {}", true);

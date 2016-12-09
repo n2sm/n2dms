@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,13 +29,12 @@ import com.google.gwt.user.client.ui.DialogBox;
  * @author jllort
  *
  */
-public class ChatRoomDialogBox extends DialogBox implements HasTranslations,
-        HasChatRoom {
+public class ChatRoomDialogBox extends DialogBox implements HasTranslations, HasChatRoom {
 
     /**
      * ChatRoomDialogBox
      */
-    public ChatRoomDialogBox(final boolean autoHide, final boolean modal) {
+    public ChatRoomDialogBox(boolean autoHide, boolean modal) {
         super(autoHide, modal);
     }
 
@@ -49,6 +48,6 @@ public class ChatRoomDialogBox extends DialogBox implements HasTranslations,
     }
 
     @Override
-    public void setChatRoomActive(final boolean active) {
+    public void setChatRoomActive(boolean active) {
     }
 }

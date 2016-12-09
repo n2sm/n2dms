@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -34,7 +34,7 @@ public class StackTraceUtils {
      */
     public static StackTraceElement whoCalledMe() {
         // The constructor for Throwable has a native function that fills the stack trace.
-        final StackTraceElement[] trace = new Throwable().getStackTrace();
+        StackTraceElement[] trace = (new Throwable()).getStackTrace();
 
         // Once you have the trace you can pick out information you need.
         if (trace.length >= 2) {
@@ -47,20 +47,17 @@ public class StackTraceUtils {
     /**
      * Return the method who make the call.
      */
-    public static void logTrace(final Logger log) {
+    public static void logTrace(Logger log) {
         // The constructor for Throwable has a native function that fills the stack trace.
-        final StackTraceElement[] trace = new Throwable().getStackTrace();
+        StackTraceElement[] trace = (new Throwable()).getStackTrace();
 
         // Once you have the trace you can pick out information you need.
         if (trace.length >= 2) {
             for (int i = 2; i < trace.length; i++) {
                 if (trace[i].getClassName().startsWith("com.openkm")) {
-                    final StackTraceElement sse = trace[i];
-                    log.warn(
-                            "{} -> {} ({}:{})",
-                            new Object[] { sse.getClassName(),
-                                    sse.getMethodName(), sse.getFileName(),
-                                    sse.getLineNumber() });
+                    StackTraceElement sse = trace[i];
+                    log.warn("{} -> {} ({}:{})",
+                            new Object[] { sse.getClassName(), sse.getMethodName(), sse.getFileName(), sse.getLineNumber() });
                 }
             }
         }
@@ -71,8 +68,8 @@ public class StackTraceUtils {
      */
     public static String getTrace() {
         // The constructor for Throwable has a native function that fills the stack trace.
-        final StackTraceElement[] trace = new Throwable().getStackTrace();
-        final StringBuilder sb = new StringBuilder();
+        StackTraceElement[] trace = (new Throwable()).getStackTrace();
+        StringBuilder sb = new StringBuilder();
 
         // Once you have the trace you can pick out information you need.
         if (trace.length >= 2) {
@@ -90,9 +87,9 @@ public class StackTraceUtils {
     /**
      * Convert stack trace to String
      */
-    public static String toString(final Throwable t) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
+    public static String toString(Throwable t) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);
         IOUtils.closeQuietly(pw);
         IOUtils.closeQuietly(sw);

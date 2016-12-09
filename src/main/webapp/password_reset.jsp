@@ -1,10 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List"%>
-<%@ page import="java.util.Locale"%>
-<%@ page import="com.openkm.core.Config"%>
-<%@ page import="com.openkm.dao.LanguageDAO"%>
-<%@ page import="com.openkm.dao.bean.Language"%>
-<%@ page import="com.openkm.dao.HibernateUtil"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Locale" %>
+<%@ page import="com.openkm.core.Config" %>
+<%@ page import="com.openkm.dao.LanguageDAO" %>
+<%@ page import="com.openkm.dao.bean.Language" %>
+<%@ page import="com.openkm.dao.HibernateUtil" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -13,7 +13,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="Shortcut icon" href="<%=request.getContextPath() %>/favicon.ico" />
   <link rel="stylesheet" href="<%=request.getContextPath() %>/css/desktop.css" type="text/css" />
-  <title>N2 DMS Password Reset</title>
+  <title>OpenKM password reset</title>
 </head>
 <body onload="document.forms[0].elements[0].focus()">
   <div id="box">

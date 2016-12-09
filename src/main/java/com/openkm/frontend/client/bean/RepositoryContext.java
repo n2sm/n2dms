@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,13 +30,9 @@ package com.openkm.frontend.client.bean;
 public class RepositoryContext {
 
     private String contextTaxonomy = "";
-
     private String contextPersonal = "";
-
     private String contextTemplates = "";
-
     private String contextMail = "";
-
     private String contextTrash = "";
 
     public RepositoryContext() {
@@ -46,7 +42,7 @@ public class RepositoryContext {
         return contextTaxonomy;
     }
 
-    public void setContextTaxonomy(final String contextTaxonomy) {
+    public void setContextTaxonomy(String contextTaxonomy) {
         this.contextTaxonomy = contextTaxonomy;
     }
 
@@ -54,7 +50,7 @@ public class RepositoryContext {
         return contextPersonal;
     }
 
-    public void setContextPersonal(final String contextPersonal) {
+    public void setContextPersonal(String contextPersonal) {
         this.contextPersonal = contextPersonal;
     }
 
@@ -62,7 +58,7 @@ public class RepositoryContext {
         return contextTemplates;
     }
 
-    public void setContextTemplates(final String contextTemplates) {
+    public void setContextTemplates(String contextTemplates) {
         this.contextTemplates = contextTemplates;
     }
 
@@ -70,7 +66,7 @@ public class RepositoryContext {
         return contextMail;
     }
 
-    public void setContextMail(final String contextMail) {
+    public void setContextMail(String contextMail) {
         this.contextMail = contextMail;
     }
 
@@ -78,7 +74,7 @@ public class RepositoryContext {
         return contextTrash;
     }
 
-    public void setContextTrash(final String contextTrash) {
+    public void setContextTrash(String contextTrash) {
         this.contextTrash = contextTrash;
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -32,15 +32,15 @@ public class GeneralException extends Exception {
         super();
     }
 
-    public GeneralException(final String arg0) {
+    public GeneralException(String arg0) {
         super(arg0);
     }
 
-    public GeneralException(final String arg0, final Throwable arg1) {
+    public GeneralException(String arg0, Throwable arg1) {
         super(arg0, arg1);
     }
 
-    public GeneralException(final Throwable arg0) {
+    public GeneralException(Throwable arg0) {
         super(arg0);
     }
 }

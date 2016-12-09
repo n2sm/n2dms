@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -36,8 +36,7 @@ public class ColumnComparatorDouble implements Comparator<GWTObjectToOrder> {
         return INSTANCE;
     }
 
-    @Override
-    public int compare(final GWTObjectToOrder arg0, final GWTObjectToOrder arg1) {
+    public int compare(GWTObjectToOrder arg0, GWTObjectToOrder arg1) {
         return ((Double) arg0.getObject()).compareTo((Double) arg1.getObject());
     }
 }

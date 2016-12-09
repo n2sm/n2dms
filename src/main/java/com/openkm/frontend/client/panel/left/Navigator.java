@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,6 +30,7 @@ import com.openkm.frontend.client.util.Util;
 import com.openkm.frontend.client.widget.categories.CategoriesTree;
 import com.openkm.frontend.client.widget.foldertree.Status;
 import com.openkm.frontend.client.widget.mail.MailTree;
+import com.openkm.frontend.client.widget.metadata.MetadataTree;
 import com.openkm.frontend.client.widget.personal.PersonalTree;
 import com.openkm.frontend.client.widget.taxonomy.TaxonomyTree;
 import com.openkm.frontend.client.widget.template.TemplateTree;
@@ -45,55 +46,33 @@ import com.openkm.frontend.client.widget.trash.TrashTree;
 public class Navigator extends Composite {
 
     public ExtendedStackPanel stackPanel;
-
     public ExtendedScrollPanel scrollTaxonomyPanel;
-
     public ScrollPanel scrollCategoriesPanel;
-
+    public ScrollPanel scrollMetadataPanel;
     public ScrollPanel scrollThesaurusPanel;
-
     private ScrollPanel scrollTrashPanel;
-
     private ExtendedScrollPanel scrollTemplatePanel;
-
     private ExtendedScrollPanel scrollPersonalPanel;
-
     private ExtendedScrollPanel scrollMailPanel;
-
     public VerticalPanel verticalTaxonomyPanel;
-
     public VerticalPanel verticalCategoriesPanel;
-
+    public VerticalPanel verticalMetadataPanel;
     public VerticalPanel verticalThesaurusPanel;
-
     public VerticalPanel verticalTrashPanel;
-
     public VerticalPanel verticalTemplatePanel;
-
     public VerticalPanel verticalMyDocumentsPanel;
-
     public VerticalPanel verticalMailPanel;
-
     public TaxonomyTree taxonomyTree;
-
     public CategoriesTree categoriesTree;
-
+    public MetadataTree metadataTree;
     public ThesaurusTree thesaurusTree;
-
     public TemplateTree templateTree;
-
     public PersonalTree personalTree;
-
     public TrashTree trashTree;
-
     public MailTree mailTree;
-
     public Status status;
-
     private int width = 0;
-
     private int height = 0;
-
     private int skinExtrStackSize = 0;
 
     public Navigator() {
@@ -102,6 +81,8 @@ public class Navigator extends Composite {
         scrollTaxonomyPanel.setSize("100%", "100%");
         scrollCategoriesPanel = new ScrollPanel();
         scrollCategoriesPanel.setSize("100%", "100%");
+        scrollMetadataPanel = new ScrollPanel();
+        scrollMetadataPanel.setSize("100%", "100%");
         scrollThesaurusPanel = new ScrollPanel();
         scrollThesaurusPanel.setSize("100%", "100%");
         scrollTrashPanel = new ScrollPanel();
@@ -116,6 +97,8 @@ public class Navigator extends Composite {
         verticalTaxonomyPanel.setSize("100%", "100%");
         verticalCategoriesPanel = new VerticalPanel();
         verticalCategoriesPanel.setSize("100%", "100%");
+        verticalMetadataPanel = new VerticalPanel();
+        verticalMetadataPanel.setSize("100%", "100%");
         verticalThesaurusPanel = new VerticalPanel();
         verticalThesaurusPanel.setSize("100%", "100%");
         verticalTrashPanel = new VerticalPanel();
@@ -139,6 +122,8 @@ public class Navigator extends Composite {
         personalTree.setSize("100%", "100%");
         thesaurusTree = new ThesaurusTree();
         thesaurusTree.setSize("100%", "100%");
+        metadataTree = new MetadataTree();
+        metadataTree.setSize("100%", "100%");
         categoriesTree = new CategoriesTree();
         categoriesTree.setSize("100%", "100%");
         taxonomyTree = new TaxonomyTree();
@@ -148,6 +133,8 @@ public class Navigator extends Composite {
         scrollTaxonomyPanel.add(verticalTaxonomyPanel);
         verticalCategoriesPanel.add(categoriesTree);
         scrollCategoriesPanel.add(verticalCategoriesPanel);
+        verticalMetadataPanel.add(metadataTree);
+        scrollMetadataPanel.add(verticalMetadataPanel);
         verticalThesaurusPanel.add(thesaurusTree);
         scrollThesaurusPanel.add(verticalThesaurusPanel);
         verticalTrashPanel.add(trashTree);
@@ -160,6 +147,15 @@ public class Navigator extends Composite {
         verticalMailPanel.add(mailTree);
         scrollMailPanel.add(verticalMailPanel);
 
+        scrollTaxonomyPanel.setStyleName("okm-Background-White");
+        scrollCategoriesPanel.setStyleName("okm-Background-White");
+        scrollMetadataPanel.setStyleName("okm-Background-White");
+        scrollThesaurusPanel.setStyleName("okm-Background-White");
+        scrollTrashPanel.setStyleName("okm-Background-White");
+        scrollTemplatePanel.setStyleName("okm-Background-White");
+        scrollPersonalPanel.setStyleName("okm-Background-White");
+        scrollMailPanel.setStyleName("okm-Background-White");
+
         stackPanel.setStyleName("okm-StackPanel");
 
         initWidget(stackPanel);
@@ -171,47 +167,41 @@ public class Navigator extends Composite {
     public void langRefresh() {
         int count = 0;
         if (stackPanel.isTaxonomyVisible()) {
-            stackPanel.setStackText(count++, Util.createHeaderHTML(
-                    "img/icon/stackpanel/chart_organisation.gif",
-                    Main.i18n("leftpanel.label.taxonomy")), true);
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/chart_organisation.gif", Main.i18n("leftpanel.label.taxonomy")));
             taxonomyTree.langRefresh();
         }
         if (stackPanel.isCategoriesVisible()) {
-            stackPanel.setStackText(count++, Util.createHeaderHTML(
-                    "img/icon/stackpanel/table_key.gif",
-                    Main.i18n("leftpanel.label.categories")), true);
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/table_key.gif", Main.i18n("leftpanel.label.categories")));
             categoriesTree.langRefresh();
         }
+        if (stackPanel.isMetadataVisible()) {
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/metadata.png", Main.i18n("leftpanel.label.metadata")));
+            metadataTree.langRefresh();
+        }
         if (stackPanel.isThesaurusVisible()) {
-            stackPanel.setStackText(count++, Util.createHeaderHTML(
-                    "img/icon/stackpanel/book_open.gif",
-                    Main.i18n("leftpanel.label.thesaurus")), true);
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/book_open.gif", Main.i18n("leftpanel.label.thesaurus")));
             thesaurusTree.langRefresh();
         }
         if (stackPanel.isTemplatesVisible()) {
-            stackPanel.setStackText(count++, Util.createHeaderHTML(
-                    "img/icon/stackpanel/template.gif",
-                    Main.i18n("leftpanel.label.templates")), true);
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/template.gif", Main.i18n("leftpanel.label.templates")));
             templateTree.langRefresh();
         }
         if (stackPanel.isPersonalVisible()) {
-            stackPanel.setStackText(count++, Util.createHeaderHTML(
-                    "img/icon/stackpanel/personal.gif",
-                    Main.i18n("leftpanel.label.my.documents")), true);
+            stackPanel.setHeaderHTML(count++,
+                    Util.createHeaderHTML("img/icon/stackpanel/personal.gif", Main.i18n("leftpanel.label.my.documents")));
             personalTree.langRefresh();
         }
         if (stackPanel.isMailVisible()) {
-            stackPanel.setStackText(
-                    count++,
-                    Util.createHeaderHTML("img/icon/stackpanel/email.gif",
-                            Main.i18n("leftpanel.label.mail")), true);
+            stackPanel.setHeaderHTML(count++, Util.createHeaderHTML("img/icon/stackpanel/email.gif", Main.i18n("leftpanel.label.mail")));
             mailTree.langRefresh();
         }
         if (stackPanel.isTrashVisible()) {
-            stackPanel.setStackText(
-                    count++,
-                    Util.createHeaderHTML("img/icon/stackpanel/bin.gif",
-                            Main.i18n("leftpanel.label.trash")), true);
+            stackPanel.setHeaderHTML(count++, Util.createHeaderHTML("img/icon/stackpanel/bin.gif", Main.i18n("leftpanel.label.trash")));
             trashTree.langRefresh();
         }
     }
@@ -222,71 +212,49 @@ public class Navigator extends Composite {
      * @param width The widget width
      * @param height The widget height
      */
-    public void setSize(int width, final int height) {
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
-        final int hiddenStacks = stackPanel.getHiddenStacks();
-        stackPanel.setSize("" + width, "" + height);
+        int hiddenStacks = stackPanel.getHiddenStacks();
+        width = width - 2; // -2 caused by border
+        height = height - 2; // -2 caused by border
         // To prevent negative resizing
-        if (width < 2) {
-            width = 2;
+        if (width < 0) {
+            width = 0;
         }
-        // Substract 2 pixels for borders on stackPanel
+        if (height < 0) {
+            height = 0;
+        }
+        stackPanel.setPixelSize(width, height);
+        // Calculating scroll height
+        height = (height - ((UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks) * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+        // To prevent negative resizing
+        if (height < 0) {
+            height = 0;
+        }
         if (stackPanel.isTaxonomyVisible()) {
-            scrollTaxonomyPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollTaxonomyPanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isCategoriesVisible()) {
-            scrollCategoriesPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollCategoriesPanel.setSize("" + width + "px", "" + height + "px");
+        }
+        if (stackPanel.isMetadataVisible()) {
+            scrollMetadataPanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isThesaurusVisible()) {
-            scrollThesaurusPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollThesaurusPanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isTemplatesVisible()) {
-            scrollTemplatePanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollTemplatePanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isPersonalVisible()) {
-            scrollPersonalPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollPersonalPanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isMailVisible()) {
-            scrollMailPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollMailPanel.setSize("" + width + "px", "" + height + "px");
         }
         if (stackPanel.isTrashVisible()) {
-            scrollTrashPanel
-                    .setSize(
-                            "" + (width - 2),
-                            ""
-                                    + (height - 2 - (UIDesktopConstants.NUMBER_OF_STACKS - hiddenStacks)
-                                            * (UIDesktopConstants.STACK_HEIGHT + skinExtrStackSize)));
+            scrollTrashPanel.setSize("" + width + "px", "" + height + "px");
         }
     }
 
@@ -302,6 +270,13 @@ public class Navigator extends Composite {
      */
     public void showCategories() {
         stackPanel.showCategories();
+    }
+
+    /**
+     * showMetadata
+     */
+    public void showMetadata() {
+        stackPanel.showMetadata();
     }
 
     /**
@@ -347,42 +322,42 @@ public class Navigator extends Composite {
             stackPanel.remove(0);
         }
         if (stackPanel.isTaxonomyVisible()) {
-            stackPanel.add(scrollTaxonomyPanel, Util.createHeaderHTML(
-                    "img/icon/stackpanel/chart_organisation.gif",
-                    Main.i18n("leftpanel.label.taxonomy")), true);
+            stackPanel.add(scrollTaxonomyPanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/chart_organisation.gif", Main.i18n("leftpanel.label.taxonomy")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
         }
         if (stackPanel.isCategoriesVisible()) {
-            stackPanel.add(scrollCategoriesPanel, Util.createHeaderHTML(
-                    "img/icon/stackpanel/table_key.gif",
-                    Main.i18n("leftpanel.label.categories")), true);
+            stackPanel.add(scrollCategoriesPanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/table_key.gif", Main.i18n("leftpanel.label.categories")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
         }
-
+        if (stackPanel.isMetadataVisible()) {
+            stackPanel.add(scrollMetadataPanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/metadata.png", Main.i18n("leftpanel.label.metadata")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
+        }
         if (stackPanel.isThesaurusVisible()) {
-            stackPanel.add(scrollThesaurusPanel, Util.createHeaderHTML(
-                    "img/icon/stackpanel/book_open.gif",
-                    Main.i18n("leftpanel.label.thesaurus")), true);
+            stackPanel.add(scrollThesaurusPanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/book_open.gif", Main.i18n("leftpanel.label.thesaurus")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
         }
         if (stackPanel.isTemplatesVisible()) {
-            stackPanel.add(scrollTemplatePanel, Util.createHeaderHTML(
-                    "img/icon/stackpanel/template.gif",
-                    Main.i18n("leftpanel.label.templates")), true);
+            stackPanel.add(scrollTemplatePanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/template.gif", Main.i18n("leftpanel.label.templates")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
         }
         if (stackPanel.isPersonalVisible()) {
-            stackPanel.add(scrollPersonalPanel, Util.createHeaderHTML(
-                    "img/icon/stackpanel/personal.gif",
-                    Main.i18n("leftpanel.label.my.documents")), true);
+            stackPanel.add(scrollPersonalPanel,
+                    Util.createHeaderHTML("img/icon/stackpanel/personal.gif", Main.i18n("leftpanel.label.my.documents")), true,
+                    UIDesktopConstants.STACK_HEIGHT);
         }
         if (stackPanel.isMailVisible()) {
-            stackPanel.add(
-                    scrollMailPanel,
-                    Util.createHeaderHTML("img/icon/stackpanel/email.gif",
-                            Main.i18n("leftpanel.label.mail")), true);
+            stackPanel.add(scrollMailPanel, Util.createHeaderHTML("img/icon/stackpanel/email.gif", Main.i18n("leftpanel.label.mail")),
+                    true, UIDesktopConstants.STACK_HEIGHT);
         }
         if (stackPanel.isTrashVisible()) {
-            stackPanel.add(
-                    scrollTrashPanel,
-                    Util.createHeaderHTML("img/icon/stackpanel/bin.gif",
-                            Main.i18n("leftpanel.label.trash")), true);
+            stackPanel.add(scrollTrashPanel, Util.createHeaderHTML("img/icon/stackpanel/bin.gif", Main.i18n("leftpanel.label.trash")),
+                    true, UIDesktopConstants.STACK_HEIGHT);
         }
 
         stackPanel.setStartUpFinished();
@@ -411,7 +386,7 @@ public class Navigator extends Composite {
     /**
      * @param skinExtrStackSize
      */
-    public void setSkinExtrStackSize(final int skinExtrStackSize) {
+    public void setSkinExtrStackSize(int skinExtrStackSize) {
         this.skinExtrStackSize = skinExtrStackSize;
     }
 }

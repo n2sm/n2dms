@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -29,18 +29,11 @@ package com.openkm.frontend.client.constants.ui;
  */
 public class UIDashboardConstants {
     public static final int DASHBOARD_NONE = -1;
-
     public static final int DASHBOARD_USER = 1;
-
     public static final int DASHBOARD_MAIL = 2;
-
     public static final int DASHBOARD_NEWS = 3;
-
     public static final int DASHBOARD_GENERAL = 4;
-
     public static final int DASHBOARD_WORKFLOW = 5;
-
     public static final int DASHBOARD_KEYMAP = 6;
-
     public static final int DASHBOARD_EXTENSION = 7;
 }

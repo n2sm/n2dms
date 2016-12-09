@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -23,6 +23,7 @@ package com.openkm.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -41,9 +42,7 @@ import com.openkm.util.MailUtils;
 
 public class UserMailImporter extends TimerTask {
     private static Logger log = LoggerFactory.getLogger(UserMailImporter.class);
-
     private static volatile boolean running = false;
-
     private List<String> exceptionMessages = new ArrayList<String>();
 
     public boolean isRunning() {
@@ -67,7 +66,7 @@ public class UserMailImporter extends TimerTask {
         runAs(systemToken);
     }
 
-    public void runAs(final String token) {
+    public void runAs(String token) {
         if (running) {
             log.warn("*** User mail importer already running ***");
         } else {
@@ -80,59 +79,56 @@ public class UserMailImporter extends TimerTask {
                     exceptionMessages.add("Warning: System in read-only mode");
                     log.warn("*** System in read-only mode ***");
                 } else {
-                    final Collection<String> users = OKMAuth.getInstance()
-                            .getUsers(token);
+                    Collection<String> users = OKMAuth.getInstance().getUsers(token);
 
-                    for (final String user : users) {
-                        final List<MailAccount> mailAccounts = MailAccountDAO
-                                .findByUser(user, true);
+                    for (Iterator<String> usrIt = users.iterator(); usrIt.hasNext();) {
+                        String user = usrIt.next();
+                        List<MailAccount> mailAccounts = MailAccountDAO.findByUser(user, true);
 
-                        for (final MailAccount ma : mailAccounts) {
+                        for (Iterator<MailAccount> maIt = mailAccounts.iterator(); maIt.hasNext();) {
+                            MailAccount ma = maIt.next();
+
                             if (Config.SYSTEM_READONLY) {
-                                exceptionMessages
-                                        .add("Warning: System in read-only mode");
+                                exceptionMessages.add("Warning: System in read-only mode");
                                 log.warn("*** System in read-only mode ***");
                             } else {
-                                final String exceptionMessage = MailUtils
-                                        .importMessages(token, ma);
+                                String exceptionMessage = MailUtils.importMessages(token, ma);
 
                                 if (exceptionMessage != null) {
-                                    exceptionMessages.add("Id: " + ma.getId()
-                                            + ", User: " + ma.getUser()
-                                            + ", Error: " + exceptionMessage);
+                                    exceptionMessages.add("Id: " + ma.getId() + ", User: " + ma.getUser() + ", Error: " + exceptionMessage);
                                 }
                             }
                         }
                     }
                 }
-            } catch (final RepositoryException e) {
+            } catch (RepositoryException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final DatabaseException e) {
+            } catch (DatabaseException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final PathNotFoundException e) {
+            } catch (PathNotFoundException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final ItemExistsException e) {
+            } catch (ItemExistsException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final VirusDetectedException e) {
+            } catch (VirusDetectedException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final AccessDeniedException e) {
+            } catch (AccessDeniedException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final PrincipalAdapterException e) {
+            } catch (PrincipalAdapterException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final UserQuotaExceededException e) {
+            } catch (UserQuotaExceededException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final ExtensionException e) {
+            } catch (ExtensionException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
-            } catch (final AutomationException e) {
+            } catch (AutomationException e) {
                 log.error(e.getMessage(), e);
                 exceptionMessages.add(e.getMessage());
             } finally {

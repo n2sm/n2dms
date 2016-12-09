@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,33 +44,27 @@ import com.openkm.core.Config;
 import com.openkm.util.EnvironmentDetector;
 
 public class ContextSubjectFilter implements Filter {
-    private static Logger log = LoggerFactory
-            .getLogger(ContextSubjectFilter.class);
-
+    private static Logger log = LoggerFactory.getLogger(ContextSubjectFilter.class);
     private static final String SESSION_AUTH_SUBJECT = "session.auth.subject";
 
     @Override
-    public void init(final FilterConfig cfg) throws ServletException {
+    public void init(FilterConfig cfg) throws ServletException {
         log.info("Init filter");
     }
 
     @Override
-    public void doFilter(final ServletRequest request,
-            final ServletResponse response, final FilterChain chain) {
-        final HttpServletRequest httpRequest = (HttpServletRequest) request;
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         try {
-            if (EnvironmentDetector.isServerTomcat()
-                    && httpRequest.getRemoteUser() != null) {
-                final HttpSession hs = httpRequest.getSession(false);
+            if (EnvironmentDetector.isServerTomcat() && httpRequest.getRemoteUser() != null) {
+                HttpSession hs = (HttpSession) (httpRequest).getSession(false);
                 Subject sub = (Subject) hs.getAttribute(SESSION_AUTH_SUBJECT);
 
                 if (sub == null) {
                     log.info("Login and put Subject in session");
-                    final HttpAuthCallbackHandler hach = new HttpAuthCallbackHandler(
-                            httpRequest);
-                    final LoginContext lc = new LoginContext(Config.CONTEXT,
-                            new Subject(), hach);
+                    HttpAuthCallbackHandler hach = new HttpAuthCallbackHandler(httpRequest);
+                    LoginContext lc = new LoginContext(Config.CONTEXT, new Subject(), hach);
                     lc.login();
                     sub = lc.getSubject();
                     hs.setAttribute(SESSION_AUTH_SUBJECT, sub);
@@ -78,17 +72,14 @@ public class ContextSubjectFilter implements Filter {
                 }
 
                 Subject.doAs(sub, new PrivilegedAction<Object>() {
-                    @Override
                     public Object run() {
                         try {
-                            log.debug("AccessController: {}",
-                                    AccessController.getContext());
-                            log.debug("Subject: {}", Subject
-                                    .getSubject(AccessController.getContext()));
+                            log.debug("AccessController: {}", AccessController.getContext());
+                            log.debug("Subject: {}", Subject.getSubject(AccessController.getContext()));
                             chain.doFilter(request, response);
-                        } catch (final IOException e) {
+                        } catch (IOException e) {
                             e.printStackTrace();
-                        } catch (final ServletException e) {
+                        } catch (ServletException e) {
                             e.printStackTrace();
                         }
 
@@ -98,13 +89,13 @@ public class ContextSubjectFilter implements Filter {
             } else {
                 chain.doFilter(request, response);
             }
-        } catch (final LoginException e) {
+        } catch (LoginException e) {
             log.error(e.getMessage(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-        } catch (final ServletException e) {
+        } catch (ServletException e) {
             log.error(e.getMessage(), e);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
             //LoginContextHolder.set(null);

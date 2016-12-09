@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class CultureComparator<T> implements Comparator<T> {
 
-    private static Logger log = LoggerFactory
-            .getLogger(CultureComparator.class);
-
+    private static Logger log = LoggerFactory.getLogger(CultureComparator.class);
     protected static final String DEFAULT_LOCALE = "en";
 
     // Collator used for comparing values according to the locale
@@ -28,7 +26,8 @@ public abstract class CultureComparator<T> implements Comparator<T> {
 
     // all available comparators. First key is the name of comparator's class, second is the locale
     // e.g. en-GB, cs-CZ, etc.
-    private static HashMap<String, HashMap<String, CultureComparator<?>>> comparators = new HashMap<String, HashMap<String, CultureComparator<?>>>();
+    private static HashMap<String, HashMap<String, CultureComparator<?>>> comparators =
+            new HashMap<String, HashMap<String, CultureComparator<?>>>();
 
     // objet for synchronized access
     private static final Object SYNC_LOCK = new Object();
@@ -37,26 +36,21 @@ public abstract class CultureComparator<T> implements Comparator<T> {
      * Protected construcotr that creates collator according to the locale.
      * @param sLocale locale
      */
-    protected CultureComparator(final String sLocale) {
+    protected CultureComparator(String sLocale) {
         try {
             if (sLocale == null) {
                 log.debug("no locale defined, using default collator");
                 collator = Collator.getInstance();
                 return;
             }
-            final String[] split = sLocale.split("-");
-            final Locale locale = split.length > 1 ? new Locale(split[0],
-                    split[1]) : new Locale(split[0]);
+            String[] split = sLocale.split("-");
+            Locale locale = split.length > 1 ? new Locale(split[0], split[1]) : new Locale(split[0]);
 
             collator = Collator.getInstance(locale);
-            log.debug(
-                    "created new collator (locale={}, lang={}, country={}",
-                    new Object[] { sLocale, locale.getLanguage(),
-                            locale.getCountry() });
-        } catch (final Exception e) {
-            log.warn(String.format(
-                    "Unable to create collator for %1$s, creating default",
-                    sLocale), e);
+            log.debug("created new collator (locale={}, lang={}, country={}",
+                    new Object[] { sLocale, locale.getLanguage(), locale.getCountry() });
+        } catch (Exception e) {
+            log.warn(String.format("Unable to create collator for %1$s, creating default", sLocale), e);
             collator = Collator.getInstance();
         }
     }
@@ -64,7 +58,6 @@ public abstract class CultureComparator<T> implements Comparator<T> {
     /**
      * Comparing method.
      */
-    @Override
     public abstract int compare(T arg0, T arg1);
 
     /**
@@ -77,9 +70,7 @@ public abstract class CultureComparator<T> implements Comparator<T> {
      * @return CultureComparator
      * @throws Exception
      */
-    private static CultureComparator<?> getComparator(final String className,
-            final String locale,
-            final HashMap<String, CultureComparator<?>> hashMap)
+    private static CultureComparator<?> getComparator(String className, String locale, HashMap<String, CultureComparator<?>> hashMap)
             throws Exception {
         // get required comparator
         CultureComparator<?> comparator = hashMap.get(className);
@@ -90,10 +81,8 @@ public abstract class CultureComparator<T> implements Comparator<T> {
         // comparator probably does not exist, create a new one
         synchronized (SYNC_LOCK) {
             if (!hashMap.containsKey(className)) {
-                final Class<?> clazz = Class.forName(className);
-                comparator = (CultureComparator<?>) clazz
-                        .getDeclaredConstructor(String.class).newInstance(
-                                locale);
+                Class<?> clazz = Class.forName(className);
+                comparator = (CultureComparator<?>) clazz.getDeclaredConstructor(String.class).newInstance(locale);
                 hashMap.put(className, comparator);
             } else {
                 comparator = hashMap.get(className);
@@ -112,10 +101,9 @@ public abstract class CultureComparator<T> implements Comparator<T> {
      * @return CultureComparator
      * @throws Exception
      */
-    protected static CultureComparator<?> getInstance(final Class<?> clazz,
-            final String locale) throws Exception {
+    protected static CultureComparator<?> getInstance(Class<?> clazz, String locale) throws Exception {
         CultureComparator<?> comparator;
-        final String className = clazz.getName();
+        String className = clazz.getName();
 
         // get hashmap of comparators
         HashMap<String, CultureComparator<?>> hashMap = comparators.get(locale);
@@ -129,9 +117,7 @@ public abstract class CultureComparator<T> implements Comparator<T> {
         synchronized (SYNC_LOCK) {
             if (!comparators.containsKey(locale)) {
                 hashMap = new HashMap<String, CultureComparator<?>>();
-                comparator = (CultureComparator<?>) clazz
-                        .getDeclaredConstructor(String.class).newInstance(
-                                locale);
+                comparator = (CultureComparator<?>) clazz.getDeclaredConstructor(String.class).newInstance(locale);
                 hashMap.put(className, comparator);
                 comparators.put(locale, hashMap);
             } else {

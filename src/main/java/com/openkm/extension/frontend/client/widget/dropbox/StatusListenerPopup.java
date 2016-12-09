@@ -1,6 +1,6 @@
 /**
  * OpenKM, Open Document Management System (http://www.openkm.com)
- * Copyright (c) 2006-2013 Paco Avila & Josep Llort
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
  * 
  * No bytes were intentionally harmed during the development of this application.
  * 
@@ -27,10 +27,12 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.openkm.extension.frontend.client.bean.GWTDropboxStatusListener;
+import com.openkm.frontend.client.bean.GWTFolder;
+import com.openkm.frontend.client.bean.GWTPermission;
 import com.openkm.frontend.client.extension.comunicator.GeneralComunicator;
 import com.openkm.frontend.client.extension.comunicator.UtilComunicator;
 import com.openkm.frontend.client.util.Util;
@@ -42,15 +44,11 @@ import com.openkm.frontend.client.util.Util;
  */
 public class StatusListenerPopup extends DialogBox {
     public final static int ACTION_IMPORT = 0;
-
     public final static int ACTION_EXPORT = 1;
 
     private ScrollPanel scrollPanel;
-
     private VerticalPanel vPanel;
-
     private FlexTable table;
-
     public Button closeButton;
 
     public StatusListenerPopup() {
@@ -72,26 +70,23 @@ public class StatusListenerPopup extends DialogBox {
         scrollPanel.add(table);
 
         // closeButton
-        closeButton = new Button(
-                GeneralComunicator.i18nExtension("button.close"));
+        closeButton = new Button(GeneralComunicator.i18nExtension("button.close"));
         closeButton.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
         closeButton.setStyleName("okm-YesButton");
 
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
         vPanel.add(scrollPanel);
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
         vPanel.add(closeButton);
-        vPanel.add(UtilComunicator.vSpace("5"));
+        vPanel.add(UtilComunicator.vSpace("5px"));
 
-        vPanel.setCellHorizontalAlignment(scrollPanel,
-                HasHorizontalAlignment.ALIGN_CENTER);
-        vPanel.setCellHorizontalAlignment(closeButton,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(scrollPanel, VerticalPanel.ALIGN_CENTER);
+        vPanel.setCellHorizontalAlignment(closeButton, VerticalPanel.ALIGN_CENTER);
 
         setWidget(vPanel);
     }
@@ -99,15 +94,13 @@ public class StatusListenerPopup extends DialogBox {
     /**
      * reset
      */
-    public void reset(final int action) {
+    public void reset(int action) {
         switch (action) {
         case ACTION_IMPORT:
-            setText(GeneralComunicator
-                    .i18nExtension("dropbox.status.listener.import.title"));
+            setText(GeneralComunicator.i18nExtension("dropbox.status.listener.import.title"));
             break;
         case ACTION_EXPORT:
-            setText(GeneralComunicator
-                    .i18nExtension("dropbox.status.listener.export.title"));
+            setText(GeneralComunicator.i18nExtension("dropbox.status.listener.export.title"));
             break;
         }
 
@@ -118,32 +111,25 @@ public class StatusListenerPopup extends DialogBox {
     /**
      * add
      */
-    public void add(final GWTDropboxStatusListener dsl) {
-        final int row = table.getRowCount();
+    public void add(GWTDropboxStatusListener dsl) {
+        int row = table.getRowCount();
 
         if (dsl.getFolder() != null) {
-            if (dsl.getFolder().isHasChildren()) {
-                table.setHTML(row, 0,
-                        Util.imageItemHTML("img/menuitem_childs.gif"));
-            } else {
-                table.setHTML(row, 0,
-                        Util.imageItemHTML("img/menuitem_empty.gif"));
-            }
-
-            final HTML name = new HTML(dsl.getFolder().getPath());
+            GWTFolder folder = new GWTFolder();
+            folder.setPermissions(GWTPermission.READ | GWTPermission.WRITE);
+            folder.setHasChildren(dsl.getFolder().isHasChildren());
+            table.setHTML(row, 0, Util.imageItemHTML(GeneralComunicator.getFolderIcon(folder)));
+            HTML name = new HTML(dsl.getFolder().getPath());
             table.setWidget(row, 1, name);
-            table.getFlexCellFormatter().setWidth(row, 0, "20");
-            table.getFlexCellFormatter().setHorizontalAlignment(row, 0,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            table.getFlexCellFormatter().setWidth(row, 0, "20px");
+            table.getFlexCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
             scrollPanel.ensureVisible(name);
         } else if (dsl.getDocument() != null) {
-            table.setHTML(row, 0,
-                    Util.mimeImageHTML(dsl.getDocument().getMimeType()));
-            final HTML name = new HTML(dsl.getDocument().getPath());
+            table.setHTML(row, 0, Util.mimeImageHTML(dsl.getDocument().getMimeType()));
+            HTML name = new HTML(dsl.getDocument().getPath());
             table.setWidget(row, 1, name);
-            table.getFlexCellFormatter().setWidth(row, 0, "20");
-            table.getFlexCellFormatter().setHorizontalAlignment(row, 0,
-                    HasHorizontalAlignment.ALIGN_CENTER);
+            table.getFlexCellFormatter().setWidth(row, 0, "20px");
+            table.getFlexCellFormatter().setHorizontalAlignment(row, 0, HasAlignment.ALIGN_CENTER);
             scrollPanel.ensureVisible(name);
         }
     }

@@ -32,23 +32,22 @@ public class ErrorMsgLabelTextAction extends ValidationAction<Object> {
 
     private Label errorLabel;
 
-    public ErrorMsgLabelTextAction(final Label errorLabel) {
+    public ErrorMsgLabelTextAction(Label errorLabel) {
         errorLabel.setVisible(false);
         this.errorLabel = errorLabel;
     }
 
     @Override
-    public void invoke(final ValidationResult result, final Object notUsed) {
-        if (result == null) {
+    public void invoke(ValidationResult result, Object notUsed) {
+        if (result == null)
             return;
-        }
 
         errorLabel.setVisible(true);
 
     }
 
     @Override
-    public void reset(final UIObject obj) {
+    public void reset(UIObject obj) {
         reset();
     }
 

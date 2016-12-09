@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,15 +33,14 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RichTextArea;
-import com.google.gwt.user.client.ui.RichTextArea.Formatter;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.RichTextArea.Formatter;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.util.OKMBundleResources;
 
@@ -52,40 +51,24 @@ import com.openkm.frontend.client.util.OKMBundleResources;
 public class RichTextToolbar extends Composite implements RichTextAction {
     //HTML Related (styles made by SPAN and DIV)
     private static final String HTML_STYLE_CLOSE_SPAN = "</span>";
-
     private static final String HTML_STYLE_CLOSE_DIV = "</div>";
-
     private static final String HTML_STYLE_OPEN_BOLD = "<span style=\"font-weight: bold;\">";
-
     private static final String HTML_STYLE_OPEN_ITALIC = "<span style=\"font-weight: italic;\">";
-
     private static final String HTML_STYLE_OPEN_UNDERLINE = "<span style=\"font-weight: underline;\">";
-
     private static final String HTML_STYLE_OPEN_LINETHROUGH = "<span style=\"font-weight: line-through;\">";
-
     private static final String HTML_STYLE_OPEN_ALIGNLEFT = "<div style=\"text-align: left;\">";
-
     private static final String HTML_STYLE_OPEN_ALIGNCENTER = "<div style=\"text-align: center;\">";
-
     private static final String HTML_STYLE_OPEN_ALIGNRIGHT = "<div style=\"text-align: right;\">";
-
     private static final String HTML_STYLE_OPEN_INDENTRIGHT = "<div style=\"margin-left: 40px;\">";
 
     //HTML Related (styles made by custom HTML-Tags)
     private static final String HTML_STYLE_OPEN_SUBSCRIPT = "<sub>";
-
     private static final String HTML_STYLE_CLOSE_SUBSCRIPT = "</sub>";
-
     private static final String HTML_STYLE_OPEN_SUPERSCRIPT = "<sup>";
-
     private static final String HTML_STYLE_CLOSE_SUPERSCRIPT = "</sup>";
-
     private static final String HTML_STYLE_OPEN_ORDERLIST = "<ol><li>";
-
     private static final String HTML_STYLE_CLOSE_ORDERLIST = "</ol></li>";
-
     private static final String HTML_STYLE_OPEN_UNORDERLIST = "<ul><li>";
-
     private static final String HTML_STYLE_CLOSE_UNORDERLIST = "</ul></li>";
 
     //HTML Related (styles without closing Tag)
@@ -94,14 +77,11 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     /** Private Variables **/
     //The main (Vertical)-Panel and the two inner (Horizontal)-Panels
     private VerticalPanel outer;
-
     private HorizontalPanel topPanel;
-
     private HorizontalPanel bottomPanel;
 
     //The RichTextArea this Toolbar referes to and the Interfaces to access the RichTextArea
     private RichTextArea styleText;
-
     private Formatter styleTextFormatter;
 
     //We use an internal class of the ClickHandler and the KeyUpHandler to be private to others with these events
@@ -109,47 +89,27 @@ public class RichTextToolbar extends Composite implements RichTextAction {
 
     //The Buttons of the Menubar
     private ToggleButton bold;
-
     private ToggleButton italic;
-
     private ToggleButton underline;
-
     private ToggleButton stroke;
-
     private ToggleButton subscript;
-
     private ToggleButton superscript;
-
     private PushButton alignleft;
-
     private PushButton alignmiddle;
-
     private PushButton justify;
-
     private PushButton alignright;
-
     private PushButton orderlist;
-
     private PushButton unorderlist;
-
     private PushButton indentleft;
-
     private PushButton indentright;
-
     private PushButton generatelink;
-
     private PushButton breaklink;
-
     private PushButton insertline;
-
     private PushButton insertimage;
-
     private PushButton removeformatting;
-
     private ToggleButton texthtml;
 
     private ListBox fontList;
-
     private ListBox colorlist;
 
     RichTextPopup richTextPopup;
@@ -171,8 +131,8 @@ public class RichTextToolbar extends Composite implements RichTextAction {
         styleTextFormatter = styleText.getFormatter();
 
         //Set some graphical options, so this toolbar looks how we like it.
-        topPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        bottomPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+        topPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_LEFT);
+        bottomPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_LEFT);
 
         //Add the two inner panels to the main panel
         outer.add(topPanel);
@@ -190,7 +150,7 @@ public class RichTextToolbar extends Composite implements RichTextAction {
         styleText.addClickHandler(evHandler);
 
         // Changing styles
-        final IFrameElement e = IFrameElement.as(richtext.getElement());
+        IFrameElement e = IFrameElement.as(richtext.getElement());
         e.setSrc("iframe_richtext.html");
         e.setFrameBorder(0); // removing frame border
 
@@ -204,10 +164,8 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     }
 
     /** Click Handler of the Toolbar **/
-    private class EventHandler implements ClickHandler, KeyUpHandler,
-            ChangeHandler {
-        @Override
-        public void onClick(final ClickEvent event) {
+    private class EventHandler implements ClickHandler, KeyUpHandler, ChangeHandler {
+        public void onClick(ClickEvent event) {
             if (event.getSource().equals(bold)) {
                 if (isHTMLMode()) {
                     changeHtmlStyle(HTML_STYLE_OPEN_BOLD, HTML_STYLE_CLOSE_SPAN);
@@ -216,103 +174,85 @@ public class RichTextToolbar extends Composite implements RichTextAction {
                 }
             } else if (event.getSource().equals(italic)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ITALIC,
-                            HTML_STYLE_CLOSE_SPAN);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ITALIC, HTML_STYLE_CLOSE_SPAN);
                 } else {
                     styleTextFormatter.toggleItalic();
                 }
             } else if (event.getSource().equals(underline)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_UNDERLINE,
-                            HTML_STYLE_CLOSE_SPAN);
+                    changeHtmlStyle(HTML_STYLE_OPEN_UNDERLINE, HTML_STYLE_CLOSE_SPAN);
                 } else {
                     styleTextFormatter.toggleUnderline();
                 }
             } else if (event.getSource().equals(stroke)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_LINETHROUGH,
-                            HTML_STYLE_CLOSE_SPAN);
+                    changeHtmlStyle(HTML_STYLE_OPEN_LINETHROUGH, HTML_STYLE_CLOSE_SPAN);
                 } else {
                     styleTextFormatter.toggleStrikethrough();
                 }
             } else if (event.getSource().equals(subscript)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_SUBSCRIPT,
-                            HTML_STYLE_CLOSE_SUBSCRIPT);
+                    changeHtmlStyle(HTML_STYLE_OPEN_SUBSCRIPT, HTML_STYLE_CLOSE_SUBSCRIPT);
                 } else {
                     styleTextFormatter.toggleSubscript();
                 }
             } else if (event.getSource().equals(superscript)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_SUPERSCRIPT,
-                            HTML_STYLE_CLOSE_SUPERSCRIPT);
+                    changeHtmlStyle(HTML_STYLE_OPEN_SUPERSCRIPT, HTML_STYLE_CLOSE_SUPERSCRIPT);
                 } else {
                     styleTextFormatter.toggleSuperscript();
                 }
             } else if (event.getSource().equals(alignleft)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNLEFT,
-                            HTML_STYLE_CLOSE_DIV);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNLEFT, HTML_STYLE_CLOSE_DIV);
                 } else {
-                    styleTextFormatter
-                            .setJustification(RichTextArea.Justification.LEFT);
+                    styleTextFormatter.setJustification(RichTextArea.Justification.LEFT);
                 }
             } else if (event.getSource().equals(alignmiddle)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNCENTER,
-                            HTML_STYLE_CLOSE_DIV);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNCENTER, HTML_STYLE_CLOSE_DIV);
                 } else {
-                    styleTextFormatter
-                            .setJustification(RichTextArea.Justification.CENTER);
+                    styleTextFormatter.setJustification(RichTextArea.Justification.CENTER);
                 }
             } else if (event.getSource().equals(justify)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNCENTER,
-                            HTML_STYLE_CLOSE_DIV);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNCENTER, HTML_STYLE_CLOSE_DIV);
                 } else {
-                    styleTextFormatter
-                            .setJustification(RichTextArea.Justification.FULL);
+                    styleTextFormatter.setJustification(RichTextArea.Justification.FULL);
                 }
             } else if (event.getSource().equals(alignright)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNRIGHT,
-                            HTML_STYLE_CLOSE_DIV);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ALIGNRIGHT, HTML_STYLE_CLOSE_DIV);
                 } else {
-                    styleTextFormatter
-                            .setJustification(RichTextArea.Justification.RIGHT);
+                    styleTextFormatter.setJustification(RichTextArea.Justification.RIGHT);
                 }
             } else if (event.getSource().equals(orderlist)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_ORDERLIST,
-                            HTML_STYLE_CLOSE_ORDERLIST);
+                    changeHtmlStyle(HTML_STYLE_OPEN_ORDERLIST, HTML_STYLE_CLOSE_ORDERLIST);
                 } else {
                     styleTextFormatter.insertOrderedList();
                 }
             } else if (event.getSource().equals(unorderlist)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_UNORDERLIST,
-                            HTML_STYLE_CLOSE_UNORDERLIST);
+                    changeHtmlStyle(HTML_STYLE_OPEN_UNORDERLIST, HTML_STYLE_CLOSE_UNORDERLIST);
                 } else {
                     styleTextFormatter.insertUnorderedList();
                 }
             } else if (event.getSource().equals(indentright)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(HTML_STYLE_OPEN_INDENTRIGHT,
-                            HTML_STYLE_CLOSE_DIV);
+                    changeHtmlStyle(HTML_STYLE_OPEN_INDENTRIGHT, HTML_STYLE_CLOSE_DIV);
                 } else {
                     styleTextFormatter.rightIndent();
                 }
             } else if (event.getSource().equals(indentleft)) {
-                if (isHTMLMode()) {
-                } else {
+                if (isHTMLMode()) {} else {
                     styleTextFormatter.leftIndent();
                 }
             } else if (event.getSource().equals(generatelink)) {
                 richTextPopup.setAction(RichTextPopup.ACTION_ENTER_URL);
                 richTextPopup.show();
             } else if (event.getSource().equals(breaklink)) {
-                if (isHTMLMode()) {
-                } else {
+                if (isHTMLMode()) {} else {
                     styleTextFormatter.removeLink();
                 }
             } else if (event.getSource().equals(insertimage)) {
@@ -325,8 +265,7 @@ public class RichTextToolbar extends Composite implements RichTextAction {
                     styleTextFormatter.insertHorizontalRule();
                 }
             } else if (event.getSource().equals(removeformatting)) {
-                if (isHTMLMode()) {
-                } else {
+                if (isHTMLMode()) {} else {
                     styleTextFormatter.removeFormat();
                 }
             } else if (event.getSource().equals(texthtml)) {
@@ -341,34 +280,24 @@ public class RichTextToolbar extends Composite implements RichTextAction {
             updateStatus();
         }
 
-        @Override
-        public void onKeyUp(final KeyUpEvent event) {
+        public void onKeyUp(KeyUpEvent event) {
             updateStatus();
         }
 
-        @Override
-        public void onChange(final ChangeEvent event) {
+        public void onChange(ChangeEvent event) {
             if (event.getSource().equals(fontList)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(
-                            "<span style=\"font-family: "
-                                    + fontList.getValue(fontList
-                                            .getSelectedIndex()) + ";\">",
+                    changeHtmlStyle("<span style=\"font-family: " + fontList.getValue(fontList.getSelectedIndex()) + ";\">",
                             HTML_STYLE_CLOSE_SPAN);
                 } else {
-                    styleTextFormatter.setFontName(fontList.getValue(fontList
-                            .getSelectedIndex()));
+                    styleTextFormatter.setFontName(fontList.getValue(fontList.getSelectedIndex()));
                 }
             } else if (event.getSource().equals(colorlist)) {
                 if (isHTMLMode()) {
-                    changeHtmlStyle(
-                            "<span style=\"color: "
-                                    + colorlist.getValue(colorlist
-                                            .getSelectedIndex()) + ";\">",
+                    changeHtmlStyle("<span style=\"color: " + colorlist.getValue(colorlist.getSelectedIndex()) + ";\">",
                             HTML_STYLE_CLOSE_SPAN);
                 } else {
-                    styleTextFormatter.setForeColor(colorlist
-                            .getValue(colorlist.getSelectedIndex()));
+                    styleTextFormatter.setForeColor(colorlist.getValue(colorlist.getSelectedIndex()));
                 }
             }
         }
@@ -401,13 +330,12 @@ public class RichTextToolbar extends Composite implements RichTextAction {
                                                                   }-*/;
 
     /** Method called to toggle the style in HTML-Mode **/
-    private void changeHtmlStyle(final String startTag, final String stopTag) {
-        final JsArrayString tx = getSelection(styleText.getElement());
-        final String txbuffer = styleText.getText();
-        final Integer startpos = Integer.parseInt(tx.get(1));
-        final String selectedText = tx.get(0);
-        styleText.setText(txbuffer.substring(0, startpos) + startTag
-                + selectedText + stopTag
+    private void changeHtmlStyle(String startTag, String stopTag) {
+        JsArrayString tx = getSelection(styleText.getElement());
+        String txbuffer = styleText.getText();
+        Integer startpos = Integer.parseInt(tx.get(1));
+        String selectedText = tx.get(0);
+        styleText.setText(txbuffer.substring(0, startpos) + startTag + selectedText + stopTag
                 + txbuffer.substring(startpos + selectedText.length()));
     }
 
@@ -441,71 +369,33 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     /** Initialize the options on the toolbar **/
     private void buildTools() {
         //Init the TOP Panel forst
-        topPanel.add(bold = createToggleButton(
-                OKMBundleResources.INSTANCE.bold(), Main.i18n("richtext.bold")));
-        topPanel.add(italic = createToggleButton(
-                OKMBundleResources.INSTANCE.italic(),
-                Main.i18n("richtext.italic")));
-        topPanel.add(underline = createToggleButton(
-                OKMBundleResources.INSTANCE.underline(),
-                Main.i18n("richtext.underline")));
-        topPanel.add(stroke = createToggleButton(
-                OKMBundleResources.INSTANCE.stroke(),
-                Main.i18n("richtext.stroke")));
+        topPanel.add(bold = createToggleButton(OKMBundleResources.INSTANCE.bold(), Main.i18n("richtext.bold")));
+        topPanel.add(italic = createToggleButton(OKMBundleResources.INSTANCE.italic(), Main.i18n("richtext.italic")));
+        topPanel.add(underline = createToggleButton(OKMBundleResources.INSTANCE.underline(), Main.i18n("richtext.underline")));
+        topPanel.add(stroke = createToggleButton(OKMBundleResources.INSTANCE.stroke(), Main.i18n("richtext.stroke")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(subscript = createToggleButton(
-                OKMBundleResources.INSTANCE.subScript(),
-                Main.i18n("richtext.subscript")));
-        topPanel.add(superscript = createToggleButton(
-                OKMBundleResources.INSTANCE.superScript(),
-                Main.i18n("richtext.superscript")));
+        topPanel.add(subscript = createToggleButton(OKMBundleResources.INSTANCE.subScript(), Main.i18n("richtext.subscript")));
+        topPanel.add(superscript = createToggleButton(OKMBundleResources.INSTANCE.superScript(), Main.i18n("richtext.superscript")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(alignleft = createPushButton(
-                OKMBundleResources.INSTANCE.justifyLeft(),
-                Main.i18n("richtext.justify.left")));
-        topPanel.add(alignmiddle = createPushButton(
-                OKMBundleResources.INSTANCE.justifyCenter(),
-                Main.i18n("richtext.justify.center")));
-        topPanel.add(justify = createPushButton(
-                OKMBundleResources.INSTANCE.justify(),
-                Main.i18n("richtext.justify")));
-        topPanel.add(alignright = createPushButton(
-                OKMBundleResources.INSTANCE.justifyRight(),
-                Main.i18n("richtext.justify.right")));
+        topPanel.add(alignleft = createPushButton(OKMBundleResources.INSTANCE.justifyLeft(), Main.i18n("richtext.justify.left")));
+        topPanel.add(alignmiddle = createPushButton(OKMBundleResources.INSTANCE.justifyCenter(), Main.i18n("richtext.justify.center")));
+        topPanel.add(justify = createPushButton(OKMBundleResources.INSTANCE.justify(), Main.i18n("richtext.justify")));
+        topPanel.add(alignright = createPushButton(OKMBundleResources.INSTANCE.justifyRight(), Main.i18n("richtext.justify.right")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(orderlist = createPushButton(
-                OKMBundleResources.INSTANCE.ordered(),
-                Main.i18n("richtext.list.ordered")));
-        topPanel.add(unorderlist = createPushButton(
-                OKMBundleResources.INSTANCE.unOrdered(),
-                Main.i18n("richtext.list.unordered")));
-        topPanel.add(indentright = createPushButton(
-                OKMBundleResources.INSTANCE.identRight(),
-                Main.i18n("richtext.ident.right")));
-        topPanel.add(indentleft = createPushButton(
-                OKMBundleResources.INSTANCE.identLeft(),
-                Main.i18n("richtext.ident.left")));
+        topPanel.add(orderlist = createPushButton(OKMBundleResources.INSTANCE.ordered(), Main.i18n("richtext.list.ordered")));
+        topPanel.add(unorderlist = createPushButton(OKMBundleResources.INSTANCE.unOrdered(), Main.i18n("richtext.list.unordered")));
+        topPanel.add(indentright = createPushButton(OKMBundleResources.INSTANCE.identRight(), Main.i18n("richtext.ident.right")));
+        topPanel.add(indentleft = createPushButton(OKMBundleResources.INSTANCE.identLeft(), Main.i18n("richtext.ident.left")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(generatelink = createPushButton(
-                OKMBundleResources.INSTANCE.createEditorLink(),
-                Main.i18n("richtext.link.create")));
-        topPanel.add(breaklink = createPushButton(
-                OKMBundleResources.INSTANCE.breakEditorLink(),
-                Main.i18n("richtext.link.break")));
+        topPanel.add(generatelink = createPushButton(OKMBundleResources.INSTANCE.createEditorLink(), Main.i18n("richtext.link.create")));
+        topPanel.add(breaklink = createPushButton(OKMBundleResources.INSTANCE.breakEditorLink(), Main.i18n("richtext.link.break")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(insertline = createPushButton(
-                OKMBundleResources.INSTANCE.line(), Main.i18n("richtext.line")));
-        topPanel.add(insertimage = createPushButton(
-                OKMBundleResources.INSTANCE.picture(),
-                Main.i18n("richtext.image")));
+        topPanel.add(insertline = createPushButton(OKMBundleResources.INSTANCE.line(), Main.i18n("richtext.line")));
+        topPanel.add(insertimage = createPushButton(OKMBundleResources.INSTANCE.picture(), Main.i18n("richtext.image")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(removeformatting = createPushButton(
-                OKMBundleResources.INSTANCE.removeFormat(),
-                Main.i18n("richtext.remove.format")));
+        topPanel.add(removeformatting = createPushButton(OKMBundleResources.INSTANCE.removeFormat(), Main.i18n("richtext.remove.format")));
         topPanel.add(new HTML("&nbsp;"));
-        topPanel.add(texthtml = createToggleButton(
-                OKMBundleResources.INSTANCE.html(),
-                Main.i18n("richtext.switch.view")));
+        topPanel.add(texthtml = createToggleButton(OKMBundleResources.INSTANCE.html(), Main.i18n("richtext.switch.view")));
 
         //Init the BOTTOM Panel
         fontList = new ListBox();
@@ -525,9 +415,8 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     }
 
     /** Method to create a Toggle button for the toolbar **/
-    private ToggleButton createToggleButton(final ImageResource resource,
-            final String tip) {
-        final ToggleButton tb = new ToggleButton(new Image(resource));
+    private ToggleButton createToggleButton(ImageResource resource, String tip) {
+        ToggleButton tb = new ToggleButton(new Image(resource));
         tb.addClickHandler(evHandler);
         if (tip != null) {
             tb.setTitle(tip);
@@ -536,9 +425,8 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     }
 
     /** Method to create a Push button for the toolbar **/
-    private PushButton createPushButton(final ImageResource resource,
-            final String tip) {
-        final PushButton tb = new PushButton(new Image(resource));
+    private PushButton createPushButton(ImageResource resource, String tip) {
+        PushButton tb = new PushButton(new Image(resource));
         tb.addClickHandler(evHandler);
         if (tip != null) {
             tb.setTitle(tip);
@@ -601,7 +489,7 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     }
 
     @Override
-    public void insertURL(final String url) {
+    public void insertURL(String url) {
         if (url != null) {
             if (isHTMLMode()) {
                 changeHtmlStyle("<a href=\"" + url + "\">", "</a>");
@@ -612,7 +500,7 @@ public class RichTextToolbar extends Composite implements RichTextAction {
     }
 
     @Override
-    public void insertImageURL(final String url) {
+    public void insertImageURL(String url) {
         if (url != null) {
             if (isHTMLMode()) {
                 changeHtmlStyle("<img src=\"" + url + "\">", "");

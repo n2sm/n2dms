@@ -44,9 +44,7 @@ import com.openkm.core.Ref;
 import com.openkm.core.RepositoryException;
 
 public class PropertyGroupExtensionManager {
-    private static Logger log = LoggerFactory
-            .getLogger(PropertyGroupExtensionManager.class);
-
+    private static Logger log = LoggerFactory.getLogger(PropertyGroupExtensionManager.class);
     private static PropertyGroupExtensionManager service = null;
 
     private PropertyGroupExtensionManager() {
@@ -63,26 +61,20 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle PRE addGroup
      */
-    public void preAddGroup(final Session session, final Ref<Node> node,
-            final String grpName) throws NoSuchGroupException, LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException {
-        log.debug("preAddGroup({}, {}, {})", new Object[] { session, node,
-                grpName });
+    public void preAddGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException {
+        log.debug("preAddGroup({}, {}, {})", new Object[] { session, node, grpName });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.preAddGroup(session, node, grpName);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -90,26 +82,20 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle POST addGroup
      */
-    public void postAddGroup(final Session session, final Ref<Node> node,
-            final String grpName) throws NoSuchGroupException, LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException {
-        log.debug("postAddGroup({}, {}, {})", new Object[] { session, node,
-                grpName });
+    public void postAddGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException {
+        log.debug("postAddGroup({}, {}, {})", new Object[] { session, node, grpName });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.postAddGroup(session, node, grpName);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -117,26 +103,20 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle PRE removeGroup
      */
-    public void preRemoveGroup(final Session session, final Ref<Node> node,
-            final String grpName) throws NoSuchGroupException, LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException {
-        log.debug("preRemoveGroup({}, {}, {})", new Object[] { session, node,
-                grpName });
+    public void preRemoveGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException {
+        log.debug("preRemoveGroup({}, {}, {})", new Object[] { session, node, grpName });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.preRemoveGroup(session, node, grpName);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -144,26 +124,20 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle POST removeGroup
      */
-    public void postRemoveGroup(final Session session, final Ref<Node> node,
-            final String grpName) throws NoSuchGroupException, LockException,
-            PathNotFoundException, AccessDeniedException, RepositoryException,
-            DatabaseException, ExtensionException {
-        log.debug("postRemoveGroup({}, {}, {})", new Object[] { session, node,
-                grpName });
+    public void postRemoveGroup(Session session, Ref<Node> node, String grpName) throws NoSuchGroupException, LockException,
+            PathNotFoundException, AccessDeniedException, RepositoryException, DatabaseException, ExtensionException {
+        log.debug("postRemoveGroup({}, {}, {})", new Object[] { session, node, grpName });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.postRemoveGroup(session, node, grpName);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -171,28 +145,21 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle PRE setProperties
      */
-    public void preSetProperties(final Session session, final Ref<Node> node,
-            final String grpName, final List<FormElement> properties)
-            throws IOException, ParseException, NoSuchPropertyException,
-            NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException {
-        log.debug("preSetProperties({}, {}, {}, {})", new Object[] { session,
-                node, grpName, properties });
+    public void preSetProperties(Session session, Ref<Node> node, String grpName, List<FormElement> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException {
+        log.debug("preSetProperties({}, {}, {}, {})", new Object[] { session, node, grpName, properties });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.preSetProperties(session, node, grpName, properties);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -200,28 +167,21 @@ public class PropertyGroupExtensionManager {
     /**
      * Handle POST setProperties
      */
-    public void postSetProperties(final Session session, final Ref<Node> node,
-            final String grpName, final List<FormElement> properties)
-            throws IOException, ParseException, NoSuchPropertyException,
-            NoSuchGroupException, LockException, PathNotFoundException,
-            AccessDeniedException, RepositoryException, DatabaseException,
-            ExtensionException {
-        log.debug("postSetProperties({}, {}, {}, {})", new Object[] { session,
-                node, grpName, properties });
+    public void postSetProperties(Session session, Ref<Node> node, String grpName, List<FormElement> properties) throws IOException,
+            ParseException, NoSuchPropertyException, NoSuchGroupException, LockException, PathNotFoundException, AccessDeniedException,
+            RepositoryException, DatabaseException, ExtensionException {
+        log.debug("postSetProperties({}, {}, {}, {})", new Object[] { session, node, grpName, properties });
 
         try {
-            final ExtensionManager em = ExtensionManager.getInstance();
-            final List<PropertyGroupExtension> col = em
-                    .getPlugins(PropertyGroupExtension.class);
-            Collections
-                    .sort(col, new OrderComparator<PropertyGroupExtension>());
+            ExtensionManager em = ExtensionManager.getInstance();
+            List<PropertyGroupExtension> col = em.getPlugins(PropertyGroupExtension.class);
+            Collections.sort(col, new OrderComparator<PropertyGroupExtension>());
 
-            for (final PropertyGroupExtension ext : col) {
-                log.debug("Extension class: {}", ext.getClass()
-                        .getCanonicalName());
+            for (PropertyGroupExtension ext : col) {
+                log.debug("Extension class: {}", ext.getClass().getCanonicalName());
                 ext.postSetProperties(session, node, grpName, properties);
             }
-        } catch (final ServiceConfigurationError e) {
+        } catch (ServiceConfigurationError e) {
             log.error(e.getMessage(), e);
         }
     }

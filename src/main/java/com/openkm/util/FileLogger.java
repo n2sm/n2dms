@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,11 +35,8 @@ import com.openkm.core.Config;
 
 public class FileLogger {
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss,SSS";
-
     private static final String LEVEL_INFO = "INFO ";
-
     private static final String LEVEL_WARN = "WARN ";
-
     private static final String LEVEL_ERROR = "ERROR";
 
     private Writer cLogger = null;
@@ -50,7 +47,7 @@ public class FileLogger {
      * @param baseName The base name of the log file
      * @throws IOException If there is an exception when creating.
      */
-    public FileLogger(final String baseName) throws IOException {
+    public FileLogger(String baseName) throws IOException {
         cLogger = new FileWriter(getLogFile(baseName), true);
     }
 
@@ -60,8 +57,7 @@ public class FileLogger {
      * @param message Message to write.
      * @throws IOException If there is an exception when writing.
      */
-    public void info(final String message, final Object... params)
-            throws IOException {
+    public void info(String message, Object... params) throws IOException {
         cLogger.write(getLogEntry(LEVEL_INFO, message, params));
         cLogger.flush();
     }
@@ -72,8 +68,7 @@ public class FileLogger {
      * @param message Message to write.
      * @throws IOException If there is an exception when writing.
      */
-    public void warn(final String message, final Object... params)
-            throws IOException {
+    public void warn(String message, Object... params) throws IOException {
         cLogger.write(getLogEntry(LEVEL_WARN, message, params));
         cLogger.flush();
     }
@@ -84,8 +79,7 @@ public class FileLogger {
      * @param message Message to write.
      * @throws IOException If there is an exception when writing.
      */
-    public void error(final String message, final Object... params)
-            throws IOException {
+    public void error(String message, Object... params) throws IOException {
         cLogger.write(getLogEntry(LEVEL_ERROR, message, params));
         cLogger.flush();
     }
@@ -102,8 +96,7 @@ public class FileLogger {
      * 
      * @throws IOException If there is an exception when writing.
      */
-    public static void info(final String baseName, final String message,
-            final Object... params) throws IOException {
+    public static void info(String baseName, String message, Object... params) throws IOException {
         logWrite(baseName, LEVEL_INFO, message, params);
     }
 
@@ -112,8 +105,7 @@ public class FileLogger {
      * 
      * @throws IOException If there is an exception when writing.
      */
-    public static void warn(final String baseName, final String message,
-            final Object... params) throws IOException {
+    public static void warn(String baseName, String message, Object... params) throws IOException {
         logWrite(baseName, LEVEL_WARN, message, params);
     }
 
@@ -122,8 +114,7 @@ public class FileLogger {
      * 
      * @throws IOException If there is an exception when writing.
      */
-    public static void error(final String baseName, final String message,
-            final Object... params) throws IOException {
+    public static void error(String baseName, String message, Object... params) throws IOException {
         logWrite(baseName, LEVEL_ERROR, message, params);
     }
 
@@ -132,9 +123,8 @@ public class FileLogger {
      * 
      * @throws IOException If there is an exception when writing.
      */
-    private static void logWrite(final String baseName, final String level,
-            final String message, final Object... params) throws IOException {
-        final Writer sLogger = new FileWriter(getLogFile(baseName), true);
+    private static void logWrite(String baseName, String level, String message, Object... params) throws IOException {
+        Writer sLogger = new FileWriter(getLogFile(baseName), true);
         sLogger.write(getLogEntry(level, message, params));
         sLogger.flush();
         sLogger.close();
@@ -146,11 +136,9 @@ public class FileLogger {
      * @param baseName The base name to construct the file name.
      * @return The result file name.
      */
-    private static String getLogFile(final String baseName) {
-        final String fileDate = new SimpleDateFormat("yyyyMMdd")
-                .format(new Date());
-        return Config.HOME_DIR + File.separator + baseName + "_" + fileDate
-                + ".log";
+    private static String getLogFile(String baseName) {
+        String fileDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        return Config.LOG_DIR + File.separator + baseName + "_" + fileDate + ".log";
     }
 
     /**
@@ -160,9 +148,8 @@ public class FileLogger {
      * @param params Optional menssage params.
      * @return An String with the long entry.
      */
-    private static String getLogEntry(final String level, final String message,
-            final Object... params) {
-        final StringBuilder sb = new StringBuilder();
+    private static String getLogEntry(String level, String message, Object... params) {
+        StringBuilder sb = new StringBuilder();
         sb.append(new SimpleDateFormat(DATE_FORMAT).format(new Date()));
         sb.append(" ");
         sb.append(level);

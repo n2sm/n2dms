@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -53,47 +53,28 @@ import com.openkm.frontend.client.util.Util;
  *
  */
 public class TestPopup extends DialogBox {
-    private final OKMTestServiceAsync testService = (OKMTestServiceAsync) GWT
-            .create(OKMTestService.class);
+    private final OKMTestServiceAsync testService = (OKMTestServiceAsync) GWT.create(OKMTestService.class);
 
     private VerticalPanel vPanel;
-
     private HorizontalPanel hPanel;
-
     private HorizontalPanel hPanel2;
-
     private HorizontalPanel hPanel3;
-
     private ScrollPanel scroll;
-
     private FlexTable table;
-
     private Button clean;
-
     private Button run;
-
     private Button runTiemout;
-
     private Button close;
-
     private Button getUserAgent;
-
     private TextBox sizeTest;
-
     private TextBox cyclesTest;
-
     private TextBox numThreads;
-
     private ListBox type;
 
     private String runnningTest = "";
-
     private int selectedTest = 0;
-
     private int actualCycle = 0;
-
     private int maxCycle = 0;
-
     private int textSize = 0;
 
     private TextBox timeoutSeconds;
@@ -118,27 +99,27 @@ public class TestPopup extends DialogBox {
         hPanel.add(type);
         hPanel.add(new HTML("&nbsp;Elements:"));
         sizeTest = new TextBox();
-        sizeTest.setSize("60", "20");
+        sizeTest.setSize("60px", "20px");
         sizeTest.setText("2000");
         sizeTest.setStyleName("okm-Input");
         hPanel.add(sizeTest);
         hPanel.add(new HTML("&nbsp;Cycles:"));
         cyclesTest = new TextBox();
         cyclesTest.setText("100");
-        cyclesTest.setSize("60", "20");
+        cyclesTest.setSize("60px", "20px");
         cyclesTest.setStyleName("okm-Input");
         hPanel.add(cyclesTest);
         hPanel.add(new HTML("&nbsp;Threads:"));
         numThreads = new TextBox();
         numThreads.setText("1");
-        numThreads.setSize("60", "20");
+        numThreads.setSize("60px", "20px");
         numThreads.setStyleName("okm-Input");
         hPanel.add(numThreads);
         hPanel.add(new HTML("&nbsp;"));
         clean = new Button("Clean");
         clean.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 table.removeAllRows();
             }
         });
@@ -148,7 +129,7 @@ public class TestPopup extends DialogBox {
         run = new Button("run");
         run.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 run();
             }
         });
@@ -167,7 +148,7 @@ public class TestPopup extends DialogBox {
         runTiemout = new Button("run");
         runTiemout.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 runtimeout();
             }
         });
@@ -179,7 +160,7 @@ public class TestPopup extends DialogBox {
         getUserAgent = new Button("Get user agent");
         getUserAgent.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 log("Agent: ", Util.getUserAgent());
             }
         });
@@ -189,7 +170,7 @@ public class TestPopup extends DialogBox {
         // Log
         table = new FlexTable();
         scroll = new ScrollPanel(table);
-        scroll.setSize("600", "450");
+        scroll.setSize("600px", "450px");
         table.setWidth("100%");
         table.setCellPadding(5);
         table.setCellSpacing(0);
@@ -198,7 +179,7 @@ public class TestPopup extends DialogBox {
         close = new Button("close");
         close.addClickHandler(new ClickHandler() {
             @Override
-            public void onClick(final ClickEvent event) {
+            public void onClick(ClickEvent event) {
                 hide();
             }
         });
@@ -209,11 +190,10 @@ public class TestPopup extends DialogBox {
         vPanel.add(hPanel3);
         vPanel.add(scroll);
         vPanel.add(close);
-        vPanel.setCellHeight(hPanel, "30");
-        vPanel.setCellHeight(scroll, "450");
-        vPanel.setCellHeight(close, "20");
-        vPanel.setCellHorizontalAlignment(close,
-                HasHorizontalAlignment.ALIGN_CENTER);
+        vPanel.setCellHeight(hPanel, "30px");
+        vPanel.setCellHeight(scroll, "450px");
+        vPanel.setCellHeight(close, "20px");
+        vPanel.setCellHorizontalAlignment(close, HasAlignment.ALIGN_CENTER);
 
         super.hide();
         setWidget(vPanel);
@@ -229,7 +209,7 @@ public class TestPopup extends DialogBox {
         maxCycle = Integer.parseInt(cyclesTest.getText());
         textSize = Integer.parseInt(sizeTest.getText());
         log(runnningTest, "Starting");
-        final int thread = Integer.parseInt(numThreads.getText());
+        int thread = Integer.parseInt(numThreads.getText());
         int count = 0;
 
         while (count < thread) {
@@ -242,17 +222,17 @@ public class TestPopup extends DialogBox {
      * runtimeout
      */
     public void runtimeout() {
-        final int delay = Integer.parseInt(timeoutSeconds.getValue());
+        int delay = Integer.parseInt(timeoutSeconds.getValue());
         runnningTest = "Timeout RPC Test >";
         log(runnningTest, "started with delay=" + delay + " seconds");
         testService.RPCTimeout(delay, new AsyncCallback<Object>() {
             @Override
-            public void onSuccess(final Object result) {
+            public void onSuccess(Object result) {
                 log(runnningTest, "finished");
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("RPCTimeout", caught);
             }
         });
@@ -289,14 +269,13 @@ public class TestPopup extends DialogBox {
         log(runnningTest, "Calling RPC: " + cycle);
         testService.StringTest(textSize, new AsyncCallback<String>() {
             @Override
-            public void onSuccess(final String result) {
-                log(runnningTest, "Finished RPC: " + cycle
-                        + ", Result length: " + result.length());
+            public void onSuccess(String result) {
+                log(runnningTest, "Finished RPC: " + cycle + ", Result length: " + result.length());
                 controller();
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("StringTest", caught);
             }
         });
@@ -310,14 +289,13 @@ public class TestPopup extends DialogBox {
         testService.folderText(textSize, new AsyncCallback<List<GWTFolder>>() {
 
             @Override
-            public void onSuccess(final List<GWTFolder> result) {
-                log(runnningTest, "Finished RPC: " + cycle + ", Result size: "
-                        + result.size());
+            public void onSuccess(List<GWTFolder> result) {
+                log(runnningTest, "Finished RPC: " + cycle + ", Result size: " + result.size());
                 controller();
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("folderText", caught);
             }
         });
@@ -328,33 +306,30 @@ public class TestPopup extends DialogBox {
      */
     private void documentTest(final int cycle) {
         log(runnningTest, "Calling RPC: " + cycle);
-        testService.documentText(textSize,
-                new AsyncCallback<List<GWTDocument>>() {
-                    @Override
-                    public void onSuccess(final List<GWTDocument> result) {
-                        log(runnningTest, "Finished RPC: " + cycle
-                                + ", Result size: " + result.size());
-                        controller();
-                    }
+        testService.documentText(textSize, new AsyncCallback<List<GWTDocument>>() {
+            @Override
+            public void onSuccess(List<GWTDocument> result) {
+                log(runnningTest, "Finished RPC: " + cycle + ", Result size: " + result.size());
+                controller();
+            }
 
-                    @Override
-                    public void onFailure(final Throwable caught) {
-                        Main.get().showError("folderText", caught);
-                    }
-                });
+            @Override
+            public void onFailure(Throwable caught) {
+                Main.get().showError("folderText", caught);
+            }
+        });
     }
 
     /**
      * @param value
      * @param value2
      */
-    private void log(final String value, final String value2) {
-        final DateTimeFormat dtf = DateTimeFormat.getFormat(Main
-                .i18n("general.date.pattern"));
-        final int row = table.getRowCount();
+    private void log(String value, String value2) {
+        DateTimeFormat dtf = DateTimeFormat.getFormat(Main.i18n("general.date.pattern"));
+        int row = table.getRowCount();
         table.setHTML(row, 0, dtf.format(new Date()) + " " + value);
         table.setHTML(row, 1, value2);
-        table.getCellFormatter().setHeight(row, 0, "20");
-        table.getCellFormatter().setWidth(row, 0, "250");
+        table.getCellFormatter().setHeight(row, 0, "20px");
+        table.getCellFormatter().setWidth(row, 0, "250px");
     }
 }

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -35,25 +35,19 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "OKM_AUTO_METADATA", uniqueConstraints = {
 // ALTER TABLE OKM_AUTO_METADATA ADD CONSTRAINT IDX_AUTO_MD_ATCLS UNIQUE (AMD_AT, AMD_CLASS_NAME)
-@UniqueConstraint(name = "IDX_AUTO_MD_ATCLS", columnNames = { "AMD_AT",
-        "AMD_CLASS_NAME" }) })
+@UniqueConstraint(name = "IDX_AUTO_MD_ATCLS", columnNames = { "AMD_AT", "AMD_CLASS_NAME" }) })
 public class AutomationMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String GROUP_ACTION = "action";
-
     public static final String GROUP_VALIDATION = "validation";
 
     public static final String TYPE_TEXT = "text";
-
     public static final String TYPE_INTEGER = "integer";
-
     public static final String TYPE_BOOLEAN = "boolean";
-
     public static final String TYPE_TEXTAREA = "textarea";
 
     public static final String AT_PRE = "pre";
-
     public static final String AT_POST = "post";
 
     public static final String SOURCE_FOLDER = "okm:folder";
@@ -100,7 +94,7 @@ public class AutomationMetadata implements Serializable {
         return id;
     }
 
-    public void setId(final long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -108,7 +102,7 @@ public class AutomationMetadata implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -116,7 +110,7 @@ public class AutomationMetadata implements Serializable {
         return group;
     }
 
-    public void setGroup(final String group) {
+    public void setGroup(String group) {
         this.group = group;
     }
 
@@ -124,7 +118,7 @@ public class AutomationMetadata implements Serializable {
         return className;
     }
 
-    public void setClassName(final String className) {
+    public void setClassName(String className) {
         this.className = className;
     }
 
@@ -132,7 +126,7 @@ public class AutomationMetadata implements Serializable {
         return at;
     }
 
-    public void setAt(final String at) {
+    public void setAt(String at) {
         this.at = at;
     }
 
@@ -140,7 +134,7 @@ public class AutomationMetadata implements Serializable {
         return active;
     }
 
-    public void setActive(final boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 
@@ -148,7 +142,7 @@ public class AutomationMetadata implements Serializable {
         return type00;
     }
 
-    public void setType00(final String type00) {
+    public void setType00(String type00) {
         this.type00 = type00;
     }
 
@@ -156,7 +150,7 @@ public class AutomationMetadata implements Serializable {
         return type01;
     }
 
-    public void setType01(final String type01) {
+    public void setType01(String type01) {
         this.type01 = type01;
     }
 
@@ -164,7 +158,7 @@ public class AutomationMetadata implements Serializable {
         return source00;
     }
 
-    public void setSource00(final String source00) {
+    public void setSource00(String source00) {
         this.source00 = source00;
     }
 
@@ -172,7 +166,7 @@ public class AutomationMetadata implements Serializable {
         return source01;
     }
 
-    public void setSource01(final String source01) {
+    public void setSource01(String source01) {
         this.source01 = source01;
     }
 
@@ -180,7 +174,7 @@ public class AutomationMetadata implements Serializable {
         return description00;
     }
 
-    public void setDescription00(final String description00) {
+    public void setDescription00(String description00) {
         this.description00 = description00;
     }
 
@@ -188,13 +182,12 @@ public class AutomationMetadata implements Serializable {
         return description01;
     }
 
-    public void setDescription01(final String description01) {
+    public void setDescription01(String description01) {
         this.description01 = description01;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id=").append(id);
         sb.append(", name=").append(name);

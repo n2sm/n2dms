@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SystemSession extends XASessionImpl {
     private static Logger log = LoggerFactory.getLogger(SystemSession.class);
-
     private static final boolean DEBUG = false;
 
     /**
@@ -64,20 +63,16 @@ public class SystemSession extends XASessionImpl {
      * @return
      * @throws RepositoryException
      */
-    public static SystemSession create(final RepositoryImpl rep,
-            final WorkspaceConfig wspConfig) throws RepositoryException {
-        if (DEBUG) {
+    public static SystemSession create(RepositoryImpl rep, WorkspaceConfig wspConfig) throws RepositoryException {
+        if (DEBUG)
             log.debug("create()");
-        }
         // create subject with SystemPrincipal
-        final Set<SystemPrincipal> principals = new HashSet<SystemPrincipal>();
+        Set<SystemPrincipal> principals = new HashSet<SystemPrincipal>();
         principals.add(new SystemPrincipal());
-        final Subject subject = new Subject(true, principals,
-                Collections.EMPTY_SET, Collections.EMPTY_SET);
-        final SystemSession oss = new SystemSession(rep, subject, wspConfig);
-        if (DEBUG) {
+        Subject subject = new Subject(true, principals, Collections.EMPTY_SET, Collections.EMPTY_SET);
+        SystemSession oss = new SystemSession(rep, subject, wspConfig);
+        if (DEBUG)
             log.debug("create: " + oss);
-        }
         return oss;
     }
 
@@ -87,28 +82,23 @@ public class SystemSession extends XASessionImpl {
      * @param rep
      * @param wspConfig
      */
-    private SystemSession(final RepositoryImpl rep, final Subject subject,
-            final WorkspaceConfig wspConfig) throws RepositoryException {
+    private SystemSession(RepositoryImpl rep, Subject subject, WorkspaceConfig wspConfig) throws RepositoryException {
         super(rep, subject, wspConfig);
     }
 
     /* (non-Javadoc)
      * @see javax.jcr.Session#logout()
      */
-    @Override
     public synchronized void logout() {
-        if (DEBUG) {
+        if (DEBUG)
             log.warn("logout()");
-        }
         super.logout();
-        if (DEBUG) {
+        if (DEBUG)
             log.warn("logout: void");
-        }
     }
 
     @Override
-    protected AccessManager createAccessManager(final Subject subject,
-            final HierarchyManager hierMgr) throws AccessDeniedException,
+    protected AccessManager createAccessManager(Subject subject, HierarchyManager hierMgr) throws AccessDeniedException,
             RepositoryException {
         /**
          * use own AccessManager implementation rather than relying on
@@ -127,16 +117,12 @@ public class SystemSession extends XASessionImpl {
 
         //----------------------------------------------------< AccessManager >
         @Override
-        public void init(final AMContext context) throws AccessDeniedException,
-                Exception {
+        public void init(AMContext context) throws AccessDeniedException, Exception {
             // none
         }
 
         @Override
-        public void init(final AMContext arg0,
-                final AccessControlProvider arg1,
-                final WorkspaceAccessManager arg2)
-                throws AccessDeniedException, Exception {
+        public void init(AMContext arg0, AccessControlProvider arg1, WorkspaceAccessManager arg2) throws AccessDeniedException, Exception {
             // none
         }
 
@@ -146,51 +132,43 @@ public class SystemSession extends XASessionImpl {
         }
 
         @Override
-        public void checkPermission(final ItemId id, final int permissions)
-                throws AccessDeniedException, ItemNotFoundException,
-                RepositoryException {
+        public void checkPermission(ItemId id, int permissions) throws AccessDeniedException, ItemNotFoundException, RepositoryException {
             // allow everything
         }
 
         @Override
-        public boolean isGranted(final ItemId id, final int permissions)
-                throws ItemNotFoundException, RepositoryException {
+        public boolean isGranted(ItemId id, int permissions) throws ItemNotFoundException, RepositoryException {
             // allow everything
             return true;
         }
 
         @Override
-        public boolean canAccess(final String workspaceName)
-                throws NoSuchWorkspaceException, RepositoryException {
+        public boolean canAccess(String workspaceName) throws NoSuchWorkspaceException, RepositoryException {
             // allow everything
             return true;
         }
 
         @Override
-        public boolean canRead(final Path itemPath) throws RepositoryException {
+        public boolean canRead(Path itemPath) throws RepositoryException {
             // allow everything
             return true;
         }
 
         @Override
-        public boolean isGranted(final Path absPath, final int permissions)
-                throws RepositoryException {
+        public boolean isGranted(Path absPath, int permissions) throws RepositoryException {
             // allow everything
             return true;
         }
 
         @Override
-        public boolean isGranted(final Path parentPath, final Name childName,
-                final int permissions) throws RepositoryException {
+        public boolean isGranted(Path parentPath, Name childName, int permissions) throws RepositoryException {
             // allow everything
             return true;
         }
 
         // @Override
         // TODO Enable @Override when use jackrabbit 1.6
-        @Override
-        public void checkPermission(final Path absPath, final int permissions)
-                throws AccessDeniedException, RepositoryException {
+        public void checkPermission(Path absPath, int permissions) throws AccessDeniedException, RepositoryException {
             // allow everything
         }
     }

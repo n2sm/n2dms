@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,11 +30,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GWTProcessDefinition implements IsSerializable {
 
     private double id = 0;
-
     private String name = "";
-
     private String description;
-
     private int version = 0;
 
     public GWTProcessDefinition() {
@@ -44,7 +41,7 @@ public class GWTProcessDefinition implements IsSerializable {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -52,7 +49,7 @@ public class GWTProcessDefinition implements IsSerializable {
         return version;
     }
 
-    public void setVersion(final int version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
@@ -60,7 +57,7 @@ public class GWTProcessDefinition implements IsSerializable {
         return id;
     }
 
-    public void setId(final double id) {
+    public void setId(double id) {
         this.id = id;
     }
 
@@ -68,7 +65,7 @@ public class GWTProcessDefinition implements IsSerializable {
         return description;
     }
 
-    public void setDescription(final String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 }

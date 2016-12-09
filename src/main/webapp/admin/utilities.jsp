@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="com.openkm.core.Config" %>
 <%@ page import="com.openkm.servlet.admin.BaseServlet" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -11,7 +12,8 @@
   <title>Utilities</title>
 </head>
 <body>
-  <c:set var="isAdmin"><%=BaseServlet.isAdmin(request)%></c:set>
+  <c:set var="isAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
+  <c:set var="isRepositoryNative"><%=Config.REPOSITORY_NATIVE%></c:set>
   <c:choose>
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
@@ -24,8 +26,17 @@
         <a href="CheckEmail"><button class="utilButton">Check email</button></a>
         <a href="rebuild_indexes.jsp"><button class="utilButton">Rebuild indexes</button></a>
         <a href="repository_checker.jsp"><button class="utilButton">Repository checker</button></a>
+        <c:choose>
+          <c:when test="${isRepositoryNative}">
+            <a href="DbRepositoryView"><button class="utilButton">Repository view</button></a>
+          </c:when>
+          <c:otherwise>
+            <a href="JcrRepositoryView"><button class="utilButton">Repository view</button></a>
+          </c:otherwise>
+        </c:choose>
         <a href="ListIndexes"><button class="utilButton">List indexes</button></a>
         <a href="CheckTextExtraction"><button class="utilButton">Check text extraction</button></a>
+        <a href="system_properties.jsp"><button class="utilButton">System properties</button></a>
         <a href="LogCat"><button class="utilButton">LogCat</button></a>
         <a href="Css"><button class="utilButton">CSS</button></a>
       </center>

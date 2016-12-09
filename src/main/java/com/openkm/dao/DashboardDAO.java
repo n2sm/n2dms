@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -44,16 +44,16 @@ public class DashboardDAO {
      * Get dashboard stats
      */
     @SuppressWarnings("unchecked")
-    public Dashboard findByPk(final int dsId) throws DatabaseException {
+    public Dashboard findByPk(int dsId) throws DatabaseException {
         log.debug("findByPk({})", dsId);
-        final String qs = "from Dashboard db where db.id=:id";
+        String qs = "from Dashboard db where db.id=:id";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setInteger("id", dsId);
-            final List<Dashboard> results = q.list(); // uniqueResult
+            List<Dashboard> results = q.list(); // uniqueResult
             Dashboard ret = null;
 
             if (results.size() == 1) {
@@ -62,7 +62,7 @@ public class DashboardDAO {
 
             log.debug("findByPk: {}", ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -72,16 +72,15 @@ public class DashboardDAO {
     /**
      * Create dashboard stats
      */
-    public static void createIfNew(final Dashboard db) throws DatabaseException {
-        final String qs = "from Dashboard db where db.user=:user and db.source=:source "
-                + "and db.node=:node and db.date=:date";
+    public static void createIfNew(Dashboard db) throws DatabaseException {
+        String qs = "from Dashboard db where db.user=:user and db.source=:source " + "and db.node=:node and db.date=:date";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", db.getUser());
             q.setString("source", db.getSource());
             q.setString("node", db.getNode());
@@ -92,7 +91,7 @@ public class DashboardDAO {
             }
 
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -103,18 +102,17 @@ public class DashboardDAO {
     /**
      * Delete dashboard stats
      */
-    public void delete(final int dsId) throws DatabaseException {
+    public void delete(int dsId) throws DatabaseException {
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Dashboard ds = (Dashboard) session
-                    .load(Dashboard.class, dsId);
+            Dashboard ds = (Dashboard) session.load(Dashboard.class, dsId);
             session.delete(ds);
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -126,21 +124,20 @@ public class DashboardDAO {
      * Find by user source
      */
     @SuppressWarnings("unchecked")
-    public static List<Dashboard> findByUserSource(final String user,
-            final String source) throws DatabaseException {
+    public static List<Dashboard> findByUserSource(String user, String source) throws DatabaseException {
         log.debug("findByUserSource({}, {})", user, source);
-        final String qs = "from Dashboard db where db.user=:user and db.source=:source";
+        String qs = "from Dashboard db where db.user=:user and db.source=:source";
         Session session = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
             q.setString("source", source);
-            final List<Dashboard> ret = q.list();
+            List<Dashboard> ret = q.list();
             log.debug("findByUserSource: " + ret);
             return ret;
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             throw new DatabaseException(e.getMessage(), e);
         } finally {
             HibernateUtil.close(session);
@@ -150,22 +147,21 @@ public class DashboardDAO {
     /**
      * Delete visited nodes
      */
-    public static void deleteVisitedNodes(final String user, final String source)
-            throws DatabaseException {
+    public static void deleteVisitedNodes(String user, String source) throws DatabaseException {
         log.debug("deleteVisitedNodes({}, {})", user, source);
-        final String qs = "delete from Dashboard db where db.user=:user and db.source=:source";
+        String qs = "delete from Dashboard db where db.user=:user and db.source=:source";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
             q.setString("source", source);
             q.executeUpdate();
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {
@@ -178,27 +174,23 @@ public class DashboardDAO {
     /**
      * Delete old visited node
      */
-    public static void purgeOldVisitedNode(final String user,
-            final String source, final String node, final Calendar date)
-            throws DatabaseException {
-        log.debug("purgeOldVisitedNode({}, {}, {}, {})", new Object[] { user,
-                source, node, date });
-        final String qs = "delete from Dashboard db where db.user=:user and db.source=:source "
-                + "and db.node=:node and db.date=:date";
+    public static void purgeOldVisitedNode(String user, String source, String node, Calendar date) throws DatabaseException {
+        log.debug("purgeOldVisitedNode({}, {}, {}, {})", new Object[] { user, source, node, date });
+        String qs = "delete from Dashboard db where db.user=:user and db.source=:source " + "and db.node=:node and db.date=:date";
         Session session = null;
         Transaction tx = null;
 
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            final Query q = session.createQuery(qs);
+            Query q = session.createQuery(qs);
             q.setString("user", user);
             q.setString("source", source);
             q.setString("node", node);
             q.setCalendar("date", date);
             q.executeUpdate();
             HibernateUtil.commit(tx);
-        } catch (final HibernateException e) {
+        } catch (HibernateException e) {
             HibernateUtil.rollback(tx);
             throw new DatabaseException(e.getMessage(), e);
         } finally {

@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -25,28 +25,20 @@ import java.io.Serializable;
 
 public class ProfileMenuHelp implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private boolean helpVisible;
-
     private boolean documentationVisible;
-
     private boolean bugTrackingVisible;
-
     private boolean supportVisible;
-
     private boolean forumVisible;
-
     private boolean changelogVisible;
-
     private boolean webSiteVisible;
-
     private boolean aboutVisible;
 
     public boolean isHelpVisible() {
         return helpVisible;
     }
 
-    public void setHelpVisible(final boolean helpVisible) {
+    public void setHelpVisible(boolean helpVisible) {
         this.helpVisible = helpVisible;
     }
 
@@ -54,7 +46,7 @@ public class ProfileMenuHelp implements Serializable {
         return documentationVisible;
     }
 
-    public void setDocumentationVisible(final boolean documentationVisible) {
+    public void setDocumentationVisible(boolean documentationVisible) {
         this.documentationVisible = documentationVisible;
     }
 
@@ -62,7 +54,7 @@ public class ProfileMenuHelp implements Serializable {
         return bugTrackingVisible;
     }
 
-    public void setBugTrackingVisible(final boolean bugTrackingVisible) {
+    public void setBugTrackingVisible(boolean bugTrackingVisible) {
         this.bugTrackingVisible = bugTrackingVisible;
     }
 
@@ -70,7 +62,7 @@ public class ProfileMenuHelp implements Serializable {
         return supportVisible;
     }
 
-    public void setSupportVisible(final boolean supportVisible) {
+    public void setSupportVisible(boolean supportVisible) {
         this.supportVisible = supportVisible;
     }
 
@@ -78,7 +70,7 @@ public class ProfileMenuHelp implements Serializable {
         return forumVisible;
     }
 
-    public void setForumVisible(final boolean forumVisible) {
+    public void setForumVisible(boolean forumVisible) {
         this.forumVisible = forumVisible;
     }
 
@@ -86,7 +78,7 @@ public class ProfileMenuHelp implements Serializable {
         return changelogVisible;
     }
 
-    public void setChangelogVisible(final boolean changelogVisible) {
+    public void setChangelogVisible(boolean changelogVisible) {
         this.changelogVisible = changelogVisible;
     }
 
@@ -94,7 +86,7 @@ public class ProfileMenuHelp implements Serializable {
         return webSiteVisible;
     }
 
-    public void setWebSiteVisible(final boolean webSiteVisible) {
+    public void setWebSiteVisible(boolean webSiteVisible) {
         this.webSiteVisible = webSiteVisible;
     }
 
@@ -102,13 +94,12 @@ public class ProfileMenuHelp implements Serializable {
         return aboutVisible;
     }
 
-    public void setAboutVisible(final boolean aboutVisible) {
+    public void setAboutVisible(boolean aboutVisible) {
         this.aboutVisible = aboutVisible;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("helpVisible=");
         sb.append(helpVisible);

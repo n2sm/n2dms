@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -69,10 +69,11 @@ import com.openkm.module.db.stuff.SetPropertiesFieldBridge;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class NodeBase implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final int MAX_NAME = 256;
 
     public static final String PARENT_FIELD = "parent";
-
     public static final String NAME_FIELD = "name";
+    public static final String UUID_FIELD = "uuid";
 
     @Id
     @DocumentId
@@ -89,12 +90,9 @@ public class NodeBase implements Serializable {
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     protected String context;
 
-    // @ElementCollection
-    // @Column(name = "NPT_PATH")
-    // @CollectionTable(name = "OKM_NODE_PATH", joinColumns = { @JoinColumn(name = "NPT_NODE") })
-    // @Field(index = Index.UN_TOKENIZED, store = Store.YES)
-    // @FieldBridge(impl = SetFieldBridge.class)
-    // Set<String> path = new HashSet<String>();
+    @Column(name = "NBS_PATH", length = 1024)
+    @Field(index = Index.UN_TOKENIZED, store = Store.YES)
+    protected String path;
 
     @Column(name = "NBS_AUTHOR", length = 64)
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
@@ -105,12 +103,12 @@ public class NodeBase implements Serializable {
     @CalendarBridge(resolution = Resolution.DAY)
     protected Calendar created;
 
-    @Column(name = "NBS_NAME", length = 256)
+    @Column(name = "NBS_NAME", length = MAX_NAME)
     @Field(index = Index.UN_TOKENIZED, store = Store.YES)
     @FieldBridge(impl = LowerCaseFieldBridge.class)
     protected String name;
 
-    @Column(name = "NDC_SCRIPTING")
+    @Column(name = "NDC_SCRIPTING", nullable = false)
     @Type(type = "true_false")
     protected boolean scripting;
 
@@ -163,7 +161,7 @@ public class NodeBase implements Serializable {
         return uuid;
     }
 
-    public void setUuid(final String uuid) {
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
@@ -171,15 +169,23 @@ public class NodeBase implements Serializable {
         return context;
     }
 
-    public void setContext(final String context) {
+    public void setContext(String context) {
         this.context = context;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getParent() {
         return parent;
     }
 
-    public void setParent(final String parent) {
+    public void setParent(String parent) {
         this.parent = parent;
     }
 
@@ -187,7 +193,7 @@ public class NodeBase implements Serializable {
         return author;
     }
 
-    public void setAuthor(final String author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -195,7 +201,7 @@ public class NodeBase implements Serializable {
         return created;
     }
 
-    public void setCreated(final Calendar created) {
+    public void setCreated(Calendar created) {
         this.created = created;
     }
 
@@ -203,15 +209,19 @@ public class NodeBase implements Serializable {
         return name;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setName(String name) {
+        if (name != null && name.length() > MAX_NAME) {
+            this.name = name.substring(0, MAX_NAME);
+        } else {
+            this.name = name;
+        }
     }
 
     public boolean isScripting() {
         return scripting;
     }
 
-    public void setScripting(final boolean scripting) {
+    public void setScripting(boolean scripting) {
         this.scripting = scripting;
     }
 
@@ -219,7 +229,7 @@ public class NodeBase implements Serializable {
         return scriptCode;
     }
 
-    public void setScriptCode(final String scriptCode) {
+    public void setScriptCode(String scriptCode) {
         this.scriptCode = scriptCode;
     }
 
@@ -227,7 +237,7 @@ public class NodeBase implements Serializable {
         return subscriptors;
     }
 
-    public void setSubscriptors(final Set<String> subscriptors) {
+    public void setSubscriptors(Set<String> subscriptors) {
         this.subscriptors = subscriptors;
     }
 
@@ -235,7 +245,7 @@ public class NodeBase implements Serializable {
         return keywords;
     }
 
-    public void setKeywords(final Set<String> keywords) {
+    public void setKeywords(Set<String> keywords) {
         this.keywords = keywords;
     }
 
@@ -243,7 +253,7 @@ public class NodeBase implements Serializable {
         return categories;
     }
 
-    public void setCategories(final Set<String> categories) {
+    public void setCategories(Set<String> categories) {
         this.categories = categories;
     }
 
@@ -251,7 +261,7 @@ public class NodeBase implements Serializable {
         return properties;
     }
 
-    public void setProperties(final Set<NodeProperty> properties) {
+    public void setProperties(Set<NodeProperty> properties) {
         this.properties = properties;
     }
 
@@ -259,7 +269,7 @@ public class NodeBase implements Serializable {
         return userPermissions;
     }
 
-    public void setUserPermissions(final Map<String, Integer> userPermissions) {
+    public void setUserPermissions(Map<String, Integer> userPermissions) {
         this.userPermissions = userPermissions;
     }
 
@@ -267,21 +277,20 @@ public class NodeBase implements Serializable {
         return rolePermissions;
     }
 
-    public void setRolePermissions(final Map<String, Integer> rolePermissions) {
+    public void setRolePermissions(Map<String, Integer> rolePermissions) {
         this.rolePermissions = rolePermissions;
     }
 
-    @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("uuid=").append(uuid);
         sb.append(", context=").append(context);
+        sb.append(", path=").append(path);
         sb.append(", parent=").append(parent);
         sb.append(", author=").append(author);
         sb.append(", name=").append(name);
-        sb.append(", created=").append(
-                created == null ? null : created.getTime());
+        sb.append(", created=").append(created == null ? null : created.getTime());
         sb.append(", subscriptors=").append(subscriptors);
         sb.append(", keywords=").append(keywords);
         sb.append(", categories=").append(categories);

@@ -1,27 +1,28 @@
 /**
- *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
- *
- *  No bytes were intentionally harmed during the development of this application.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * OpenKM, Open Document Management System (http://www.openkm.com)
+ * Copyright (c) 2006-2015 Paco Avila & Josep Llort
+ * 
+ * No bytes were intentionally harmed during the development of this application.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 package com.openkm.servlet;
 
 import java.io.File;
+import java.io.FileReader;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.Timer;
@@ -32,6 +33,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.SessionImpl;
 import org.jbpm.JbpmContext;
@@ -41,11 +43,8 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
-import com.openkm.cache.UserItemsManager;
-import com.openkm.cache.UserNodeKeywordsManager;
 import com.openkm.core.Config;
 import com.openkm.core.Cron;
-import com.openkm.core.DatabaseException;
 import com.openkm.core.MimeTypeConfig;
 import com.openkm.core.UINotification;
 import com.openkm.core.UpdateInfo;
@@ -63,39 +62,30 @@ import com.openkm.util.FormUtils;
 import com.openkm.util.JBPMUtils;
 import com.openkm.util.UserActivity;
 import com.openkm.util.WarUtils;
+import com.openkm.util.pendtask.PendingTaskExecutor;
 
 /**
  * Servlet Startup Class
  */
 public class RepositoryStartupServlet extends HttpServlet {
-    private static Logger log = LoggerFactory
-            .getLogger(RepositoryStartupServlet.class);
-
+    private static Logger log = LoggerFactory.getLogger(RepositoryStartupServlet.class);
     private static final long serialVersionUID = 1L;
-
     private static Timer uiTimer; // Update Info (OpenKM Update Information)
-
     private static Timer cronTimer; // CRON Manager
-
     private static Timer uinTimer; // User Interface Notification (Create From Administration)
-
     private static Cron cron;
-
     private static UINotification uin;
-
     private static UpdateInfo ui;
-
     private static boolean hasConfiguredDataStore = false;
-
     private static boolean running = false;
 
     @Override
     public void init() throws ServletException {
         super.init();
-        final ServletContext sc = getServletContext();
+        ServletContext sc = getServletContext();
 
         // Read configuration file
-        final Properties config = Config.load(sc);
+        Properties config = Config.load(sc);
 
         // Call only once during initialization time of your application
         // @see http://issues.openkm.com/view.php?id=1577
@@ -118,7 +108,7 @@ public class RepositoryStartupServlet extends HttpServlet {
             // Initialize property groups
             log.info("*** Initialize property groups... ***");
             FormUtils.parsePropertyGroupsForms(Config.PROPERTY_GROUPS_XML);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -126,7 +116,7 @@ public class RepositoryStartupServlet extends HttpServlet {
         try {
             log.info("*** Initialize language detection engine... ***");
             DetectorFactory.loadProfile(Config.LANG_PROFILES_BASE);
-        } catch (final LangDetectException e) {
+        } catch (LangDetectException e) {
             log.error(e.getMessage(), e);
         }
 
@@ -137,8 +127,7 @@ public class RepositoryStartupServlet extends HttpServlet {
         start();
 
         // Activity log
-        UserActivity.log(Config.SYSTEM_USER, "MISC_OPENKM_START", null, null,
-                null);
+        UserActivity.log(Config.SYSTEM_USER, "MISC_OPENKM_START", null, null, null);
     }
 
     @Override
@@ -146,8 +135,7 @@ public class RepositoryStartupServlet extends HttpServlet {
         super.destroy();
 
         // Activity log
-        UserActivity.log(Config.SYSTEM_USER, "MISC_OPENKM_STOP", null, null,
-                null);
+        UserActivity.log(Config.SYSTEM_USER, "MISC_OPENKM_STOP", null, null, null);
 
         // Invoke stop
         stop(this);
@@ -156,7 +144,7 @@ public class RepositoryStartupServlet extends HttpServlet {
             // Database shutdown
             log.info("*** Hibernate shutdown ***");
             HibernateUtil.closeSessionFactory();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
@@ -164,7 +152,7 @@ public class RepositoryStartupServlet extends HttpServlet {
             // Call only once during destroy time of your application
             // @see http://issues.openkm.com/view.php?id=1577
             SLF4JBridgeHandler.uninstall();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -173,7 +161,7 @@ public class RepositoryStartupServlet extends HttpServlet {
      * Start OpenKM and possible repository and database initialization
      */
     public static synchronized void start() throws ServletException {
-        final SystemAuthentication systemAuth = new SystemAuthentication();
+        SystemAuthentication systemAuth = new SystemAuthentication();
 
         if (running) {
             throw new IllegalStateException("OpenKM already started");
@@ -191,27 +179,15 @@ public class RepositoryStartupServlet extends HttpServlet {
             }
 
             log.info("*** Repository initialized ***");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new ServletException(e.getMessage(), e);
-        }
-
-        if (Config.USER_ITEM_CACHE) {
-            // Deserialize
-            try {
-                log.info("*** Cache deserialization ***");
-                UserItemsManager.deserialize();
-                UserNodeKeywordsManager.deserialize();
-            } catch (final DatabaseException e) {
-                log.warn(e.getMessage(), e);
-            }
         }
 
         log.info("*** User database initialized ***");
 
         if (!Config.REPOSITORY_NATIVE) {
             // Test for datastore
-            final SessionImpl si = (SessionImpl) JcrRepositoryModule
-                    .getSystemSession();
+            SessionImpl si = (SessionImpl) JcrRepositoryModule.getSystemSession();
 
             if (((RepositoryImpl) si.getRepository()).getDataStore() == null) {
                 hasConfiguredDataStore = false;
@@ -227,8 +203,7 @@ public class RepositoryStartupServlet extends HttpServlet {
 
         // Workflow
         log.info("*** Initializing workflow engine... ***");
-        final JbpmContext jbpmContext = JBPMUtils.getConfig()
-                .createJbpmContext();
+        JbpmContext jbpmContext = JBPMUtils.getConfig().createJbpmContext();
         jbpmContext.setSessionFactory(HibernateUtil.getSessionFactory());
         jbpmContext.getGraphSession();
         jbpmContext.getJbpmConfiguration().getJobExecutor().start(); // startJobExecutor();
@@ -238,15 +213,13 @@ public class RepositoryStartupServlet extends HttpServlet {
         log.info("*** Initializing MIME types... ***");
         MimeTypeConfig.loadMimeTypes();
 
-        if (Config.UPDATE_INFO) {
-            log.info("*** Activating update info ***");
-            ui = new UpdateInfo();
-            uiTimer.schedule(ui, 1000, 24 * 60 * 60 * 1000); // First in 1 seg, next each 24 hours
-        }
+        log.info("*** Activating update info ***");
+        ui = new UpdateInfo();
+        uiTimer.schedule(ui, TimeUnit.MINUTES.toMillis(5), TimeUnit.HOURS.toMillis(24)); // First in 5 min, next each 24 hours
 
         log.info("*** Activating cron ***");
         cron = new Cron();
-        final Calendar calCron = Calendar.getInstance();
+        Calendar calCron = Calendar.getInstance();
         calCron.add(Calendar.MINUTE, 1);
         calCron.set(Calendar.SECOND, 0);
         calCron.set(Calendar.MILLISECOND, 0);
@@ -258,59 +231,61 @@ public class RepositoryStartupServlet extends HttpServlet {
         uin = new UINotification();
 
         // First in 1 second next in x minutes
-        uinTimer.scheduleAtFixedRate(uin, 1000,
-                TimeUnit.MINUTES.toMillis(Config.SCHEDULE_UI_NOTIFICATION));
+        uinTimer.scheduleAtFixedRate(uin, 1000, TimeUnit.MINUTES.toMillis(Config.SCHEDULE_UI_NOTIFICATION));
 
         try {
             // General maintenance works
-            final String uisContent = "com.openkm.cache.UserItemsManager.serialize();";
-            CronTabUtils.createOrUpdate("User Items Serialize", "@hourly",
-                    uisContent);
+            String dapContent = "com.openkm.dao.DashboardActivityDAO.purge();";
+            CronTabUtils.createOrUpdate("Dashboard Activity Purge", "@daily", dapContent);
 
-            final String ruiContent = "com.openkm.cache.UserItemsManager.refreshDbUserItems();";
-            CronTabUtils.createOrUpdate("Refresh User Items", "@weekly",
-                    ruiContent);
+            String uisContent = "com.openkm.cache.UserItemsManager.serialize();";
+            CronTabUtils.createOrUpdate("User Items Serialize", "@hourly", uisContent);
 
-            final String umiContent = "new com.openkm.core.UserMailImporter().run();";
-            CronTabUtils.createOrUpdate("User Mail Importer", "*/30 * * * *",
-                    umiContent);
+            String ruiContent = "com.openkm.cache.UserItemsManager.refreshDbUserItems();";
+            CronTabUtils.createOrUpdate("Refresh User Items", "@weekly", ruiContent);
 
-            final String tewContent = "new com.openkm.extractor.TextExtractorWorker().run();";
-            CronTabUtils.createOrUpdate("Text Extractor Worker", "*/5 * * * *",
-                    tewContent);
+            String umiContent = "new com.openkm.core.UserMailImporter().run();";
+            CronTabUtils.createOrUpdate("User Mail Importer", "*/30 * * * *", umiContent);
 
-            final String riContent = "new com.openkm.core.RepositoryInfo().run();";
-            CronTabUtils.createOrUpdate("Repository Info", "@daily", riContent);
+            String tewContent = "new com.openkm.extractor.TextExtractorWorker().run();";
+            CronTabUtils.createOrUpdate("Text Extractor Worker", "*/5 * * * *", tewContent);
 
-            final String swdContent = "new com.openkm.core.Watchdog().run();";
-            CronTabUtils.createOrUpdate("Session Watchdog", "*/5 * * * *",
-                    swdContent);
+            String swdContent = "new com.openkm.core.Watchdog().run();";
+            CronTabUtils.createOrUpdate("Session Watchdog", "*/5 * * * *", swdContent);
+
+            String pptContent = "new com.openkm.util.pendtask.PendingTaskExecutor().run();";
+            CronTabUtils.createOrUpdate("Process Pending Tasks", "*/5 * * * *", pptContent);
 
             // Datastore garbage collection
             if (!Config.REPOSITORY_NATIVE && hasConfiguredDataStore) {
-                final String dgcContent = "new com.openkm.module.jcr.stuff.DataStoreGarbageCollector().run();";
-                CronTabUtils.createOrUpdate("Datastore Garbage Collector",
-                        "@daily", dgcContent);
+                String dgcContent = "new com.openkm.module.jcr.stuff.DataStoreGarbageCollector().run();";
+                CronTabUtils.createOrUpdate("Datastore Garbage Collector", "@daily", dgcContent);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
         try {
             log.info("*** Activating thesaurus repository ***");
             RDFREpository.getInstance();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
 
         try {
-            if (!Config.SYSTEM_OPENOFFICE_PATH.equals("")) {
-                log.info("*** Start OpenOffice manager ***");
-                DocConverter.getInstance().start();
+            if (Config.REMOTE_CONVERSION_SERVER.equals("")) {
+                if (!Config.SYSTEM_OPENOFFICE_PATH.equals("")) {
+                    log.info("*** Start OpenOffice manager ***");
+                    DocConverter.getInstance().start();
+                } else if (!Config.SYSTEM_OPENOFFICE_SERVER.equals("")) {
+                    log.info("*** Using OpenOffice conversion server ***");
+                } else {
+                    log.warn("*** No OpenOffice manager nor server configured ***");
+                }
             } else {
-                log.warn("*** No OpenOffice manager configured ***");
+                log.info("*** Remote conversion configured ***");
             }
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -318,14 +293,27 @@ public class RepositoryStartupServlet extends HttpServlet {
         ExtensionManager.getInstance();
 
         try {
-            log.info("*** Ejecute start script ***");
-            final File script = new File(Config.HOME_DIR + File.separatorChar
-                    + Config.START_SCRIPT);
+            log.info("*** Execute start script ***");
+            File script = new File(Config.HOME_DIR + File.separatorChar + Config.START_SCRIPT);
             ExecutionUtils.runScript(script);
-            final File jar = new File(Config.HOME_DIR + File.separatorChar
-                    + Config.START_JAR);
+            File jar = new File(Config.HOME_DIR + File.separatorChar + Config.START_JAR);
             ExecutionUtils.getInstance().runJar(jar);
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+        }
+
+        try {
+            log.info("*** Execute start SQL ***");
+            File sql = new File(Config.HOME_DIR + File.separatorChar + Config.START_SQL);
+
+            if (sql.exists() && sql.canRead()) {
+                FileReader fr = new FileReader(sql);
+                HibernateUtil.executeSentences(fr);
+                IOUtils.closeQuietly(fr);
+            } else {
+                log.warn("Unable to read sql: {}", sql.getPath());
+            }
+        } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -336,7 +324,7 @@ public class RepositoryStartupServlet extends HttpServlet {
     /**
      * Close OpenKM and free resources
      */
-    public static synchronized void stop(final GenericServlet gs) {
+    public static synchronized void stop(GenericServlet gs) {
         if (!running) {
             throw new IllegalStateException("OpenKM not started");
         }
@@ -345,11 +333,13 @@ public class RepositoryStartupServlet extends HttpServlet {
         ExtensionManager.getInstance().shutdown();
 
         try {
-            if (!Config.SYSTEM_OPENOFFICE_PATH.equals("")) {
-                log.info("*** Shutting down OpenOffice manager ***");
-                DocConverter.getInstance().stop();
+            if (Config.REMOTE_CONVERSION_SERVER.equals("")) {
+                if (!Config.SYSTEM_OPENOFFICE_PATH.equals("")) {
+                    log.info("*** Shutting down OpenOffice manager ***");
+                    DocConverter.getInstance().stop();
+                }
             }
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -369,45 +359,50 @@ public class RepositoryStartupServlet extends HttpServlet {
         uinTimer.cancel();
         uiTimer.cancel();
 
-        log.info("*** Shutting down repository... ***");
+        // Shutdown pending task executor
+        log.info("*** Shutting pending task executor... ***");
+        PendingTaskExecutor.shutdown();
 
-        if (Config.USER_ITEM_CACHE) {
-            // Serialize
-            try {
-                log.info("*** Cache serialization ***");
-                UserItemsManager.serialize();
-                UserNodeKeywordsManager.serialize();
-            } catch (final DatabaseException e) {
-                log.warn(e.getMessage(), e);
-            }
-        }
+        log.info("*** Shutting down repository... ***");
 
         try {
             // Preserve system user config
             if (!Config.REPOSITORY_NATIVE) {
                 JcrRepositoryModule.shutdown();
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
         log.info("*** Repository shutted down ***");
 
         try {
-            log.info("*** Ejecute stop script ***");
-            final File script = new File(Config.HOME_DIR + File.separatorChar
-                    + Config.STOP_SCRIPT);
+            log.info("*** Execute stop script ***");
+            File script = new File(Config.HOME_DIR + File.separatorChar + Config.STOP_SCRIPT);
             ExecutionUtils.runScript(script);
-            final File jar = new File(Config.HOME_DIR + File.separatorChar
-                    + Config.STOP_JAR);
+            File jar = new File(Config.HOME_DIR + File.separatorChar + Config.STOP_JAR);
             ExecutionUtils.getInstance().runJar(jar);
-        } catch (final Throwable e) {
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+        }
+
+        try {
+            log.info("*** Execute stop SQL ***");
+            File sql = new File(Config.HOME_DIR + File.separatorChar + Config.STOP_SQL);
+
+            if (sql.exists() && sql.canRead()) {
+                FileReader fr = new FileReader(sql);
+                HibernateUtil.executeSentences(fr);
+                IOUtils.closeQuietly(fr);
+            } else {
+                log.warn("Unable to read sql: {}", sql.getPath());
+            }
+        } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
 
         log.info("*** Shutting down workflow engine... ***");
-        final JbpmContext jbpmContext = JBPMUtils.getConfig()
-                .createJbpmContext();
+        JbpmContext jbpmContext = JBPMUtils.getConfig().createJbpmContext();
         jbpmContext.getJbpmConfiguration().getJobExecutor().stop();
         jbpmContext.getJbpmConfiguration().close();
         jbpmContext.close();
@@ -421,45 +416,58 @@ public class RepositoryStartupServlet extends HttpServlet {
      */
     private static void createMissingDirs() {
         // Initialize DXF cache folder
-        final File dxfCacheFolder = new File(Config.REPOSITORY_CACHE_DXF);
+        File dxfCacheFolder = new File(Config.REPOSITORY_CACHE_DXF);
         if (!dxfCacheFolder.exists()) {
             log.info("Create missing directory {}", dxfCacheFolder.getPath());
             dxfCacheFolder.mkdirs();
         }
 
         // Initialize PDF cache folder
-        final File pdfCacheFolder = new File(Config.REPOSITORY_CACHE_PDF);
+        File pdfCacheFolder = new File(Config.REPOSITORY_CACHE_PDF);
         if (!pdfCacheFolder.exists()) {
             log.info("Create missing directory {}", pdfCacheFolder.getPath());
             pdfCacheFolder.mkdirs();
         }
 
         // Initialize SWF cache folder
-        final File swfCacheFolder = new File(Config.REPOSITORY_CACHE_SWF);
+        File swfCacheFolder = new File(Config.REPOSITORY_CACHE_SWF);
         if (!swfCacheFolder.exists()) {
             log.info("Create missing directory {}", swfCacheFolder.getPath());
             swfCacheFolder.mkdirs();
         }
 
-        if (FsDataStore.DATASTORE_BACKEND_FS
-                .equals(Config.REPOSITORY_DATASTORE_BACKEND)) {
+        // Initialize chroot folder
+        if (Config.SYSTEM_MULTIPLE_INSTANCES) {
+            File chrootFolder = new File(Config.INSTANCE_CHROOT_PATH);
+            if (!chrootFolder.exists()) {
+                log.info("Create missing directory {}", chrootFolder.getPath());
+                chrootFolder.mkdirs();
+            }
+        }
+
+        // Initialize purgatory home
+        if (Config.REPOSITORY_PURGATORY_HOME != null && !Config.REPOSITORY_PURGATORY_HOME.isEmpty()) {
+            File purgatoryFolder = new File(Config.REPOSITORY_PURGATORY_HOME);
+            if (!purgatoryFolder.exists()) {
+                log.info("Create missing directory {}", purgatoryFolder.getPath());
+                purgatoryFolder.mkdirs();
+            }
+        }
+
+        if (FsDataStore.DATASTORE_BACKEND_FS.equals(Config.REPOSITORY_DATASTORE_BACKEND)) {
             // Initialize datastore
-            final File repoDatastoreFolder = new File(
-                    Config.REPOSITORY_DATASTORE_HOME);
+            File repoDatastoreFolder = new File(Config.REPOSITORY_DATASTORE_HOME);
             if (!repoDatastoreFolder.exists()) {
-                log.info("Create missing directory {}",
-                        repoDatastoreFolder.getPath());
+                log.info("Create missing directory {}", repoDatastoreFolder.getPath());
                 repoDatastoreFolder.mkdirs();
             }
         }
 
         // Initialize Hibernate Search indexes
         // NOTE: This is already created on Hibernate initialization
-        final File hSearchIndexesFolder = new File(
-                Config.HIBERNATE_SEARCH_INDEX_HOME);
+        File hSearchIndexesFolder = new File(Config.HIBERNATE_SEARCH_INDEX_HOME);
         if (!hSearchIndexesFolder.exists()) {
-            log.info("Create missing directory {}",
-                    hSearchIndexesFolder.getPath());
+            log.info("Create missing directory {}", hSearchIndexesFolder.getPath());
             hSearchIndexesFolder.mkdirs();
         }
     }

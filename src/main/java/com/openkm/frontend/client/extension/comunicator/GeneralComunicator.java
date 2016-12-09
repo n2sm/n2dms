@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -30,6 +30,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.openkm.frontend.client.Main;
 import com.openkm.frontend.client.bean.GWTDocument;
+import com.openkm.frontend.client.bean.GWTFolder;
 import com.openkm.frontend.client.bean.GWTWorkspace;
 import com.openkm.frontend.client.bean.ToolBarOption;
 import com.openkm.frontend.client.service.OKMRepositoryService;
@@ -44,8 +45,7 @@ import com.openkm.frontend.client.util.Util;
  *
  */
 public class GeneralComunicator {
-    private static final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT
-            .create(OKMRepositoryService.class);
+    private static final OKMRepositoryServiceAsync repositoryService = (OKMRepositoryServiceAsync) GWT.create(OKMRepositoryService.class);
 
     /**
      * refreshUI
@@ -71,26 +71,24 @@ public class GeneralComunicator {
     /**
      * i18nExtension
      */
-    public static String i18nExtension(final String property) {
+    public static String i18nExtension(String property) {
         return Main.get().i18nExtension(property);
     }
 
     /**
      * i18n
      */
-    public static String i18n(final String property) {
+    public static String i18n(String property) {
         return Main.i18n(property);
     }
 
     /**
      * Download Document
      */
-    public static void downloadDocument(final boolean checkout) {
-        if (Main.get().mainPanel.desktop.browser.fileBrowser
-                .isDocumentSelected()) {
-            final String docUuid = Main.get().mainPanel.desktop.browser.fileBrowser
-                    .getDocument().getUuid();
-            Util.downloadFileByUUID(docUuid, checkout ? "checkout" : "");
+    public static void downloadDocument(boolean checkout) {
+        if (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()) {
+            String docUuid = Main.get().mainPanel.desktop.browser.fileBrowser.getDocument().getUuid();
+            Util.downloadFileByUUID(docUuid, (checkout ? "checkout" : ""));
         }
     }
 
@@ -98,17 +96,15 @@ public class GeneralComunicator {
      * Download document as PDF
      */
     public static void downloadDocumentPdf() {
-        if (Main.get().mainPanel.desktop.browser.fileBrowser
-                .isDocumentSelected()) {
-            Util.downloadFilePdf(Main.get().mainPanel.desktop.browser.fileBrowser
-                    .getDocument().getUuid());
+        if (Main.get().mainPanel.desktop.browser.fileBrowser.isDocumentSelected()) {
+            Util.downloadFilePdf(Main.get().mainPanel.desktop.browser.fileBrowser.getDocument().getUuid());
         }
     }
 
     /**
      * extensionCallOwnDownload
      */
-    public static void extensionCallOwnDownload(final String url) {
+    public static void extensionCallOwnDownload(String url) {
         final Element downloadIframe = RootPanel.get("__download").getElement();
         DOM.setElementAttribute(downloadIframe, "src", url);
     }
@@ -116,7 +112,7 @@ public class GeneralComunicator {
     /**
      * download file by uuid
      */
-    public static void downloadFileByUUID(final String uuid, final String params) {
+    public static void downloadFileByUUID(String uuid, String params) {
         Util.downloadFileByUUID(uuid, params);
     }
 
@@ -124,15 +120,15 @@ public class GeneralComunicator {
      * download file by path
      */
     @Deprecated
-    public static void downloadFile(final String path, final String params) {
+    public static void downloadFile(String path, final String params) {
         repositoryService.getUUIDByPath(path, new AsyncCallback<String>() {
             @Override
-            public void onSuccess(final String result) {
+            public void onSuccess(String result) {
                 Util.downloadFileByUUID(result, params);
             }
 
             @Override
-            public void onFailure(final Throwable caught) {
+            public void onFailure(Throwable caught) {
                 Main.get().showError("getUUIDByPath", caught);
             }
         });
@@ -142,7 +138,7 @@ public class GeneralComunicator {
     /**
      * Sets the status
      */
-    public static void setStatus(final String msg) {
+    public static void setStatus(String msg) {
         Main.get().mainPanel.bottomPanel.setStatus(msg);
     }
 
@@ -157,7 +153,7 @@ public class GeneralComunicator {
     /**
      * showError
      */
-    public static void showError(final String callback, final Throwable caught) {
+    public static void showError(String callback, Throwable caught) {
         Main.get().showError(callback, caught);
     }
 
@@ -192,14 +188,14 @@ public class GeneralComunicator {
     /**
      * openAllFolderPath
      */
-    public static void openPath(final String path, final String docPath) {
+    public static void openPath(String path, String docPath) {
         CommonUI.openPath(path, docPath);
     }
 
     /**
      * openAllFolderPath
      */
-    public static void openAllFolderPath(final String path, final String docPath) {
+    public static void openAllFolderPath(String path, String docPath) {
         CommonUI.openPath(path, docPath);
     }
 
@@ -255,7 +251,23 @@ public class GeneralComunicator {
     /**
      * openPathByUuid
      */
-    public static void openPathByUuid(final String uuid) {
+    public static void openPathByUuid(String uuid) {
         CommonUI.openPathByUuid(uuid);
+    }
+
+    /**
+     * getFolderIcon
+     */
+    public static String getFolderIcon(GWTFolder fld) {
+        return CommonUI.getFolderIcon(fld);
+    }
+
+    /**
+     * get
+     * 
+     * @return
+     */
+    public static Main get() {
+        return Main.get();
     }
 }
