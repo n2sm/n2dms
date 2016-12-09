@@ -79,19 +79,25 @@ public class SecureStore {
     /**
      * DES encoder
      */
-    @SuppressWarnings("restriction")
     public static String desEncode(String key, String src) throws InvalidKeyException, UnsupportedEncodingException,
             NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-        return new sun.misc.BASE64Encoder().encode(desEncode(key, src.getBytes("UTF8")));
+        try {
+            return new String(Base64.encodeBase64(desEncode(key, src.getBytes("UTF8"))));
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 
     /**
      * DES decoder
      */
-    @SuppressWarnings("restriction")
     public static String desDecode(String key, String src) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException,
             NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
-        return new String(desDecode(key, new sun.misc.BASE64Decoder().decodeBuffer(src)), "UTF8");
+        try {
+            return new String(desDecode(key, Base64.decodeBase64(src.getBytes("UTF8"))), "UTF8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 
     /**
