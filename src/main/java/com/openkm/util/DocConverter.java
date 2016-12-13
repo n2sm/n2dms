@@ -491,7 +491,8 @@ public class DocConverter {
             ExecutionResult er = ExecutionUtils.runCmd(cmd);
 
             if (er.getExitValue() != 0) {
-                throw new ConversionException(er.getStderr());
+                throw new ConversionException("cmd=" + cmd + ", exitcode=" + er.getExitValue() + ", fileIn=" + input.getPath()
+                        + ", fileOut=" + output.getPath() + ", stderr=" + er.getStderr());
             }
         } catch (SecurityException e) {
             throw new ConversionException("Security exception executing command: " + cmd, e);

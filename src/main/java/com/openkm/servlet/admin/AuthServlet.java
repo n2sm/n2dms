@@ -225,26 +225,29 @@ public class AuthServlet extends BaseServlet {
                 String usrId = WebUtils.getString(request, "usr_id");
 
                 if (AuthDAO.findUserByPk(usrId) == null) {
-                    if (usrId.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
-                        User usr = new User();
-                        usr.setId(usrId);
-                        usr.setName(WebUtils.getString(request, "usr_name"));
-                        usr.setPassword(WebUtils.getString(request, "usr_password"));
-                        usr.setEmail(WebUtils.getString(request, "usr_email"));
-                        usr.setActive(WebUtils.getBoolean(request, "usr_active"));
-                        List<String> usrRoles = WebUtils.getStringList(request, "usr_roles");
-
-                        for (String rolId : usrRoles) {
-                            usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
-                        }
-
-                        AuthDAO.createUser(usr);
-
-                        // Activity log
-                        UserActivity.log(userId, "ADMIN_USER_CREATE", usr.getId(), null, usr.toString());
-                    } else {
+                    if (!usrId.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION)) {
                         throw new DatabaseException("Invalid identifier");
+                    } else if (Config.VALIDATOR_ID_MIN_LENGTH > 0 && usrId.length() < Config.VALIDATOR_ID_MIN_LENGTH) {
+                        throw new DatabaseException(Config.VALIDATOR_ID_ERROR_MIN_LENGTH);
+                    } else if (Config.VALIDATOR_ID_MAX_LENGTH > 0 && usrId.length() > Config.VALIDATOR_ID_MAX_LENGTH) {
+                        throw new DatabaseException(Config.VALIDATOR_ID_ERROR_MAX_LENGTH);
                     }
+                    User usr = new User();
+                    usr.setId(usrId);
+                    usr.setName(WebUtils.getString(request, "usr_name"));
+                    usr.setPassword(WebUtils.getString(request, "usr_password"));
+                    usr.setEmail(WebUtils.getString(request, "usr_email"));
+                    usr.setActive(WebUtils.getBoolean(request, "usr_active"));
+                    List<String> usrRoles = WebUtils.getStringList(request, "usr_roles");
+
+                    for (String rolId : usrRoles) {
+                        usr.getRoles().add(AuthDAO.findRoleByPk(rolId));
+                    }
+
+                    AuthDAO.createUser(usr);
+
+                    // Activity log
+                    UserActivity.log(userId, "ADMIN_USER_CREATE", usr.getId(), null, usr.toString());
                 } else {
                     throw new DatabaseException("User name already taken");
                 }

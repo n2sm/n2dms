@@ -15,6 +15,10 @@
     $(document).ready(function() {
     	$('form').bind('submit', function(event) {
         	var error = $('input[name="usr_id"] + span.vanadium-invalid');
+                var id = $('input[name="usr_id"]').val();
+                if ((error != null) && (!id.matches(Config.PRINCIPAL_IDENTIFIER_VALIDATION))) {
+                    return false;
+                }
     		
     		if (error == null || error.text() == '') {
         		return true;

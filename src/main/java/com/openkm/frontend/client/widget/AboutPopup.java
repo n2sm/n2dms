@@ -48,12 +48,12 @@ public class AboutPopup extends DialogBox implements ClickHandler {
     private HTML htmlAppVersion;
     private HTML htmlExtVersion;
     private Button button;
-    private String msg = "<b>Be Open, my friend!</b><br>";
-    private String copy = "&nbsp;&copy 2006-2016 OpenKM <br><br>";
-    private String team = "<b>OpenKM Team</b><br><br>";
+    private String msg = "<br>";
+    private String copy = "&nbsp;&copy 2006-2016 N2SM, Inc.<br><br>";
+    private String team = "<b>N2SM Products Solution</b><br><br>";
     // "Francisco José Ávila Bermejo (<i>Monkiki</i>)<br>"+
     // "Josep Llort Tella (<i>Darkman97i</i>)<br><br>";
-    private String web = "<a href=\"http://www.openkm.com\" target=\"_blank\">http://www.openkm.com</a><br><br>";
+    private String web = "<a href=\"http://www.n2sm.net\" target=\"_blank\">http://www.n2sm.net</a><br><br>";
     private String appVersion = "Version 0.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     private String extVersion = "With Default Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     private Futurama futurama;
@@ -72,7 +72,7 @@ public class AboutPopup extends DialogBox implements ClickHandler {
         vPanel = new VerticalPanel();
         text = new HTML();
         button = new Button(Main.i18n("button.close"), this);
-        logo = new Image("img/logo_openkm.gif");
+        logo = new Image("img/logo_n2sm.gif");
 
         vPanel.setWidth("300px");
         vPanel.setHeight("195px");
@@ -118,7 +118,7 @@ public class AboutPopup extends DialogBox implements ClickHandler {
     }
 
     public void setExtVersion(String extVersion) {
-        this.extVersion = "With " + extVersion + " Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        // this.extVersion = "With " + extVersion + " Extension&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         htmlExtVersion.setHTML(this.extVersion);
     }
 
@@ -145,7 +145,7 @@ public class AboutPopup extends DialogBox implements ClickHandler {
     public void show() {
         setText(Main.i18n("about.label"));
         text.setHTML(msg);
-        logo.setUrl("img/logo_openkm.gif");
+        logo.setUrl("img/logo_n2sm.gif");
         reset();
         super.show();
     }

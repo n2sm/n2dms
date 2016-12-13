@@ -1,7 +1,13 @@
-INSERT INTO OKM_USER (USR_ID, USR_NAME, USR_PASSWORD, USR_EMAIL, USR_ACTIVE) VALUES ('okmAdmin', 'Administrator', '21232f297a57a5a743894a0e4a801fc3', 'noreply@openkm.com', 'T');
+INSERT INTO OKM_USER (USR_ID, USR_NAME, USR_PASSWORD, USR_EMAIL, USR_ACTIVE) VALUES ('n2smAdmin', 'N2SM Administrator', '21232f297a57a5a743894a0e4a801fc3', 'support@n2sm.net', 'T');
+INSERT INTO OKM_USER (USR_ID, USR_NAME, USR_PASSWORD, USR_EMAIL, USR_ACTIVE) VALUES ('siteAdmin', 'Site Administrator', '21232f297a57a5a743894a0e4a801fc3', 'support@n2sm.net', 'T');
+INSERT INTO OKM_USER (USR_ID, USR_NAME, USR_PASSWORD, USR_EMAIL, USR_ACTIVE) VALUES ('guest', 'Guest', '21232f297a57a5a743894a0e4a801fc3', 'support@n2sm.net', 'T');
 INSERT INTO OKM_ROLE (ROL_ID, ROL_ACTIVE) VALUES ('ROLE_ADMIN', 'T');
 INSERT INTO OKM_ROLE (ROL_ID, ROL_ACTIVE) VALUES ('ROLE_USER', 'T');
-INSERT INTO OKM_USER_ROLE (UR_USER, UR_ROLE) VALUES ('okmAdmin', 'ROLE_ADMIN');
+INSERT INTO OKM_ROLE (ROL_ID, ROL_ACTIVE) VALUES ('ROLE_SITE_ADMIN', 'T');
+INSERT INTO OKM_USER_ROLE (UR_USER, UR_ROLE) VALUES ('n2smAdmin', 'ROLE_ADMIN');
+INSERT INTO OKM_USER_ROLE (UR_USER, UR_ROLE) VALUES ('siteAdmin', 'ROLE_ADMIN');
+INSERT INTO OKM_USER_ROLE (UR_USER, UR_ROLE) VALUES ('siteAdmin', 'ROLE_SITE_ADMIN');
+INSERT INTO OKM_USER_ROLE (UR_USER, UR_ROLE) VALUES ('guest', 'ROLE_USER');
 INSERT INTO OKM_PROFILE (PRF_ID, PRF_NAME, PRF_ACTIVE) VALUES (1, 'Default', 'T');
 INSERT INTO OKM_MIME_TYPE (MT_ID, MT_NAME, MT_DESCRIPTION, MT_SEARCH, MT_IMAGE_CONTENT, MT_IMAGE_MIME) VALUES (1, 'application/octet-stream', 'Binary', 'T', 'R0lGODlhFwAQAMZrANldWqxqc+deWliBrtFlZehhXehiXlqEtFmFtOhkYVuGs+hoZmeJs1+LuGGMuOtraa2AX2OOuutua6yCYulvbaqCa+1vbutxbmuQud54cbuEc+12de52dW2VvnSVuJeNpe54d2yefnCfa+Z7duN8du17eXaYvYSVs3SigfB+fJWXr++DgvCEhH2odpWctYmiwOyLieuNjYGweomnxYOwfoWwfoWzfZSqxPSTlI6uzYy3ho+vzpKwz8OmpJOwz/ScnZi/kLG4sKbAmaa/2L69vaXIn76+vqjJoua1svC8ue/CwbrUtO/NzMrY2tTc5dzi6Obm5ufn5+np6fDo5+rq6uzs7O3t7fHs7O/u7+/v7/Dw8PLw8PHx8fbw7/bx8PLy8vPz8/Tz8/T09PX19fb29vj4+Pj4+fn5+fr6+vv7+/z8/P///////////////////////////////////////////////////////////////////////////////////yH5BAEKAH8ALAAAAAAXABAAAAfLgH+Cf0aFhoeDiYqEZWuOj2plRouLRmliY5lcWVJqUZOUg0RdTElKU1taVGpkYqChPTEUDwswSGFcarpqr4saLBYbEhwkV1xVVFC8lC02ED8pIAkGI15lZGBWy4syQBMrOCUFAhlY12Bf24o6S0IVBBcAASceaWlnZOqJNUdFKC4fVJjocODemTL6EomgEcLHkBwRHCBAQxFhL0VBmszgsaOBAgYUKSZMZMSMkxcYBtx4sivNyEFGdsmceZHkmUeQdp2pCfOQT0SJAgEAOw==', 'image/gif');
 INSERT INTO OKM_MIME_TYPE_EXTENSION (MTE_ID, MTE_NAME) VALUES (1, '*');
@@ -146,3 +152,128 @@ INSERT INTO OKM_MIME_TYPE (MT_ID, MT_NAME, MT_DESCRIPTION, MT_SEARCH, MT_IMAGE_C
 INSERT INTO OKM_MIME_TYPE_EXTENSION (MTE_ID, MTE_NAME) VALUES (62, 'wav');
 INSERT INTO OKM_MIME_TYPE (MT_ID, MT_NAME, MT_DESCRIPTION, MT_SEARCH, MT_IMAGE_CONTENT, MT_IMAGE_MIME) VALUES (63, 'image/svg+xml', 'SVG', 'T', 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIWSURBVDjLhZNPbxJRFMWhRrYu3NrExIUbdzWte6M7d34Eo2Hjxm8gwZUxIYEARUKAWgwbV0BpxAW11bpQFrCoCVEMDplhQMow782/enx3WsiU0jrJ2bz7zu+9e95cHwAfSXzXhFaEVv+j60JLM58HsGIYxsi27SPHcbBIoo5oNBrxQryAVTJPJhPouu6q0+mgVquh0WhAlmUX0uv1EIvFZpCp2U8A2sA5h2maYIyhUChA0zTU63UoiuICaJ0OSSaTx5B5AJnpqqVSCbmNTWxVt9FsNtHv98+05GYyD7AsC5VKBZvFd/j2k6Etc6gjHfLgELKiujeRJGkxQGSAYDCIx8+eI/ORIb3Lkf0sWvmio9aaoC2NoQ7+QFUHCwFr5XIZ8bfvhZFhq2XgU9tEb2Tj99DCgcTx9YeOg64GZTCGPQdYEnpaLBbxZl9HfIejo1rg5nGvti3CMyxouonhIYM8ZG7NBWSz2YepVKobiUR+UXjrwry+wzBm9qnAqD03YHohbsASUP+ly2u+XC7XzmQyt9LpdJc2xuscr0ULU9NUFC6JDiFRCy4gn88/EWqFw+EEmfL7HK8+8FOAqdmrWYjC7E8kElcCgcAdWmx2LbzY5mCmc+YWXp33H/w1LQehKhPPZuK8mTjR0QxwArktQtKpsLHHEarwC81ir+ZOrwewTBCiXr157/7d0PfqjQcvH10w1jT6y/8A/nHJHcAgm2AAAAAASUVORK5CYII=', 'image/png');
 INSERT INTO OKM_MIME_TYPE_EXTENSION (MTE_ID, MTE_NAME) VALUES (63, 'svg');
+
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('application.url', 'string', 'http://localhost:8080/dm/index.jsp');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('default.admin.role', 'string', 'ROLE_ADMIN');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('default.lang', 'string', 'ja-JP');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('default.script', 'text', 'print("UserId: " + session.getUserID());
+print("EventType: " + eventType);
+print("EventNode: " + eventNode.getPath());
+print("ScriptNode: " + scriptNode.getPath());');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('default.user.role', 'string', 'ROLE_USER');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.base.url', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.owl.file', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.skos.file', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.tree.childs', 'text', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.tree.root', 'text', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('kea.thesaurus.vocabulary.serql', 'text', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('managed.text.extraction', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('managed.text.extraction.batch', 'integer', '10');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('max.file.size', 'long', '100');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('max.search.results', 'integer', '500');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('min.search.characters', 'integer', '3');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('notification.message.body', 'text', '<b>Document: </b><a href="${documentUrl}">${documentPath}</a><br/><b>User: </b>${userId}<br/><b>Message: </b>${notificationMessage}<br/>');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('notification.message.subject', 'text', 'N2 DMS - NOTIFICATION - ${documentName}');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('notify.twitter.password', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('notify.twitter.status', 'text', 'N2 DMS - ${documentUrl} - ${documentPath} - ${userId} - ${eventType}');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('notify.twitter.user', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('plugin.debug', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.adapter', 'string', 'com.openkm.principal.DatabasePrincipalAdapter');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.database.filter.inactive.users', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.hide.connection.roles', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.mail.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.mail.search.base', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.mail.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.referral', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.role.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.role.search.base', 'list', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.role.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.roles.by.user.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.roles.by.user.search.base', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.roles.by.user.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.security.credentials', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.security.principal', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.server', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.user.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.user.search.base', 'list', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.user.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.username.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.username.search.base', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.username.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.users.by.role.attribute', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.users.by.role.search.base', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.users.by.role.search.filter', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('principal.ldap.users.from.roles', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('registered.text.extractors', 'list', 'org.apache.jackrabbit.extractor.PlainTextExtractor
+org.apache.jackrabbit.extractor.MsWordTextExtractor
+org.apache.jackrabbit.extractor.MsExcelTextExtractor
+org.apache.jackrabbit.extractor.MsPowerPointTextExtractor
+org.apache.jackrabbit.extractor.OpenOfficeTextExtractor
+org.apache.jackrabbit.extractor.RTFTextExtractor
+org.apache.jackrabbit.extractor.HTMLTextExtractor
+org.apache.jackrabbit.extractor.XMLTextExtractor
+org.apache.jackrabbit.extractor.PngTextExtractor
+org.apache.jackrabbit.extractor.MsOutlookTextExtractor
+com.openkm.extractor.PdfTextExtractor
+com.openkm.extractor.AudioTextExtractor
+com.openkm.extractor.ExifTextExtractor
+com.openkm.extractor.CuneiformTextExtractor
+com.openkm.extractor.SourceCodeTextExtractor
+com.openkm.extractor.MsOffice2007TextExtractor');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('repository.content.checksum', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('restrict.file.mime', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('restrict.file.name', 'string', '*~;*.bak');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('schedule.dashboard.refresh', 'integer', '30');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('schedule.session.keepalive', 'integer', '15');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('schedule.ui.notification', 'integer', '1');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('security.access.manager', 'string', 'simple');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('security.mode.multiple', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('security.search.evaluation', 'string', 'lucene');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('subscription.message.body', 'text', '<b>Document: </b><a href="${documentUrl}">${documentPath}</a><br/><b>User: </b>${userId}<br/><b>Event: </b>${eventType}<br/><b>Comment: </b>${subscriptionComment}<br/>');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('subscription.message.subject', 'text', 'N2 DMS - ${eventType} - ${documentPath}');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.antivir', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.apache.request.header.fix', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.document.name.mismatch.check', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.execution.timeout', 'integer', '5');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.ghostscript.ps2pdf', 'string', '/usr/bin/ps2pdf');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.imagemagick.convert', 'string', '/usr/bin/convert');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.keyword.lowercase', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.login.lowercase', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.maintenance', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.ocr', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.ocr.rotate', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.openoffice.dictionary', 'string', '');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.openoffice.path', 'string', '/usr/lib64/libreoffice');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.openoffice.port', 'integer', '2002');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.openoffice.tasks', 'integer', '200');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.pdf.force.ocr', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.previewer', 'select', '{"options":[{"name":"flexpaper","value":"flexpaper","selected":true},{"name":"zviewer","value":"zviewer","selected":false}]}');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.readonly', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.swftools.pdf2swf', 'string', '/usr/bin/pdf2swf');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.webdav.fix', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('system.webdav.server', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('update.info', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('upload.throttle.filter', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('user.assign.document.creation', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('user.item.cache', 'boolean', 'true');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('user.keywords.cache', 'boolean', 'false');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password', 'string', 'com.openkm.validator.password.CompletePasswordValidator');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.max.length', 'integer', '30');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.min.digits', 'integer', '0');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.min.length', 'integer', '8');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.min.lowercase', 'integer', '0');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.min.uppercase', 'integer', '0');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.password.mini.special', 'integer', '0');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.note', 'string', 'com.openkm.validator.note.CompleteNoteValidator');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.note.min.length', 'integer', '1');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.note.max.length', 'integer', '200');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.id.min.length', 'integer', '8');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('validator.id.max.length', 'integer', '30');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('version.numeration.adapter', 'string', 'com.openkm.vernum.MajorMinorVersionNumerationAdapter');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('workflow.run.config.form', 'string', 'run_config');
+INSERT INTO OKM_CONFIG (CFG_KEY, CFG_TYPE, CFG_VALUE) VALUES ('workflow.start.task.auto.run', 'boolean', 'true');
+ 
+INSERT INTO `OKM_PROFILE` VALUES (2,'User','T','F',10000,'default','T','F','F','F','F','F','F','T','T','T','F','T','T','F','T','T','F','F','F','T','F','T','T','T','T','F','T','F','T','F','F','F','F','F','F','F','F','F','F','T','T','T','F','T','T','T','F','F','F','T','F','T','F','T','F','F','F','T','T','T','T','F','F','T','T','T','T','T','T','T','T','T','F','F','F','F','T','T','T','T','F','F','F','F','F','T','T','T','T','F','F','T','F','F','F','F','F','F','T','T','F','T','T','F','T','T','T','T','T','T','T','F','F','F','F','F','T','F','F','F','F','T','T','T','T','T','T','T','T');
+INSERT INTO `OKM_PROFILE` VALUES (3,'Admin','T','F',10000,'default','T','F','F','F','F','F','F','T','T','T','F','T','T','F','T','T','F','F','T','T','F','T','T','T','T','F','T','F','T','F','F','F','F','F','F','F','F','F','F','T','T','T','F','T','T','T','F','F','F','T','F','T','F','T','F','F','F','T','T','T','T','F','F','T','T','T','T','T','T','T','T','T','F','F','F','F','T','T','T','T','F','F','F','F','F','T','T','T','T','F','T','T','F','F','F','F','F','F','T','T','F','T','T','F','T','T','T','T','T','T','T','F','F','F','F','F','T','T','F','F','F','T','T','T','T','T','T','T','T');
+INSERT INTO `OKM_PROFILE` VALUES (4,'SiteAdmin','T','F',10000,'default','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','T','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','T','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F','F');
+

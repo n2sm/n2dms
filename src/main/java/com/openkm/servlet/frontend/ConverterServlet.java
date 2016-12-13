@@ -143,8 +143,13 @@ public class ConverterServlet extends OKMHttpServlet {
                     } catch (ConversionException e) {
                         log.error(e.getMessage(), e);
                         listener.setError(e.getMessage());
-                        InputStream tis = ConverterServlet.class.getResourceAsStream("conversion_problem.pdf");
-                        FileUtils.copy(tis, cd.file);
+                        InputStream tis = null;
+                        try {
+                            tis = ConverterServlet.class.getResourceAsStream("conversion_problem.pdf");
+                            FileUtils.copy(tis, cd.file);
+                        } finally {
+                            IOUtils.closeQuietly(tis);
+                        }
                     }
                 } else if (toSwf && !cd.mimeType.equals(MimeTypeConfig.MIME_SWF)) {
                     try {
@@ -154,8 +159,13 @@ public class ConverterServlet extends OKMHttpServlet {
                     } catch (ConversionException e) {
                         log.error(e.getMessage(), e);
                         listener.setError(e.getMessage());
-                        InputStream tis = ConverterServlet.class.getResourceAsStream("conversion_problem.swf");
-                        FileUtils.copy(tis, cd.file);
+                        InputStream tis = null;
+                        try {
+                            tis = ConverterServlet.class.getResourceAsStream("conversion_problem.swf");
+                            FileUtils.copy(tis, cd.file);
+                        } finally {
+                            IOUtils.closeQuietly(tis);
+                        }
                     }
                 }
 
@@ -218,6 +228,7 @@ public class ConverterServlet extends OKMHttpServlet {
     private void toPDF(ConversionData cd) throws ConversionException, AutomationException, DatabaseException, IOException {
         log.debug("toPDF({})", cd);
         File pdfCache = new File(Config.REPOSITORY_CACHE_PDF + File.separator + cd.uuid + ".pdf");
+        removeExpiredCache(pdfCache);
 
         if (DocConverter.getInstance().convertibleToPdf(cd.mimeType)) {
             if (!pdfCache.exists()) {
@@ -268,6 +279,7 @@ public class ConverterServlet extends OKMHttpServlet {
                     AutomationManager.getInstance().fireEvent(AutomationRule.EVENT_CONVERSION_PDF, AutomationRule.AT_POST, env);
                 } catch (ConversionException e) {
                     pdfCache.delete();
+                    cd.file = pdfCache;
                     throw e;
                 } finally {
                     FileUtils.deleteQuietly(cd.file);
@@ -293,6 +305,7 @@ public class ConverterServlet extends OKMHttpServlet {
     private void toSWF(ConversionData cd) throws ConversionException, AutomationException, DatabaseException, IOException {
         log.debug("toSWF({})", cd);
         File swfCache = new File(Config.REPOSITORY_CACHE_SWF + File.separator + cd.uuid + ".swf");
+        removeExpiredCache(swfCache);
         boolean delTmp = true;
 
         if (DocConverter.getInstance().convertibleToSwf(cd.mimeType)) {
@@ -327,6 +340,7 @@ public class ConverterServlet extends OKMHttpServlet {
                     }
                 } catch (ConversionException e) {
                     swfCache.delete();
+                    cd.file = swfCache;
                     throw e;
                 } finally {
                     if (delTmp) {
@@ -366,6 +380,12 @@ public class ConverterServlet extends OKMHttpServlet {
             sb.append(", file=").append(file);
             sb.append("}");
             return sb.toString();
+        }
+    }
+
+    private void removeExpiredCache(File file) {
+        if (file != null && file.exists() && System.currentTimeMillis() - file.lastModified() > 60 * 1000) {
+            file.delete();
         }
     }
 }

@@ -41,7 +41,7 @@ public class MassiveOperationsMenu extends MenuBase {
     private MenuItem selectAll;
     private MenuItem selectFolders;
     private MenuItem selectDocuments;
-    private MenuItem selectMails;
+    // private MenuItem selectMails;
     private MenuItem removeSelection;
 
     /**
@@ -67,10 +67,10 @@ public class MassiveOperationsMenu extends MenuBase {
                         massiveSelectDocuments);
         selectDocuments.addStyleName("okm-MenuItem-strike");
         dirMenu.addItem(selectDocuments);
-        selectMails =
-                new MenuItem(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")), true, massiveSelectMails);
-        selectMails.addStyleName("okm-MenuItem-strike");
-        dirMenu.addItem(selectMails);
+        // selectMails =
+        //         new MenuItem(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")), true, massiveSelectMails);
+        // selectMails.addStyleName("okm-MenuItem-strike");
+        // dirMenu.addItem(selectMails);
         removeSelection =
                 new MenuItem(Util.menuHTML("img/icon/actions/remove_all.png", Main.i18n("filebrowser.menu.remove.selection")), true,
                         massiveRemoveSelection);
@@ -82,7 +82,7 @@ public class MassiveOperationsMenu extends MenuBase {
         enable(selectAll);
         enable(selectFolders);
         enable(selectDocuments);
-        enable(selectMails);
+        // enable(selectMails);
     }
 
     // Command menu to select all file
@@ -130,7 +130,7 @@ public class MassiveOperationsMenu extends MenuBase {
         selectAll.setHTML(Util.menuHTML("img/icon/actions/select_all.png", Main.i18n("filebrowser.menu.select.all")));
         selectFolders.setHTML(Util.menuHTML("img/menuitem_empty.gif", Main.i18n("filebrowser.menu.select.all.folders")));
         selectDocuments.setHTML(Util.menuHTML("img/document.png", Main.i18n("filebrowser.menu.select.all.documents")));
-        selectMails.setHTML(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")));
+        // selectMails.setHTML(Util.menuHTML("img/email.gif", Main.i18n("filebrowser.menu.select.all.mails")));
         removeSelection.setHTML(Util.menuHTML("img/icon/actions/remove_all.png", Main.i18n("filebrowser.menu.remove.selection")));
     }
 

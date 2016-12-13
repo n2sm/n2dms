@@ -34,6 +34,9 @@ import com.openkm.frontend.client.bean.GWTNote;
 import com.openkm.frontend.client.constants.service.ErrorCode;
 import com.openkm.frontend.client.service.OKMNoteService;
 import com.openkm.util.GWTUtil;
+import com.openkm.validator.note.NoteValidator;
+import com.openkm.validator.ValidatorException;
+import com.openkm.validator.ValidatorFactory;
 
 /**
  * Note handling sevlet
@@ -121,6 +124,26 @@ public class NoteServlet extends OKMRemoteServiceServlet implements OKMNoteServi
         }
 
         log.debug("set: {}", ret);
+        return ret;
+    }
+
+    @Override
+    public String isValidNote(String text) throws OKMException {
+        log.debug("isValidNote()");
+        String ret = null;
+        updateSessionManager();
+
+        try {
+            NoteValidator noteValidator = ValidatorFactory.getNoteValidator();
+            try {
+                noteValidator.Validate(text);
+            } catch (ValidatorException e) {
+                ret = e.getMessage();
+            }
+        } catch (RepositoryException e) {
+            log.error(e.getMessage(), e);
+            throw new OKMException(ErrorCode.get(ErrorCode.ORIGIN_OKMNoteService, ErrorCode.CAUSE_Repository), e.getMessage());
+        }
         return ret;
     }
 }

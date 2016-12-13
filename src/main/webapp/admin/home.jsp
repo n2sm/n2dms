@@ -21,21 +21,18 @@
     <c:when test="${isAdmin}">
       <ul id="breadcrumb">
         <li class="path">
-          <a href="home.jsp">OpenKM Administration</a>
+          <a href="home.jsp">N2 DMS Administration</a>
         </li>
       </ul>
       <br/>
       <table width="234px" class="form" style="margin-top: 25px">
-        <tr><td><b>OpenKM - Knowledge Management</b></td></tr>
+        <tr><td><b>N2 DMS - Knowledge Management</b></td></tr>
         <tr><td nowrap="nowrap">Version: <%=WarUtils.getAppVersion() %></td></tr>
         <tr><td>&nbsp;</td></tr>
-        <tr><td>&copy; 2006-2016 OpenKM</td></tr>
+        <tr><td>&copy; 2006-2016 N2 DMS</td></tr>
         <tr><td>&nbsp;</td></tr>
         <tr><td><b>Support</b></td></tr>
-        <tr><td><a target="_blank" href="http://support.openkm.com/">http://support.openkm.com</a></td></tr>
-        <tr><td>&nbsp;</td></tr>
-        <tr><td><b>Installation ID</b></td></tr>
-        <tr><td nowrap="nowrap"><%=OKMRepository.getInstance().getRepositoryUuid(null)%></td></tr>
+        <tr><td><a target="_blank" href="http://www.n2sm.net/">http://www.n2sm.net/</a></td></tr>
       </table>
       <br/>
       <% if (!Config.HIBERNATE_HBM2DDL.equals(HibernateUtil.HBM2DDL_NONE)) { %>

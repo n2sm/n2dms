@@ -37,4 +37,6 @@ public interface OKMNoteService extends RemoteService {
     public void delete(String notePath) throws OKMException;
 
     public String set(String notePath, String text) throws OKMException;
+
+    public String isValidNote(String text) throws OKMException;
 }

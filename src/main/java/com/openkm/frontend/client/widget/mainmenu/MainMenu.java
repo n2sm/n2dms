@@ -294,8 +294,8 @@ public class MainMenu extends Composite {
         subMenuFile.addItem(addDocument);
         subMenuFile.addItem(download);
         subMenuFile.addItem(downloadPdf);
-        subMenuFile.addItem(sendDocumentLink);
-        subMenuFile.addItem(sendDocumentAttachment);
+        // subMenuFile.addItem(sendDocumentLink);
+        // subMenuFile.addItem(sendDocumentAttachment);
         subMenuFile.addItem(forwardMail);
         subMenuFile.addItem(createFromTemplate);
         subMenuFile.addItem(export);
@@ -304,9 +304,9 @@ public class MainMenu extends Composite {
         subMenuFile.addItem(horizontalLineFile2);
         subMenuFile.addItem(refresh);
         subMenuFile.addItem(horizontalLineFile3);
-        subMenuFile.addItem(scanner);
-        subMenuFile.addItem(uploader);
-        subMenuFile.addItem(horizontalLineFile4);
+        // subMenuFile.addItem(scanner);
+        // subMenuFile.addItem(uploader);
+        // subMenuFile.addItem(horizontalLineFile4);
         subMenuFile.addItem(restore);
         subMenuFile.addItem(purge);
         subMenuFile.addItem(purgeTrash);
@@ -398,15 +398,15 @@ public class MainMenu extends Composite {
         subMenuEdit.addItem(rename);
         subMenuEdit.addItem(note);
         subMenuEdit.addItem(category);
-        subMenuEdit.addItem(keyword);
-        subMenuEdit.addItem(merge);
-        subMenuEdit.addItem(horizontalLineEdit3);
-        subMenuEdit.addItem(addPropertyGroup);
-        subMenuEdit.addItem(updatePropertyGroup);
-        subMenuEdit.addItem(removePropertyGroup);
-        subMenuEdit.addItem(horizontalLineEdit4);
-        subMenuEdit.addItem(addSubscription);
-        subMenuEdit.addItem(removeSubscription);
+        // subMenuEdit.addItem(keyword);
+        // subMenuEdit.addItem(merge);
+        // subMenuEdit.addItem(horizontalLineEdit3);
+        // subMenuEdit.addItem(addPropertyGroup);
+        // subMenuEdit.addItem(updatePropertyGroup);
+        // subMenuEdit.addItem(removePropertyGroup);
+        // subMenuEdit.addItem(horizontalLineEdit4);
+        // subMenuEdit.addItem(addSubscription);
+        // subMenuEdit.addItem(removeSubscription);
 
         // Menu edit
         menuEdit = new MenuItem(Main.i18n("general.menu.edit"), subMenuEdit);
@@ -611,12 +611,12 @@ public class MainMenu extends Composite {
         subMenuHelp.setStyleName("okm-SubMenuBar");
         subMenuHelp.setAutoOpen(true);
         // subMenuHelp.addItem(help);
-        subMenuHelp.addItem(documentation);
-        subMenuHelp.addItem(bugReport);
-        subMenuHelp.addItem(supportRequest);
-        subMenuHelp.addItem(publicForum);
-        subMenuHelp.addItem(versionChanges);
-        subMenuHelp.addItem(projectWeb);
+        // subMenuHelp.addItem(documentation);
+        // subMenuHelp.addItem(bugReport);
+        // subMenuHelp.addItem(supportRequest);
+        // subMenuHelp.addItem(publicForum);
+        // subMenuHelp.addItem(versionChanges);
+        // subMenuHelp.addItem(projectWeb);
         subMenuHelp.addItem(about);
 
         // Help menu
@@ -1647,6 +1647,25 @@ public class MainMenu extends Composite {
         purge.setVisible(option.isPurgeOption());
         purgeTrash.setVisible(option.isPurgeTrashOption());
         horizontalLineFile5.setVisible(option.isPurgeTrashOption() || option.isPurgeOption() || option.isRestoreOption());
+        if (!option.isCreateFolderOption()) {
+            subMenuFile.removeItem(findFolder);
+            subMenuFile.removeItem(findDocument);
+            subMenuFile.removeItem(createFolder);
+            subMenuFile.removeItem(addDocument);
+            subMenuFile.removeItem(download);
+            subMenuFile.removeItem(downloadPdf);
+            subMenuFile.removeItem(createFromTemplate);
+            subMenuFile.removeItem(export);
+            subMenuFile.removeItem(horizontalLineFile1);
+            subMenuFile.removeItem(startWorkflow);
+            subMenuFile.removeItem(horizontalLineFile2);
+            subMenuFile.removeItem(refresh);
+            subMenuFile.removeItem(horizontalLineFile3);
+            subMenuFile.removeItem(restore);
+            subMenuFile.removeItem(purge);
+            subMenuFile.removeItem(purgeTrash);
+            subMenuFile.removeItem(horizontalLineFile5);
+        }
 
         // EDIT MENU
         lock.setVisible(option.isLockOption());

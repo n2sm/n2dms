@@ -30,7 +30,7 @@
       preset = locale.getLanguage() + "-" + locale.getCountry();
     }
   %>
-  <title>OpenKM Login</title>
+  <title>N2 DMS Login</title>
 </head>
 <body onload="document.forms[0].elements[0].focus()">
   <u:constantsMap className="com.openkm.core.Config" var="Config"/>

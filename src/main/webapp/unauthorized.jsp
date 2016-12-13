@@ -14,7 +14,7 @@
   <% } else { %>
   <link rel="stylesheet" href="<%=request.getContextPath() %>/css/desktop.css" type="text/css" />
   <% } %>
-  <title>OpenKM Error</title>
+  <title>N2 DMS Error</title>
 </head>
 <body>
   <table border="0" width="100%" align="center" style="padding-top: 125px">

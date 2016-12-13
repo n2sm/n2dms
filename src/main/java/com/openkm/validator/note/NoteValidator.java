@@ -1,6 +1,6 @@
 /**
  *  OpenKM, Open Document Management System (http://www.openkm.com)
- *  Copyright (c) 2006-2015  Paco Avila & Josep Llort
+ *  Copyright (c) 2006-2013  Paco Avila & Josep Llort
  *
  *  No bytes were intentionally harmed during the development of this application.
  *
@@ -8,7 +8,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,21 +19,18 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.openkm.frontend.client.service;
+package com.openkm.validator.note;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.openkm.frontend.client.bean.GWTNote;
+import com.openkm.validator.ValidatorException;
 
-/**
- * @author jllort
- *
- */
-public interface OKMNoteServiceAsync {
-    public void add(String nodePath, String text, AsyncCallback<GWTNote> callback);
+public interface NoteValidator {
 
-    public void delete(String notePath, AsyncCallback<?> callback);
+    /**
+     * Validate
+     *
+     * @param note
+     * @throws ValidatorException
+     */
+    public void Validate(String text) throws ValidatorException;
 
-    public void set(String notePath, String text, AsyncCallback<?> callback);
-
-    public void isValidNote(String text, AsyncCallback<String> callback);
 }

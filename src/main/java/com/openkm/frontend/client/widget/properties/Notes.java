@@ -450,17 +450,40 @@ public class Notes extends Composite {
     private void addNote() {
         boolean hasText = (isChrome) ? textArea.getText().trim().length() > 0 : richTextArea.getText().trim().length() > 0;
         if (hasText) {
-            noteService.add(getPath(), getTextNote(), callbackAddNote);
+            noteService.isValidNote(getTextNote(), new AsyncCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                    if (result == null) {
+                        noteService.add(getPath(), getTextNote(), callbackAddNote);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Main.get().showError("callbackInvalidNote", caught);
+                }
+            });
         }
     }
 
     /**
      * addNote
      */
-    public void addNote(String text) {
-        if (text.length() > 0) {
-            noteService.add(getPath(), text, callbackAddNote);
-        }
+    public void addNote(final String text) {
+        noteService.isValidNote(getTextNote(), new AsyncCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                if (result == null) {
+                    ;
+                    noteService.add(getPath(), text, callbackAddNote);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Main.get().showError("callbackInvalidNote", caught);
+            }
+        });
     }
 
     /**

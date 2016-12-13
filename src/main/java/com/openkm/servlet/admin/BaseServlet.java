@@ -53,6 +53,13 @@ public class BaseServlet extends HttpServlet {
     }
 
     /**
+      * Test if an user can access to site administration
+      */
+    public static boolean isSiteAdmin(HttpServletRequest request) {
+        return request.isUserInRole(Config.DEFAULT_SITE_ADMIN_ROLE);
+    }
+
+    /**
      * Test if an user can access to administration when configured as SaaS: An user can
      * access if:
      * 

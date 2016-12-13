@@ -31,6 +31,7 @@ import com.openkm.principal.DatabasePrincipalAdapter;
 import com.openkm.util.EnvironmentDetector;
 import com.openkm.util.FormatUtil;
 import com.openkm.validator.password.NoPasswordValidator;
+import com.openkm.validator.note.NoNoteValidator;
 import com.openkm.vernum.MajorMinorVersionNumerationAdapter;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.util.Version;
@@ -52,7 +53,7 @@ import java.util.TreeMap;
 public class Config {
     private static Logger log = LoggerFactory.getLogger(Config.class);
     public static TreeMap<String, String> values = new TreeMap<String, String>();
-    public static final String DEFAULT_CONTEXT = "OpenKM";
+    public static final String DEFAULT_CONTEXT = "dm";
 
     // Server specific configuration
     public static final String HOME_DIR = EnvironmentDetector.getServerHomeDir();
@@ -253,6 +254,9 @@ public class Config {
     public static final String PROPERTY_KEA_THESAURUS_TREE_CHILDS = "kea.thesaurus.tree.childs";
 
     // Validator
+    public static final String PROPERTY_VALIDATOR_ID_MIN_LENGTH = "validator.id.min.length";
+    public static final String PROPERTY_VALIDATOR_ID_MAX_LENGTH = "validator.id.max.length";
+
     public static final String PROPERTY_VALIDATOR_PASSWORD = "validator.password";
 
     public static final String PROPERTY_VALIDATOR_PASSWORD_MIN_LENGTH = "validator.password.min.length";
@@ -261,6 +265,11 @@ public class Config {
     public static final String PROPERTY_VALIDATOR_PASSWORD_MIN_UPPERCASE = "validator.password.min.uppercase";
     public static final String PROPERTY_VALIDATOR_PASSWORD_MIN_DIGITS = "validator.password.min.digits";
     public static final String PROPERTY_VALIDATOR_PASSWORD_MIN_SPECIAL = "validator.password.mini.special";
+
+    public static final String PROPERTY_VALIDATOR_NOTE = "validator.note";
+
+    public static final String PROPERTY_VALIDATOR_NOTE_MIN_LENGTH = "validator.note.min.length";
+    public static final String PROPERTY_VALIDATOR_NOTE_MAX_LENGTH = "validator.note.max.length";
 
     // Hibernate
     public static final String PROPERTY_HIBERNATE_DIALECT = "hibernate.dialect";
@@ -356,6 +365,7 @@ public class Config {
 
     public static String DEFAULT_USER_ROLE = "ROLE_USER";
     public static String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
+    public static String DEFAULT_SITE_ADMIN_ROLE = "ROLE_SITE_ADMIN";
 
     // Text extractors
     public static List<String> REGISTERED_TEXT_EXTRACTORS = new ArrayList<String>();
@@ -474,6 +484,12 @@ public class Config {
     public static String KEA_THESAURUS_TREE_CHILDS;
 
     // Validator
+    public static int VALIDATOR_ID_MIN_LENGTH;
+    public static int VALIDATOR_ID_MAX_LENGTH;
+
+    public static String VALIDATOR_ID_ERROR_MIN_LENGTH = "ID error: too short";
+    public static String VALIDATOR_ID_ERROR_MAX_LENGTH = "ID error: too long";
+
     public static String VALIDATOR_PASSWORD = NoPasswordValidator.class.getCanonicalName();
 
     public static int VALIDATOR_PASSWORD_MIN_LENGTH;
@@ -489,6 +505,14 @@ public class Config {
     public static String VALIDATOR_PASSWORD_ERROR_MIN_UPPERCASE = "Password error: too few uppercase characters";
     public static String VALIDATOR_PASSWORD_ERROR_MIN_DIGITS = "Password error: too few digits";
     public static String VALIDATOR_PASSWORD_ERROR_MIN_SPECIAL = "Password error: too few special characters";
+
+    public static String VALIDATOR_NOTE = NoNoteValidator.class.getCanonicalName();
+
+    public static int VALIDATOR_NOTE_MIN_LENGTH;
+    public static int VALIDATOR_NOTE_MAX_LENGTH;
+
+    public static String VALIDATOR_NOTE_ERROR_MIN_LENGTH = "NOTE error: too short";
+    public static String VALIDATOR_NOTE_ERROR_MAX_LENGTH = "NOTE error: too long";
 
     // Hibernate
     public static String HIBERNATE_DIALECT = "org.hibernate.dialect.HSQLDialect";
@@ -512,8 +536,8 @@ public class Config {
     // Logo icons and login texts
     public static String TEXT_BANNER = "&nbsp;";
     public static String TEXT_WELCOME =
-            "<p>Welcome to OpenKM !</p><p>Use a valid username and password to access to OpenKM user Desktop.</p>";
-    public static String TEXT_TITLE = "OpenKM";
+            "<p>Welcome to N2 DMS !</p><p>Use a valid username and password to access to N2 DMS user Desktop.</p>";
+    public static String TEXT_TITLE = "N2 DMS";
     public static ConfigStoredFile LOGO_TINY;
     public static ConfigStoredFile LOGO_LOGIN;
     public static ConfigStoredFile LOGO_REPORT;
@@ -864,7 +888,7 @@ public class Config {
             RESTRICT_FILE_NAME = ConfigDAO.getString(PROPERTY_RESTRICT_FILE_NAME, "*~;*.bak");
             values.put(PROPERTY_RESTRICT_FILE_NAME, RESTRICT_FILE_NAME);
 
-            NOTIFICATION_MESSAGE_SUBJECT = ConfigDAO.getText(PROPERTY_NOTIFICATION_MESSAGE_SUBJECT, "OpenKM - NOTIFICATION");
+            NOTIFICATION_MESSAGE_SUBJECT = ConfigDAO.getText(PROPERTY_NOTIFICATION_MESSAGE_SUBJECT, "N2 DMS - NOTIFICATION");
             values.put(PROPERTY_NOTIFICATION_MESSAGE_SUBJECT, NOTIFICATION_MESSAGE_SUBJECT);
             NOTIFICATION_MESSAGE_BODY =
                     ConfigDAO
@@ -874,7 +898,7 @@ public class Config {
             values.put(PROPERTY_NOTIFICATION_MESSAGE_BODY, NOTIFICATION_MESSAGE_BODY);
 
             SUBSCRIPTION_MESSAGE_SUBJECT =
-                    ConfigDAO.getText(PROPERTY_SUBSCRIPTION_MESSAGE_SUBJECT, "OpenKM - ${eventType} - ${documentPath}");
+                    ConfigDAO.getText(PROPERTY_SUBSCRIPTION_MESSAGE_SUBJECT, "N2 DMS - ${eventType} - ${documentPath}");
             values.put(PROPERTY_SUBSCRIPTION_MESSAGE_SUBJECT, SUBSCRIPTION_MESSAGE_SUBJECT);
             SUBSCRIPTION_MESSAGE_BODY =
                     ConfigDAO
@@ -889,7 +913,7 @@ public class Config {
             values.put(PROPERTY_SUBSCRIPTION_TWITTER_PASSWORD, SUBSCRIPTION_TWITTER_PASSWORD);
             SUBSCRIPTION_TWITTER_STATUS =
                     ConfigDAO.getText(PROPERTY_SUBSCRIPTION_TWITTER_STATUS,
-                            "OpenKM - ${documentUrl} - ${documentPath} - ${userId} - ${eventType}");
+                            "N2 DMS - ${documentUrl} - ${documentPath} - ${userId} - ${eventType}");
             values.put(PROPERTY_SUBSCRIPTION_TWITTER_STATUS, SUBSCRIPTION_TWITTER_STATUS);
 
             SYSTEM_APACHE_REQUEST_HEADER_FIX =
@@ -1029,6 +1053,11 @@ public class Config {
             values.put(PROPERTY_KEA_THESAURUS_TREE_CHILDS, KEA_THESAURUS_TREE_CHILDS);
 
             // Validator
+            VALIDATOR_ID_MIN_LENGTH = ConfigDAO.getInteger(PROPERTY_VALIDATOR_ID_MIN_LENGTH, 0);
+            values.put(PROPERTY_VALIDATOR_ID_MIN_LENGTH, Integer.toString(VALIDATOR_ID_MIN_LENGTH));
+            VALIDATOR_NOTE_MAX_LENGTH = ConfigDAO.getInteger(PROPERTY_VALIDATOR_ID_MAX_LENGTH, 0);
+            values.put(PROPERTY_VALIDATOR_ID_MAX_LENGTH, Integer.toString(VALIDATOR_ID_MAX_LENGTH));
+
             VALIDATOR_PASSWORD = ConfigDAO.getString(PROPERTY_VALIDATOR_PASSWORD, VALIDATOR_PASSWORD);
             values.put(PROPERTY_VALIDATOR_PASSWORD, VALIDATOR_PASSWORD);
 
@@ -1044,6 +1073,14 @@ public class Config {
             values.put(PROPERTY_VALIDATOR_PASSWORD_MIN_DIGITS, Integer.toString(VALIDATOR_PASSWORD_MIN_DIGITS));
             VALIDATOR_PASSWORD_MIN_SPECIAL = ConfigDAO.getInteger(PROPERTY_VALIDATOR_PASSWORD_MIN_SPECIAL, 0);
             values.put(PROPERTY_VALIDATOR_PASSWORD_MIN_SPECIAL, Integer.toString(VALIDATOR_PASSWORD_MIN_SPECIAL));
+
+            VALIDATOR_NOTE = ConfigDAO.getString(PROPERTY_VALIDATOR_NOTE, VALIDATOR_NOTE);
+            values.put(PROPERTY_VALIDATOR_NOTE, VALIDATOR_NOTE);
+
+            VALIDATOR_NOTE_MIN_LENGTH = ConfigDAO.getInteger(PROPERTY_VALIDATOR_NOTE_MIN_LENGTH, 0);
+            values.put(PROPERTY_VALIDATOR_NOTE_MIN_LENGTH, Integer.toString(VALIDATOR_NOTE_MIN_LENGTH));
+            VALIDATOR_NOTE_MAX_LENGTH = ConfigDAO.getInteger(PROPERTY_VALIDATOR_NOTE_MAX_LENGTH, 0);
+            values.put(PROPERTY_VALIDATOR_NOTE_MAX_LENGTH, Integer.toString(VALIDATOR_NOTE_MAX_LENGTH));
 
             // Hibernate
             HIBERNATE_INDEXER_MASS_INDEXER = ConfigDAO.getBoolean(PROPERTY_HIBERNATE_INDEXER_MASS_INDEXER, false);

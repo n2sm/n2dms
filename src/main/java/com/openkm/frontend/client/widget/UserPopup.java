@@ -473,6 +473,15 @@ public class UserPopup extends DialogBox implements ClickHandler {
                     userPasswordTextVerify.setVisible(false);
                 }
 
+                if (!workspace.isStackMailVisible()) {
+                    vPanel.remove(mailGroupBoxPanel);
+                    vPanel.remove(mailPasswordError);
+                    vPanel.remove(mailError);
+                    vPanel.remove(mailTestError);
+                    vPanel.remove(mailTestOK);
+                    vPanel.remove(new HTML("<br>"));
+                }
+
                 // Enables delete button only if there's some mail server configured to be removed
                 if (workspace.getMailID() >= 0) {
                     deleteButton.setVisible(true);

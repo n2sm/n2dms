@@ -5,6 +5,7 @@
 <c:set var="isMultipleInstancesAdmin"><%=BaseServlet.isMultipleInstancesAdmin(request)%></c:set>
 <c:set var="isRepositoryNative"><%=Config.REPOSITORY_NATIVE%></c:set>
 <!-- http://stackoverflow.com/questions/1708054/center-ul-li-into-div -->
+<c:set var="isSiteAdmin"><%=BaseServlet.isSiteAdmin(request)%></c:set>
 <div style="text-align: center">
   <ul style="display: inline-block;">
     <li>
@@ -12,6 +13,7 @@
         <img src="img/toolbar/home.png">
       </a>
     </li>
+<c:if test="${!isSiteAdmin}">
     <c:if test="${isMultipleInstancesAdmin}">
       <li>
         <a target="frame" href="Config" title="Configuration">
@@ -24,11 +26,13 @@
         <img src="img/toolbar/mime.png">
       </a>
     </li>
+</c:if>
     <li>
       <a target="frame" href="stats.jsp" title="Statistics">
         <img src="img/toolbar/stats.png">
       </a>
     </li>
+<c:if test="${!isSiteAdmin}">
     <c:if test="${isMultipleInstancesAdmin}">
       <li>
         <a target="frame" href="scripting.jsp" title="Scripting">
@@ -48,11 +52,13 @@
         <img src="img/toolbar/properties.png">
       </a>
     </li>
+</c:if>
     <li>
       <a target="frame" href="Auth" title="Users">
         <img src="img/toolbar/users.png">
       </a>
     </li>
+<c:if test="${!isSiteAdmin}">
     <li>
       <a target="frame" href="Profile"  title="Profiles">
         <img src="img/toolbar/profile.png">
@@ -70,11 +76,13 @@
         <img src="img/toolbar/report.png" title="Reports">
       </a>
     </li>
+</c:if>
     <li>
       <a target="frame" href="ActivityLog" title="Log">
         <img src="img/toolbar/activity.png">
       </a>
     </li>
+<c:if test="${!isSiteAdmin}">
     <li>
       <a target="frame" href="Workflow" title="Workflow">
         <img src="img/toolbar/workflow.png">
@@ -106,6 +114,7 @@
           <img src="img/toolbar/language.png">
         </a>
       </li>
+</c:if>
       <li>
         <a target="frame" href="repository_import.jsp" title="Import">
           <img src="img/toolbar/import.png">
@@ -116,12 +125,14 @@
           <img src="img/toolbar/export.png">
          </a>
       </li>
+<c:if test="${!isSiteAdmin}">
       <li>
         <a target="frame" href="utilities.jsp" title="Utilities">
           <img src="img/toolbar/utilities.png">
          </a>
       </li>
     </c:if>
+</c:if>
     <script type="text/javascript">
       // Identify if being loaded inside an iframe
       if (self == top) {

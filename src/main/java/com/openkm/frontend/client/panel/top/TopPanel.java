@@ -60,14 +60,14 @@ public class TopPanel extends Composite {
     private HorizontalPanel horizontalPanel;
     private HorizontalPanel horizontalPanelMenu;
     private ExtendedHorizontalPanel uploadingPanel;
-    private HorizontalPanel quickSearchPanel;
+    // private HorizontalPanel quickSearchPanel;
     public MainMenu mainMenu;
     public ToolBar toolBar;
     public TabWorkspace tabWorkspace;
     private Label leftLabel;
     private Label rightLabel;
-    private TextBox quickSearch;
-    private Image searchImage;
+    // private TextBox quickSearch;
+    // private Image searchImage;
     private HTML pendingInfo;
     private Image arrowUp;
     private HTML percentage;
@@ -82,7 +82,7 @@ public class TopPanel extends Composite {
         panel = new VerticalPanel();
         horizontalPanel = new HorizontalPanel();
         horizontalPanelMenu = new HorizontalPanel();
-        quickSearchPanel = new HorizontalPanel();
+        // quickSearchPanel = new HorizontalPanel();
         toolsPanel = new HorizontalPanel();
         mainMenu = new MainMenu();
         toolBar = new ToolBar();
@@ -117,6 +117,7 @@ public class TopPanel extends Composite {
         uploadingPanel.add(Util.hSpace("5px"));
         uploadingPanel.setVisible(false);
 
+        /*
         quickSearch = new TextBox();
         quickSearch.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -152,6 +153,7 @@ public class TopPanel extends Composite {
         quickSearchPanel.add(Util.hSpace("25px"));
         quickSearchPanel.setCellVerticalAlignment(searchImage, HasAlignment.ALIGN_MIDDLE);
         quickSearchPanel.setCellVerticalAlignment(openkmVersion, HasAlignment.ALIGN_MIDDLE);
+        */
 
         horizontalPanelMenu.add(mainMenu);
         horizontalPanelMenu.setWidth("100%");
@@ -159,16 +161,16 @@ public class TopPanel extends Composite {
         separator.setWidth("100%");
         horizontalPanelMenu.add(separator);
         horizontalPanelMenu.add(uploadingPanel);
-        horizontalPanelMenu.add(quickSearchPanel);
+        // horizontalPanelMenu.add(quickSearchPanel);
         Image logo = new Image("../logo/tiny");
         horizontalPanelMenu.add(logo);
         horizontalPanelMenu.setCellHorizontalAlignment(uploadingPanel, HasAlignment.ALIGN_RIGHT);
         horizontalPanelMenu.setCellVerticalAlignment(uploadingPanel, HasAlignment.ALIGN_MIDDLE);
-        horizontalPanelMenu.setCellHorizontalAlignment(quickSearchPanel, HasAlignment.ALIGN_RIGHT);
-        horizontalPanelMenu.setCellVerticalAlignment(quickSearchPanel, HasAlignment.ALIGN_MIDDLE);
+        // horizontalPanelMenu.setCellHorizontalAlignment(quickSearchPanel, HasAlignment.ALIGN_RIGHT);
+        // horizontalPanelMenu.setCellVerticalAlignment(quickSearchPanel, HasAlignment.ALIGN_MIDDLE);
         horizontalPanelMenu.setCellHorizontalAlignment(logo, HasAlignment.ALIGN_RIGHT);
         horizontalPanelMenu.setCellVerticalAlignment(logo, HasAlignment.ALIGN_MIDDLE);
-        horizontalPanelMenu.setCellWidth(quickSearchPanel, "220px");
+        // horizontalPanelMenu.setCellWidth(quickSearchPanel, "220px");
         horizontalPanelMenu.setCellWidth(logo, "40px");
         panel.setStyleName("okm-TopPanel");
         panel.addStyleName("okm-DisableSelect");
@@ -225,6 +227,7 @@ public class TopPanel extends Composite {
     /**
      * executeQuickSearch
      */
+    /*
     private void executeQuickSearch() {
         if (quickSearch.getText().length() >= 3) {
             Main.get().mainPanel.topPanel.tabWorkspace.changeSelectedTab(UIDockPanelConstants.SEARCH);
@@ -233,6 +236,7 @@ public class TopPanel extends Composite {
             searchImage.setResource(OKMBundleResources.INSTANCE.searchDisabled());
         }
     }
+    */
 
     /**
      * Lang refresh
