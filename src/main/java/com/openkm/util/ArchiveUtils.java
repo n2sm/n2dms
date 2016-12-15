@@ -53,7 +53,11 @@ public class ArchiveUtils {
             zaos.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.ALWAYS);
             zaos.setUseLanguageEncodingFlag(true);
             zaos.setFallbackToUTF8(true);
-            zaos.setEncoding("UTF-8");
+            String filenameEncoding = System.getProperty("zip.filename.encoding");
+            if (filenameEncoding == null) {
+                filenameEncoding = "UTF-8";
+            }
+            zaos.setEncoding(filenameEncoding);
 
             log.debug("FILE {}", path);
             ZipArchiveEntry zae = new ZipArchiveEntry(path.getName());
@@ -85,7 +89,11 @@ public class ArchiveUtils {
             zaos.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.ALWAYS);
             zaos.setUseLanguageEncodingFlag(true);
             zaos.setFallbackToUTF8(true);
-            zaos.setEncoding("UTF-8");
+            String filenameEncoding = System.getProperty("zip.filename.encoding");
+            if (filenameEncoding == null) {
+                filenameEncoding = "UTF-8";
+            }
+            zaos.setEncoding(filenameEncoding);
 
             // Prevents java.util.zip.ZipException: ZIP file must have at least one entry
             ZipArchiveEntry zae = new ZipArchiveEntry(root + "/");
