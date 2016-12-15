@@ -19,6 +19,8 @@ import com.openkm.util.impexp.RepositoryImporter;
 import com.openkm.util.impexp.TextInfoDecorator;
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.FileOutputStream;
+import net.n2sm.dms.util.ZipUtils;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -442,9 +444,7 @@ public class FileUploadServlet extends OKMHttpServlet {
             fos.close();
 
             // Unzip files
-            File fileTmpIn = new File(tmpIn);
-            fileTmpIn.archiveCopyAllTo(tmpOut);
-            File.umount();
+            ZipUtils.extract(tmpIn, tmpOut);
 
             // Import files
             StringWriter out = new StringWriter();
@@ -497,8 +497,7 @@ public class FileUploadServlet extends OKMHttpServlet {
             fos.close();
 
             // Unzip files
-            File fileTmpIn = new File(tmpIn);
-            fileTmpIn.archiveCopyAllTo(tmpOut);
+            ZipUtils.extract(tmpIn, tmpOut);
 
             // Import files
             StringWriter out = new StringWriter();
