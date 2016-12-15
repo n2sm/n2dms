@@ -331,13 +331,14 @@ public class CommonUI {
      * disableExtension
      */
     public static void disableExtension(String name) {
-        GWTUINotification uin = new GWTUINotification();
-        uin.setAction(GWTUINotification.ACTION_NONE);
-        uin.setType(GWTUINotification.TYPE_TEMPORAL);
-        uin.setDate(new Date());
-        uin.setShow(true);
-        uin.setMessage("[" + name + "] " + Main.i18n("browser.java.support.not.found.extension.disabled"));
-        Main.get().mainPanel.bottomPanel.userInfo.addUINotification(uin);
+        // TODO: disable popup messages
+        //        GWTUINotification uin = new GWTUINotification();
+        //        uin.setAction(GWTUINotification.ACTION_NONE);
+        //        uin.setType(GWTUINotification.TYPE_TEMPORAL);
+        //        uin.setDate(new Date());
+        //        uin.setShow(true);
+        //        uin.setMessage("[" + name + "] " + Main.i18n("browser.java.support.not.found.extension.disabled"));
+        //        Main.get().mainPanel.bottomPanel.userInfo.addUINotification(uin);
     }
 
     /**
