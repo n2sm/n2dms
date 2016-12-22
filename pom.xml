@@ -10,9 +10,9 @@
   <description>N2 DMS is one of distribution for OpenKM and is optimized for Japanese environment. OpenKM is powerful scalable Document Management System (DMS). </description>
 
   <scm>
-    <url>http://openkm.svn.sourceforge.net/viewvc/openkm/trunk</url>
-    <connection>scm:svn:https://openkm.svn.sourceforge.net/svnroot/openkm/trunk</connection>
-    <developerConnection>scm:svn:https://openkm.svn.sourceforge.net/svnroot/openkm/trunk</developerConnection>
+    <connection>scm:git:git@github.com:codelibs/n2dms.git</connection>
+    <developerConnection>scm:git:git@github.com:codelibs/n2dms.git</developerConnection>
+    <url>https://github.com/codelibs/n2dms</url>
   </scm>
 
   <licenses>
