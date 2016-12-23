@@ -18,12 +18,11 @@ package net.n2sm.dms.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -44,28 +43,31 @@ public class ZipUtils {
         if (filenameEncoding == null) {
             filenameEncoding = "UTF-8";
         }
+        log.debug("filenameEncoding: " + filenameEncoding);
         try (final ZipFile zf = new ZipFile(zip, Charset.forName(filenameEncoding))) {
-            final FileSystem fileSystem = FileSystems.getDefault();
             final Enumeration<? extends ZipEntry> entries = zf.entries();
             final String uncompressedDirectory = destDir.getPath() + "/";
 
-            byte[] buffer = new byte[1024];
-            int length;
+            byte[] buf = new byte[1024];
+            int size;
             while (entries.hasMoreElements()) {
                 final ZipEntry entry = entries.nextElement();
-                final String filePath = uncompressedDirectory + entry.getName();
+                final Path filePath = Paths.get(uncompressedDirectory + entry.getName());
+                log.debug("entry: " + entry.getName());
                 if (entry.isDirectory()) {
-                    log.debug("Creating Directory:" + filePath);
-                    Files.createDirectories(fileSystem.getPath(filePath));
+                    Files.createDirectories(filePath);
                 } else {
+                    final File outFile = filePath.toFile();
+                    if (!outFile.getParentFile().exists()) {
+                        outFile.getParentFile().mkdirs();
+                    }
                     try (final BufferedInputStream bis = new BufferedInputStream(zf.getInputStream(entry));
-                            final OutputStream os = Files.newOutputStream(Paths.get(filePath));
-                            final OutputStream bos = new BufferedOutputStream(os);) {
-                        while ((length = bis.read(buffer)) > 0) {
-                            bos.write(buffer, 0, length);
+                            FileOutputStream fos = new FileOutputStream(outFile);
+                            BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+                        while ((size = bis.read(buf)) > 0) {
+                            bos.write(buf, 0, size);
                         }
-                        bos.flush();
-                        log.debug("Written :" + entry.getName());
+                        log.debug("Written: " + entry.getName());
                     }
                 }
             }
