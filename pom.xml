@@ -54,7 +54,7 @@
     
     <!-- Using this Spring version -->
     <spring.version>3.1.0.RELEASE</spring.version>
-    <spring.security.version>3.1.0.RELEASE</spring.security.version>
+    <spring.security.version>5.3.3.RELEASE</spring.security.version>
     
     <!-- Apache CXF -->
     <cxf.version>2.7.12</cxf.version>
