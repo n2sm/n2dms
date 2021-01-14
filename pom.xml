@@ -60,7 +60,7 @@
     <cxf.version>2.7.12</cxf.version>
     
     <!-- Apache POI -->
-    <poi.version>3.9</poi.version>
+    <poi.version>4.1.2</poi.version>
     
     <!-- Milton WebDAV -->
     <milton.version>1.8.1.4</milton.version>
