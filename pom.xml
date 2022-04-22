@@ -53,7 +53,7 @@
     <jcr.version>1.6.5</jcr.version>
     
     <!-- Using this Spring version -->
-    <spring.version>3.1.0.RELEASE</spring.version>
+    <spring.version>5.3.19</spring.version>
     <spring.security.version>3.1.0.RELEASE</spring.security.version>
     
     <!-- Apache CXF -->
