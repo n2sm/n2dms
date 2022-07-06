@@ -50,7 +50,7 @@
     <gwt.version>2.4.0</gwt.version>
 	
     <!-- Using this Jackrabbit version -->
-    <jcr.version>1.6.5</jcr.version>
+    <jcr.version>2.1.0</jcr.version>
     
     <!-- Using this Spring version -->
     <spring.version>3.1.0.RELEASE</spring.version>
